@@ -93,7 +93,7 @@ GetOrgUnitChildren <-
 GetAnalytics <-
   function(technical_area, numerator_or_denominator, support_types,
            disaggregation_type, targets_or_results,organisation_units,
-           dimensions_row,dimensions_col,period){
+           dimensions_row=NULL,dimensions_col=NULL,period){
 
         if (!is.null(dimensions_row)) {
           dimensions_row <-  dimensions_row %>% paste0("&dimension=", ., collapse = "")
@@ -123,9 +123,6 @@ GetAnalytics <-
       httr::content(., "text")
     data <- data  %>%
       readr::read_csv(col_names=TRUE)
-
-
-
         return(data)
   }
 
