@@ -34,3 +34,6 @@ vignettes/*.pdf
 
 # Shiny token, see https://shiny.rstudio.com/articles/shinyapps.html
 rsconnect/
+copr/.DS_Store
+copr/.Rbuildignore
+copr/R/.DS_Store
