@@ -32,8 +32,7 @@ vignettes/*.pdf
 *.utf8.md
 *.knit.md
 
-# Shiny token, see https://shiny.rstudio.com/articles/shinyapps.html
-rsconnect/
-copr/.DS_Store
-copr/.Rbuildignore
-copr/R/.DS_Store
+.DS_Store
+
+.R_Cache/
+.Rproj.user

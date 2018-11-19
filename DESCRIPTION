@@ -1,6 +1,6 @@
-Package: copr
+Package: datapackcommons
 Type: Package
-Title: What the Package Does (Title Case)
+Title: Common Utilities for with with the PEPFAR DataPack
 Version: 0.1.0
 Author: Who wrote it
 Maintainer: The package maintainer <yourself@somewhere.net>
@@ -17,3 +17,4 @@ Imports:
     readr
 Suggests: 
     testthat
+RoxygenNote: 6.1.1

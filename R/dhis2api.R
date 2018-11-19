@@ -108,19 +108,21 @@ GetAnalytics <-
     web_api_call <- paste0(
       getOption("baseurl"),
       "api/analytics.csv?",
-      "dimension=ou:", organisation_units %>% paste0(collapse = ";"),
+      "dimension=ou:",  paste0(organisation_units,collapse = ";"),
       dimensions_row, dimensions_col,
       "&filter=LxhLO68FcXm:", technical_area,
       "&filter=lD2x0c8kywj:", numerator_or_denominator,
-      "&filter=TWXpUVE2MqL:", support_types %>% paste0(collapse = ";"),
+      "&filter=TWXpUVE2MqL:", paste0(support_types,collapse = ";"),
       "&filter=HWPJnUTMjEq:", disaggregation_type,
       "&filter=IeMmjHyBUpi:", targets_or_results,
       "&filter=pe:", period
     )
-    print(web_api_call)
+    #print(web_api_call)
+    
     data <- web_api_call  %>%
       httr::GET() %>%
       httr::content(., "text")
+    
     data <- data  %>%
       readr::read_csv(col_names=TRUE)
         return(data)
