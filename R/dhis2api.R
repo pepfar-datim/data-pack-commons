@@ -1,29 +1,40 @@
+
+
+#' @export
+#' @title LoadConfig(config_path)
+#'
+#' @description Loads a JSON configuration file to access a DHIS2 instance
+#' @param config_path Path to the DHIS2 credentials file
+#' @return Only errors out if the file is not readable, does not exist or the
+#' user cannot login to the server
+#'
 LoadConfig <- function(config_path = NA) {
   #Load from a file
   if (!is.na(config_path)) {
-    foo <- assertthat::assert_that(file.exists(config_path))
+    if (!file.access(config_path, mode = 4)) {
+      stop(paste("Cannot read configuration located at",config_path))
+    }
     s <- jsonlite::fromJSON(config_path)
     options("baseurl" = s$dhis$baseurl)
     options("config" = config_path)
-    url <-
-      URLencode(URL = paste0(getOption("baseurl"), "api/me"))
+    url <- URLencode(URL = paste0(getOption("baseurl"), "api/me"))
     #Logging in here will give us a cookie to reuse
     r <- httr::GET(url ,
              httr::authenticate(s$dhis$username, s$dhis$password),
              httr::timeout(60))
-    assertthat::assert_that(r$status == 200L)
-    print("Successfully logged in!")
-    r <- httr::content(r, "text")
-    me <- jsonlite::fromJSON(r)
-    options("organisationUnit" = me$organisationUnits$id)
+    if(r$status != 200L){
+      stop("Could not authenticate you with the server!")
+    } else {
+      print("Successfully logged in!")
+      me <- httr::content(r, as="parsed",type="appplication/json")
+      options("organisationUnit" = me$organisationUnits$id)
+    }
   } else {
     stop("You must specify a credentials file!")
   }
 }
 
-getMetadata <- function(end_point,
-                        filters = NULL,
-                        fields = NULL) {
+getMetadata <- function(end_point, filters = NULL, fields = NULL) {
   if (!is.null(filters)) {
     filters <- filters %>% paste0("&filter=", ., collapse = "") %>% URLencode()
   }
@@ -38,13 +49,28 @@ getMetadata <- function(end_point,
                          ".json?paging=false",
                          filters,
                          fields)
-  print(web_api_call)
+  #print(web_api_call)
   data <- web_api_call %>%  httr::GET() %>%
-    httr::content(., "text")   %>%
-    jsonlite::fromJSON()
+    httr::content(., as="parsed",type="application/json")
+  
   return(data[[end_point]])
 }
 
+#' @export
+#' @importFrom readr col_character
+#' @importFrom readr col_number
+#' @importFrom readr cols_only
+#' @title GetDataValueSet(org_unit,data_set,start_date,end_date,children)
+#' @param org_unit UID of the organisation unit of interest
+#' @param data_set UID of the dataset of interest
+#' @param start_date Start date in YYYY-MM-DD format
+#' @param end_date End date in YYYY-MM-DD format
+#' @param children Boolean flag to indicate whether data of the Orgunits c
+#' children should be returned.
+#' @description Gets a data value set for the provided paramaters
+#' @return Only errors out if the file is not readable, does not exist or the
+#' user cannot login to the server
+#' 
 GetDataValueSet <-
   function(org_unit,
            data_set,
@@ -65,10 +91,11 @@ GetDataValueSet <-
       "&endDate=",
       end_date
     )
-    print(web_api_call)
+    #print(web_api_call)
     data <- web_api_call  %>%
       httr::GET() %>%
       httr::content(., "text")
+    
     data <- data %>% stringr::str_replace(",deleted","") %>%
       readr::read_csv(col_names=TRUE, cols_only(dataelement = col_character(),
                                          period = col_character(),
@@ -128,8 +155,6 @@ GetAnalytics <-
         return(data)
   }
 
-
-
 add_name_col <- function(data_tib, column_str, end_point_str) {
   unique_items =   unique(data_tib[[column_str]])
   unique_items = paste0(unique_items, collapse = ",")
@@ -142,8 +167,8 @@ add_name_col <- function(data_tib, column_str, end_point_str) {
       unique_items,
       "]"
     ) %>%
-    GET() %>%
-    content(., "text")  %>%
+    httr::GET() %>%
+    httr::content(., "text")  %>%
     readr::read_csv(col_names = TRUE)
 
 
@@ -152,6 +177,6 @@ add_name_col <- function(data_tib, column_str, end_point_str) {
     dplyr::rename(!!paste0(column_str, "_name") := name) %>%
     dplyr::rename(!!column_str := id)
 
-  data_tib <- inner_join(mer_data, item_name_id)
+  data_tib <- dplyr::inner_join(mer_data, item_name_id)
   return(data_tib)
 }
