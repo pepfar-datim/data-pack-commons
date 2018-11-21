@@ -51,7 +51,8 @@ getMetadata <- function(end_point, filters = NULL, fields = NULL) {
                          fields)
   #print(web_api_call)
   data <- web_api_call %>%  httr::GET() %>%
-    httr::content(., as="parsed",type="application/json")
+    httr::content(., "text")   %>%
+    jsonlite::fromJSON()
   
   return(data[[end_point]])
 }
