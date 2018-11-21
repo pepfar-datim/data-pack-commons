@@ -11,7 +11,7 @@
 LoadConfig <- function(config_path = NA) {
   #Load from a file
   if (!is.na(config_path)) {
-    if (!file.access(config_path, mode = 4)) {
+    if (file.access(config_path, mode = -1)) {
       stop(paste("Cannot read configuration located at",config_path))
     }
     s <- jsonlite::fromJSON(config_path)
@@ -26,7 +26,7 @@ LoadConfig <- function(config_path = NA) {
       stop("Could not authenticate you with the server!")
     } else {
       print("Successfully logged in!")
-      me <- httr::content(r, as="parsed",type="appplication/json")
+      me <- httr::content(r, as="parsed",type="application/json")
       options("organisationUnit" = me$organisationUnits$id)
     }
   } else {
