@@ -11,7 +11,7 @@
 LoadConfig <- function(config_path = NA) {
   #Load from a file
   if (!is.na(config_path)) {
-    if (file.access(config_path, mode = -1)) {
+    if (file.access(config_path, mode = 4) == -1) {
       stop(paste("Cannot read configuration located at",config_path))
     }
     s <- jsonlite::fromJSON(config_path)
@@ -34,6 +34,7 @@ LoadConfig <- function(config_path = NA) {
   }
 }
 
+#' @export
 getMetadata <- function(end_point, filters = NULL, fields = NULL) {
   if (!is.null(filters)) {
     filters <- filters %>% paste0("&filter=", ., collapse = "") %>% URLencode()
@@ -108,16 +109,18 @@ GetDataValueSet <-
     return(data)
   }
 
+#' @export
 GetOrgUnitChildren <-
   function(org_unit) {
     #TODO add error handling
     end_point = "organisationUnits"
-    filters = c(paste0("id:eq:", psnu))
+    filters = c(paste0("id:eq:", org_unit))
     fields = "children"
     children <- getMetadata(end_point, filters, fields)[["children"]][[1]][["id"]]
     return(children)
   }
 
+#' @export
 GetAnalytics <-
   function(technical_area, numerator_or_denominator, support_types,
            disaggregation_type, targets_or_results,organisation_units,
@@ -156,6 +159,7 @@ GetAnalytics <-
         return(data)
   }
 
+#' @export
 add_name_col <- function(data_tib, column_str, end_point_str) {
   unique_items =   unique(data_tib[[column_str]])
   unique_items = paste0(unique_items, collapse = ",")
@@ -178,6 +182,6 @@ add_name_col <- function(data_tib, column_str, end_point_str) {
     dplyr::rename(!!paste0(column_str, "_name") := name) %>%
     dplyr::rename(!!column_str := id)
 
-  data_tib <- dplyr::inner_join(mer_data, item_name_id)
+  data_tib <- dplyr::inner_join(data_tib, item_name_id)
   return(data_tib)
 }
