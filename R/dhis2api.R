@@ -185,3 +185,77 @@ add_name_col <- function(data_tib, column_str, end_point_str) {
   data_tib <- dplyr::inner_join(data_tib, item_name_id)
   return(data_tib)
 }
+
+
+#' @param technical_area type string - technical area data element group name
+#' @param numerator_or_denominator type string - numerator / denominator data element group name
+#' @param disagg_to_group_set type string - numerator / denominator data element group name
+#' disagg_element_to_dimension
+#' @param disagg_element_to_dimension type tibble cols(
+#' disaggregation_type_element = col_character(),
+#' data_dimension = col_character()
+#' ) 
+#' 
+GetAnalyticsByDimensions <-
+  function(technical_area, numerator_or_denominator, disaggregation_type,
+           targets_or_results, organisation_unit_ids, period,
+           additional_dimensions = NULL, support_types = c("TA", "DSD")) {
+    
+    # Get uids for 5 Standard dimensions     
+    filters = paste0("name:in:[", technical_area, ",", numerator_or_denominator, ",",
+                     disaggregation_type, ",", targets_or_results, ",", 
+                     support_types %>% paste0(collapse = ","),
+                     "]")
+    name_uid <- datapackcommons::getMetadata(end_point = "dataElementGroups", filters, fields ="name,id")
+    
+    technical_area_uid  <- name_uid %>% filter(name==technical_area) %>% .$id
+    numerator_or_denominator_uid  <- name_uid %>% filter(name==numerator_or_denominator) %>% .$id
+    disaggregation_type_uid  <- name_uid %>% filter(name==disaggregation_type) %>% .$id
+    targets_or_results_uid  <- name_uid %>% filter(name==targets_or_results) %>% .$id
+    support_types_uid <- name_uid %>% filter(name %in% support_types) %>% .$id %>% paste0(collapse = ",")
+    ####
+    
+    if (!is.null(additional_dimensions)) {
+      end_point = "dimensions"
+      filters = paste0("name:in:[", additional_dimensions %>% paste0(collapse = ","), "]")
+      additional_dimensions_uid <-
+        datapackcommons::getMetadata(end_point, filters, "id")$id
+      additional_dimensions <-
+        additional_dimensions_uid %>% paste0("&dimension=", ., collapse = "")
+    }
+    
+    # divide org units in to multiple calls
+    # TODO decide if 40 is reasonable or maybe auto try with smaller chunks if api call fails
+    organisation_unit_ids <- psnu_list$uid
+    org_unit_chunks <-
+      organisation_unit_ids %>% split(., ceiling(seq_along(.) / 40))
+    
+    for (ou_chunk in 1:NROW(org_unit_chunks))
+    {
+      #TODO add error handling
+      web_api_call <- paste0(getOption("baseurl"), "api/analytics.csv?",
+                             "dimension=ou:", paste0(org_unit_chunks[[ou_chunk]], collapse = ";"),
+                             additional_dimensions,
+                             "&filter=LxhLO68FcXm:", technical_area_uid,
+                             "&filter=lD2x0c8kywj:", numerator_or_denominator_uid,
+                             "&filter=TWXpUVE2MqL:", paste0(support_types_uid, collapse = ";"),
+                             "&filter=HWPJnUTMjEq:", disaggregation_type_uid,
+                             "&filter=IeMmjHyBUpi:", targets_or_results_uid,
+                             "&filter=pe:", period
+      )
+      
+      data_chunk <- web_api_call  %>%
+        httr::GET() %>%
+        httr::content(., "text")
+      
+      if (exists("my_data")) {
+        my_data <- data_chunk %>%
+          readr::read_csv(col_names = TRUE) %>%
+          dplyr::bind_rows(my_data, .)
+      } else{
+        my_data <- data_chunk %>%
+          readr::read_csv(col_names = TRUE)
+      }
+    }
+    return(my_data)
+  }
