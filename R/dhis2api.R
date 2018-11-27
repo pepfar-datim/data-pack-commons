@@ -208,11 +208,11 @@ GetAnalyticsByDimensions <-
                      "]")
     name_uid <- datapackcommons::getMetadata(end_point = "dataElementGroups", filters, fields ="name,id")
     
-    technical_area_uid  <- name_uid %>% filter(name==technical_area) %>% .$id
-    numerator_or_denominator_uid  <- name_uid %>% filter(name==numerator_or_denominator) %>% .$id
-    disaggregation_type_uid  <- name_uid %>% filter(name==disaggregation_type) %>% .$id
-    targets_or_results_uid  <- name_uid %>% filter(name==targets_or_results) %>% .$id
-    support_types_uid <- name_uid %>% filter(name %in% support_types) %>% .$id %>% paste0(collapse = ",")
+    technical_area_uid  <- name_uid %>% dplyr::filter(name==technical_area) %>% .$id
+    numerator_or_denominator_uid  <- name_uid %>% dplyr::filter(name==numerator_or_denominator) %>% .$id
+    disaggregation_type_uid  <- name_uid %>% dplyr::filter(name==disaggregation_type) %>% .$id
+    targets_or_results_uid  <- name_uid %>% dplyr::filter(name==targets_or_results) %>% .$id
+    support_types_uid <- name_uid %>% dplyr::filter(name %in% support_types) %>% .$id %>% paste0(collapse = ",")
     ####
     
     if (!is.null(additional_dimensions)) {
@@ -226,7 +226,7 @@ GetAnalyticsByDimensions <-
     
     # divide org units in to multiple calls
     # TODO decide if 40 is reasonable or maybe auto try with smaller chunks if api call fails
-    organisation_unit_ids <- psnu_list$uid
+   
     org_unit_chunks <-
       organisation_unit_ids %>% split(., ceiling(seq_along(.) / 40))
     
