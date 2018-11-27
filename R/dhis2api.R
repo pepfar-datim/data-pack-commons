@@ -186,7 +186,7 @@ add_name_col <- function(data_tib, column_str, end_point_str) {
   return(data_tib)
 }
 
-
+#' @export
 #' @param technical_area type string - technical area data element group name
 #' @param numerator_or_denominator type string - numerator / denominator data element group name
 #' @param disagg_to_group_set type string - numerator / denominator data element group name
