@@ -243,7 +243,6 @@ GetAnalyticsByDimensions <-
                              "&filter=IeMmjHyBUpi:", targets_or_results_uid,
                              "&filter=pe:", period
       )
-      
       data_chunk <- web_api_call  %>%
         httr::GET() %>%
         httr::content(., "text")
@@ -259,3 +258,89 @@ GetAnalyticsByDimensions <-
     }
     return(my_data)
   }
+
+#' @export
+#' @param indicator_uid type string - uid of indicator to call
+#' @param organisation_units_uid type character vector -  org unit uids to include in api call
+#' @param period type string - the period to use in api call
+#' @param dimensions_required type list - with dimension names and 
+#' vector of specific dimension item names for api call e.g.
+#' list("dimension1" = c("item1"), "dimension1" = c("item1", "item2"), "dimension1" = NULL)
+#' NULL in the item vector indicates to return all items that are defined to be a member of 
+#' the dimension in DATIM
+GetIndicatorByDimensions <- function(indicator_uid, organisation_units_uid, 
+                                     period, dimensions_required = NULL) {
+  web_api_call <- paste0(getOption("baseurl"), "api/29/analytics.csv?dimension=dx:", indicator_uid, 
+                         "&dimension=pe:", period, "&outputIdScheme=NAME")
+  
+  # get name,id,items[id,name] for each dimension
+  end_point = "dimensions"
+  filters = paste0("name:in:[",
+                   names(dimensions_required) %>% paste0(collapse = ","),
+                   "]")
+  dimensions_metadata <-
+    datapackcommons::getMetadata(end_point, filters, "name,id,items[id,name]")
+  
+  # add each dimension along with any specified items to the api call string    
+  for (dimension_required in names(dimensions_required)) {
+    dimension_metadata <-
+      dimensions_metadata %>% filter(name == dimension_required)
+    if (NROW(dimension_metadata) != 1) {
+      stop(
+        paste(
+          "Unable to match exactly input dimension name to DATIM dimension",
+          dimension_required
+        )
+      )
+    }
+    
+    if (is.null(dimensions_required[[dimension_required]])) {
+      # There dimension specified without specifc list of items - will return all options
+      web_api_call <-
+        paste0(web_api_call, "&dimension=", dimension_metadata$id)
+      next
+    } else{
+      web_api_call <-
+        #add dimension uid to api call string then contiune to add specific items 
+        paste0(web_api_call, "&dimension=", dimension_metadata$id, ":")
+      items_required <-
+        tibble(name = dimensions_required[[dimension_required]])
+    }
+    
+    
+    dimension_metadata_items <-
+      left_join(items_required, dimension_metadata[[1, "items"]])
+    if (anyNA(dimension_metadata_items$id)) {
+      dimension_metadata_items %>% filter(is.na(id)) %>% .$name %>%
+        paste("Unable to find uid for required dimension item", .) %>% stop()
+    }
+    
+    web_api_call <-  paste0(dimension_metadata_items$id, collapse = ";") %>% paste0(web_api_call, .)
+  }
+  
+  # divide org units in to multiple calls
+  # TODO decide if 40 is reasonable or maybe auto try with smaller chunks if api call fails
+  
+  org_unit_chunks <-
+    organisation_unit_ids %>% split(., ceiling(seq_along(.) / 40))
+  
+  for (ou_chunk in 1:NROW(org_unit_chunks)){
+    
+    web_api_call_chunk <- paste0(web_api_call, "&dimension=ou:", 
+                                 paste0(org_unit_chunks[[ou_chunk]], collapse = ";"))
+    
+    data_chunk <- web_api_call_chunk  %>%
+      httr::GET() %>%
+      httr::content(., "text")
+    
+    if (exists("my_data")) {
+      my_data <- data_chunk %>%
+        readr::read_csv(col_names = TRUE) %>%
+        dplyr::bind_rows(my_data, .)
+    } else{
+      my_data <- data_chunk %>%
+        readr::read_csv(col_names = TRUE)
+    }
+  }
+  return(my_data)
+}
