@@ -3,6 +3,7 @@
 export(GetAnalytics)
 export(GetAnalyticsByDimensions)
 export(GetDataValueSet)
+export(GetIndicatorByDimensions)
 export(GetOrgUnitChildren)
 export(LoadConfig)
 export(add_name_col)

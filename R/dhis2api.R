@@ -50,7 +50,7 @@ getMetadata <- function(end_point, filters = NULL, fields = NULL) {
                          ".json?paging=false",
                          filters,
                          fields)
-  #print(web_api_call)
+  print(web_api_call)
   data <- web_api_call %>%  httr::GET() %>%
     httr::content(., "text")   %>%
     jsonlite::fromJSON()
@@ -284,7 +284,7 @@ GetIndicatorByDimensions <- function(indicator_uid, organisation_units_uid,
   # add each dimension along with any specified items to the api call string    
   for (dimension_required in names(dimensions_required)) {
     dimension_metadata <-
-      dimensions_metadata %>% filter(name == dimension_required)
+      dimensions_metadata %>% dplyr::filter(name == dimension_required)
     if (NROW(dimension_metadata) != 1) {
       stop(
         paste(
@@ -304,14 +304,13 @@ GetIndicatorByDimensions <- function(indicator_uid, organisation_units_uid,
         #add dimension uid to api call string then contiune to add specific items 
         paste0(web_api_call, "&dimension=", dimension_metadata$id, ":")
       items_required <-
-        tibble(name = dimensions_required[[dimension_required]])
+        tibble::tibble(name = dimensions_required[[dimension_required]])
     }
     
-    
     dimension_metadata_items <-
-      left_join(items_required, dimension_metadata[[1, "items"]])
+      dplyr::left_join(items_required, dimension_metadata[[1, "items"]])
     if (anyNA(dimension_metadata_items$id)) {
-      dimension_metadata_items %>% filter(is.na(id)) %>% .$name %>%
+      dimension_metadata_items %>% dplyr::filter(is.na(id)) %>% .$name %>%
         paste("Unable to find uid for required dimension item", .) %>% stop()
     }
     
