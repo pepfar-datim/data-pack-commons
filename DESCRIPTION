@@ -16,5 +16,6 @@ Imports:
     httr,
     readr
 Suggests: 
+    httptest,
     testthat
 RoxygenNote: 6.1.1
