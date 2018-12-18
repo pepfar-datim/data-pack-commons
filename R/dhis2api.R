@@ -72,9 +72,9 @@ GetDataWithIndicator <- function(indicator, org_units, level,
     colnames(additional_dimensions)[1] <- "item"
     colnames(additional_dimensions)[2] <- "dimension"
     
-    additional_dimensions <- additional_dimensions %>% group_by(dimension) %>% 
-      summarize(items = paste0(item,collapse=";")) %>% 
-      mutate(dimension_full = paste0("&dimension=",dimension,":",items)) %>% 
+    additional_dimensions <- additional_dimensions %>% dplyr::group_by(dimension) %>% 
+      dplyr::summarize(items = paste0(item,collapse=";")) %>% 
+      dplyr::mutate(dimension_full = paste0("&dimension=",dimension,":",items)) %>% 
       .[["dimension_full"]] %>% glue::glue_collapse()
 }
  
@@ -83,9 +83,9 @@ GetDataWithIndicator <- function(indicator, org_units, level,
     colnames(additional_filters)[1] <- "item"
     colnames(additional_filters)[2] <- "filter"
 
-    additional_filters <- additional_filters %>% group_by(filters) %>% 
-      summarize(items = paste0(item,collapse=";")) %>% 
-      mutate(filter_full = paste0("&filter=",filter,":",items)) %>% 
+    additional_filters <- additional_filters %>% dplyr::group_by(filters) %>% 
+      dplyr::summarize(items = paste0(item,collapse=";")) %>% 
+      dplyr::mutate(filter_full = paste0("&filter=",filter,":",items)) %>% 
       .[["filter_full"]] %>% glue::glue_collapse()
   }
   
