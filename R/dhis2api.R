@@ -39,7 +39,7 @@ DHISLogin<-function(config_path = NA) {
 
 #' @export
 #' @title GetDataWithIndicator(indicator, org_units, level,
-#' period, additional_dimensions, additional_filters, outputIdScheme)
+#' period, additional_dimensions, additional_filters)
 #' 
 #' @description Gets data from DHIS2 using a single indicator
 #' @param indicator string - uid of indicator
@@ -59,11 +59,6 @@ GetDataWithIndicator <- function(indicator, org_units, level,
                                  periods, additional_dimensions = NULL,
                                  additional_filters = NULL) {
 
-# give input data frames column names I will use in function
-
-  colnames(additional_filters)[1] <- "item"
-  colnames(additional_filters)[2] <- "dimension"
-  
   org_units <- glue::glue_collapse(org_units, ";")
 
 # prep additional_dimensions for api call
