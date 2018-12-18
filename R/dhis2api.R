@@ -38,6 +38,78 @@ DHISLogin<-function(config_path = NA) {
 }
 
 #' @export
+#' @title GetDataWithIndicator(indicator, org_units, level,
+#' period, additional_dimensions, additional_filters, outputIdScheme)
+#' 
+#' @description Gets data from DHIS2 using a single indicator
+#' @param indicator string - uid of indicator
+#' @param org_units list of strings - list of org unit uids, operate as boundry org units
+#' @param level string - org hierarchy level, only one allowed
+#' @param periods list of strings - periods specified as required by DHIS2 analytics endpoint, 
+#' currently only one period supported
+#' @param additional_dimensions 2 column dataframe, first column containing dimension item uids
+#' and second column the related dimension uid. Dimensions appear as columns in output with names
+#' based on dimension name in DHIS2.
+#' @param additional_filters 2 column dataframe, first column containing dimension item uids
+#' and second column the related dimension uid.filters do not appear explicitly in output.
+#' @return  
+#'
+
+GetDataWithIndicator <- function(indicator, org_units, level,
+                                 periods, additional_dimensions = NULL,
+                                 additional_filters = NULL) {
+
+# give input data frames column names I will use in function
+
+  colnames(additional_filters)[1] <- "item"
+  colnames(additional_filters)[2] <- "dimension"
+  
+  org_units <- glue::glue_collapse(org_units, ";")
+
+# prep additional_dimensions for api call
+
+  if(!is.null(additional_dimensions)){
+    colnames(additional_dimensions)[1] <- "item"
+    colnames(additional_dimensions)[2] <- "dimension"
+    
+    additional_dimensions <- additional_dimensions %>% group_by(dimension) %>% 
+      summarize(items = paste0(item,collapse=";")) %>% 
+      mutate(dimension_full = paste0("&dimension=",dimension,":",items)) %>% 
+      .[["dimension_full"]] %>% glue::glue_collapse()
+}
+ 
+  # prep additional_filters for api call
+  if(!is.null(additional_filters)){
+    colnames(additional_filters)[1] <- "item"
+    colnames(additional_filters)[2] <- "filter"
+
+    additional_filters <- additional_filters %>% group_by(filters) %>% 
+      summarize(items = paste0(item,collapse=";")) %>% 
+      mutate(filter_full = paste0("&filter=",filter,":",items)) %>% 
+      .[["filter_full"]] %>% glue::glue_collapse()
+  }
+  
+  web_api_call <- paste0( getOption("baseurl"),
+                          "api/29/analytics.csv?outputIdScheme=UID",
+                          "&dimension=dx:", indicator,
+                          "&dimension=pe:", periods, 
+                          "&dimension=ou:LEVEL-", level, ";", org_units,
+                          additional_dimensions, additional_filters)
+
+  my_data <- web_api_call %>% utils::URLencode()  %>%
+    httr::GET() %>%
+    httr::content(., "text")
+  
+  my_data <- my_data %>%
+    readr::read_csv(col_names = TRUE)
+  return(list(
+    "api_call" = web_api_call,
+    "time" = lubridate::now("UTC"),
+    "results" = my_data))
+}
+
+
+#' @export
 getMetadata <- function(end_point, filters = NULL, fields = NULL) {
   
   url_filters=""
