@@ -3,7 +3,7 @@
 \name{GetDataWithIndicator}
 \alias{GetDataWithIndicator}
 \title{GetDataWithIndicator(indicator, org_units, level,
-period, additional_dimensions, additional_filters, outputIdScheme)}
+period, additional_dimensions, additional_filters)}
 \usage{
 GetDataWithIndicator(indicator, org_units, level, periods,
   additional_dimensions = NULL, additional_filters = NULL)

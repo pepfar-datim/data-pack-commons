@@ -19,7 +19,7 @@ LoadConfigFile <- function(config_path = NA) {
       stop("You must specify a credentials file!") }
 }
 
-
+#' @export
 DHISLogin<-function(config_path = NA) {
   
   dhis_config<-LoadConfigFile(config_path)
@@ -111,7 +111,7 @@ getMetadata <- function(end_point, filters = NULL, fields = NULL) {
   url_fields=""
   
   if (!is.null(filters)) {
-    url_filters <- paste0("&filter=", filters ) %>% URLencode()
+    url_filters <- filters %>% paste0("&filter=", ., collapse = "") %>% URLencode()
   }
   
   if (!is.null(fields)) {
@@ -133,6 +133,30 @@ getMetadata <- function(end_point, filters = NULL, fields = NULL) {
     rlist::list.extract(.,end_point) } else {
       stop("Could not retreive endpoint")
     }
+}
+
+#' @export
+#' @title CompareNamesIds(names, ids, type)
+#' 
+#' @description Checks name list and paired id list (same length) and verifies they correspond to each other
+#' @param names string vector - names of spcific class of metadata - category option, indicator etc
+#' @param ids string vector - ids of specific class of metadata - category option, indicator etc
+#' @param type string - metadata endpoint - cataegoryOptions, indicators, etc
+#' @return  
+#'
+CompareNamesIds <- function(names, ids, type){
+  assertthat::assert_that(is.character(names), assertthat::not_empty(names), NCOL(names) == 1,
+                          is.character(ids), assertthat::not_empty(ids), NCOL(ids) == 1,
+                          assertthat::is.string(type),
+                          length(names) == length(ids))
+
+  
+  
+}
+
+CompareCodesIds <- function(codes, ids, type){
+  
+  
 }
 
 #' @export
