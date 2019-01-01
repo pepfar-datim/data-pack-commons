@@ -55,52 +55,61 @@ DHISLogin<-function(config_path = NA) {
 #' @return  
 #'
 
-GetDataWithIndicator <- function(indicator, org_units, level,
-                                 periods, additional_dimensions = NULL,
-                                 additional_filters = NULL) {
-
+GetDataWithIndicator <- function(indicator, org_units, level, periods,
+                                 additional_dimensions = NULL, additional_filters = NULL) {
+  
   org_units <- glue::glue_collapse(org_units, ";")
-
-# prep additional_dimensions for api call
-
-  if(!is.null(additional_dimensions)){
+  
+  # prep additional_dimensions for api call
+  
+  if (!is.null(additional_dimensions)) {
     colnames(additional_dimensions)[1] <- "item"
     colnames(additional_dimensions)[2] <- "dimension"
     
-    additional_dimensions <- additional_dimensions %>% dplyr::group_by(dimension) %>% 
-      dplyr::summarize(items = paste0(item,collapse=";")) %>% 
-      dplyr::mutate(dimension_full = paste0("&dimension=",dimension,":",items)) %>% 
+    additional_dimensions <-
+      additional_dimensions %>% dplyr::group_by(dimension) %>%
+      dplyr::summarize(items = paste0(item, collapse = ";")) %>%
+      dplyr::mutate(dimension_full = paste0("&dimension=", dimension, ":", items)) %>%
       .[["dimension_full"]] %>% glue::glue_collapse()
-}
- 
+  }
+  
   # prep additional_filters for api call
-  if(!is.null(additional_filters)){
+  if (!is.null(additional_filters)) {
     colnames(additional_filters)[1] <- "item"
     colnames(additional_filters)[2] <- "filter"
-
-    additional_filters <- additional_filters %>% dplyr::group_by(filters) %>% 
-      dplyr::summarize(items = paste0(item,collapse=";")) %>% 
-      dplyr::mutate(filter_full = paste0("&filter=",filter,":",items)) %>% 
+    
+    additional_filters <-
+      additional_filters %>% dplyr::group_by(filters) %>%
+      dplyr::summarize(items = paste0(item, collapse = ";")) %>%
+      dplyr::mutate(filter_full = paste0("&filter=", filter, ":", items)) %>%
       .[["filter_full"]] %>% glue::glue_collapse()
   }
   
-  web_api_call <- paste0( getOption("baseurl"),
-                          "api/29/analytics.csv?outputIdScheme=UID",
-                          "&dimension=dx:", indicator,
-                          "&dimension=pe:", periods, 
-                          "&dimension=ou:LEVEL-", level, ";", org_units,
-                          additional_dimensions, additional_filters)
-
-  my_data <- web_api_call %>% utils::URLencode()  %>%
-    httr::GET() %>%
-    httr::content(., "text")
-  
-  my_data <- my_data %>%
-    readr::read_csv(col_names = TRUE)
-  return(list(
-    "api_call" = web_api_call,
-    "time" = lubridate::now("UTC"),
-    "results" = my_data))
+  web_api_call <- paste0(
+    getOption("baseurl"),
+    "api/29/analytics.csv?outputIdScheme=UID",
+    "&dimension=dx:", indicator,
+    "&dimension=pe:", periods,
+    "&dimension=ou:LEVEL-", level, ";", org_units,
+    additional_dimensions, additional_filters
+  )
+  for (i in 1:20) {
+    
+    my_data <- web_api_call %>% utils::URLencode()  %>%
+      httr::GET() %>%
+      httr::content(., "text")
+    
+    my_data <- my_data %>%
+      readr::read_csv(col_names = TRUE)
+    if ("Value" %in% names(my_data)) { # then we got back a data set we can return
+      return(list(
+        "api_call" = web_api_call,
+        "time" = lubridate::now("UTC"),
+        "results" = my_data
+      ))
+    }
+  } 
+  stop("20 attempts to GetDataWithIndicator failed")
 }
 
 
