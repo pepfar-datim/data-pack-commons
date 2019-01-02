@@ -127,10 +127,7 @@ getMetadata <- function(end_point, filters = NULL, fields = NULL) {
     url_fields <- paste0("&fields=", paste(fields,sep="",collapse=",")) %>% URLencode()
   }
   
-  web_api_call <- paste0(getOption("baseurl"),
-                         "api/",
-                         end_point,
-                         ".json?paging=false",
+  web_api_call <- paste0(getOption("baseurl"), "api/", end_point, ".json?paging=false",
                          url_filters,
                          url_fields)
     r <- web_api_call %>%
@@ -143,6 +140,8 @@ getMetadata <- function(end_point, filters = NULL, fields = NULL) {
       stop("Could not retreive endpoint")
     }
 }
+
+## TO IMPLEMENT code that will compare a name in one column with the id in another column to ensure they correspond 
 
 #' @export
 #' @title CompareNamesIds(names, ids, type)
@@ -163,37 +162,40 @@ CompareNamesIds <- function(names, ids, type){
   
 }
 
+## TO IMPLEMENT code that will compare a code in one column with the id in another column to ensure they correspond 
 CompareCodesIds <- function(codes, ids, type){
   
   
 }
 
-#' @export
-add_name_col <- function(data_tib, column_str, end_point_str) {
-  unique_items =   unique(data_tib[[column_str]])
-  unique_items = paste0(unique_items, collapse = ",")
-  item_name_id <-
-    paste0(
-      getOption("baseurl"),
-      "api/",
-      end_point_str,
-      ".csv?paging=false&fields=name,id&filter=id:in:[",
-      unique_items,
-      "]"
-    ) %>%
-    httr::GET() %>%
-    httr::content(., "text")  %>%
-    readr::read_csv(col_names = TRUE)
 
-
-  item_name_id <-
-    item_name_id %>%
-    dplyr::rename(!!paste0(column_str, "_name") := name) %>%
-    dplyr::rename(!!column_str := id)
-
-  data_tib <- dplyr::inner_join(data_tib, item_name_id)
-  return(data_tib)
-}
+# ## No Longer needed function that would add a column with names corresponding to a given
+# ## column with UIDs
+# add_name_col <- function(data_tib, column_str, end_point_str) {
+#   unique_items =   unique(data_tib[[column_str]])
+#   unique_items = paste0(unique_items, collapse = ",")
+#   item_name_id <-
+#     paste0(
+#       getOption("baseurl"),
+#       "api/",
+#       end_point_str,
+#       ".csv?paging=false&fields=name,id&filter=id:in:[",
+#       unique_items,
+#       "]"
+#     ) %>%
+#     httr::GET() %>%
+#     httr::content(., "text")  %>%
+#     readr::read_csv(col_names = TRUE)
+# 
+# 
+#   item_name_id <-
+#     item_name_id %>%
+#     dplyr::rename(!!paste0(column_str, "_name") := name) %>%
+#     dplyr::rename(!!column_str := id)
+# 
+#   data_tib <- dplyr::inner_join(data_tib, item_name_id)
+#   return(data_tib)
+# }
 
 
 # VERSION USING THE 5 MAIN DIMESNIONS TO GET DATA - BEFORE SWITCHING TO USE INDICATORS
