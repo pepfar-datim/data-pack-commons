@@ -52,17 +52,23 @@ DHISLogin<-function(config_path = NA) {
 #' based on dimension name in DHIS2.
 #' @param additional_filters 2 column dataframe, first column containing dimension item uids
 #' and second column the related dimension uid.filters do not appear explicitly in output.
-#' @return  
+#' @return  A list with $time = name the function was called, 
+#' $api_call = api call use and 
+#' $results = the data returnd by the analytics call
 #'
 
 GetDataWithIndicator <- function(indicator, org_units, level, periods,
                                  additional_dimensions = NULL, additional_filters = NULL) {
+  
+  assertthat::assert_that(assertthat::is.string(indicator), nchar(indicator) == 11,
+                          assertthat::is.string(periods))
   
   org_units <- glue::glue_collapse(org_units, ";")
   
   # prep additional_dimensions for api call
   
   if (!is.null(additional_dimensions)) {
+    assertthat::assert_that(NCOL(additional_dimensions) == 2)
     colnames(additional_dimensions)[1] <- "item"
     colnames(additional_dimensions)[2] <- "dimension"
     
@@ -75,11 +81,12 @@ GetDataWithIndicator <- function(indicator, org_units, level, periods,
   
   # prep additional_filters for api call
   if (!is.null(additional_filters)) {
+    assertthat::assert_that(NCOL(additional_filters) == 2)
     colnames(additional_filters)[1] <- "item"
     colnames(additional_filters)[2] <- "filter"
     
     additional_filters <-
-      additional_filters %>% dplyr::group_by(filters) %>%
+      additional_filters %>% dplyr::group_by(filter) %>%
       dplyr::summarize(items = paste0(item, collapse = ";")) %>%
       dplyr::mutate(filter_full = paste0("&filter=", filter, ":", items)) %>%
       .[["filter_full"]] %>% glue::glue_collapse()

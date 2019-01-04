@@ -3,7 +3,6 @@
 export(CompareNamesIds)
 export(DHISLogin)
 export(GetDataWithIndicator)
-export(add_name_col)
 export(getMetadata)
 importFrom(dplyr,"%>%")
 importFrom(utils,URLencode)
