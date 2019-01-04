@@ -2,6 +2,7 @@
 
 export(CompareNamesIds)
 export(DHISLogin)
+export(GetCountryPrioritizationLevel)
 export(GetDataWithIndicator)
 export(getMetadata)
 importFrom(dplyr,"%>%")

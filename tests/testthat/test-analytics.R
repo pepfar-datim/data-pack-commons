@@ -43,3 +43,18 @@ test_that("We can get data with GetDataWithIndicator", {
 # Sum of values from response and response_filter should be the same
   expect_equal(sum(response$Value), sum(response_filter$Value))  
 })
+
+test_that("GetCountryPrioritizationLevel", {
+  DHISLogin("/users/sam/.secrets/prod.json")
+  data <- GetCountryPrioritizationLevel()
+  expect_gt(NROW(data), 0)
+  expect_named(data, c("country_level", "prioritization_level",
+                       "country_name", "id"))
+  
+  expect_error(GetCountryPrioritizationLevel(c("nonsense", "Rwanda")))
+  expect_error(GetCountryPrioritizationLevel(c("Rwanda", "Rwanda")))
+  
+  data <- GetCountryPrioritizationLevel(c("Kenya", "Rwanda"))
+  expect_equal(NROW(data), 2)
+  expect_setequal(data$country_name, c("Kenya", "Rwanda"))
+})

@@ -1,3 +1,6 @@
+# devtools::check("/Users/sam/Documents/GitHub/data-pack-commons")
+
+
 #' @title LoadConfig(config_path)
 #'
 #' @description Loads a JSON configuration file to access a DHIS2 instance
@@ -117,6 +120,62 @@ GetDataWithIndicator <- function(indicator, org_units, level, periods,
     }
   } 
   stop("20 attempts to GetDataWithIndicator failed")
+}
+
+#' @export
+#' @title GetCountryPrioritizationLevel(country_names)
+#' @description Gets country uid and prioritization level using dataSetAssignments/ous
+#' @param countries_req list of country names to include in response
+#' @return dataframe with columns country_level, prioritization_level, country_name, id   
+
+GetCountryPrioritizationLevel <- function(countries_req = NULL){
+  response <-  paste0(getOption("baseurl"),"api/dataStore/dataSetAssignments/ous") %>%
+    httr::GET()
+  
+  if(response$status != 200L){
+    stop("Could not retrieve OUs")
+  }
+
+# get api response into a data frame a reduce to columns of interest  
+  countries <- response %>% httr::content(.,"text") %>%
+    jsonlite::fromJSON() %>%
+    do.call(rbind.data.frame,.) %>%
+    dplyr::mutate(country_name = rownames(.), prioritization_level = prioritization, country_level = country) %>% 
+    dplyr::select(country_level, prioritization_level, country_name) 
+
+# If specific counties were requested filter and assert we got the correct results  
+  if(!is.null(countries_req)){
+    countries <- countries %>% dplyr::filter(country_name %in% countries_req)
+    assertthat::assert_that(NROW(countries) == NROW(countries_req),
+                            setequal(countries$country_name, countries_req), 
+                            msg = "Error in GetCountryPrioritizationLevel, results do not correspond to countries requested")
+  }
+
+# look up country uid by name
+# specifing country level as there are some cases of a countries name appearing as an org unit more than once, e.g. Ghana
+# countries can appear on level 3 or 4 or org hierarchy currently
+  
+  assertthat::assert_that(min(countries$country_level) > 2, max(countries$country_level) < 5)
+  countries$country_name_url = plyr::laply(countries$country_name, utils::URLencode, reserved = TRUE)
+
+  level_3_countries <- countries %>% dplyr::filter(country_level == "3") %>% .$country_name %>%
+    plyr::laply(utils::URLencode, reserved = TRUE) %>% 
+    paste0(collapse = ",") %>% 
+    paste0("name:in:[", .,"]") %>%  c("level:eq:3") %>% 
+    datapackcommons::getMetadata("organisationUnits", .)
+  
+  level_4_countries <- countries %>% dplyr::filter(country_level == "4") %>% .$country_name %>%
+    plyr::laply(utils::URLencode, reserved = TRUE) %>% 
+    paste0(collapse = ",") %>% 
+    paste0("name:in:[", .,"]") %>%  c("level:eq:4") %>% 
+    datapackcommons::getMetadata("organisationUnits", .)
+  
+  assertthat::assert_that(NROW(level_3_countries) + NROW(level_4_countries) == NROW(countries))
+
+# stack level 3 and l;evel 4 countries and join the uid to the main list of countries  
+  rbind(level_3_countries, level_4_countries) %>% 
+    dplyr::left_join(countries, ., by = c("country_name" = "displayName")) %>% 
+    dplyr::select(-country_name_url)
 }
 
 
