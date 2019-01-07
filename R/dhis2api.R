@@ -103,21 +103,28 @@ GetDataWithIndicator <- function(indicator, org_units, level, periods,
     additional_dimensions, additional_filters
   )
   for (i in 1:20) {
+    try({response <- web_api_call %>% 
+      utils::URLencode()  %>%
+      httr::GET()
     
-    my_data <- web_api_call %>% utils::URLencode()  %>%
-      httr::GET() %>%
-      httr::content(., "text")
+    if(response$status_code != 200L){next}
     
-    my_data <- my_data %>%
+    my_data <- response %>% 
+      httr::content(., "text") %>% 
       readr::read_csv(col_names = TRUE)
+    
     if ("Value" %in% names(my_data)) { # then we got back a data set we can return
       return(list(
         "api_call" = web_api_call,
         "time" = lubridate::now("UTC"),
         "results" = my_data
-      ))
+        )
+        )
+      }
     }
-  } 
+    )
+    Sys.sleep(3)
+    }
   stop("20 attempts to GetDataWithIndicator failed")
 }
 
