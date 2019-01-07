@@ -111,7 +111,7 @@ GetDataWithIndicator <- function(indicator, org_units, level, periods,
     
     my_data <- response %>% 
       httr::content(., "text") %>% 
-      readr::read_csv(col_names = TRUE)
+      readr::read_csv(col_names = TRUE, col_types = readr::cols(.default = "c", Value = "d"))
     
     if ("Value" %in% names(my_data)) { # then we got back a data set we can return
       return(list(
