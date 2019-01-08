@@ -113,13 +113,17 @@ GetDataWithIndicator <- function(indicator, org_units, level, periods,
       httr::content(., "text") %>% 
       readr::read_csv(col_names = TRUE, col_types = readr::cols(.default = "c", Value = "d"))
     
-    if ("Value" %in% names(my_data)) { # then we got back a data set we can return
+    if ("Value" %in% names(my_data)) { # make sure we got a data table - we should always get one back even if empty
+      # if we got back an empty data set return it, 
+      # if we got back a set with data make sure it the indicator uid matches to validate we got back the data we requested
+      if(NROW(my_data) == 0 | (NROW(my_data) > 0 & indicator %in% my_data$Data)){
       return(list(
         "api_call" = web_api_call,
         "time" = lubridate::now("UTC"),
         "results" = my_data
         )
-        )
+      )
+        }
       }
     }
     )
