@@ -21,11 +21,15 @@ dim_item_sets_test <- readr::read_csv("./data-raw/model_calculations_test/dimens
  usethis::use_data(dim_item_sets_test, overwrite = TRUE, compress = "gzip")
 
 data_required <- readr::read_csv("./data-raw/model_calculations/data_required.csv", 
-                                 na = c("NA"))
+                                 na = c("NA")) %>%
+  dplyr::mutate(B.kp_set = NA_character_, B.add_dim_1 = NA_character_, B.add_dim_1_uid = NA_character_, 
+                B.add_dim_1_items = NA_character_,	B.add_dim_1_items_uid = NA_character_)
 usethis::use_data(data_required, overwrite = TRUE, compress = "gzip")
 
 data_required_test <- readr::read_csv("./data-raw/model_calculations_test/data_required.csv", 
-                                      na = c("NA"))
+                                      na = c("NA")) %>%
+  dplyr::mutate(B.kp_set = NA_character_, B.add_dim_1 = NA_character_, B.add_dim_1_uid = NA_character_, 
+                B.add_dim_1_items = NA_character_,	B.add_dim_1_items_uid = NA_character_)
 usethis::use_data(data_required_test, overwrite = TRUE, compress = "gzip")
 
 
