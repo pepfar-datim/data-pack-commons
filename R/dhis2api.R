@@ -1,4 +1,5 @@
-#devtools::check("/Users/sam/Documents/GitHub/data-pack-commons")
+# devtools::check("/Users/sam/Documents/GitHub/data-pack-commons")
+# 20190109_1
 
 #' @title LoadConfig(config_path)
 #'
