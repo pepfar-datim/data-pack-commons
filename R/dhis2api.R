@@ -55,8 +55,8 @@ DHISLogin<-function(config_path = NA) {
 #' based on dimension name in DHIS2.
 #' @param additional_filters 2 column dataframe, first column containing dimension item uids
 #' and second column the related dimension uid.filters do not appear explicitly in output.
-#' @return  A list with $time = name the function was called, 
-#' $api_call = api call use and 
+#' @return  A list with $time = time the function was called, 
+#' $api_call = api call used, and 
 #' $results = the data returnd by the analytics call
 #'
 
@@ -173,13 +173,13 @@ GetCountryPrioritizationLevel <- function(countries_req = NULL){
     plyr::laply(utils::URLencode, reserved = TRUE) %>% 
     paste0(collapse = ",") %>% 
     paste0("name:in:[", .,"]") %>%  c("level:eq:3") %>% 
-    datapackcommons::getMetadata("organisationUnits", .)
+    getMetadata("organisationUnits", .)
   
   level_4_countries <- countries %>% dplyr::filter(country_level == "4") %>% .$country_name %>%
     plyr::laply(utils::URLencode, reserved = TRUE) %>% 
     paste0(collapse = ",") %>% 
     paste0("name:in:[", .,"]") %>%  c("level:eq:4") %>% 
-    datapackcommons::getMetadata("organisationUnits", .)
+    getMetadata("organisationUnits", .)
   
   assertthat::assert_that(NROW(level_3_countries) + NROW(level_4_countries) == NROW(countries))
 
@@ -189,8 +189,16 @@ GetCountryPrioritizationLevel <- function(countries_req = NULL){
     dplyr::select(-country_name_url)
 }
 
-
-#' @export
+#' @title getMetadata(end_point, filters, fields)
+#' 
+#' @description General utility to get metadata details from DATIM
+#' @param end_point string - api endpoint for the metadata of interest e.g. dataElements, 
+#' organisationUnits
+#' @param filters - list of strings - the parameters for  the DHIS2 metadata filter, 
+#' e.g. c("id:eq:1234","name:in:Kenya,Rwanda")
+#' @param fields - string for the fields to return structured as DHIS 2 expects,
+#' e.g. "name,id,items[name,id]"
+#' @return list of metadata details
 getMetadata <- function(end_point, filters = NULL, fields = NULL) {
   
   url_filters=""
@@ -220,7 +228,6 @@ getMetadata <- function(end_point, filters = NULL, fields = NULL) {
 
 ## TO IMPLEMENT code that will compare a name in one column with the id in another column to ensure they correspond 
 
-#' @export
 #' @title CompareNamesIds(names, ids, type)
 #' 
 #' @description Checks name list and paired id list (same length) and verifies they correspond to each other

@@ -9,12 +9,16 @@ Description: More about what it does (maybe more than one line)
 License: What license is it under?
 Encoding: UTF-8
 LazyData: true
-Imports: 
+Imports: assertthat,
     dplyr,
-    stringr,
-    jsonlite,
+    glue,
     httr,
-    readr
+    jsonlite,
+    lubridate,
+    plyr,
+    readr,
+    rlist,
+    stringr
 Suggests: 
     httptest,
     testthat

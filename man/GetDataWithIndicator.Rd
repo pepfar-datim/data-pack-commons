@@ -26,8 +26,8 @@ based on dimension name in DHIS2.}
 and second column the related dimension uid.filters do not appear explicitly in output.}
 }
 \value{
-A list with $time = name the function was called, 
-$api_call = api call use and 
+A list with $time = time the function was called, 
+$api_call = api call used, and 
 $results = the data returnd by the analytics call
 }
 \description{
