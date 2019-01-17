@@ -134,12 +134,12 @@ GetDataWithIndicator <- function(indicator, org_units, level, periods,
 }
 
 #' @export
-#' @title GetCountryPrioritizationLevel(country_names)
+#' @title GetCountryLevels(country_names)
 #' @description Gets country uid and prioritization level using dataSetAssignments/ous
 #' @param countries_req list of country names to include in response
 #' @return dataframe with columns country_level, prioritization_level, country_name, id   
 
-GetCountryPrioritizationLevel <- function(countries_req = NULL){
+GetCountryLevels <- function(countries_req = NULL){
   response <-  paste0(getOption("baseurl"),"api/dataStore/dataSetAssignments/ous") %>%
     httr::GET()
   
@@ -151,8 +151,8 @@ GetCountryPrioritizationLevel <- function(countries_req = NULL){
   countries <- response %>% httr::content(.,"text") %>%
     jsonlite::fromJSON() %>%
     do.call(rbind.data.frame,.) %>%
-    dplyr::mutate(country_name = rownames(.), prioritization_level = prioritization, country_level = country) %>% 
-    dplyr::select(country_level, prioritization_level, country_name) 
+    dplyr::mutate(country_name = rownames(.), planning_level = planning, prioritization_level = prioritization, country_level = country) %>% 
+    dplyr::select(country_level, planning_level, prioritization_level, country_name) 
 
 # If specific counties were requested filter and assert we got the correct results  
   if(!is.null(countries_req)){
@@ -224,6 +224,11 @@ getMetadata <- function(end_point, filters = NULL, fields = NULL) {
     rlist::list.extract(.,end_point) } else {
       stop("Could not retreive endpoint")
     }
+}
+
+#' @export
+GetMilitaryUid <- function(ou_name, base_url){
+  getMetadata("organisationUnits", paste0("name:eq:_Military%20", utils::URLencode(ou_name)), "id")
 }
 
 ## TO IMPLEMENT code that will compare a name in one column with the id in another column to ensure they correspond 
