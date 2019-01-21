@@ -1,0 +1,524 @@
+{
+    "Angola": {
+        "name3": "Angola",
+        "name4": "",
+        "country": 3,
+        "prioritization": 4,
+        "planning": 4,
+        "community": 5,
+        "facility": 6
+    },
+    "Antigua & Barbuda": {
+        "name3": "Caribbean Region",
+        "name4": "Antigua & Barbuda",
+        "country": 4,
+        "prioritization": 4,
+        "planning": 4,
+        "community": 6,
+        "facility": 7
+    },
+    "Bahamas": {
+        "name3": "Caribbean Region",
+        "name4": "Bahamas",
+        "country": 4,
+        "prioritization": 4,
+        "planning": 4,
+        "community": 6,
+        "facility": 7
+    },
+    "Barbados": {
+        "name3": "Caribbean Region",
+        "name4": "Barbados",
+        "country": 4,
+        "prioritization": 4,
+        "planning": 4,
+        "community": 6,
+        "facility": 7
+    },
+    "Belize": {
+        "name3": "Central America Region",
+        "name4": "Belize",
+        "country": 4,
+        "prioritization": 5,
+        "planning": 5,
+        "community": 6,
+        "facility": 7
+    },
+    "Botswana": {
+        "name3": "Botswana",
+        "name4": "",
+        "country": 3,
+        "prioritization": 5,
+        "planning": 5,
+        "community": 5,
+        "facility": 6
+    },
+    "Burma": {
+        "name3": "Burma",
+        "name4": "",
+        "country": 3,
+        "prioritization": 6,
+        "planning": 6,
+        "community": 6,
+        "facility": 7
+    },
+    "Burundi": {
+        "name3": "Burundi",
+        "name4": "",
+        "country": 3,
+        "prioritization": 4,
+        "planning": 4,
+        "community": 6,
+        "facility": 7
+    },
+    "Cambodia": {
+        "name3": "Cambodia",
+        "name4": "",
+        "country": 3,
+        "prioritization": 4,
+        "planning": 4,
+        "community": 5,
+        "facility": 6
+    },
+    "Cameroon": {
+        "name3": "Cameroon",
+        "name4": "",
+        "country": 3,
+        "prioritization": 5,
+        "planning": 5,
+        "community": 5,
+        "facility": 6
+    },
+    "China": {
+        "name3": "Asia Regional Program",
+        "name4": "China",
+        "country": 4,
+        "prioritization": 5,
+        "planning": 5,
+        "community": 7,
+        "facility": 8
+    },
+    "Costa Rica": {
+        "name3": "Central America Region",
+        "name4": "Costa Rica",
+        "country": 4,
+        "prioritization": 5,
+        "planning": 5,
+        "community": 6,
+        "facility": 7
+    },
+    "Cote d'Ivoire": {
+        "name3": "Cote d'Ivoire",
+        "name4": "",
+        "country": 3,
+        "prioritization": 5,
+        "planning": 5,
+        "community": 6,
+        "facility": 7
+    },
+    "Democratic Republic of the Congo": {
+        "name3": "Democratic Republic of the Congo",
+        "name4": "",
+        "country": 3,
+        "prioritization": 5,
+        "planning": 5,
+        "community": 5,
+        "facility": 6
+    },
+    "Dominica": {
+        "name3": "Caribbean Region",
+        "name4": "Dominica",
+        "country": 4,
+        "prioritization": 4,
+        "planning": 4,
+        "community": 6,
+        "facility": 7
+    },
+    "Dominican Republic": {
+        "name3": "Dominican Republic",
+        "name4": "",
+        "country": 3,
+        "prioritization": 5,
+        "planning": 5,
+        "community": 5,
+        "facility": 7
+    },
+    "El Salvador": {
+        "name3": "Central America Region",
+        "name4": "El Salvador",
+        "country": 4,
+        "prioritization": 5,
+        "planning": 5,
+        "community": 6,
+        "facility": 7
+    },
+    "Eswatini": {
+        "name3": "Eswatini",
+        "name4": "",
+        "country": 3,
+        "prioritization": 4,
+        "planning": 4,
+        "community": 5,
+        "facility": 6
+    },
+    "Ethiopia": {
+        "name3": "Ethiopia",
+        "name4": "",
+        "country": 3,
+        "prioritization": 6,
+        "planning": 6,
+        "community": 6,
+        "facility": 7
+    },
+    "Ghana": {
+        "name3": "Ghana",
+        "name4": "",
+        "country": 3,
+        "prioritization": 5,
+        "planning": 5,
+        "community": 5,
+        "facility": 7
+    },
+    "Grenada": {
+        "name3": "Caribbean Region",
+        "name4": "Grenada",
+        "country": 4,
+        "prioritization": 4,
+        "planning": 4,
+        "community": 6,
+        "facility": 7
+    },
+    "Guatemala": {
+        "name3": "Central America Region",
+        "name4": "Guatemala",
+        "country": 4,
+        "prioritization": 5,
+        "planning": 5,
+        "community": 6,
+        "facility": 7
+    },
+    "Guyana": {
+        "name3": "Caribbean Region",
+        "name4": "Guyana",
+        "country": 4,
+        "prioritization": 5,
+        "planning": 5,
+        "community": 5,
+        "facility": 6
+    },
+    "Haiti": {
+        "name3": "Haiti",
+        "name4": "",
+        "country": 3,
+        "prioritization": 5,
+        "planning": 5,
+        "community": 6,
+        "facility": 7
+    },
+    "Honduras": {
+        "name3": "Central America Region",
+        "name4": "Honduras",
+        "country": 4,
+        "prioritization": 5,
+        "planning": 5,
+        "community": 6,
+        "facility": 7
+    },
+    "India": {
+        "name3": "India",
+        "name4": "",
+        "country": 3,
+        "prioritization": 5,
+        "planning": 5,
+        "community": 5,
+        "facility": 6
+    },
+    "Indonesia": {
+        "name3": "Indonesia",
+        "name4": "",
+        "country": 3,
+        "prioritization": 5,
+        "planning": 5,
+        "community": 5,
+        "facility": 6
+    },
+    "Jamaica": {
+        "name3": "Caribbean Region",
+        "name4": "Jamaica",
+        "country": 4,
+        "prioritization": 4,
+        "planning": 6,
+        "community": 6,
+        "facility": 7
+    },
+    "Kazakhstan": {
+        "name3": "Central Asia Region",
+        "name4": "Kazakhstan",
+        "country": 4,
+        "prioritization": 5,
+        "planning": 5,
+        "community": 7,
+        "facility": 8
+    },
+    "Kenya": {
+        "name3": "Kenya",
+        "name4": "",
+        "country": 3,
+        "prioritization": 4,
+        "planning": 4,
+        "community": 6,
+        "facility": 7
+    },
+    "Kyrgyzstan": {
+        "name3": "Central Asia Region",
+        "name4": "Kyrgyzstan",
+        "country": 4,
+        "prioritization": 5,
+        "planning": 5,
+        "community": 7,
+        "facility": 8
+    },
+    "Laos": {
+        "name3": "Asia Regional Program",
+        "name4": "Laos",
+        "country": 4,
+        "prioritization": 5,
+        "planning": 5,
+        "community": 5,
+        "facility": 7
+    },
+    "Lesotho": {
+        "name3": "Lesotho",
+        "name4": "",
+        "country": 3,
+        "prioritization": 4,
+        "planning": 4,
+        "community": 5,
+        "facility": 6
+    },
+    "Malawi": {
+        "name3": "Malawi",
+        "name4": "",
+        "country": 3,
+        "prioritization": 6,
+        "planning": 6,
+        "community": 6,
+        "facility": 7
+    },
+    "Mozambique": {
+        "name3": "Mozambique",
+        "name4": "",
+        "country": 3,
+        "prioritization": 5,
+        "planning": 5,
+        "community": 5,
+        "facility": 6
+    },
+    "Namibia": {
+        "name3": "Namibia",
+        "name4": "",
+        "country": 3,
+        "prioritization": 5,
+        "planning": 5,
+        "community": 5,
+        "facility": 6
+    },
+    "Nicaragua": {
+        "name3": "Central America Region",
+        "name4": "Nicaragua",
+        "country": 4,
+        "prioritization": 5,
+        "planning": 5,
+        "community": 6,
+        "facility": 7
+    },
+    "Nigeria": {
+        "name3": "Nigeria",
+        "name4": "",
+        "country": 3,
+        "prioritization": 5,
+        "planning": 5,
+        "community": 5,
+        "facility": 6
+    },
+    "Panama": {
+        "name3": "Central America Region",
+        "name4": "Panama",
+        "country": 4,
+        "prioritization": 5,
+        "planning": 5,
+        "community": 6,
+        "facility": 7
+    },
+    "Papua New Guinea": {
+        "name3": "Papua New Guinea",
+        "name4": "",
+        "country": 3,
+        "prioritization": 4,
+        "planning": 4,
+        "community": 6,
+        "facility": 7
+    },
+    "Rwanda": {
+        "name3": "Rwanda",
+        "name4": "",
+        "country": 3,
+        "prioritization": 4,
+        "planning": 4,
+        "community": 6,
+        "facility": 7
+    },
+    "Saint Kitts & Nevis": {
+        "name3": "Caribbean Region",
+        "name4": "Saint Kitts & Nevis",
+        "country": 4,
+        "prioritization": 4,
+        "planning": 4,
+        "community": 6,
+        "facility": 7
+    },
+    "Saint Lucia": {
+        "name3": "Caribbean Region",
+        "name4": "Saint Lucia",
+        "country": 4,
+        "prioritization": 4,
+        "planning": 4,
+        "community": 6,
+        "facility": 7
+    },
+    "Saint Vincent & the Grenadines": {
+        "name3": "Caribbean Region",
+        "name4": "Saint Vincent & the Grenadines",
+        "country": 4,
+        "prioritization": 4,
+        "planning": 4,
+        "community": 6,
+        "facility": 7
+    },
+    "South Africa": {
+        "name3": "South Africa",
+        "name4": "",
+        "country": 3,
+        "prioritization": 5,
+        "planning": 5,
+        "community": 6,
+        "facility": 7
+    },
+    "South Sudan": {
+        "name3": "South Sudan",
+        "name4": "",
+        "country": 3,
+        "prioritization": 5,
+        "planning": 5,
+        "community": 6,
+        "facility": 7
+    },
+    "Suriname": {
+        "name3": "Caribbean Region",
+        "name4": "Suriname",
+        "country": 4,
+        "prioritization": 4,
+        "planning": 5,
+        "community": 5,
+        "facility": 6
+    },
+    "Tajikistan": {
+        "name3": "Central Asia Region",
+        "name4": "Tajikistan",
+        "country": 4,
+        "prioritization": 5,
+        "planning": 5,
+        "community": 7,
+        "facility": 8
+    },
+    "Tanzania": {
+        "name3": "Tanzania",
+        "name4": "",
+        "country": 3,
+        "prioritization": 5,
+        "planning": 5,
+        "community": 6,
+        "facility": 7
+    },
+    "Thailand": {
+        "name3": "Asia Regional Program",
+        "name4": "Thailand",
+        "country": 4,
+        "prioritization": 5,
+        "planning": 5,
+        "community": 5,
+        "facility": 7
+    },
+    "Trinidad & Tobago": {
+        "name3": "Caribbean Region",
+        "name4": "Trinidad & Tobago",
+        "country": 4,
+        "prioritization": 4,
+        "planning": 4,
+        "community": 8,
+        "facility": 9
+    },
+    "Turkmenistan": {
+        "name3": "Central Asia Region",
+        "name4": "Turkmenistan",
+        "country": 4,
+        "prioritization": 0,
+        "planning": 0,
+        "community": 0,
+        "facility": 0
+    },
+    "Uganda": {
+        "name3": "Uganda",
+        "name4": "",
+        "country": 3,
+        "prioritization": 5,
+        "planning": 5,
+        "community": 6,
+        "facility": 7
+    },
+    "Ukraine": {
+        "name3": "Ukraine",
+        "name4": "",
+        "country": 3,
+        "prioritization": 4,
+        "planning": 4,
+        "community": 4,
+        "facility": 6
+    },
+    "Uzbekistan": {
+        "name3": "Central Asia Region",
+        "name4": "Uzbekistan",
+        "country": 4,
+        "prioritization": 5,
+        "planning": 5,
+        "community": 7,
+        "facility": 8
+    },
+    "Vietnam": {
+        "name3": "Vietnam",
+        "name4": "",
+        "country": 3,
+        "prioritization": 4,
+        "planning": 4,
+        "community": 5,
+        "facility": 6
+    },
+    "Zambia": {
+        "name3": "Zambia",
+        "name4": "",
+        "country": 3,
+        "prioritization": 5,
+        "planning": 5,
+        "community": 5,
+        "facility": 6
+    },
+    "Zimbabwe": {
+        "name3": "Zimbabwe",
+        "name4": "",
+        "country": 3,
+        "prioritization": 5,
+        "planning": 5,
+        "community": 5,
+        "facility": 6
+    }
+}

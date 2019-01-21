@@ -2,11 +2,13 @@
 % Please edit documentation in R/dhis2api.R
 \name{getMetadata}
 \alias{getMetadata}
-\title{getMetadata(end_point, filters, fields)}
+\title{getMetadata(base_url, end_point, filters, fields)}
 \usage{
-getMetadata(end_point, filters = NULL, fields = NULL)
+getMetadata(base_url, end_point, filters = NULL, fields = NULL)
 }
 \arguments{
+\item{base_url}{string - base address of instance (text before api/ in URL)}
+
 \item{end_point}{string - api endpoint for the metadata of interest e.g. dataElements, 
 organisationUnits}
 

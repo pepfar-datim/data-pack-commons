@@ -5,10 +5,12 @@
 \title{GetDataWithIndicator(indicator, org_units, level,
 period, additional_dimensions, additional_filters)}
 \usage{
-GetDataWithIndicator(indicator, org_units, level, periods,
+GetDataWithIndicator(base_url, indicator, org_units, level, periods,
   additional_dimensions = NULL, additional_filters = NULL)
 }
 \arguments{
+\item{base_url}{string - base address of instance (text before api/ in URL)}
+
 \item{indicator}{string - uid of indicator}
 
 \item{org_units}{list of strings - list of org unit uids, operate as boundry org units}

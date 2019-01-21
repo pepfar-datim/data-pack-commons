@@ -4,9 +4,11 @@
 \alias{GetCountryLevels}
 \title{GetCountryLevels(country_names)}
 \usage{
-GetCountryLevels(countries_req = NULL)
+GetCountryLevels(base_url, countries_req = NULL)
 }
 \arguments{
+\item{base_url}{string - base address of instance (text before api/ in URL)}
+
 \item{countries_req}{list of country names to include in response}
 }
 \value{
