@@ -45,6 +45,7 @@ DHISLogin<-function(config_path = NA) {
 #' period, additional_dimensions, additional_filters)
 #' 
 #' @description Gets data from DHIS2 using a single indicator
+#' @param base_url string - base address of instance (text before api/ in URL)
 #' @param indicator string - uid of indicator
 #' @param org_units list of strings - list of org unit uids, operate as boundry org units
 #' @param level string - org hierarchy level, only one allowed
@@ -60,7 +61,7 @@ DHISLogin<-function(config_path = NA) {
 #' $results = the data returnd by the analytics call
 #'
 
-GetDataWithIndicator <- function(indicator, org_units, level, periods,
+GetDataWithIndicator <- function(base_url, indicator, org_units, level, periods,
                                  additional_dimensions = NULL, additional_filters = NULL) {
   
   assertthat::assert_that(assertthat::is.string(indicator), nchar(indicator) == 11,
@@ -96,7 +97,7 @@ GetDataWithIndicator <- function(indicator, org_units, level, periods,
   }
   
   web_api_call <- paste0(
-    getOption("baseurl"),
+    base_url,
     "api/29/analytics.csv?outputIdScheme=UID",
     "&dimension=dx:", indicator,
     "&dimension=pe:", periods,
@@ -136,11 +137,12 @@ GetDataWithIndicator <- function(indicator, org_units, level, periods,
 #' @export
 #' @title GetCountryLevels(country_names)
 #' @description Gets country uid and prioritization level using dataSetAssignments/ous
+#' @param base_url string - base address of instance (text before api/ in URL)
 #' @param countries_req list of country names to include in response
 #' @return dataframe with columns country_level, prioritization_level, country_name, id   
 
-GetCountryLevels <- function(countries_req = NULL){
-  response <-  paste0(getOption("baseurl"),"api/dataStore/dataSetAssignments/ous") %>%
+GetCountryLevels <- function(base_url, countries_req = NULL){
+  response <-  paste0(base_url, "api/dataStore/dataSetAssignments/ous") %>%
     httr::GET()
   
   if(response$status != 200L){
@@ -173,13 +175,13 @@ GetCountryLevels <- function(countries_req = NULL){
     plyr::laply(utils::URLencode, reserved = TRUE) %>% 
     paste0(collapse = ",") %>% 
     paste0("name:in:[", .,"]") %>%  c("level:eq:3") %>% 
-    getMetadata("organisationUnits", .)
+    getMetadata(base_url, "organisationUnits", .)
   
   level_4_countries <- countries %>% dplyr::filter(country_level == "4") %>% .$country_name %>%
     plyr::laply(utils::URLencode, reserved = TRUE) %>% 
     paste0(collapse = ",") %>% 
     paste0("name:in:[", .,"]") %>%  c("level:eq:4") %>% 
-    getMetadata("organisationUnits", .)
+    getMetadata(base_url, "organisationUnits", .)
   
   assertthat::assert_that(NROW(level_3_countries) + NROW(level_4_countries) == NROW(countries))
 
@@ -189,9 +191,10 @@ GetCountryLevels <- function(countries_req = NULL){
     dplyr::select(-country_name_url)
 }
 
-#' @title getMetadata(end_point, filters, fields)
+#' @title getMetadata(base_url, end_point, filters, fields)
 #' 
 #' @description General utility to get metadata details from DATIM
+#' @param base_url string - base address of instance (text before api/ in URL)
 #' @param end_point string - api endpoint for the metadata of interest e.g. dataElements, 
 #' organisationUnits
 #' @param filters - list of strings - the parameters for  the DHIS2 metadata filter, 
@@ -199,7 +202,7 @@ GetCountryLevels <- function(countries_req = NULL){
 #' @param fields - string for the fields to return structured as DHIS 2 expects,
 #' e.g. "name,id,items[name,id]"
 #' @return list of metadata details
-getMetadata <- function(end_point, filters = NULL, fields = NULL) {
+getMetadata <- function(base_url, end_point, filters = NULL, fields = NULL) {
   
   url_filters=""
   url_fields=""
@@ -212,7 +215,7 @@ getMetadata <- function(end_point, filters = NULL, fields = NULL) {
     url_fields <- paste0("&fields=", paste(fields,sep="",collapse=",")) %>% URLencode()
   }
   
-  web_api_call <- paste0(getOption("baseurl"), "api/", end_point, ".json?paging=false",
+  web_api_call <- paste0(base_url, "api/", end_point, ".json?paging=false",
                          url_filters,
                          url_fields)
     r <- web_api_call %>%
@@ -227,8 +230,10 @@ getMetadata <- function(end_point, filters = NULL, fields = NULL) {
 }
 
 #' @export
+#' @param base_url string - base address of instance (text before api/ in URL)
+
 GetMilitaryUid <- function(ou_name, base_url){
-  getMetadata("organisationUnits", paste0("name:eq:_Military%20", utils::URLencode(ou_name)), "id")
+  getMetadata(base_url, "organisationUnits", paste0("name:eq:_Military%20", utils::URLencode(ou_name)), "id")
 }
 
 ## TO IMPLEMENT code that will compare a name in one column with the id in another column to ensure they correspond 
