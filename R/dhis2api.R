@@ -110,6 +110,7 @@ GetDataWithIndicator <- function(base_url, indicator, org_units, level, periods,
       httr::GET()
     
     if(response$status_code != 200L){next}
+    if(httr::http_type(response) != "application/csv"){next}
     
     my_data <- response %>% 
       httr::content(., "text") %>% 
