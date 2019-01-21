@@ -1,5 +1,5 @@
 # devtools::check("/Users/sam/Documents/GitHub/data-pack-commons")
-# model_data_pack_input_20190118
+# model_data_pack_input_#######
 
 #' @title LoadConfig(config_path)
 #'
@@ -38,6 +38,18 @@ DHISLogin<-function(config_path = NA) {
     options("organisationUnit" = me$organisationUnits$id)
     return(TRUE)
   }
+}
+
+RetryAPI <- function(api_url, content_type, max_attempts = 20){
+  for(i in 1:max_attempts){
+    response <- httr::GET(api_url)
+    if (response$status_code == 200L & httr::http_type(response) == content_type){
+      return(response)
+    }
+    Sys.sleep(3)
+  }
+  # if i am here all my attempts failed
+  stop(paste("Failed to obtain valid response for:", api_url))
 }
 
 #' @export
@@ -104,35 +116,25 @@ GetDataWithIndicator <- function(base_url, indicator, org_units, level, periods,
     "&dimension=ou:LEVEL-", level, ";", org_units,
     additional_dimensions, additional_filters
   )
-  for (i in 1:20) {
-    try({response <- web_api_call %>% 
-      utils::URLencode()  %>%
-      httr::GET()
-    
-    if(response$status_code != 200L){next}
-    if(httr::http_type(response) != "application/csv"){next}
-    
+  
+  response <- web_api_call %>% 
+    utils::URLencode()  %>%
+    RetryAPI("application/csv", 20)
+
     my_data <- response %>% 
       httr::content(., "text") %>% 
       readr::read_csv(col_names = TRUE, col_types = readr::cols(.default = "c", Value = "d"))
-    
-    if ("Value" %in% names(my_data)) { # make sure we got a data table - we should always get one back even if empty
+    assertthat::has_name(my_data, "Value")
+    #if ("Value" %in% names(my_data)) { # make sure we got a data table - we should always get one back even if empty
       # if we got back an empty data set return it, 
       # if we got back a set with data make sure it the indicator uid matches to validate we got back the data we requested
       if(NROW(my_data) == 0 | (NROW(my_data) > 0 & indicator %in% my_data$Data)){
-      return(list(
-        "api_call" = web_api_call,
-        "time" = lubridate::now("UTC"),
-        "results" = my_data
-        )
-      )
+      return(list("api_call" = web_api_call,
+                  "time" = lubridate::now("UTC"),
+                  "results" = my_data))
         }
-      }
-    }
-    )
-    Sys.sleep(3)
-    }
-  stop("20 attempts to GetDataWithIndicator failed")
+      #}
+  stop("Call to GetDataWithIndicator failed")
 }
 
 #' @export
@@ -144,12 +146,8 @@ GetDataWithIndicator <- function(base_url, indicator, org_units, level, periods,
 
 GetCountryLevels <- function(base_url, countries_req = NULL){
   response <-  paste0(base_url, "api/dataStore/dataSetAssignments/ous") %>%
-    httr::GET()
+    RetryAPI("application/json", 20)
   
-  if(response$status != 200L){
-    stop("Could not retrieve OUs")
-  }
-
 # get api response into a data frame a reduce to columns of interest  
   countries <- response %>% httr::content(.,"text") %>%
     jsonlite::fromJSON() %>%
@@ -219,8 +217,8 @@ getMetadata <- function(base_url, end_point, filters = NULL, fields = NULL) {
   web_api_call <- paste0(base_url, "api/", end_point, ".json?paging=false",
                          url_filters,
                          url_fields)
-    r <- web_api_call %>%
-    httr::GET()
+    r <- web_api_call %>% RetryAPI("application/json", 20)
+    # httr::GET()
     
     if (r$status_code == 200L) {
     httr::content(r, "text")   %>%
@@ -234,7 +232,10 @@ getMetadata <- function(base_url, end_point, filters = NULL, fields = NULL) {
 #' @param base_url string - base address of instance (text before api/ in URL)
 
 GetMilitaryUid <- function(ou_name, base_url){
-  getMetadata(base_url, "organisationUnits", paste0("name:eq:_Military%20", utils::URLencode(ou_name)), "id")
+  getMetadata(base_url, 
+              "organisationUnits", 
+              paste0("name:eq:_Military%20", utils::URLencode(ou_name)), 
+              "id")
 }
 
 ## TO IMPLEMENT code that will compare a name in one column with the id in another column to ensure they correspond 
