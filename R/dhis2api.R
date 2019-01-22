@@ -40,13 +40,22 @@ DHISLogin<-function(config_path = NA) {
   }
 }
 
-RetryAPI <- function(api_url, content_type, max_attempts = 20){
+#' @title RetryAPI(api_url, content_type, max_attempts)
+#' 
+#' @description Submits specified api request up to specified maximum times
+#' stopping when expected content type is returned with 200 response
+#' @param api_url string - full url for web request
+#' @param content_type string - expected type of content in reposne e.d 'application/json'
+#' @param max_attempts integer - maximum number of retries for succesful request
+#' @return  full api response
+#'
+RetryAPI <- function(api_url, content_type, max_attempts = 10){
   for(i in 1:max_attempts){
     response <- httr::GET(api_url)
     if (response$status_code == 200L & httr::http_type(response) == content_type){
       return(response)
     }
-    Sys.sleep(3)
+    Sys.sleep(i/2 + 1)
   }
   # if i am here all my attempts failed
   stop(paste("Failed to obtain valid response for:", api_url))
@@ -124,17 +133,22 @@ GetDataWithIndicator <- function(base_url, indicator, org_units, level, periods,
     my_data <- response %>% 
       httr::content(., "text") %>% 
       readr::read_csv(col_names = TRUE, col_types = readr::cols(.default = "c", Value = "d"))
+    
     assertthat::has_name(my_data, "Value")
+    if(NROW(my_data) > 0){
+      assertthat::assert_that(indicator %in% my_data$Data)
+    }
+    
     #if ("Value" %in% names(my_data)) { # make sure we got a data table - we should always get one back even if empty
       # if we got back an empty data set return it, 
       # if we got back a set with data make sure it the indicator uid matches to validate we got back the data we requested
-      if(NROW(my_data) == 0 | (NROW(my_data) > 0 & indicator %in% my_data$Data)){
+  #    if(NROW(my_data) == 0 | (NROW(my_data) > 0 & indicator %in% my_data$Data)){
       return(list("api_call" = web_api_call,
                   "time" = lubridate::now("UTC"),
                   "results" = my_data))
-        }
+ #       }
       #}
-  stop("Call to GetDataWithIndicator failed")
+#  stop("Call to GetDataWithIndicator failed")
 }
 
 #' @export
@@ -190,6 +204,7 @@ GetCountryLevels <- function(base_url, countries_req = NULL){
     dplyr::select(-country_name_url)
 }
 
+#' @export
 #' @title getMetadata(base_url, end_point, filters, fields)
 #' 
 #' @description General utility to get metadata details from DATIM
@@ -219,51 +234,82 @@ getMetadata <- function(base_url, end_point, filters = NULL, fields = NULL) {
                          url_fields)
     r <- web_api_call %>% RetryAPI("application/json", 20)
     # httr::GET()
-    
-    if (r$status_code == 200L) {
+    assertthat::are_equal(r$status_code, 200L)
+#    if (r$status_code == 200L) {
     httr::content(r, "text")   %>%
     jsonlite::fromJSON() %>%
-    rlist::list.extract(.,end_point) } else {
-      stop("Could not retreive endpoint")
-    }
+    rlist::list.extract(.,end_point) #} else {
+    #  stop("Could not retreive endpoint")
+    #}
 }
 
-#' @export
-#' @param base_url string - base address of instance (text before api/ in URL)
-
-GetMilitaryUid <- function(ou_name, base_url){
-  getMetadata(base_url, 
-              "organisationUnits", 
-              paste0("name:eq:_Military%20", utils::URLencode(ou_name)), 
-              "id")
-}
+# #' @export
+# #' @param base_url string - base address of instance (text before api/ in URL)
+# 
+# GetMilitaryUid <- function(ou_name, base_url){
+#   getMetadata(base_url, 
+#               "organisationUnits", 
+#               paste0("name:eq:_Military%20", utils::URLencode(ou_name)), 
+#               "id")
+# }
 
 ## TO IMPLEMENT code that will compare a name in one column with the id in another column to ensure they correspond 
-
-#' @title CompareNamesIds(names, ids, type)
+#' @export
+#' @title ValidateNameIdPairs(names, ids, type)
 #' 
 #' @description Checks name list and paired id list (same length) and verifies they correspond to each other
+#' @param base_url string - base address of instance (text before api/ in URL)
 #' @param names string vector - names of spcific class of metadata - category option, indicator etc
 #' @param ids string vector - ids of specific class of metadata - category option, indicator etc
 #' @param type string - metadata endpoint - cataegoryOptions, indicators, etc
-#' @return  
+#' @return  dplyr::all_equal response
 #'
-CompareNamesIds <- function(names, ids, type){
+ValidateNameIdPairs <- function(base_url, names, ids, type){
   assertthat::assert_that(is.character(names), assertthat::not_empty(names), NCOL(names) == 1,
-                          is.character(ids), assertthat::not_empty(ids), NCOL(ids) == 1,
+                          is.character(ids),   assertthat::not_empty(ids),   NCOL(ids)   == 1,
                           assertthat::is.string(type),
                           length(names) == length(ids))
-
-  
-  
+  original <- tibble::tibble(name = names, id = ids) %>% unique()
+  ids_csv = unique(ids) %>% paste0(collapse = ",")
+  response <- datapackcommons::getMetadata(base_url, type, filters = glue::glue("id:in:[{ids_csv}]"), fields = "id,name")
+  assertthat::has_name(response, "name")
+  assertthat::has_name(response, "id")
+  result = dplyr::all_equal(original, response)
+  if(result != TRUE){
+    stop(result)
+  } else{
+    TRUE
+  }
 }
 
-## TO IMPLEMENT code that will compare a code in one column with the id in another column to ensure they correspond 
-CompareCodesIds <- function(codes, ids, type){
-  
-  
-}
-
+## TO IMPLEMENT code that will compare a name in one column with the id in another column to ensure they correspond 
+#' @export
+#' @title ValidateCodeIdPairs(base_url, codes, ids, type)
+#' 
+#' @description Checks code list and paired id list (same length) and verifies they correspond to each other
+#' @param base_url string - base address of instance (text before api/ in URL)
+#' @param codes string vector - code of spcific class of metadata - category option, indicator etc
+#' @param ids string vector - ids of specific class of metadata - category option, indicator etc
+#' @param type string - metadata endpoint - cataegoryOptions, indicators, etc
+#' @return  dplyr::all_equal response
+#'
+ValidateCodeIdPairs <- function(base_url, codes, ids, type){
+  assertthat::assert_that(is.character(codes), assertthat::not_empty(codes), NCOL(codes) == 1,
+                          is.character(ids),   assertthat::not_empty(ids),   NCOL(ids)   == 1,
+                          assertthat::is.string(type),
+                          length(codes) == length(ids))
+  original <- tibble::tibble(code = codes, id = ids) %>% unique()
+  ids_csv = ids %>% unique() %>% paste0(collapse = ",")
+  response <- datapackcommons::getMetadata(base_url, type, filters = glue::glue("id:in:[{ids_csv}]"), fields = "id,code")
+  assertthat::has_name(response, "code")
+  assertthat::has_name(response, "id")
+  result = dplyr::all_equal(original, response)
+  if(result != TRUE){
+    stop(result)
+    } else{
+    TRUE
+    }
+  }
 
 # ## No Longer needed function that would add a column with names corresponding to a given
 # ## column with UIDs

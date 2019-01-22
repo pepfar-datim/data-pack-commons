@@ -8,6 +8,7 @@
 # httr::GET(paste0("https://play.dhis2.org/2.29/api/29/analytics.csv?outputIdScheme=UID",
 #                                            "&dimension=dx:vihpFUg2WTy&dimension=pe:LAST_YEAR&dimension=ou:LEVEL-2;ImspTQPwCqd",
 #                                            "&filter=J5jldMd8OHv:uYxK4wmcPqA;EYbopBOJWsW&filter=veGzholzPQm:UOqJW6HPvvL;WAl0OCcIYxr"))
+# httr::GET("https://play.dhis2.org/NONSENSE")
 # httptest::stop_capturing()
 
 context("Test interactions with DHIS 2 analytics")
@@ -55,6 +56,17 @@ test_that("We can get data with GetDataWithIndicator", {
   expect_equal(sum(response$Value), sum(response_filter$Value))
   })
 
+test_that("RetryAPI", {
+  api_url = paste0("https://play.dhis2.org/2.29/api/29/analytics.csv?outputIdScheme=UID",
+  "&dimension=dx:vihpFUg2WTy&dimension=pe:LAST_YEAR&dimension=ou:LEVEL-2;ImspTQPwCqd",
+  "&dimension=J5jldMd8OHv:uYxK4wmcPqA;EYbopBOJWsW&dimension=veGzholzPQm:UOqJW6HPvvL;WAl0OCcIYxr")
+  testthat::expect_type(RetryAPI(api_url, "application/csv", 1), "list")
+  testthat::expect_error(RetryAPI(api_url, "application/json", 1))
+  api_url <- "https://play.dhis2.org/NONSENSE"
+  testthat::expect_error(RetryAPI(api_url, "text/html", 1))
+  
+})
+
 test_that("GetCountryLevels", {
 #  DHISLogin("/users/sam/.secrets/prod.json")
   data <- GetCountryLevels(base_url = "https://www.datim.org/")
@@ -68,6 +80,70 @@ test_that("GetCountryLevels", {
   data <- GetCountryLevels(base_url = "https://www.datim.org/", c("Kenya", "Rwanda"))
   expect_equal(NROW(data), 2)
   expect_setequal(data$country_name, c("Kenya", "Rwanda"))
+})
+
+test_that("ValidateCodeIdPairs", {
+  testthat::expect_true(datapackcommons::ValidateCodeIdPairs("play.dhis2.org/2.29/", 
+                                                             c("IN_52486","IN_52491"), 
+                                                             c("Uvn6LCg7dVU","OdiHJayrsKo"), 
+                                                             "indicators"))
+  testthat::expect_true(datapackcommons::ValidateCodeIdPairs("play.dhis2.org/2.29/", 
+                                                             c("IN_52486", "IN_52491", "IN_52491"), 
+                                                             c("Uvn6LCg7dVU", "OdiHJayrsKo", "OdiHJayrsKo"), 
+                                                             "indicators"))
+  testthat::expect_error(
+    datapackcommons::ValidateCodeIdPairs("play.dhis2.org/2.29/", 
+                                         c("IN_52486","NONSENSE"), 
+                                         c("Uvn6LCg7dVU","OdiHJayrsKo"), 
+                                         "indicators"))
+  testthat::expect_error(
+    datapackcommons::ValidateCodeIdPairs("play.dhis2.org/2.29/", 
+                                         c("IN_52486","IN_52491"), 
+                                         c("NONSENSE","OdiHJayrsKo"), 
+                                         "indicators"))
+  
+  testthat::expect_error(
+    datapackcommons::ValidateCodeIdPairs("play.dhis2.org/2.29/", 
+                                         c("IN_52486","IN_52491"), 
+                                         c("Uvn6LCg7dVU"), 
+                                         "indicators"))
+  testthat::expect_error(
+    datapackcommons::ValidateCodeIdPairs("play.dhis2.org/2.29/", 
+                                         c("IN_52486"), 
+                                         c("Uvn6LCg7dVU","OdiHJayrsKo"), 
+                                         "indicators"))
+  })
+
+test_that("ValidateNameIdPairs", {
+testthat::expect_true(datapackcommons::ValidateNameIdPairs("play.dhis2.org/2.29/", 
+                                                           c("ANC 1 Coverage","ANC 2 Coverage"), 
+                                                           c("Uvn6LCg7dVU","OdiHJayrsKo"), 
+                                                           "indicators"))
+testthat::expect_true(datapackcommons::ValidateNameIdPairs("play.dhis2.org/2.29/", 
+                                                             c("ANC 1 Coverage", "ANC 2 Coverage", "ANC 2 Coverage"), 
+                                                             c("Uvn6LCg7dVU", "OdiHJayrsKo", "OdiHJayrsKo"), 
+                                                             "indicators"))
+testthat::expect_error(
+  datapackcommons::ValidateNameIdPairs("play.dhis2.org/2.29/", 
+                                       c("ANC 1 Coverage","NONSENSE"), 
+                                       c("Uvn6LCg7dVU","OdiHJayrsKo"), 
+                                       "indicators"))
+testthat::expect_error(
+  datapackcommons::ValidateNameIdPairs("play.dhis2.org/2.29/", 
+                                       c("ANC 1 Coverage","ANC 2 Coverage"), 
+                                       c("NONSENSE","OdiHJayrsKo"), 
+                                       "indicators"))
+
+testthat::expect_error(
+  datapackcommons::ValidateNameIdPairs("play.dhis2.org/2.29/", 
+                                       c("ANC 1 Coverage","ANC 2 Coverage"), 
+                                       c("Uvn6LCg7dVU"), 
+                                       "indicators"))
+testthat::expect_error(
+  datapackcommons::ValidateNameIdPairs("play.dhis2.org/2.29/", 
+                                       c("ANC 1 Coverage"), 
+                                       c("Uvn6LCg7dVU","OdiHJayrsKo"), 
+                                       "indicators"))
 })
 
 

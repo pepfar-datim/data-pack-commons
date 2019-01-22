@@ -18,7 +18,8 @@ Imports: assertthat,
     plyr,
     readr,
     rlist,
-    stringr
+    stringr,
+    tibble
 Suggests: 
     httptest,
     testthat
