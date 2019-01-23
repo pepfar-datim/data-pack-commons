@@ -276,13 +276,12 @@ ValidateNameIdPairs <- function(base_url, names, ids, type){
   assertthat::has_name(response, "id")
   result = dplyr::all_equal(original, response)
   if(result != TRUE){
-    stop(result)
+    stop(list(result=result, dplyr::anti_join(original, response), dplyr::anti_join(response, original)))
   } else{
     TRUE
   }
 }
 
-## TO IMPLEMENT code that will compare a name in one column with the id in another column to ensure they correspond 
 #' @export
 #' @title ValidateCodeIdPairs(base_url, codes, ids, type)
 #' 
@@ -305,7 +304,7 @@ ValidateCodeIdPairs <- function(base_url, codes, ids, type){
   assertthat::has_name(response, "id")
   result = dplyr::all_equal(original, response)
   if(result != TRUE){
-    stop(result)
+    stop(list(result=result, dplyr::anti_join(original, response), dplyr::anti_join(response, original)))
     } else{
     TRUE
     }
