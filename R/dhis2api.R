@@ -52,7 +52,7 @@ DHISLogin<-function(config_path = NA) {
 RetryAPI <- function(api_url, content_type, max_attempts = 10){
   for(i in 1:max_attempts){
     response <- httr::GET(api_url)
-    if (response$status_code == 200L & httr::http_type(response) == content_type){
+    if (response$status_code == 200L && httr::http_type(response) == content_type){
       return(response)
     }
     Sys.sleep(i/2 + 1)
@@ -243,17 +243,6 @@ getMetadata <- function(base_url, end_point, filters = NULL, fields = NULL) {
     #}
 }
 
-# #' @export
-# #' @param base_url string - base address of instance (text before api/ in URL)
-# 
-# GetMilitaryUid <- function(ou_name, base_url){
-#   getMetadata(base_url, 
-#               "organisationUnits", 
-#               paste0("name:eq:_Military%20", utils::URLencode(ou_name)), 
-#               "id")
-# }
-
-## TO IMPLEMENT code that will compare a name in one column with the id in another column to ensure they correspond 
 #' @export
 #' @title ValidateNameIdPairs(names, ids, type)
 #' 
@@ -270,7 +259,7 @@ ValidateNameIdPairs <- function(base_url, names, ids, type){
                           assertthat::is.string(type),
                           length(names) == length(ids))
   original <- tibble::tibble(name = names, id = ids) %>% unique()
-  ids_csv = unique(ids) %>% paste0(collapse = ",")
+  ids_csv  <-  unique(ids) %>% paste0(collapse = ",")
   response <- datapackcommons::getMetadata(base_url, type, filters = glue::glue("id:in:[{ids_csv}]"), fields = "id,name")
   assertthat::has_name(response, "name")
   assertthat::has_name(response, "id")
@@ -298,11 +287,11 @@ ValidateCodeIdPairs <- function(base_url, codes, ids, type){
                           assertthat::is.string(type),
                           length(codes) == length(ids))
   original <- tibble::tibble(code = codes, id = ids) %>% unique()
-  ids_csv = ids %>% unique() %>% paste0(collapse = ",")
+  ids_csv <-  ids %>% unique() %>% paste0(collapse = ",")
   response <- datapackcommons::getMetadata(base_url, type, filters = glue::glue("id:in:[{ids_csv}]"), fields = "id,code")
   assertthat::has_name(response, "code")
   assertthat::has_name(response, "id")
-  result = dplyr::all_equal(original, response)
+  result <-  dplyr::all_equal(original, response)
   if(result != TRUE){
     stop(list(result=result, dplyr::anti_join(original, response), dplyr::anti_join(response, original)))
     } else{
