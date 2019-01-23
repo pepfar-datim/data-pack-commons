@@ -1,0 +1,16 @@
+structure(list(url = "https://play.dhis2.org/NONSENSE", status_code = 404L, 
+    headers = structure(list(server = "nginx/1.14.2", date = "Tue, 22 Jan 2019 08:00:13 GMT", 
+        `content-type` = "text/html", `transfer-encoding` = "chunked", 
+        connection = "keep-alive", `content-encoding` = "gzip"), class = c("insensitive", 
+    "list")), all_headers = list(list(status = 404L, version = "HTTP/1.1", 
+        headers = structure(list(server = "nginx/1.14.2", date = "Tue, 22 Jan 2019 08:00:13 GMT", 
+            `content-type` = "text/html", `transfer-encoding` = "chunked", 
+            connection = "keep-alive", `content-encoding` = "gzip"), class = c("insensitive", 
+        "list")))), cookies = structure(list(domain = "#HttpOnly_play.dhis2.org", 
+        flag = FALSE, path = "/2.29", secure = FALSE, expiration = structure(Inf, class = c("POSIXct", 
+        "POSIXt")), name = "JSESSIONID", value = "REDACTED"), row.names = c(NA, 
+    -1L), class = "data.frame"), content = charToRaw("<html>\r\n<head><title>404 Not Found</title></head>\r\n<body bgcolor=\"white\">\r\n<center><h1>404 Not Found</h1></center>\r\n<hr><center>nginx/1.14.2</center>\r\n</body>\r\n</html>\r\n"), 
+    date = structure(1548144013, class = c("POSIXct", "POSIXt"
+    ), tzone = "GMT"), times = c(redirect = 0, namelookup = 0.000981, 
+    connect = 0.049146, pretransfer = 0.106176, starttransfer = 0.155455, 
+    total = 0.155505)), class = "response")
