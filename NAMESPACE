@@ -3,6 +3,7 @@
 export(DHISLogin)
 export(GetCountryLevels)
 export(GetDataWithIndicator)
+export(StackPrefixedCols)
 export(ValidateCodeIdPairs)
 export(ValidateNameIdPairs)
 export(getMetadata)
