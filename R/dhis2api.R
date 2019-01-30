@@ -126,19 +126,24 @@ GetDataWithIndicator <- function(base_url, indicator, org_units, level, periods,
     additional_dimensions, additional_filters
   )
   
-  response <- web_api_call %>% 
-    utils::URLencode()  %>%
-    RetryAPI("application/csv", 20)
-
-    my_data <- response %>% 
-      httr::content(., "text") %>% 
-      readr::read_csv(col_names = TRUE, col_types = readr::cols(.default = "c", Value = "d"))
-    
-    assertthat::has_name(my_data, "Value")
-    if(NROW(my_data) > 0){
-      assertthat::assert_that(indicator %in% my_data$Data)
+  for(i in 1:3){
+    try({
+      response <- web_api_call %>% 
+        utils::URLencode()  %>%
+        RetryAPI("application/csv", 20)
+      
+      my_data <- response %>% 
+        httr::content(., "text") %>% 
+        readr::read_csv(col_names = TRUE, col_types = readr::cols(.default = "c", Value = "d"))
+      
+      assertthat::has_name(my_data, "Value")
+      if(NROW(my_data) > 0){
+        assertthat::assert_that(indicator %in% my_data$Data)
+      }
+      break # if I am here then I got a valid result set
+    })
+    if(i == 3){stop("three attempts to obtain valid result set in GetDataWithIndicator failed")}
     }
-    
     #if ("Value" %in% names(my_data)) { # make sure we got a data table - we should always get one back even if empty
       # if we got back an empty data set return it, 
       # if we got back a set with data make sure it the indicator uid matches to validate we got back the data we requested
