@@ -1,5 +1,5 @@
 # devtools::check("/Users/sam/Documents/GitHub/data-pack-commons")
-# model_data_pack_input_#######
+# model_data_pack_input_20190130_CDI
 
 #' @title LoadConfig(config_path)
 #'
