@@ -40,6 +40,31 @@ DHISLogin<-function(config_path = NA) {
   }
 }
 
+# #' http_was_redirected
+# #'
+# #' @param response an httr response object, e.g. from a call to httr::GET()
+# #'
+# #' @return logical of length 1 indicating whether or not any redirect happened 
+# #'   during the HTTP request
+# #'
+# #' @export
+# #'
+# http_was_redirected <- 
+#   function(response){
+#     str(response)
+#     # extract status 
+#     status <- 
+#       vapply(
+#         X         = response$all_headers, 
+#         FUN       = `[[`, 
+#         FUN.VALUE = integer(1),
+#         "status"
+#       )
+#     
+#     # check status and return
+#     any(status >= 300 & status < 400)
+#   }
+
 #' @title RetryAPI(api_url, content_type, max_attempts)
 #' 
 #' @description Submits specified api request up to specified maximum times
@@ -51,14 +76,16 @@ DHISLogin<-function(config_path = NA) {
 #'
 RetryAPI <- function(api_url, content_type, max_attempts = 10){
   for(i in 1:max_attempts){
-    response <- httr::GET(api_url)
-    if (response$status_code == 200L && httr::http_type(response) == content_type){
+    response <- httr::GET(api_url, httr::timeout(180))
+    if (response$status_code == 200L && 
+        response$url == api_url && 
+        httr::http_type(response) == content_type){
       return(response)
     }
     Sys.sleep(i/2 + 1)
   }
   # if i am here all my attempts failed
-  stop(paste("Failed to obtain valid response for:", api_url))
+  stop(paste("Failed to obtain valid response in RetryAPI for:", api_url))
 }
 
 #' @export
@@ -126,8 +153,8 @@ GetDataWithIndicator <- function(base_url, indicator, org_units, level, periods,
     additional_dimensions, additional_filters
   )
   
-  for(i in 1:3){
-    try({
+#  for(i in 1:3){
+#    try({
       response <- web_api_call %>% 
         utils::URLencode()  %>%
         RetryAPI("application/csv", 20)
@@ -140,10 +167,10 @@ GetDataWithIndicator <- function(base_url, indicator, org_units, level, periods,
       if(NROW(my_data) > 0){
         assertthat::assert_that(indicator %in% my_data$Data)
       }
-      break # if I am here then I got a valid result set
-    })
-    if(i == 3){stop("three attempts to obtain valid result set in GetDataWithIndicator failed")}
-    }
+#      break # if I am here then I got a valid result set
+#    })
+#    if(i == 3){stop("three attempts to obtain valid result set in GetDataWithIndicator failed")}
+#    }
     #if ("Value" %in% names(my_data)) { # make sure we got a data table - we should always get one back even if empty
       # if we got back an empty data set return it, 
       # if we got back a set with data make sure it the indicator uid matches to validate we got back the data we requested
