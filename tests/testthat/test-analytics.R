@@ -72,6 +72,7 @@ test_that("GetCountryLevels", {
   data <- GetCountryLevels(base_url = "https://www.datim.org/")
   expect_gt(NROW(data), 0)
   expect_named(data, c("country_level", "planning_level", "prioritization_level",
+                       "facility_level", "community_level",
                        "country_name", "id"))
   
   expect_error(GetCountryLevels(base_url = "https://www.datim.org/", c("nonsense", "Rwanda")))

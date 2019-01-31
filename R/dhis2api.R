@@ -198,8 +198,11 @@ GetCountryLevels <- function(base_url, countries_req = NULL){
   countries <- response %>% httr::content(.,"text") %>%
     jsonlite::fromJSON() %>%
     do.call(rbind.data.frame,.) %>%
-    dplyr::mutate(country_name = rownames(.), planning_level = planning, prioritization_level = prioritization, country_level = country) %>% 
-    dplyr::select(country_level, planning_level, prioritization_level, country_name) 
+    dplyr::mutate(country_name = rownames(.), planning_level = planning, 
+                  prioritization_level = prioritization, country_level = country, 
+                  community_level = community, facility_level = facility) %>% 
+    dplyr::select(country_level, planning_level, prioritization_level, 
+                  facility_level, community_level, country_name) 
 
 # If specific counties were requested filter and assert we got the correct results  
   if(!is.null(countries_req)){
