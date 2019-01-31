@@ -164,7 +164,8 @@ GetDataWithIndicator <- function(base_url, indicator, org_units, level, periods,
         readr::read_csv(col_names = TRUE, col_types = readr::cols(.default = "c", Value = "d"))
       
       assertthat::has_name(my_data, "Value")
-      if(NROW(my_data) > 0){
+      if(NROW(my_data) > 0 && !(indicator %in% my_data$Data)){
+        stop(response$url, slice(my_data,1))
         assertthat::assert_that(indicator %in% my_data$Data)
       }
 #      break # if I am here then I got a valid result set
