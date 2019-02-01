@@ -1,5 +1,5 @@
 # devtools::check("/Users/sam/Documents/GitHub/data-pack-commons")
-# model_data_pack_input_20190130_CDI
+# model_data_pack_input_20190201_2
 
 #' @title LoadConfig(config_path)
 #'
@@ -76,12 +76,14 @@ DHISLogin<-function(config_path = NA) {
 #'
 RetryAPI <- function(api_url, content_type, max_attempts = 10){
   for(i in 1:max_attempts){
-    response <- httr::GET(api_url, httr::timeout(180))
-    if (response$status_code == 200L && 
-        response$url == api_url && 
-        httr::http_type(response) == content_type){
-      return(response)
-    }
+    try({
+      response <- httr::GET(api_url, httr::timeout(180))
+      if (response$status_code == 200L && 
+          response$url == api_url && 
+          httr::http_type(response) == content_type){
+        return(response)
+        }
+      })
     Sys.sleep(i/2 + 1)
   }
   # if i am here all my attempts failed
@@ -165,7 +167,7 @@ GetDataWithIndicator <- function(base_url, indicator, org_units, level, periods,
       
       assertthat::has_name(my_data, "Value")
       if(NROW(my_data) > 0 && !(indicator %in% my_data$Data)){
-        stop(response$url, slice(my_data,1))
+        stop("response$url: ", response$url, " slice(my_data,1): ", slice(my_data,1))
         assertthat::assert_that(indicator %in% my_data$Data)
       }
 #      break # if I am here then I got a valid result set
