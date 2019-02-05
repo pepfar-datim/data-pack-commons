@@ -338,60 +338,41 @@ ValidateCodeIdPairs <- function(base_url, codes, ids, type){
 }
 
 
-
-GetDataWithIndicator <- function(base_url, data_element_uid = , org_units, level, periods,
-                                 additional_dimensions = NULL, additional_filters = NULL) {
+GetSiteDistributionDenom <-  function(base_url, data_element_uid_dsd, data_element_uid_ta,
+                         country_uid, planning_level, period, mechanisms_uid, 
+                         additional_dimensions = NULL, additional_filters = NULL){
+  ###TEMP###
   
-  # assertthat::assert_that(assertthat::is.string(indicator), nchar(indicator) == 11,
-  #                         assertthat::is.string(periods))
-  # 
-  # org_units <- glue::glue_collapse(org_units, ";")
-  # 
-  # # prep additional_dimensions for api call
-  # 
-  # if (!is.null(additional_dimensions)) {
-  #   assertthat::assert_that(NCOL(additional_dimensions) == 2)
-  #   colnames(additional_dimensions)[1] <- "item"
-  #   colnames(additional_dimensions)[2] <- "dimension"
-  #   
-  #   additional_dimensions <-
-  #     additional_dimensions %>% dplyr::group_by(dimension) %>%
-  #     dplyr::summarize(items = paste0(item, collapse = ";")) %>%
-  #     dplyr::mutate(dimension_full = paste0("&dimension=", dimension, ":", items)) %>%
-  #     .[["dimension_full"]] %>% glue::glue_collapse()
-  # }
-  # 
-  # # prep additional_filters for api call
-  # if (!is.null(additional_filters)) {
-  #   assertthat::assert_that(NCOL(additional_filters) == 2)
-  #   colnames(additional_filters)[1] <- "item"
-  #   colnames(additional_filters)[2] <- "filter"
-  #   
-  #   additional_filters <-
-  #     additional_filters %>% dplyr::group_by(filter) %>%
-  #     dplyr::summarize(items = paste0(item, collapse = ";")) %>%
-  #     dplyr::mutate(filter_full = paste0("&filter=", filter, ":", items)) %>%
-  #     .[["filter_full"]] %>% glue::glue_collapse()
-  # }
-  # 
-  # web_api_call <- paste0(
-  #   base_url,
-  #   "api/29/analytics.csv?outputIdScheme=UID",
-  #   "&dimension=dx:", indicator,
-  #   "&dimension=pe:", periods,
-  #   "&dimension=ou:LEVEL-", level, ";", org_units,
-  #   additional_dimensions, additional_filters
-  # )
-  # 
-  # #  for(i in 1:3){
-  # #    try({
-  # response <- web_api_call %>% 
-  #   utils::URLencode()  %>%
-  #   RetryAPI("application/csv", 20)
-  # 
-  # my_data <- response %>% 
-  #   httr::content(., "text") %>% 
-  #   readr::read_csv(col_names = TRUE, col_types = readr::cols(.default = "c", Value = "d"))
+  require(datapackcommons)
+  require(tidyverse)
+  DHISLogin("/users/sam/.secrets/prod.json")
+  base_url <- getOption("baseurl")
+  options(maxCacheAge = 0)
+  #####
+  api_call <- paste0(base_url, "api/sqlViews/vtNAsZcMZiU/data.csv") # limit calls to this SQL view on prod
+                                                                    # it locks data value table
+  mech_list_r <-  RetryAPI(api_call, "application/csv")
+   mech_list_r <- mech_list_r %>% 
+     httr::content(., "text") %>% 
+     readr::read_csv(col_names = TRUE, col_types = readr::cols(.default = "c"))
+   nigeria_uid = "PqlFzhuPcF1"
+   relevant_mechs <- dplyr::inner_join(mech_list_r, datimvalidation::getMechanismsMap(nigeria_uid), 
+                    by = c("uid" = "id")) %>% .$uid
+   api_call <- paste0(base_url,  
+   "api/29/analytics.json?filter=dx:Qdn0vmNSflO;mfYq3HGUIX3",
+   "&dimension=e485zBiR7vG:tIZRQs0FK5P;QOawCj9oLNS",
+   "&dimension=jyUTj5YC3OK:hDBPKTjUPDm;ZOYVg7Hosni;Gxcf2DK8vNc",
+   "&dimension=SH885jaRe0o:", paste0(relevant_mechs, collapse = ";"),
+   "&dimension=pe:2018Oct",
+   "&dimension=ou:LEVEL-4;PqlFzhuPcF1", # Nigeria
+   "&outputIdScheme=UID")                  
+    response <- api_call %>% 
+     utils::URLencode()  %>%
+     RetryAPI("application/json", 20)
+   
+ my_data <- response %>% 
+     httr::content(., "text") %>% 
+     jsonlite::fromJSON()
   # 
   # assertthat::has_name(my_data, "Value")
   # if(NROW(my_data) > 0 && !(indicator %in% my_data$Data)){
