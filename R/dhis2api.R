@@ -339,6 +339,91 @@ ValidateCodeIdPairs <- function(base_url, codes, ids, type){
 
 
 
+GetDataWithIndicator <- function(base_url, data_element_uid = , org_units, level, periods,
+                                 additional_dimensions = NULL, additional_filters = NULL) {
+  
+  # assertthat::assert_that(assertthat::is.string(indicator), nchar(indicator) == 11,
+  #                         assertthat::is.string(periods))
+  # 
+  # org_units <- glue::glue_collapse(org_units, ";")
+  # 
+  # # prep additional_dimensions for api call
+  # 
+  # if (!is.null(additional_dimensions)) {
+  #   assertthat::assert_that(NCOL(additional_dimensions) == 2)
+  #   colnames(additional_dimensions)[1] <- "item"
+  #   colnames(additional_dimensions)[2] <- "dimension"
+  #   
+  #   additional_dimensions <-
+  #     additional_dimensions %>% dplyr::group_by(dimension) %>%
+  #     dplyr::summarize(items = paste0(item, collapse = ";")) %>%
+  #     dplyr::mutate(dimension_full = paste0("&dimension=", dimension, ":", items)) %>%
+  #     .[["dimension_full"]] %>% glue::glue_collapse()
+  # }
+  # 
+  # # prep additional_filters for api call
+  # if (!is.null(additional_filters)) {
+  #   assertthat::assert_that(NCOL(additional_filters) == 2)
+  #   colnames(additional_filters)[1] <- "item"
+  #   colnames(additional_filters)[2] <- "filter"
+  #   
+  #   additional_filters <-
+  #     additional_filters %>% dplyr::group_by(filter) %>%
+  #     dplyr::summarize(items = paste0(item, collapse = ";")) %>%
+  #     dplyr::mutate(filter_full = paste0("&filter=", filter, ":", items)) %>%
+  #     .[["filter_full"]] %>% glue::glue_collapse()
+  # }
+  # 
+  # web_api_call <- paste0(
+  #   base_url,
+  #   "api/29/analytics.csv?outputIdScheme=UID",
+  #   "&dimension=dx:", indicator,
+  #   "&dimension=pe:", periods,
+  #   "&dimension=ou:LEVEL-", level, ";", org_units,
+  #   additional_dimensions, additional_filters
+  # )
+  # 
+  # #  for(i in 1:3){
+  # #    try({
+  # response <- web_api_call %>% 
+  #   utils::URLencode()  %>%
+  #   RetryAPI("application/csv", 20)
+  # 
+  # my_data <- response %>% 
+  #   httr::content(., "text") %>% 
+  #   readr::read_csv(col_names = TRUE, col_types = readr::cols(.default = "c", Value = "d"))
+  # 
+  # assertthat::has_name(my_data, "Value")
+  # if(NROW(my_data) > 0 && !(indicator %in% my_data$Data)){
+  #   stop("response$url: ", response$url, " slice(my_data,1): ", slice(my_data,1))
+  #   assertthat::assert_that(indicator %in% my_data$Data)
+  # }
+  # #      break # if I am here then I got a valid result set
+  # #    })
+  # #    if(i == 3){stop("three attempts to obtain valid result set in GetDataWithIndicator failed")}
+  # #    }
+  # #if ("Value" %in% names(my_data)) { # make sure we got a data table - we should always get one back even if empty
+  # # if we got back an empty data set return it, 
+  # # if we got back a set with data make sure it the indicator uid matches to validate we got back the data we requested
+  # #    if(NROW(my_data) == 0 | (NROW(my_data) > 0 & indicator %in% my_data$Data)){
+  # return(list("api_call" = web_api_call,
+  #             "time" = lubridate::now("UTC"),
+  #             "results" = my_data))
+  # #       }
+  # #}
+  # #  stop("Call to GetDataWithIndicator failed")
+}
+
+
+
+
+
+
+
+
+
+
+
 # ## No Longer needed function that would add a column with names corresponding to a given
 # ## column with UIDs
 # add_name_col <- function(data_tib, column_str, end_point_str) {
