@@ -337,42 +337,50 @@ ValidateCodeIdPairs <- function(base_url, codes, ids, type){
     }
 }
 
-
+##RUN preceeding functions
 GetSiteDistributionDenom <-  function(base_url, data_element_uid_dsd, data_element_uid_ta,
                          country_uid, planning_level, period, mechanisms_uid, 
                          additional_dimensions = NULL, additional_filters = NULL){
   ###TEMP###
-  
+  ###  GetDataWithIndicator() can act as a bit of a model
   require(datapackcommons)
   require(tidyverse)
   DHISLogin("/users/sam/.secrets/prod.json")
   base_url <- getOption("baseurl")
   options(maxCacheAge = 0)
   #####
+# SQL view will retrieve list of mechanisms for which there is FY2019 data - 2018Oct period
   api_call <- paste0(base_url, "api/sqlViews/vtNAsZcMZiU/data.csv") # limit calls to this SQL view on prod
                                                                     # it locks data value table
   mech_list_r <-  RetryAPI(api_call, "application/csv")
-   mech_list_r <- mech_list_r %>% 
+   mech_list_parsed <- mech_list_r %>% 
      httr::content(., "text") %>% 
      readr::read_csv(col_names = TRUE, col_types = readr::cols(.default = "c"))
+   
    nigeria_uid = "PqlFzhuPcF1"
-   relevant_mechs <- dplyr::inner_join(mech_list_r, datimvalidation::getMechanismsMap(nigeria_uid), 
+   relevant_mechs <- dplyr::inner_join(mech_list_parsed, datimvalidation::getMechanismsMap(nigeria_uid), 
                     by = c("uid" = "id")) %>% .$uid
    api_call <- paste0(base_url,  
-   "api/29/analytics.json?filter=dx:Qdn0vmNSflO;mfYq3HGUIX3",
-   "&dimension=e485zBiR7vG:tIZRQs0FK5P;QOawCj9oLNS",
-   "&dimension=jyUTj5YC3OK:hDBPKTjUPDm;ZOYVg7Hosni;Gxcf2DK8vNc",
-   "&dimension=SH885jaRe0o:", paste0(relevant_mechs, collapse = ";"),
-   "&dimension=pe:2018Oct",
+   "api/29/analytics.json?filter=dx:Qdn0vmNSflO;mfYq3HGUIX3", # PMTCT_STAT (N, DSD, Age/Sex/KnownNewResult) TARGET: Known Results
+                                                              # PMTCT_STAT (N, TA, Age/Sex/KnownNewResult) TARGET: Known Results
+   "&dimension=e485zBiR7vG:tIZRQs0FK5P;QOawCj9oLNS", # some age dimension items
+   "&dimension=jyUTj5YC3OK:hDBPKTjUPDm;ZOYVg7Hosni;Gxcf2DK8vNc", # some sex dimension items
+   "&dimension=SH885jaRe0o:", paste0(relevant_mechs, collapse = ";"), # relevant nigeria mechanisms
+   "&dimension=pe:2018Oct", # FY2019 targets perios
    "&dimension=ou:LEVEL-4;PqlFzhuPcF1", # Nigeria
-   "&outputIdScheme=UID")                  
+   "&outputIdScheme=UID") # gives us UIDs in response                  
     response <- api_call %>% 
      utils::URLencode()  %>%
      RetryAPI("application/json", 20)
    
- my_data <- response %>% 
+ content <- response %>% 
      httr::content(., "text") %>% 
      jsonlite::fromJSON()
+ 
+ my_data <- content$rows
+ colnames(my_data) <- content$headers$column
+ my_data <-tibble::as_tibble(my_data) %>% mutate(Value = as.numeric(Value))
+ 
   # 
   # assertthat::has_name(my_data, "Value")
   # if(NROW(my_data) > 0 && !(indicator %in% my_data$Data)){
