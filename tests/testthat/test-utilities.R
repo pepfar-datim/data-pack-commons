@@ -22,3 +22,21 @@ test_that("StackPrefixedCols", {
   testthat::expect_error(StackPrefixedCols(NULL, prefixes))
 
   })
+
+test_that("FormatForApi_Dimensions", {
+  # https://play.dhis2.org/2.29/api/29/analytics.json?
+  # dimension=LFsZ8v5v7rq:CW81uF03hvV;C6nZpLKjEJr
+  # &dimension=ou:O6uvpzGd5pu
+  # &filter=dx:BOSZApCrBni;dGdeotKpRed;eRwOwCpMzyP;zYkwbCBALhn
+  # &filter=pe:THIS_FINANCIAL_YEAR
+  df = tibble::tribble(~type, ~dim_id, ~item_id, ~other_col,
+                         "dimension",    "LFsZ8v5v7rq", "CW81uF03hvV", "Implementing Partner: AIDSRelief Consortium",
+                         "dimension",    "LFsZ8v5v7rq", "C6nZpLKjEJr", "Implementing Partner: African Medical and Research Foundation",
+                         "filter", "dx", "BOSZApCrBni", "ART enrollment stage 1",
+                         "filter", "dx", "dGdeotKpRed", "ART enrollment stage 2",
+                         "dimension", "ou", "O6uvpzGd5pu", "Bo",
+                         "filter", "pe", "THIS_FINANCIAL_YEAR","")
+  FormatForApi_Dimensions(df, "type", "dim_id", "item_id") %>% 
+  testthat::expect_equal("dimension=LFsZ8v5v7rq:CW81uF03hvV;C6nZpLKjEJr&dimension=ou:O6uvpzGd5pu&filter=dx:BOSZApCrBni;dGdeotKpRed&filter=pe:THIS_FINANCIAL_YEAR")
+  testthat::expect_error(FormatForApi_Dimensions(df, "type", "dim_id", "Nonsense"))  
+  })
