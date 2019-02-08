@@ -93,38 +93,40 @@
 #CHANGE ME!
 #config_path="~/.secrets/datim.json"
 config_path="/Users/sam/.secrets/triage.json"
+DHISLogin("/users/sam/.secrets/triage.json")
+base_url <- getOption("baseurl")
 #outFolder="/home/jason/consultancy/datim/datapack/"
 #outFolder="/Users/siddharth/Desktop/"
 
 #DON'T CHANGE!
-
+require(datapackcommons)
 require(dplyr)
 require(httr)
 require(jsonlite)
 require(stringr)
 
-PSNU_levels <- GetCountryLevels("https://www.datim.org/")
+PSNU_levels <- GetCountryLevels(base_url)
+
+# country, psnu, site, site_type
 
 get_full_site_list <- function(config_path) {
-
-  LoadConfig(config_path)
 
   psnu_levels <-
     paste0(getOption("baseurl"),
            "api/dataStore/dataSetAssignments/ous") %>%
-    GET() %>%
-    content(., "text") %>%
-    fromJSON(., flatten = TRUE) %>%
+    httr::GET() %>%
+    httr::content(., "text") %>%
+    jsonlite::fromJSON(., flatten = TRUE) %>%
     do.call(rbind.data.frame, .) %>%
-    select(name3, prioritization,community,facility) %>%
-    mutate(name3 = as.character(name3))
+    dplyr::select(name3, prioritization,community,facility) %>%
+    dplyr::mutate(name3 = as.character(name3))
 
 
   orgHierarchy <-
     paste0(getOption("baseurl"), "/api/sqlViews/kEtZ2bSQCu2/data.json") %>%
-    GET() %>%
-    content(., "text") %>%
-    fromJSON(., flatten = TRUE)
+    httr::GET() %>%
+    httr::content(., "text") %>%
+    jsonlite::fromJSON(., flatten = TRUE)
 
 
   ous_list<-as.data.frame(orgHierarchy$rows,stringsAsFactors = FALSE) %>%
@@ -178,7 +180,6 @@ get_full_site_list <- function(config_path) {
 
 getMechList <- function(config_path) {
 
-  LoadConfig(config_path)
   url<-paste0(getOption("baseurl"),"api/sqlViews/fgUtV6e9YIX/data.csv")
   d<-read.csv(url,stringsAsFactors = FALSE)
   return(d[,c("mechanism","code","uid","ou")])
@@ -205,6 +206,9 @@ print(full_site_list[4])
 
 
 merged_table <- merge(full_site_list, PSNU_levels, by = "country_name")
+
+temp=dplyr::anti_join(full_site_list, PSNU_levels)
+
 # There's a problem here, the merged table has 107k rows and the full site list has 111k rows.
 
 subset_table <- merged_table[c("country_name", "DataPackSiteID", "DataPackSiteUID", "siteType")]
