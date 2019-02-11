@@ -60,6 +60,8 @@ ValidateDataRequired <- function(data_required, base_url){
 
 datapackcommons::DHISLogin("/users/sam/.secrets/prod.json")
 base_url <- getOption("baseurl")
+wd <- getwd()
+setwd("/Users/sam/Documents/GitHub/data-pack-commons")
 
 dim_item_sets <- readr::read_csv("./data-raw/model_calculations/dimension_item_sets.csv",
                                  col_types = readr::cols(.default = "c", sort_order = "d", weight = "d"),
@@ -94,8 +96,7 @@ data_required_test <-
                   na = c("NA")) %>%
   dplyr::mutate(B.kp_set = NA_character_) %>% select(-data_pack_type)
 
-wd <- getwd()
-setwd("/Users/sam/Documents/GitHub/data-pack-commons")
+
 
 usethis::use_data(dim_item_sets, overwrite = TRUE, compress = "gzip")
 usethis::use_data(dim_item_sets_test, overwrite = TRUE, compress = "gzip")
