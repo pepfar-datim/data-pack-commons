@@ -204,12 +204,24 @@ get_full_site_list <- function(config_path) {
       distributed=1) %>%
     select(distributed,siteType,everything())
   
-  # Removes all rows with NA values for Site Type
-  ous_list_regional <- na.omit(ous_list_regional)
-  
-  ous_list_regional_military<-as.data.frame(orgHierarchy$rows,stringsAsFactors = FALSE) %>%
+  ous_list_regional_mil <- as.data.frame(orgHierarchy$rows,stringsAsFactors = FALSE) %>%
     setNames(.,orgHierarchy$headers$name) %>%
     filter(level3name == 'Caribbean Region'| level3name == 'Central America Region' | level3name == 'Asia Regional Program' | level3name=='Central Asia Region')%>%
+    filter(stringr::str_detect(level4name, "_Military")) %>%
+    mutate(psnu_name = level4name) %>%
+    mutate(psnu_uid = uidlevel4) %>%
+    mutate(dpOrgUnit=psnu_name, dpOrgUnitUID=psnu_uid) %>%
+    select(organisationunituid,name,level,uidlevel4,level4name,psnu_name,psnu_uid,dpOrgUnit,dpOrgUnitUID) %>%
+    mutate(siteType = "Military")
+
+  
+  # Removes all rows with NA values for Site Type
+  ous_list_regional <- ous_list_regional %>% 
+    dplyr::filter(! is.na(siteType))
+  
+  ous_list_non_regional<-as.data.frame(orgHierarchy$rows,stringsAsFactors = FALSE) %>%
+    setNames(.,orgHierarchy$headers$name) %>%
+    filter(level3name != 'Caribbean Region'| level3name != 'Central America Region' | level3name != 'Asia Regional Program' | level3name !='Central Asia Region')%>%
     dplyr::inner_join(PSNU_levels,by=c("level3name" = "country_name")) %>%
     mutate(level = as.numeric(level)) %>%
     mutate(
@@ -223,7 +235,7 @@ get_full_site_list <- function(config_path) {
         planning_level == 6 ~ uidlevel6)
     ) %>%
     mutate(dpOrgUnit=psnu_name, dpOrgUnitUID=psnu_uid) %>%
-    select(organisationunituid,name,level,prioritization_level,community_level,facility_level,uidlevel4,level4name,psnu_name,psnu_uid,dpOrgUnit,dpOrgUnitUID) %>%
+    select(organisationunituid,name,level,planning_level,community_level,facility_level,uidlevel3,level3name,psnu_name,psnu_uid,dpOrgUnit,dpOrgUnitUID) %>%
     mutate(
       siteType = case_when(
         stringr::str_detect(name, "_Military ") ~ "Military",
@@ -232,6 +244,10 @@ get_full_site_list <- function(config_path) {
         level == planning_level ~ "PSNU"),
       distributed=1) %>%
     select(distributed,siteType,everything())
+  
+  # Removes all rows with NA values for Site Type
+  ous_list_non_regional <- ous_list_non_regional %>% 
+    dplyr::filter(! is.na(siteType))
   
   #Add in _Military sites again for cases where these cannot be distributed, as indicated in distribution function
   ous_list <- ous_list %>%
