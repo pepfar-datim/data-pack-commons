@@ -92,26 +92,72 @@
 
 #CHANGE ME!
 #config_path="~/.secrets/datim.json"
-config_path="/Users/siddharth/.secrets/triage.json"
-datapackcommons::DHISLogin("/Users/siddharth/.secrets/triage.json")
+config_path="/Users/siddharth/.secrets/datim.json"
+datapackcommons::DHISLogin("/Users/siddharth/.secrets/datim.json")
 base_url <- getOption("baseurl")
 #outFolder="/home/jason/consultancy/datim/datapack/"
 #outFolder="/Users/siddharth/Desktop/"
 
 #DON'T CHANGE!
 require(devtools)
-install_github("pepfar-datim/data-pack-commons", ref = "master", auth_token = "3c864ec5d23b8c3111039d1bf0c80bc2a0c4ea2e")
+#install_github("pepfar-datim/data-pack-commons", ref = "master")
 require(datapackcommons)
 require(dplyr)
 require(httr)
 require(jsonlite)
 require(stringr)
+require(plyr)
 
-PSNU_levels <- GetCountryLevels(base_url)
-
+OrgUnitsByLevels <- function(assignments, data) {
+  
+  country_level_in = unique(assignments$country_level)
+  planning_level_in = unique(assignments$planning_level)
+  community_level_in = unique(assignments$community_level)
+  facility_level_in = unique(assignments$facility_level)
+  assertthat::assert_that(length(country_level_in) == 1,
+                          length(planning_level_in) == 1,
+                          length(community_level_in) == 1,
+                          length(facility_level_in) == 1)
+  
+  data <- data %>%  dplyr::filter(!stringr::str_detect(name, "_Military")) %>% 
+    dplyr::filter(level == planning_level_in |
+                    level == community_level_in |
+                    level == facility_level_in)
+  if (country_level_in == 3) {
+    data <-  dplyr::mutate(data, country_name = level3name)
+  } else {
+    data <- dplyr::mutate(data, country_name = level4name)
+  }
+  
+  data <-
+    dplyr::inner_join(assignments, data, 
+                      by = c("country_name" = "country_name")) %>%
+    dplyr::mutate(level_type = level)
+  
+  # PSNU Name and PSNU ID need to be added, planning levels
+  data$level_type[data$level_type == planning_level_in] <- "planning"
+  data$level_type[data$level_type == facility_level_in] <- "facility"
+  data$level_type[data$level_type == community_level_in] <- "community"
+  
+  return(data)
+}
 # Never use www.triage
 
 # country, psnu, site, site_type
+
+PSNU_levels <- GetCountryLevels(base_url)
+orgHierarchy2 <-
+  paste0(getOption("baseurl"), "/api/sqlViews/kEtZ2bSQCu2/data.json") %>%
+  httr::GET() %>%
+  httr::content(., "text") %>%
+  jsonlite::fromJSON(., flatten = TRUE)
+
+orgHierarchy2 <- as.data.frame(orgHierarchy2$rows,stringsAsFactors = FALSE) %>%
+  setNames(.,orgHierarchy2$headers$name)
+
+temp = plyr::ddply(PSNU_levels, .(country_level, planning_level, 
+                                  community_level, facility_level),
+                   OrgUnitsByLevels, orgHierarchy2)
 
 
 get_full_site_list <- function(config_path) {
