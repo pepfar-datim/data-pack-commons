@@ -92,13 +92,15 @@
 
 #CHANGE ME!
 #config_path="~/.secrets/datim.json"
-config_path="/Users/sam/.secrets/triage.json"
-DHISLogin("/users/sam/.secrets/triage.json")
+config_path="/Users/siddharth/.secrets/triage.json"
+datapackcommons::DHISLogin("/Users/siddharth/.secrets/triage.json")
 base_url <- getOption("baseurl")
 #outFolder="/home/jason/consultancy/datim/datapack/"
 #outFolder="/Users/siddharth/Desktop/"
 
 #DON'T CHANGE!
+require(devtools)
+install_github("pepfar-datim/data-pack-commons", ref = "master", auth_token = "3c864ec5d23b8c3111039d1bf0c80bc2a0c4ea2e")
 require(datapackcommons)
 require(dplyr)
 require(httr)
@@ -107,51 +109,91 @@ require(stringr)
 
 PSNU_levels <- GetCountryLevels(base_url)
 
+# Never use www.triage
+
 # country, psnu, site, site_type
+
 
 get_full_site_list <- function(config_path) {
 
-  psnu_levels <-
-    paste0(getOption("baseurl"),
-           "api/dataStore/dataSetAssignments/ous") %>%
-    httr::GET() %>%
-    httr::content(., "text") %>%
-    jsonlite::fromJSON(., flatten = TRUE) %>%
-    do.call(rbind.data.frame, .) %>%
-    dplyr::select(name3, prioritization,community,facility) %>%
-    dplyr::mutate(name3 = as.character(name3))
-
+  # psnu_levels <-
+  #   paste0(getOption("baseurl"),
+  #          "api/dataStore/dataSetAssignments/ous") %>%
+  #   httr::GET() %>%
+  #   httr::content(., "text") %>%
+  #   jsonlite::fromJSON(., flatten = TRUE) %>%
+  #   do.call(rbind.data.frame, .) %>%
+  #   dplyr::select(name3, prioritization,community,facility, planning) %>%
+  #   dplyr::mutate(country_name = as.character(name3))
+  
+  PSNU_levels <- GetCountryLevels(base_url)
 
   orgHierarchy <-
     paste0(getOption("baseurl"), "/api/sqlViews/kEtZ2bSQCu2/data.json") %>%
     httr::GET() %>%
     httr::content(., "text") %>%
     jsonlite::fromJSON(., flatten = TRUE)
-
-
-  ous_list<-as.data.frame(orgHierarchy$rows,stringsAsFactors = FALSE) %>%
+  
+  ous_list_regional<-as.data.frame(orgHierarchy$rows,stringsAsFactors = FALSE) %>%
     setNames(.,orgHierarchy$headers$name) %>%
-    dplyr::inner_join(psnu_levels,by=c("level3name" = "name3")) %>%
+    filter(level3name == 'Caribbean Region'| level3name == 'Central America Region' | level3name == 'Asia Regional Program' | level3name=='Central Asia Region')%>%
+    dplyr::inner_join(PSNU_levels,by=c("level4name" = "country_name")) %>%  # This eliminates all the military sites for level3name = region areas
     mutate(level = as.numeric(level)) %>%
     mutate(
       psnu_name = case_when(
-        prioritization == 4 ~ level4name,
-        prioritization == 5 ~ level5name,
-        prioritization == 6 ~ level6name),
+        planning_level == 4 ~ level4name,
+        planning_level == 5 ~ level5name,
+        planning_level == 6 ~ level6name),
       psnu_uid = case_when(
-        prioritization == 4 ~ uidlevel4,
-        prioritization == 5 ~ uidlevel5,
-        prioritization == 6 ~ uidlevel6)
+        planning_level == 4 ~ uidlevel4,
+        planning_level == 5 ~ uidlevel5,
+        planning_level == 6 ~ uidlevel6)
     ) %>%
     mutate(dpOrgUnit=psnu_name, dpOrgUnitUID=psnu_uid) %>%
-    select(organisationunituid,name,level,prioritization,community,facility,uidlevel3,level3name,psnu_name,psnu_uid,dpOrgUnit,dpOrgUnitUID) %>%
+    select(organisationunituid,name,level,planning_level,community_level,facility_level,uidlevel4,level4name,psnu_name,psnu_uid,dpOrgUnit,dpOrgUnitUID) %>%
+    mutate(
+      siteType = case_when(
+        stringr::str_detect(name, "_Military ") ~ "Military",  # This is redundant as no rows containt military due to filtering
+        level == facility_level ~ "Facility",
+        level == community_level  ~ "Community",
+        level == planning_level ~ "PSNU"),
+      distributed=1) %>%
+    select(distributed,siteType,everything())
+  
+  # Removes all rows with NA values for Site Type
+  ous_list_regional <- na.omit(ous_list_regional)
+  
+  ous_list_regional_military<-as.data.frame(orgHierarchy$rows,stringsAsFactors = FALSE) %>%
+    setNames(.,orgHierarchy$headers$name) %>%
+    filter(level3name == 'Caribbean Region'| level3name == 'Central America Region' | level3name == 'Asia Regional Program' | level3name=='Central Asia Region')%>%
+    dplyr::inner_join(PSNU_levels,by=c("level3name" = "country_name")) %>%
+    mutate(level = as.numeric(level)) %>%
+    mutate(
+      psnu_name = case_when(
+        planning_level == 4 ~ level4name,
+        planning_level == 5 ~ level5name,
+        planning_level == 6 ~ level6name),
+      psnu_uid = case_when(
+        planning_level == 4 ~ uidlevel4,
+        planning_level == 5 ~ uidlevel5,
+        planning_level == 6 ~ uidlevel6)
+    ) %>%
+    mutate(dpOrgUnit=psnu_name, dpOrgUnitUID=psnu_uid) %>%
+    select(organisationunituid,name,level,prioritization_level,community_level,facility_level,uidlevel4,level4name,psnu_name,psnu_uid,dpOrgUnit,dpOrgUnitUID) %>%
     mutate(
       siteType = case_when(
         stringr::str_detect(name, "_Military ") ~ "Military",
-        level == facility ~ "Facility",
-        level == community  ~ "Community"),
+        level == facility_level ~ "Facility",
+        level == community_level  ~ "Community",
+        level == planning_level ~ "PSNU"),
       distributed=1) %>%
     select(distributed,siteType,everything())
+  
+  #Add in _Military sites again for cases where these cannot be distributed, as indicated in distribution function
+  ous_list <- ous_list %>%
+    filter(siteType=="Military") %>%
+    mutate(distributed=0) %>%
+    bind_rows(ous_list,.)
 
   #Add in _Military sites again for cases where these cannot be distributed, as indicated in distribution function
   ous_list <- ous_list %>%
@@ -160,21 +202,73 @@ get_full_site_list <- function(config_path) {
     bind_rows(ous_list,.)
 
   #Add in non-clustered PSNUs where these cannot be distributed, as indicated in distribution function
-  ous_list <- ous_list %>%
-    filter(level==prioritization & !str_detect(name,"_Military")) %>%
-    mutate(siteType="PSNU",
-           distributed=0) %>%
-    bind_rows(ous_list,.) %>%
-    #Filter out anything not tagged at this point
-    filter(!is.na(siteType)) %>%
-    #Construct Site Tool Name
-    mutate(DataPackSiteID=case_when(distributed==0 ~ paste0(name," > NOT YET DISTRIBUTED (",organisationunituid,")"),
-                                    siteType=="Military" ~ paste0(name," (",organisationunituid,")"),
-                                    siteType=="Facility" ~ paste0(dpOrgUnit," > ",name," {Facility} (",organisationunituid,")"),
-                                    siteType=="Community" ~ paste0(dpOrgUnit," > ",name," {Community} (",organisationunituid,")"))) %>%
-    select(DataPackSiteUID=organisationunituid,DataPackSiteID,ou_uid=uidlevel3,ou_name=level3name,siteType,distributed) %>%
-    unique()
+  # ous_list <- ous_list %>%
+  #   filter(level==prioritization & !str_detect(name,"_Military")) %>%
+  #   mutate(siteType="PSNU",
+  #          distributed=0) %>%
+  #   bind_rows(ous_list,.) %>%
+  #   #Filter out anything not tagged at this point
+  #   filter(!is.na(siteType)) %>%
+  #   #Construct Site Tool Name
+  #   mutate(DataPackSiteID=case_when(distributed==0 ~ paste0(name," > NOT YET DISTRIBUTED (",organisationunituid,")"),
+  #                                   siteType=="Military" ~ paste0(name," (",organisationunituid,")"),
+  #                                   siteType=="Facility" ~ paste0(dpOrgUnit," > ",name," {Facility} (",organisationunituid,")"),
+  #                                   siteType=="Community" ~ paste0(dpOrgUnit," > ",name," {Community} (",organisationunituid,")"))) %>%
+  #   select(DataPackSiteUID=organisationunituid,DataPackSiteID,ou_uid=uidlevel4,ou_name=level4name,siteType,distributed) %>%
+  #   unique()
+  
+  # #Creating dataframe for country at level 3 sites
+  # ous_list_2<-as.data.frame(orgHierarchy$rows,stringsAsFactors = FALSE) %>%
+  #   setNames(.,orgHierarchy$headers$name) %>%
+  #   filter(level3name != 'Caribbean Region'| level3name != 'Central America Region' | level3name != 'Asia Regional Program' | level3name !='Central Asia Region')%>%
+  #   dplyr::inner_join(psnu_levels,by=c("level3name" = "name3")) %>%
+  #   mutate(level = as.numeric(level)) %>%
+  #   mutate(
+  #     psnu_name = case_when(
+  #       prioritization == 4 ~ level4name,
+  #       prioritization == 5 ~ level5name,
+  #       prioritization == 6 ~ level6name),
+  #     psnu_uid = case_when(
+  #       prioritization == 4 ~ uidlevel4,
+  #       prioritization == 5 ~ uidlevel5,
+  #       prioritization == 6 ~ uidlevel6)
+  #   ) %>%
+  #   mutate(dpOrgUnit=psnu_name, dpOrgUnitUID=psnu_uid) %>%
+  #   select(organisationunituid,name,level,prioritization,community,facility,uidlevel3,level3name,psnu_name,psnu_uid,dpOrgUnit,dpOrgUnitUID) %>%
+  #   mutate(
+  #     siteType = case_when(
+  #       stringr::str_detect(name, "_Military ") ~ "Military",
+  #       level == facility ~ "Facility",
+  #       level == community  ~ "Community"),
+  #     distributed=1) %>%
+  #   select(distributed,siteType,everything())
+  # 
+  # #Add in _Military sites again for cases where these cannot be distributed, as indicated in distribution function
+  # ous_list_2 <- ous_list_2 %>%
+  #   filter(siteType=="Military") %>%
+  #   mutate(distributed=0) %>%
+  #   bind_rows(ous_list_2,.)
+  # 
+  # #Add in non-clustered PSNUs where these cannot be distributed, as indicated in distribution function
+  # ous_list_2 <- ous_list_2 %>%
+  #   filter(level==prioritization & !str_detect(name,"_Military")) %>%
+  #   mutate(siteType="PSNU",
+  #          distributed=0) %>%
+  #   bind_rows(ous_list_2,.) %>%
+  #   #Filter out anything not tagged at this point
+  #   filter(!is.na(siteType)) %>%
+  #   #Construct Site Tool Name
+  #   mutate(DataPackSiteID=case_when(distributed==0 ~ paste0(name," > NOT YET DISTRIBUTED (",organisationunituid,")"),
+  #                                   siteType=="Military" ~ paste0(name," (",organisationunituid,")"),
+  #                                   siteType=="Facility" ~ paste0(dpOrgUnit," > ",name," {Facility} (",organisationunituid,")"),
+  #                                   siteType=="Community" ~ paste0(dpOrgUnit," > ",name," {Community} (",organisationunituid,")"))) %>%
+  #   select(DataPackSiteUID=organisationunituid,DataPackSiteID,ou_uid=uidlevel3,ou_name=level3name,siteType,distributed) %>%
+  #   unique()
 
+  # total_ous_list <- rbind(ous_list, ous_list_2)
+  # 
+  # return(total_ous_list)
+  
   return(ous_list)
 }
 
@@ -188,7 +282,7 @@ getMechList <- function(config_path) {
 
 full_site_list <- get_full_site_list(config_path)
 
-fill_mech_list <- getMechList(config_path)
+full_mech_list <- getMechList(config_path)
 
 # In case the site list and mech list need to be stored as RDA files on local
 # site_list <- get_site_list(config_path) %>%
