@@ -92,20 +92,21 @@
 
 #CHANGE ME!
 #config_path="~/.secrets/datim.json"
-config_path="/Users/sam/.secrets/prod.json"
-datapackcommons::DHISLogin("/Users/sam/.secrets/prod.json")
+config_path="/Users/siddharth/.secrets/datim.json"
+datapackcommons::DHISLogin("/Users/siddharth/.secrets/datim.json")
 base_url <- getOption("baseurl")
 #outFolder="/home/jason/consultancy/datim/datapack/"
 #outFolder="/Users/siddharth/Desktop/"
 
 #DON'T CHANGE!
 require(devtools)
-install_github("pepfar-datim/data-pack-commons", ref = "master", auth_token = "3c864ec5d23b8c3111039d1bf0c80bc2a0c4ea2e")
+#install_github("pepfar-datim/data-pack-commons", ref = "master")
 require(datapackcommons)
 require(dplyr)
 require(httr)
 require(jsonlite)
 require(stringr)
+require(plyr)
 
 OrgUnitsByLevels <- function(assignments, data) {
   
