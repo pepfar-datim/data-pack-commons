@@ -134,6 +134,7 @@ OrgUnitsByLevels <- function(assignments, data) {
                       by = c("country_name" = "country_name")) %>%
     dplyr::mutate(level_type = level)
   
+  # PSNU Name and PSNU ID need to be added, planning levels
   data$level_type[data$level_type == planning_level_in] <- "planning"
   data$level_type[data$level_type == facility_level_in] <- "facility"
   data$level_type[data$level_type == community_level_in] <- "community"
