@@ -124,9 +124,9 @@ OrgUnitsByLevels <- function(assignments, data) {
                     level == community_level_in |
                     level == facility_level_in)
   
-  country_name_col_symbol <- rlang::sym(paste0("level", country_level_in, "name"))
-  planning_name_col_symbol <- rlang::sym(paste0("level", planning_level_in, "name"))
-  planning_uid_col_symbol <- rlang::sym(paste0("uidlevel", planning_level_in))
+  country_name_col_symbol <- as.name(paste0("level", country_level_in, "name"))
+  planning_name_col_symbol <- as.name(paste0("level", planning_level_in, "name"))
+  planning_uid_col_symbol <- as.name(paste0("uidlevel", planning_level_in))
   data <-  dplyr::mutate(data, country_name = !!country_name_col_symbol,
                          psnu_name = !!planning_name_col_symbol,
                          psnu_uid = !!planning_uid_col_symbol)
