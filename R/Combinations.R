@@ -124,13 +124,14 @@ OrgUnitsByLevels <- function(assignments, data) {
                     level == community_level_in |
                     level == facility_level_in)
  
-#can we use rlang::sym or something similar to have a statement like
-  # country_name == rlang::syn(paste0("level", country_level_in,"name"))
-   if (country_level_in == 3) {
-    data <-  dplyr::mutate(data, country_name = level3name)
-  } else {
-    data <- dplyr::mutate(data, country_name = level4name)
-  }
+  #can we use rlang::sym or something similar to have a statement like
+  # country_name == rlang::sym(paste0("level", country_level_in,"name"))
+  data <-  dplyr::mutate(data, country_name = rlang::sym(paste0("level", country_level_in,"name")))
+  # if (country_level_in == 3) {
+  #   data <-  dplyr::mutate(data, country_name = level3name)
+  # } else {
+  #   data <- dplyr::mutate(data, country_name = level4name)
+  # }
   
   data <-
     dplyr::inner_join(assignments, data, 
@@ -161,7 +162,7 @@ OrgUnitsByLevels <- function(assignments, data) {
   
   # data = rbind(data, military_data)
   
-  return(military_data)
+  return(data)
 }
 # Never use www.triage
 
@@ -177,7 +178,7 @@ orgHierarchy2 <-
 orgHierarchy2 <- as.data.frame(orgHierarchy2$rows,stringsAsFactors = FALSE) %>%
   setNames(.,orgHierarchy2$headers$name)
 
-temp_mil = plyr::ddply(PSNU_levels, .(country_level, planning_level, 
+temp = plyr::ddply(PSNU_levels, .(country_level, planning_level, 
                                   community_level, facility_level),
                    OrgUnitsByLevels, orgHierarchy2)
 
