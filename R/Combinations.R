@@ -123,7 +123,10 @@ OrgUnitsByLevels <- function(assignments, data) {
     dplyr::filter(level == planning_level_in |
                     level == community_level_in |
                     level == facility_level_in)
-  if (country_level_in == 3) {
+ 
+#can we use rlang::sym or something similar to have a statement like
+  # country_name == rlang::syn(paste0("level", country_level_in,"name"))
+   if (country_level_in == 3) {
     data <-  dplyr::mutate(data, country_name = level3name)
   } else {
     data <- dplyr::mutate(data, country_name = level4name)
