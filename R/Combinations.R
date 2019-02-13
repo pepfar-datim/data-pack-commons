@@ -92,8 +92,8 @@
 
 #CHANGE ME!
 #config_path="~/.secrets/datim.json"
-config_path="/Users/siddharth/.secrets/datim.json"
-datapackcommons::DHISLogin("/Users/siddharth/.secrets/datim.json")
+config_path="/Users/sam/.secrets/prod.json"
+datapackcommons::DHISLogin("/Users/sam/.secrets/prod.json")
 base_url <- getOption("baseurl")
 #outFolder="/home/jason/consultancy/datim/datapack/"
 #outFolder="/Users/siddharth/Desktop/"
@@ -102,11 +102,12 @@ base_url <- getOption("baseurl")
 require(devtools)
 #install_github("pepfar-datim/data-pack-commons", ref = "master")
 require(datapackcommons)
+require(plyr)
+
 require(dplyr)
 require(httr)
 require(jsonlite)
 require(stringr)
-require(plyr)
 
 OrgUnitsByLevels <- function(assignments, data) {
   country_level_in = unique(assignments$country_level)
@@ -118,15 +119,17 @@ OrgUnitsByLevels <- function(assignments, data) {
                           length(community_level_in) == 1,
                           length(facility_level_in) == 1)
   
-  military_data <- data
-  data <- data %>%  dplyr::filter(!stringr::str_detect(name, "_Military")) %>% 
+  data <- data %>%  dplyr::filter(!stringr::str_detect(name, "_Military")) %>%
     dplyr::filter(level == planning_level_in |
                     level == community_level_in |
                     level == facility_level_in)
- 
-  #can we use rlang::sym or something similar to have a statement like
-  # country_name == rlang::sym(paste0("level", country_level_in,"name"))
-  data <-  dplyr::mutate(data, country_name = rlang::sym(paste0("level", country_level_in,"name")))
+  
+  country_name_col_symbol <- rlang::sym(paste0("level", country_level_in, "name"))
+  planning_name_col_symbol <- rlang::sym(paste0("level", planning_level_in, "name"))
+  planning_uid_col_symbol <- rlang::sym(paste0("uidlevel", planning_level_in))
+  data <-  dplyr::mutate(data, country_name = !!country_name_col_symbol,
+                         psnu_name = !!planning_name_col_symbol,
+                         psnu_uid = !!planning_uid_col_symbol)
   # if (country_level_in == 3) {
   #   data <-  dplyr::mutate(data, country_name = level3name)
   # } else {
@@ -141,34 +144,37 @@ OrgUnitsByLevels <- function(assignments, data) {
   data$Site_Type[data$Site_Type == planning_level_in] <- "planning"
   data$Site_Type[data$Site_Type == facility_level_in] <- "facility"
   data$Site_Type[data$Site_Type == community_level_in] <- "community"
-  data$psnu_name[data$planning_level == 4] <- data$level4name
-  data$psnu_name[data$planning_level == 5] <- data$level5name
-  data$psnu_name[data$planning_level == 6] <- data$level6name
-  data$psnu_uid[data$planning_level == 4] <- data$uidlevel4
-  data$psnu_uid[data$planning_level == 5] <- data$uidlevel5
-  data$psnu_uid[data$planning_level == 6] <- data$uidlevel6
+  # data$psnu_name[data$planning_level == 4] <- data$level4name
+  # data$psnu_name[data$planning_level == 5] <- data$level5name
+  # data$psnu_name[data$planning_level == 6] <- data$level6name
+  # data$psnu_uid[data$planning_level == 4] <- data$uidlevel4
+  # data$psnu_uid[data$planning_level == 5] <- data$uidlevel5
+  # data$psnu_uid[data$planning_level == 6] <- data$uidlevel6
   
-  # Military data rows
-  military_data <- military_data %>%  dplyr::filter(stringr::str_detect(name, "_Military"))
-  # military_data <- subset(military_data, select=-(1:4))
-  military_data$Site_Type <- "Military"
-  military_data$psnu_name <- military_data$level4name
-  military_data$psnu_uid <- military_data$uidlevel4
-  if (country_level_in == 3) {
-    military_data <-  dplyr::mutate(military_data, country_name = level3name)
-  } else {
-    military_data <- dplyr::mutate(military_data, country_name = level4name)
-  }
+  # # Military data rows
+  # military_data <- military_data %>%  dplyr::filter(stringr::str_detect(name, "_Military"))
+  # # military_data <- subset(military_data, select=-(1:4))
+  # military_data$Site_Type <- "Military"
+  # military_data$psnu_name <- military_data$level4name
+  # military_data$psnu_uid <- military_data$uidlevel4
+  # if (country_level_in == 3) {
+  #   military_data <-  dplyr::mutate(military_data, country_name = level3name)
+  # } else {
+  #   military_data <- dplyr::mutate(military_data, country_name = level4name)
+  # }
   
   # data = rbind(data, military_data)
   
   return(data)
 }
+
+
+
 # Never use www.triage
 
 # country, psnu, site, site_type
 
-PSNU_levels <- GetCountryLevels(base_url)
+PSNU_levels <- GetCountryLevels(base_url) %>% dplyr::filter(planning_level > 0) 
 orgHierarchy2 <-
   paste0(getOption("baseurl"), "/api/sqlViews/kEtZ2bSQCu2/data.json") %>%
   httr::GET() %>%
@@ -182,7 +188,8 @@ temp = plyr::ddply(PSNU_levels, .(country_level, planning_level,
                                   community_level, facility_level),
                    OrgUnitsByLevels, orgHierarchy2)
 
-
+temp_2 = orgHierarchy2 %>% dplyr::filter(stringr::str_detect(name,"_Military")) %>% 
+  dplyr::bind_rows(temp)
 get_full_site_list <- function(config_path) {
   
   # psnu_levels <-
