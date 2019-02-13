@@ -109,7 +109,6 @@ require(stringr)
 require(plyr)
 
 OrgUnitsByLevels <- function(assignments, data) {
-  
   country_level_in = unique(assignments$country_level)
   planning_level_in = unique(assignments$planning_level)
   community_level_in = unique(assignments$community_level)
@@ -147,10 +146,15 @@ OrgUnitsByLevels <- function(assignments, data) {
   
   # Military data rows
   military_data <- military_data %>%  dplyr::filter(stringr::str_detect(name, "_Military"))
-  data$Site_Type[data$Site_Type == planning_level_in] <- "planning"
-  data$psnu_name[data$planning_level == 4] <- data$level4name
-  data$psnu_uid[data$planning_level == 4] <- data$uidlevel4
-
+  # military_data <- subset(military_data, select=-(1:4))
+  military_data$Site_Type <- "Military"
+  military_data$psnu_name <- military_data$level4name
+  military_data$psnu_uid <- military_data$uidlevel4
+  if (country_level_in == 3) {
+    military_data <-  dplyr::mutate(military_data, country_name = level3name)
+  } else {
+    military_data <- dplyr::mutate(military_data, country_name = level4name)
+  }
   
   # data = rbind(data, military_data)
   
