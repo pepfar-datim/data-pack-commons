@@ -146,15 +146,15 @@ OrgUnitsByLevels <- function(assignments, data) {
   data$psnu_uid[data$planning_level == 6] <- data$uidlevel6
   
   # Military data rows
-  military_data <- military_data %>%  dplyr::filter(stringr::str_detect(name, "_Military")) %>%
-    mutate(Site_Type <- "Military") %>%
-    mutate(psnu_name <- level4name) %>%
-    mutate(psnu_uid <- uidlevel4) %>%
-    mutate(country_name <- NULL)
+  military_data <- military_data %>%  dplyr::filter(stringr::str_detect(name, "_Military"))
+  data$Site_Type[data$Site_Type == planning_level_in] <- "planning"
+  data$psnu_name[data$planning_level == 4] <- data$level4name
+  data$psnu_uid[data$planning_level == 4] <- data$uidlevel4
+
   
-  data = rbind(data, military_data)
+  # data = rbind(data, military_data)
   
-  return(data)
+  return(military_data)
 }
 # Never use www.triage
 
@@ -170,7 +170,7 @@ orgHierarchy2 <-
 orgHierarchy2 <- as.data.frame(orgHierarchy2$rows,stringsAsFactors = FALSE) %>%
   setNames(.,orgHierarchy2$headers$name)
 
-temp = plyr::ddply(PSNU_levels, .(country_level, planning_level, 
+temp_mil = plyr::ddply(PSNU_levels, .(country_level, planning_level, 
                                   community_level, facility_level),
                    OrgUnitsByLevels, orgHierarchy2)
 
