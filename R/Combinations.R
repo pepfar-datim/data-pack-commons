@@ -119,6 +119,7 @@ OrgUnitsByLevels <- function(assignments, data) {
                           length(community_level_in) == 1,
                           length(facility_level_in) == 1)
   
+  military_data <- data
   data <- data %>%  dplyr::filter(!stringr::str_detect(name, "_Military")) %>% 
     dplyr::filter(level == planning_level_in |
                     level == community_level_in |
@@ -132,12 +133,26 @@ OrgUnitsByLevels <- function(assignments, data) {
   data <-
     dplyr::inner_join(assignments, data, 
                       by = c("country_name" = "country_name")) %>%
-    dplyr::mutate(level_type = level)
+    dplyr::mutate(Site_Type = level)
   
-  # PSNU Name and PSNU ID need to be added, planning levels
-  data$level_type[data$level_type == planning_level_in] <- "planning"
-  data$level_type[data$level_type == facility_level_in] <- "facility"
-  data$level_type[data$level_type == community_level_in] <- "community"
+  data$Site_Type[data$Site_Type == planning_level_in] <- "planning"
+  data$Site_Type[data$Site_Type == facility_level_in] <- "facility"
+  data$Site_Type[data$Site_Type == community_level_in] <- "community"
+  data$psnu_name[data$planning_level == 4] <- data$level4name
+  data$psnu_name[data$planning_level == 5] <- data$level5name
+  data$psnu_name[data$planning_level == 6] <- data$level6name
+  data$psnu_uid[data$planning_level == 4] <- data$uidlevel4
+  data$psnu_uid[data$planning_level == 5] <- data$uidlevel5
+  data$psnu_uid[data$planning_level == 6] <- data$uidlevel6
+  
+  # Military data rows
+  military_data <- military_data %>%  dplyr::filter(stringr::str_detect(name, "_Military")) %>%
+    mutate(Site_Type <- "Military") %>%
+    mutate(psnu_name <- level4name) %>%
+    mutate(psnu_uid <- uidlevel4) %>%
+    mutate(country_name <- NULL)
+  
+  data = rbind(data, military_data)
   
   return(data)
 }
@@ -161,7 +176,7 @@ temp = plyr::ddply(PSNU_levels, .(country_level, planning_level,
 
 
 get_full_site_list <- function(config_path) {
-
+  
   # psnu_levels <-
   #   paste0(getOption("baseurl"),
   #          "api/dataStore/dataSetAssignments/ous") %>%
@@ -173,7 +188,7 @@ get_full_site_list <- function(config_path) {
   #   dplyr::mutate(country_name = as.character(name3))
   
   PSNU_levels <- GetCountryLevels(base_url)
-
+  
   orgHierarchy <-
     paste0(getOption("baseurl"), "/api/sqlViews/kEtZ2bSQCu2/data.json") %>%
     httr::GET() %>%
@@ -215,7 +230,7 @@ get_full_site_list <- function(config_path) {
     mutate(dpOrgUnit=psnu_name, dpOrgUnitUID=psnu_uid) %>%
     select(organisationunituid,name,level,uidlevel4,level4name,psnu_name,psnu_uid,dpOrgUnit,dpOrgUnitUID) %>%
     mutate(siteType = "Military")
-
+  
   
   # Removes all rows with NA values for Site Type
   ous_list_regional <- ous_list_regional %>% 
@@ -256,13 +271,13 @@ get_full_site_list <- function(config_path) {
     filter(siteType=="Military") %>%
     mutate(distributed=0) %>%
     bind_rows(ous_list,.)
-
+  
   #Add in _Military sites again for cases where these cannot be distributed, as indicated in distribution function
   ous_list <- ous_list %>%
     filter(siteType=="Military") %>%
     mutate(distributed=0) %>%
     bind_rows(ous_list,.)
-
+  
   #Add in non-clustered PSNUs where these cannot be distributed, as indicated in distribution function
   # ous_list <- ous_list %>%
   #   filter(level==prioritization & !str_detect(name,"_Military")) %>%
@@ -326,7 +341,7 @@ get_full_site_list <- function(config_path) {
   #                                   siteType=="Community" ~ paste0(dpOrgUnit," > ",name," {Community} (",organisationunituid,")"))) %>%
   #   select(DataPackSiteUID=organisationunituid,DataPackSiteID,ou_uid=uidlevel3,ou_name=level3name,siteType,distributed) %>%
   #   unique()
-
+  
   # total_ous_list <- rbind(ous_list, ous_list_2)
   # 
   # return(total_ous_list)
@@ -335,11 +350,11 @@ get_full_site_list <- function(config_path) {
 }
 
 getMechList <- function(config_path) {
-
+  
   url<-paste0(getOption("baseurl"),"api/sqlViews/fgUtV6e9YIX/data.csv")
   d<-read.csv(url,stringsAsFactors = FALSE)
   return(d[,c("mechanism","code","uid","ou")])
-
+  
 }
 
 full_site_list <- get_full_site_list(config_path)
