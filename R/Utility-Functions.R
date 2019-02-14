@@ -16,3 +16,57 @@ StackPrefixedCols <- function(data, prefixes){
   
   purrr::map(prefixes, SelectAndStripPrefix, data) %>% dplyr::bind_rows()
 }
+
+#' @export
+#' @title OrgUnitsByLevels(assignments, data)
+#' 
+#' @description Takes the assignments table containing all the countries and their site levels for different types
+#' as well as the orghierarchy data containing all the sites, to combine and give site type and psnu name, id for each site 
+#' @param assignments dataframe - contains data of each country, their planning, community, facility and country level 
+#' @param data dataframe - List of all sites and their data with level names and UIDs, as well as site levels
+#' @return  dataframe containing all sites and their site types, their psnu names, psnu uids and country/id
+#'
+OrgUnitsByLevels <- function(assignments, data) {
+  country_level_in = unique(assignments$country_level)
+  planning_level_in = unique(assignments$planning_level)
+  community_level_in = unique(assignments$community_level)
+  facility_level_in = unique(assignments$facility_level)
+  assertthat::assert_that(
+    length(country_level_in) == 1,
+    length(planning_level_in) == 1,
+    length(community_level_in) == 1,
+    length(facility_level_in) == 1
+  )
+  
+  data <-
+    data %>%  dplyr::filter(!stringr::str_detect(name, "_Military")) %>%
+    dplyr::filter(level == planning_level_in |
+                    level == community_level_in |
+                    level == facility_level_in)
+  
+  country_name_col_symbol <-
+    as.name(paste0("level", country_level_in, "name"))
+  planning_name_col_symbol <-
+    as.name(paste0("level", planning_level_in, "name"))
+  planning_uid_col_symbol <-
+    as.name(paste0("uidlevel", planning_level_in))
+  data <-
+    dplyr::mutate(
+      data,
+      country_name = !!country_name_col_symbol,
+      psnu_name = !!planning_name_col_symbol,
+      psnu_uid = !!planning_uid_col_symbol
+    )
+  
+  data <-
+    dplyr::inner_join(assignments, data,
+                      by = c("country_name" = "country_name")) %>%
+    dplyr::mutate(Site_Type = level)
+  
+  data$Site_Type[data$Site_Type == planning_level_in] <- "planning"
+  data$Site_Type[data$Site_Type == facility_level_in] <- "facility"
+  data$Site_Type[data$Site_Type == community_level_in] <-
+    "community"
+  
+  return(data)
+}
