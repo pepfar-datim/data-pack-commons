@@ -59,8 +59,8 @@ VCCs1f22cOR,Key Populations v3,qY5T9mKjsz5,kp,MSM,MSM,qY5T9mKjsz5,310,1.00,kp1,,
 VCCs1f22cOR,Key Populations v3,eiR4kOjT60r,kp,TG,TG,eiR4kOjT60r,320,1.00,kp1,,,,,,,,,,,,,,kp1,,,,,,
 VCCs1f22cOR,Key Populations v3,UjruEYjGK4R,kp,FSW,FSW,UjruEYjGK4R,330,1.00,kp1,,,,,,,,,,,,,,kp1,,,,,,
 VCCs1f22cOR,Key Populations v3,pi7naVKPzSM,kp,People in prisons and other enclosed settings,People in prisons and other enclosed settings,pi7naVKPzSM,340,1.00,kp1,,,,,,,,,,,,,,kp1,,,,,,
-FokGv0LCTYj,Test Results,KM4dyooZHUP,tr,Positive,Positive,KM4dyooZHUP,10,1.00,tr,,,,,,,,,,,,,,,tr,,,,,
-FokGv0LCTYj,Test Results,Gb0GYkqotaO,tr,Negative,Negative,Gb0GYkqotaO,20,1.00,tr,,,,,,,,,,,,,,,tr,,,,,
+FokGv0LCTYj,Test Results,KM4dyooZHUP,tr,Positive,Positive,KM4dyooZHUP,10,1.00,tr_pos,,,,,,,,,,,,,,,tr_pos,,,,,
+FokGv0LCTYj,Test Results,Gb0GYkqotaO,tr,Negative,Negative,Gb0GYkqotaO,20,1.00,tr_neg,,,,,,,,,,,,,,,tr_neg,,,,,
 bDWsPYyXgWP,HIV Test Status (Specific),mSBg9AZx1lV,tss,Newly Identified Positive (Specific),Newly Identified Positive,Vr59uUJBySG,10,1.00,KnownNewResult,,,,,,,,,,,,,,,,,,KnownNewResult,,
 bDWsPYyXgWP,HIV Test Status (Specific),e9fbFnQEyyA,tss,Known at Entry Positive (Specific),Known at Entry Positive,LvheCKbuFJZ,20,1.00,KnownNewResult,,,,,,,,,,,,,,,,,,KnownNewResult,,
 bDWsPYyXgWP,HIV Test Status (Specific),viYXyEy7wKi,tss,Newly Identified Negative (Specific),Newly Identified Negative,BiB1MtA7o4A,30,1.00,KnownNewResult,,,,,,,,,,,,,,,,,,KnownNewResult,,
@@ -82,19 +82,27 @@ co,categoryOptionCombo,aND0YTwZzA5,st,"40-49, Female, Directly-Assisted",Directl
 co,categoryOptionCombo,QoPODSAWZJM,st,"40-49, Male, Directly-Assisted",Directly-Assisted,CM0ud5U3iWD,140,1.00,st_da,,,,,,,,,,,,,,,,,,,,st_da
 co,categoryOptionCombo,vOCMa9KoFkZ,st,"50+, Female, Directly-Assisted",Directly-Assisted,CM0ud5U3iWD,150,1.00,st_da,,,,,,,,,,,,,,,,,,,,st_da
 co,categoryOptionCombo,OmJLpLhpjRs,st,"50+, Male, Directly-Assisted",Directly-Assisted,CM0ud5U3iWD,160,1.00,st_da,,,,,,,,,,,,,,,,,,,,st_da
-co,categoryOptionCombo,FZAip9U20FO,st,"10-14, Female, Unassisted",Unassisted,QvMZVdK1AkM,170,1.00,st_ua,,,,,,,,,,,,,,,,,,,,
-co,categoryOptionCombo,F5ycS1AO6L9,st,"10-14, Male, Unassisted",Unassisted,QvMZVdK1AkM,180,1.00,st_ua,,,,,,,,,,,,,,,,,,,,
-co,categoryOptionCombo,Yygmra0wjfS,st,"15-19, Female, Unassisted",Unassisted,QvMZVdK1AkM,190,1.00,st_ua,,,,,,,,,,,,,,,,,,,,
-co,categoryOptionCombo,TmbqdGlsjgU,st,"15-19, Male, Unassisted",Unassisted,QvMZVdK1AkM,200,1.00,st_ua,,,,,,,,,,,,,,,,,,,,
-co,categoryOptionCombo,tvFpGPvf1dE,st,"20-24, Female, Unassisted",Unassisted,QvMZVdK1AkM,210,1.00,st_ua,,,,,,,,,,,,,,,,,,,,
-co,categoryOptionCombo,r8vRZxiL3On,st,"20-24, Male, Unassisted",Unassisted,QvMZVdK1AkM,220,1.00,st_ua,,,,,,,,,,,,,,,,,,,,
-co,categoryOptionCombo,dzebNOszBWB,st,"25-29, Female, Unassisted",Unassisted,QvMZVdK1AkM,230,1.00,st_ua,,,,,,,,,,,,,,,,,,,,
-co,categoryOptionCombo,NREmZ5nTjPG,st,"25-29, Male, Unassisted",Unassisted,QvMZVdK1AkM,240,1.00,st_ua,,,,,,,,,,,,,,,,,,,,
-co,categoryOptionCombo,RSmTAFblejf,st,"30-34, Female, Unassisted",Unassisted,QvMZVdK1AkM,250,1.00,st_ua,,,,,,,,,,,,,,,,,,,,
-co,categoryOptionCombo,iOs0xO0rO9a,st,"30-34, Male, Unassisted",Unassisted,QvMZVdK1AkM,260,1.00,st_ua,,,,,,,,,,,,,,,,,,,,
-co,categoryOptionCombo,T0FBc732ciN,st,"35-39, Female, Unassisted",Unassisted,QvMZVdK1AkM,270,1.00,st_ua,,,,,,,,,,,,,,,,,,,,
-co,categoryOptionCombo,hjOHLzQd87D,st,"35-39, Male, Unassisted",Unassisted,QvMZVdK1AkM,280,1.00,st_ua,,,,,,,,,,,,,,,,,,,,
-co,categoryOptionCombo,s4mTCYfXiCO,st,"40-49, Female, Unassisted",Unassisted,QvMZVdK1AkM,290,1.00,st_ua,,,,,,,,,,,,,,,,,,,,
-co,categoryOptionCombo,JutT06Y9k0T,st,"40-49, Male, Unassisted",Unassisted,QvMZVdK1AkM,300,1.00,st_ua,,,,,,,,,,,,,,,,,,,,
-co,categoryOptionCombo,wKVNLxXdver,st,"50+, Female, Unassisted",Unassisted,QvMZVdK1AkM,310,1.00,st_ua,,,,,,,,,,,,,,,,,,,,
-co,categoryOptionCombo,XQhaXRu6a7c,st,"50+, Male, Unassisted",Unassisted,QvMZVdK1AkM,320,1.00,st_ua,,,,,,,,,,,,,,,,,,,,
+co,categoryOptionCombo,FZAip9U20FO,st,"10-14, Female, Unassisted",Unassisted,QvMZVdK1AkM,170,1.00,st_ua,,,,,,,,,,,,,,,,,,,,st_ua
+co,categoryOptionCombo,F5ycS1AO6L9,st,"10-14, Male, Unassisted",Unassisted,QvMZVdK1AkM,180,1.00,st_ua,,,,,,,,,,,,,,,,,,,,st_ua
+co,categoryOptionCombo,Yygmra0wjfS,st,"15-19, Female, Unassisted",Unassisted,QvMZVdK1AkM,190,1.00,st_ua,,,,,,,,,,,,,,,,,,,,st_ua
+co,categoryOptionCombo,TmbqdGlsjgU,st,"15-19, Male, Unassisted",Unassisted,QvMZVdK1AkM,200,1.00,st_ua,,,,,,,,,,,,,,,,,,,,st_ua
+co,categoryOptionCombo,tvFpGPvf1dE,st,"20-24, Female, Unassisted",Unassisted,QvMZVdK1AkM,210,1.00,st_ua,,,,,,,,,,,,,,,,,,,,st_ua
+co,categoryOptionCombo,r8vRZxiL3On,st,"20-24, Male, Unassisted",Unassisted,QvMZVdK1AkM,220,1.00,st_ua,,,,,,,,,,,,,,,,,,,,st_ua
+co,categoryOptionCombo,dzebNOszBWB,st,"25-29, Female, Unassisted",Unassisted,QvMZVdK1AkM,230,1.00,st_ua,,,,,,,,,,,,,,,,,,,,st_ua
+co,categoryOptionCombo,NREmZ5nTjPG,st,"25-29, Male, Unassisted",Unassisted,QvMZVdK1AkM,240,1.00,st_ua,,,,,,,,,,,,,,,,,,,,st_ua
+co,categoryOptionCombo,RSmTAFblejf,st,"30-34, Female, Unassisted",Unassisted,QvMZVdK1AkM,250,1.00,st_ua,,,,,,,,,,,,,,,,,,,,st_ua
+co,categoryOptionCombo,iOs0xO0rO9a,st,"30-34, Male, Unassisted",Unassisted,QvMZVdK1AkM,260,1.00,st_ua,,,,,,,,,,,,,,,,,,,,st_ua
+co,categoryOptionCombo,T0FBc732ciN,st,"35-39, Female, Unassisted",Unassisted,QvMZVdK1AkM,270,1.00,st_ua,,,,,,,,,,,,,,,,,,,,st_ua
+co,categoryOptionCombo,hjOHLzQd87D,st,"35-39, Male, Unassisted",Unassisted,QvMZVdK1AkM,280,1.00,st_ua,,,,,,,,,,,,,,,,,,,,st_ua
+co,categoryOptionCombo,s4mTCYfXiCO,st,"40-49, Female, Unassisted",Unassisted,QvMZVdK1AkM,290,1.00,st_ua,,,,,,,,,,,,,,,,,,,,st_ua
+co,categoryOptionCombo,JutT06Y9k0T,st,"40-49, Male, Unassisted",Unassisted,QvMZVdK1AkM,300,1.00,st_ua,,,,,,,,,,,,,,,,,,,,st_ua
+co,categoryOptionCombo,wKVNLxXdver,st,"50+, Female, Unassisted",Unassisted,QvMZVdK1AkM,310,1.00,st_ua,,,,,,,,,,,,,,,,,,,,st_ua
+co,categoryOptionCombo,XQhaXRu6a7c,st,"50+, Male, Unassisted",Unassisted,QvMZVdK1AkM,320,1.00,st_ua,,,,,,,,,,,,,,,,,,,,st_ua
+co,categoryOptionCombo,AkPJat3QJAW,kp,(FSW),FSW,UjruEYjGK4R,400,1.00,kp2,,,,,,,,,,,,,,kp2,,,,,,
+co,categoryOptionCombo,rpwKzAIR5f4,kp,(Female PWID),Female PWID,G6OYSzplF5a,410,1.00,kp2,,,,,,,,,,,,,,kp2,,,,,,
+co,categoryOptionCombo,uPSmoMfxrjX,kp,(MSM SW),MSM SW,Pfw6StSK8Wv,420,1.00,kp2,,,,,,,,,,,,,,kp2,,,,,,
+co,categoryOptionCombo,H4zDlK3nU3e,kp,(MSM not SW),MSM not SW,aqmuvVX1H0v,430,1.00,kp2,,,,,,,,,,,,,,kp2,,,,,,
+co,categoryOptionCombo,S4ixSeMtEoZ,kp,(Male PWID),Male PWID,wyeCT63FkXB,440,1.00,kp2,,,,,,,,,,,,,,kp2,,,,,,
+co,categoryOptionCombo,gO96NV54yD4,kp,(People in prisons and other enclosed settings),People in prisons and other enclosed settings,pi7naVKPzSM,450,1.00,kp2,,,,,,,,,,,,,,kp2,,,,,,
+co,categoryOptionCombo,fRj8O5iNQlV,kp,(TG SW),TG SW,bEqNZtIA0Jb,460,1.00,kp2,,,,,,,,,,,,,,kp2,,,,,,
+co,categoryOptionCombo,edBMVgUohvf,kp,(TG not SW),TG not SW,kgDh0sCkIAN,470,1.00,kp2,,,,,,,,,,,,,,kp2,,,,,,
