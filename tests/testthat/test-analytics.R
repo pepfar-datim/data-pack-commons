@@ -149,3 +149,41 @@ testthat::expect_error(
 
 
 httptest::stop_mocking()
+
+testthat::test_that("Creating PSNU levels and Org unit data to obtain site list data", {
+  PSNU_level_test <-
+    data.frame(
+      "country_level" = 3,
+      "planning_level" = 4,
+      "prioritization_level" = 4,
+      "facility_level" = 6,
+      "community_level" = 5,
+      "country_name" = "Angola",
+      "id" = "XOivy2uDpMF"
+    )
+  org_list <-
+    data.frame(
+      "organisationunitid" = 2138647,
+      "organisationunituid" = "IHuZkWbFwNK",
+      "name" = "Deposito provincial de Bengo",
+      "level" = 6,
+      "uidlevel1" = "ybg3MO3hcf4",
+      "level1name" = "Global",
+      "uidlevel2" = "KSkooYTy8FB",
+      "level2name" = "Africa",
+      "uidlevel3" = "XOivy2uDpMF",
+      "level3name" = "Angola",
+      "uidlevel4" = "uXwFHXCPYgj",
+      "level4name" = "Bengo",
+      "uidlevel5" = "eHgnJjbZB3G",
+      "level5name" = "Caxito",
+      "uidlevel6" = "IHuZkWbFwNK",
+      "level6name" = "Deposito provincial de Bengo",
+      "uidlevel7" = NA,
+      "level7name" = NA,
+      "uidlevel8" = NA,
+      "level8name" = NA,
+      "uidlevel9" = NA,
+      "level9name" = NA
+    )
+})

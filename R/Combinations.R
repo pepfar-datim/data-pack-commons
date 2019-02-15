@@ -19,7 +19,7 @@ require(httr)
 require(jsonlite)
 require(stringr)
 
-OrgUnitsByLevels <- function(assignments, data) {
+NonMilitarySiteData <- function(assignments, data) {
   country_level_in = unique(assignments$country_level)
   planning_level_in = unique(assignments$planning_level)
   community_level_in = unique(assignments$community_level)
@@ -58,8 +58,7 @@ OrgUnitsByLevels <- function(assignments, data) {
   
   data$Site_Type[data$Site_Type == planning_level_in] <- "planning"
   data$Site_Type[data$Site_Type == facility_level_in] <- "facility"
-  data$Site_Type[data$Site_Type == community_level_in] <-
-    "community"
+  data$Site_Type[data$Site_Type == community_level_in] <- "community"
   
   return(data)
 }
@@ -81,28 +80,40 @@ orgHierarchy2 <-
   as.data.frame(orgHierarchy2$rows, stringsAsFactors = FALSE) %>%
   setNames(., orgHierarchy2$headers$name)
 
-# This df contains all the non military sites
-temp = plyr::ddply(
-  PSNU_levels,
-  .(
-    country_level,
-    planning_level,
-    community_level,
-    facility_level
-  ),
-  OrgUnitsByLevels,
-  orgHierarchy2
-)
-
 # This df contains all the military sites
-temp_2 = orgHierarchy2 %>% dplyr::filter(stringr::str_detect(name, "_Military")) %>%
-  dplyr::mutate(Site_Type = "Military") %>%
-  dplyr::mutate(psnu_name = level4name) %>%
-  dplyr::mutate(psnu_uid = uidlevel4) %>%
-  dplyr::mutate(country_name = level3name) %>%
-  dplyr::mutate(id = uidlevel3)
+MilitarySiteData <- function(org_data) {
+  military_data = org_data %>% dplyr::filter(stringr::str_detect(name, "_Military")) %>%
+    dplyr::mutate(Site_Type = "Military") %>%
+    dplyr::mutate(psnu_name = level4name) %>%
+    dplyr::mutate(psnu_uid = uidlevel4) %>%
+    dplyr::mutate(country_name = level3name) %>%
+    dplyr::mutate(id = uidlevel3)
+  return(military_data)
+}
 
-all_sites <- dplyr::bind_rows(temp, temp_2)
+temp_2 <- MilitarySiteData(orgHierarchy2)
+
+all_sites_list <- function(assignments, org_data) {
+  # This df contains all the non military sites
+  temp = plyr::ddply(
+    assignments,
+    .(
+      country_level,
+      planning_level,
+      community_level,
+      facility_level
+    ),
+    NonMilitarySiteData,
+    org_data
+  )
+  
+  # This df contains all the military sites
+  temp_2 <- MilitarySiteData(org_data)
+  
+  return(all_sites <- dplyr::bind_rows(temp, temp_2))
+}
+
+all_sites <- all_sites_list(PSNU_levels, orgHierarchy2)
 
 getMechList <- function(config_path) {
   url <-
