@@ -70,3 +70,35 @@ CopSitesNonMilitary <- function(assignments, data) {
   
   return(data)
 }
+
+#' @export
+MilitarySiteData <- function(org_data) {
+  military_data = org_data %>% dplyr::filter(stringr::str_detect(name, "_Military")) %>%
+    dplyr::mutate(Site_Type = "Military") %>%
+    dplyr::mutate(psnu_name = level4name) %>%
+    dplyr::mutate(psnu_uid = uidlevel4) %>%
+    dplyr::mutate(country_name = level3name) %>%
+    dplyr::mutate(id = uidlevel3)
+  return(military_data)
+}
+
+#' @export
+all_sites_list <- function(assignments, org_data) {
+  # This df contains all the non military sites
+  temp = plyr::ddply(
+    assignments,
+    .(
+      country_level,
+      planning_level,
+      community_level,
+      facility_level
+    ),
+    NonMilitarySiteData,
+    org_data
+  )
+  
+  # This df contains all the military sites
+  temp_2 <- MilitarySiteData(org_data)
+  
+  return(all_sites <- dplyr::bind_rows(temp, temp_2))
+}
