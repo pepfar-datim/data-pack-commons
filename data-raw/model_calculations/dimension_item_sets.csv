@@ -112,3 +112,7 @@ co,categoryOptionCombo,RbB7UEptrN6,kp,TG,TG,eiR4kOjT60r,610,1.00,kp3,,,,,,,,,,,,
 co,categoryOptionCombo,j8AfwCZj95X,kp,Other Key Populations,Other Key Populations,GMK9eIdXAob,620,1.00,kp3,,,,,,,,,,,,,,kp3,,,,,,,,
 co,categoryOptionCombo,PmA9jG2I2PY,kp,MSM,MSM,qY5T9mKjsz5,630,1.00,kp3,,,,,,,,,,,,,,kp3,,,,,,,,
 co,categoryOptionCombo,bQfzRTksp0Y,kp,FSW,FSW,UjruEYjGK4R,640,1.00,kp3,,,,,,,,,,,,,,kp3,,,,,,,,
+co,categoryOptionCombo,GeL5oP9wATo,ti,"<15, Female, Routine, Positive",Routine,rGptWqlhaVU,710,1.00,ti_routine,,,,,,,,,,,,,,,,,,,,,,ti_routine
+co,categoryOptionCombo,v6YVL9IVWdw,ti,"15+, Female, Routine, Positive",Routine,rGptWqlhaVU,720,1.00,ti_routine,,,,,,,,,,,,,,,,,,,,,,ti_routine
+co,categoryOptionCombo,cvAG22BILFC,ti,"<15, Male, Routine, Positive",Routine,rGptWqlhaVU,730,1.00,ti_routine,,,,,,,,,,,,,,,,,,,,,,ti_routine
+co,categoryOptionCombo,rtTEeMyntFT,ti,"15+, Male, Routine, Positive",Routine,rGptWqlhaVU,740,1.00,ti_routine,,,,,,,,,,,,,,,,,,,,,,ti_routine
