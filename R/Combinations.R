@@ -93,6 +93,7 @@ MilitarySiteData <- function(org_data) {
 
 temp_2 <- MilitarySiteData(orgHierarchy2)
 
+#' @export
 all_sites_list <- function(assignments, org_data) {
   # This df contains all the non military sites
   temp = plyr::ddply(

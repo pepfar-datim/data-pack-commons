@@ -186,4 +186,5 @@ testthat::test_that("Creating PSNU levels and Org unit data to obtain site list 
       "uidlevel9" = NA,
       "level9name" = NA
     )
+  testthat::expect_true(datapackcommons::all_sites_list(PSNU_level_test,org_list)$Site_Type == "community")
 })
