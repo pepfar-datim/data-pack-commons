@@ -29,19 +29,29 @@ ValidateDimItems <-
 ValidateDimItemSets <- function(dim_item_sets, base_url){
   
 # validate dimension names and ids
-  dim_item_sets %>% dplyr::filter(!is.na(dim_uid)) %>% 
+  dim_item_sets %>% dplyr::filter(!is.na(dim_uid), dim_uid != "co") %>% 
   {datapackcommons::ValidateNameIdPairs(base_url, .$dim_name, .$dim_uid, "dimensions")} %>% 
     assertthat::assert_that()
-  
+
 # validate dimension item names and ids
-  
-  ValidateDimItems(dim_item_sets, "dim_uid", "dim_item_name", "dim_item_uid", base_url)
+  dim_item_sets %>% dplyr::filter(dim_uid != "co") %>%
+  ValidateDimItems("dim_uid", "dim_item_name", "dim_item_uid", base_url)
   
 # validate category option names and ids
   dim_item_sets %>%  
   {datapackcommons::ValidateNameIdPairs(base_url, .$option_name, .$option_uid, "categoryOptions")} %>% 
     assertthat::assert_that()  
-}
+
+  # validate category option combination rows
+  dim_item_sets %>% dplyr::filter(dim_uid == "co") %>%
+    .$dim_name %>% unique() %>% assertthat::are_equal("categoryOptionCombo") %>% 
+    assertthat::assert_that()  
+  # category option combination names and ids
+  dim_item_sets %>%  dplyr::filter(dim_uid == "co") %>%
+  {datapackcommons::ValidateNameIdPairs(base_url, .$dim_item_name, .$dim_item_uid, "categoryOptionCombos")} %>% 
+    assertthat::assert_that()  
+  
+  }
 
 ValidateDataRequired <- function(data_required, base_url){
   data_required %>% dplyr::filter(!is.na(A.ind_uid)) %>%
@@ -60,6 +70,8 @@ ValidateDataRequired <- function(data_required, base_url){
 
 datapackcommons::DHISLogin("/users/sam/.secrets/prod.json")
 base_url <- getOption("baseurl")
+wd <- getwd()
+setwd("/Users/sam/Documents/GitHub/data-pack-commons")
 
 dim_item_sets <- readr::read_csv("./data-raw/model_calculations/dimension_item_sets.csv",
                                  col_types = readr::cols(.default = "c", sort_order = "d", weight = "d"),
@@ -94,8 +106,7 @@ data_required_test <-
                   na = c("NA")) %>%
   dplyr::mutate(B.kp_set = NA_character_) %>% select(-data_pack_type)
 
-wd <- getwd()
-setwd("/Users/sam/Documents/GitHub/data-pack-commons")
+
 
 usethis::use_data(dim_item_sets, overwrite = TRUE, compress = "gzip")
 usethis::use_data(dim_item_sets_test, overwrite = TRUE, compress = "gzip")
