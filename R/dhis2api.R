@@ -337,29 +337,22 @@ ValidateCodeIdPairs <- function(base_url, codes, ids, type){
     }
 }
 
+#' @export
+Get19TMechanisms <- function(base_url){
+  # SQL view will retrieve list of mechanisms for which there is FY2019 data - 2018Oct period
+  api_call <- paste0(base_url, "api/sqlViews/vtNAsZcMZiU/data.csv") # limit calls to this SQL view on prod
+  # it locks data value table
+  mech_list_r <-  RetryAPI(api_call, "application/csv")
+  mech_list_parsed <- mech_list_r %>% 
+    httr::content(., "text") %>% 
+    readr::read_csv(col_names = TRUE, col_types = readr::cols(.default = "c"))
+}
+
 ##RUN preceeding functions
 GetSiteDistributionDenom <-  function(base_url, data_element_uid_dsd, data_element_uid_ta,
                          country_uid, planning_level, period, mechanisms_uid, 
                          additional_dimensions = NULL, additional_filters = NULL){
-  ###TEMP###
-  ###  GetDataWithIndicator() can act as a bit of a model
-  require(datapackcommons)
-  require(tidyverse)
-  DHISLogin("/users/sam/.secrets/prod.json")
-  base_url <- getOption("baseurl")
-  options(maxCacheAge = 0)
-  #####
-# SQL view will retrieve list of mechanisms for which there is FY2019 data - 2018Oct period
-  api_call <- paste0(base_url, "api/sqlViews/vtNAsZcMZiU/data.csv") # limit calls to this SQL view on prod
-                                                                    # it locks data value table
-  mech_list_r <-  RetryAPI(api_call, "application/csv")
-   mech_list_parsed <- mech_list_r %>% 
-     httr::content(., "text") %>% 
-     readr::read_csv(col_names = TRUE, col_types = readr::cols(.default = "c"))
-   
-   nigeria_uid = "PqlFzhuPcF1"
-   relevant_mechs <- dplyr::inner_join(mech_list_parsed, datimvalidation::getMechanismsMap(nigeria_uid), 
-                    by = c("uid" = "id")) %>% .$uid
+  
    api_call <- paste0(base_url,  
    "api/29/analytics.json?filter=dx:Qdn0vmNSflO;mfYq3HGUIX3", # PMTCT_STAT (N, DSD, Age/Sex/KnownNewResult) TARGET: Known Results
                                                               # PMTCT_STAT (N, TA, Age/Sex/KnownNewResult) TARGET: Known Results
