@@ -3,12 +3,13 @@
 \docType{data}
 \name{dim_item_sets}
 \alias{dim_item_sets}
-\title{Input to model calculation gives the mapping between dimension items and category options.}
+\title{Input to model calculation gives the mapping between dimension items and category options or the
+raw category option combination.}
 \format{A data frame with these variables:
 \describe{
-  \item{dim_uid}{Dimension uid used when running indicators}
+  \item{dim_uid}{Dimension uid used when running indicators, co in the case of a category option combination}
   \item{dim_name}{Name for dimension - for documentation not used directly in model calculations}
-  \item{dim_item_uid}{Dimension item used when running indicator}
+  \item{dim_item_uid}{Dimension item or category option combination used when running indicator}
   \item{dim_cop_type}{The dimension type from data pack perspective. These are categories that 
   can appear in the rows of the data pack. In theory different indicators could use different 
   dimensions to produce these disaggregations (e.g. Cascade age bands or Semi fine age). 
@@ -37,7 +38,7 @@ dim_item_sets
 }
 \description{
 - Each row corresponds to an individual category option required in the output, 
-   there are multiple entries per dimensions and even dimension item in some cases.
+   there are multiple entries per dimension and potentially even dimension item in some cases.
  - Includes weight to apply if raw values are being distributed so even a category 
    option can be repeated (<5 and 1-9 data required for 1-4)
  - Defines a key for the different sets of mappings
