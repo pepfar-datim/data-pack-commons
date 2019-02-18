@@ -72,6 +72,14 @@ CopSitesNonMilitary <- function(assignments, data) {
 }
 
 #' @export
+#' @title StackPrefixedCols(data, prefixes)
+#' 
+#' @description Takes columns from data with specified prefixes and stacks them based on the unprefixed
+#' portion of the name. Columns not containing one of the prefixes are excluded in returned data. 
+#' @param data dataframe - contains data to stack 
+#' @param prefixes string vector - list of prefixes to include in column selection and stacking
+#' @return  tibble with superset of columns without prefixes in column names
+#'
 MilitarySiteData <- function(org_data) {
   military_data = org_data %>% dplyr::filter(stringr::str_detect(name, "_Military")) %>%
     dplyr::mutate(Site_Type = "Military") %>%
@@ -83,6 +91,14 @@ MilitarySiteData <- function(org_data) {
 }
 
 #' @export
+#' @title StackPrefixedCols(data, prefixes)
+#' 
+#' @description Takes columns from data with specified prefixes and stacks them based on the unprefixed
+#' portion of the name. Columns not containing one of the prefixes are excluded in returned data. 
+#' @param data dataframe - contains data to stack 
+#' @param prefixes string vector - list of prefixes to include in column selection and stacking
+#' @return  tibble with superset of columns without prefixes in column names
+#'
 all_sites_list <- function(assignments, org_data) {
   # This df contains all the non military sites
   temp = plyr::ddply(
