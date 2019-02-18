@@ -18,13 +18,13 @@ StackPrefixedCols <- function(data, prefixes){
 }
 
 #' @export
-#' @title OrgUnitsByLevels(assignments, data)
+#' @title CopSitesNonMilitary(assignments, data)
 #' 
 #' @description Takes the assignments table containing all the countries and their site levels for different types
 #' as well as the orghierarchy data containing all the sites, to combine and give site type and psnu name, id for each site 
 #' @param assignments dataframe - contains data of each country, their planning, community, facility and country level: /api/sqlViews/kEtZ2bSQCu2/data.json
 #' @param data dataframe - List of all sites and their data with level names and UIDs, as well as site levels: api/dataStore/dataSetAssignments/ous
-#' @return  dataframe containing all sites and their site types, their psnu names, psnu uids and country/id
+#' @return  dataframe containing all sites - non military and their site types, their psnu names, psnu uids and country/id
 #'
 CopSitesNonMilitary <- function(assignments, data) {
   country_level_in = unique(assignments$country_level)
@@ -72,13 +72,11 @@ CopSitesNonMilitary <- function(assignments, data) {
 }
 
 #' @export
-#' @title StackPrefixedCols(data, prefixes)
+#' @title MilitarySiteData(org_data)
 #' 
-#' @description Takes columns from data with specified prefixes and stacks them based on the unprefixed
-#' portion of the name. Columns not containing one of the prefixes are excluded in returned data. 
-#' @param data dataframe - contains data to stack 
-#' @param prefixes string vector - list of prefixes to include in column selection and stacking
-#' @return  tibble with superset of columns without prefixes in column names
+#' @description Takes all site data and filters out the military sites, generating their PSNU name and ID as well
+#' @param org_data - dataframe - List of all sites and their data with level names and UIDs, as well as site levels: api/dataStore/dataSetAssignments/ous
+#' @return  dataframe with all military sites and their PSNU names, IDs
 #'
 MilitarySiteData <- function(org_data) {
   military_data = org_data %>% dplyr::filter(stringr::str_detect(name, "_Military")) %>%
@@ -91,13 +89,13 @@ MilitarySiteData <- function(org_data) {
 }
 
 #' @export
-#' @title StackPrefixedCols(data, prefixes)
+#' @title all_sites_list(assignments, org_data)
 #' 
-#' @description Takes columns from data with specified prefixes and stacks them based on the unprefixed
-#' portion of the name. Columns not containing one of the prefixes are excluded in returned data. 
-#' @param data dataframe - contains data to stack 
-#' @param prefixes string vector - list of prefixes to include in column selection and stacking
-#' @return  tibble with superset of columns without prefixes in column names
+#' @description Takes the assignments table containing all the countries and their site levels for different types
+#' as well as the orghierarchy data containing all the sites, to combine and give site type and psnu name, id for each site 
+#' @param assignments dataframe - contains data of each country, their planning, community, facility and country level: /api/sqlViews/kEtZ2bSQCu2/data.json
+#' @param org_data dataframe - List of all sites and their data with level names and UIDs, as well as site levels: api/dataStore/dataSetAssignments/ous
+#' @return  dataframe containing all sites and their site types, their psnu names, psnu uids and country/id
 #'
 all_sites_list <- function(assignments, org_data) {
   # This df contains all the non military sites
@@ -109,7 +107,7 @@ all_sites_list <- function(assignments, org_data) {
       community_level,
       facility_level
     ),
-    NonMilitarySiteData,
+    CopSitesNonMilitary,
     org_data
   )
   
