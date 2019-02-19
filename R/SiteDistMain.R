@@ -23,8 +23,6 @@ main <- function(){
   output_location <- "/Users/sam/COP data/"
   datapack_export = NULL
   
-
-  
   dimensions_sample <- tibble::tribble(~type, ~dim_item_uid, ~dim_uid,
                                        "filter", "DE_GROUP-zhdJiWlPvCz","dx", 
                                        "filter", "2018Oct", "pe",
@@ -49,7 +47,7 @@ main <- function(){
   dimensions_main = c(technical_area = "LxhLO68FcXm",
                       num_or_denom = "Som9NRMQqV7",
                       disagg_type = "HWPJnUTMjEq",
-                      ou = "ou"
+                      ou = "ou",
                       mechanisms = "SH885jaRe0o")
   filters_main <- c(dx = "DE_GROUP-zhdJiWlPvCz",
                     pe = "2018Oct")
@@ -85,7 +83,7 @@ DistributeToSites <- function(datapack_data, data_element_map, de_group,
 
 # 
 CalculateSiteDensity <- function(data_element_map, dim_item_sets, de_group, country_details, period){
-  assertthat::assert_that(NROW(data_element_map) == 1.
+  assertthat::assert_that(NROW(data_element_map) == 1,
                           NROW(country_details) == 1)
 
   country_uid <- country_details$id

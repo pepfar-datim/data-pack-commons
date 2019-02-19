@@ -15,6 +15,31 @@ context("Test interactions with DHIS 2 analytics")
 require(httptest)
 httptest::use_mock_api()
 #DHISLogin("/users/sam/.secrets/play.json")
+------------
+test_that("We can get data with GetData_Analytics", {
+  dimensions <- tibble::tribble(~type, ~dim_item_uid, ~dim_uid,
+                                "filter", "vihpFUg2WTy", "dx", #PMTCT positive test rate indicator
+                                "dimension", "ImspTQPwCqd", "ou", # sierra leone
+                                "dimension", "LEVEL-2", "ou", 
+                                "filter", "LAST_YEAR", "pe",
+                                "dimension", "UOqJW6HPvvL", "veGzholzPQm",
+                                "dimension", "WAl0OCcIYxr", "veGzholzPQm",
+                                "dimension", "uYxK4wmcPqA", "J5jldMd8OHv",
+                                "dimension", "EYbopBOJWsW", "J5jldMd8OHv")
+  # veGzholzPQm = HIV age, UOqJW6HPvvL = 15-24y, WAl0OCcIYxr = 25-49y, 
+  # J5jldMd8OHv = Facility Type, uYxK4wmcPqA = CHP, EYbopBOJWsW = MCHP
+  
+  response <- GetData_Analytics(dimensions, base_url = "https://play.dhis2.org/2.29/")
+  testthat::expect_equal(response$api_call, paste0("https://play.dhis2.org/2.29/api/29/analytics.json?",
+         "dimension=J5jldMd8OHv:uYxK4wmcPqA;EYbopBOJWsW&dimension=ou:ImspTQPwCqd;LEVEL-2",
+         "&dimension=veGzholzPQm:UOqJW6HPvvL;WAl0OCcIYxr&filter=dx:vihpFUg2WTy",
+         "&filter=pe:LAST_YEAR&outputIdScheme=UID"))
+  testthat::expect_gt(NROW(response$results),0)
+  testthat::expect_named(response$results,
+                         c("Facility Type", "Organisation unit", "HIV age", "Value"))
+})
+
+
 test_that("We can get data with GetDataWithIndicator", {
   item_to_dimension <- data.frame(c("UOqJW6HPvvL", "WAl0OCcIYxr", "uYxK4wmcPqA", "EYbopBOJWsW"),
                             c("veGzholzPQm", "veGzholzPQm", "J5jldMd8OHv", "J5jldMd8OHv"))
@@ -28,7 +53,7 @@ test_that("We can get data with GetDataWithIndicator", {
                                    "LAST_YEAR",     # last calendar year
                                    additional_dimensions = item_to_dimension)     # 2 column data fram of items and dimension
 # API call constructed as we expect
-  expect_equal(response$api_call,paste0("https://play.dhis2.org/2.29/api/29/analytics.csv?outputIdScheme=UID",
+  expect_equal(response$api_call, paste0("https://play.dhis2.org/2.29/api/29/analytics.csv?outputIdScheme=UID",
                                         "&dimension=dx:vihpFUg2WTy&dimension=pe:LAST_YEAR&dimension=ou:LEVEL-2;ImspTQPwCqd",
                                         "&dimension=J5jldMd8OHv:uYxK4wmcPqA;EYbopBOJWsW&dimension=veGzholzPQm:UOqJW6HPvvL;WAl0OCcIYxr"))
 # Get back a time the call was made
