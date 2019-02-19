@@ -395,6 +395,9 @@ GetData_Analytics <-  function(dimensions, base_url){
   
   my_data <- content$rows
   colnames(my_data) <- content$headers$column
+  
+  ##TODO add some code to validate what I got back
+  
   my_data <-tibble::as_tibble(my_data) %>% dplyr::mutate(Value = as.numeric(Value))
   return(list(results = my_data, api_call = response$url))
 }

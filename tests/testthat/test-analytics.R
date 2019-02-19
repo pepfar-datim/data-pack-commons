@@ -16,7 +16,7 @@ require(httptest)
 #DHISLogin("/users/sam/.secrets/play.json")
 ------------
 test_that("We can get data with GetData_Analytics", {
-  DHISLogin("/users/sam/.secrets/play.json")
+httptest::use_mock_api()
   dimensions <- tibble::tribble(~type, ~dim_item_uid, ~dim_uid,
                                 "filter", "vihpFUg2WTy", "dx", #PMTCT positive test rate indicator
                                 "dimension", "ImspTQPwCqd", "ou", # sierra leone
@@ -37,6 +37,7 @@ test_that("We can get data with GetData_Analytics", {
   testthat::expect_gt(NROW(response$results),0)
   testthat::expect_named(response$results,
                          c("Facility Type", "Organisation unit", "HIV age", "Value"))
+  httptest:::stop_mocking()
 })
 
 
