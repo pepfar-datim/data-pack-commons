@@ -348,6 +348,56 @@ Get19TMechanisms <- function(base_url){
     readr::read_csv(col_names = TRUE, col_types = readr::cols(.default = "c"))
 }
 
+
+#' @export
+#' @title GetData_Analytics <-  function(dimensions, base_url)
+#' 
+#' @description calls the analytics endpoint using the details in the dimensions parameter 
+#' @param dimensions data frame - must contain columns named "type", "dim_uid", 
+#' and "dim_item_uid". Type column contains "filter" or "dimension". dim_uid contains
+#' the uid of a dimension or one of the special dimension types e.g. dx, pe, ou, co. 
+#' Column dim_item_uid contains the uid of the dimension item to use which can also be
+#' a "special" uid such as DE_GROUP-zhdJiWlPvCz  
+#' @param base_url string - base address of instance (text before api/ in URL)
+#' @return data frame with the rows of the response
+#'
+#' @example 
+#'   dimensions_sample <- tibble::tribble(~type, ~dim_item_uid, ~dim_uid,
+#'   "filter", "DE_GROUP-zhdJiWlPvCz","dx", 
+#'   "filter", "2018Oct", "pe",
+#'   "dimension", "h11OyvlPxpJ", "ou", 
+#'   "dimension", "LEVEL-5", "ou", 
+#'   "dimension", "f5IPTM7mieH", "LxhLO68FcXm", #tech area = hts_tst
+#'   "dimension", "Som9NRMQqV7","lD2x0c8kywj", #numerator or denominator = numerator
+#'   "dimension", "iPfNX6Ylqp1","HWPJnUTMjEq",  #disagg type = emergenvy ward...
+#'   "dimension", "XU54qYp7mcX", "SH885jaRe0o", 
+#'   "dimension", "UQ6CuhPeQvt","SH885jaRe0o", 
+#'   "dimension", "b2CX6dbLHo4", "SH885jaRe0o",
+#'   "dimension", "egW0hBcZeD2",	"e485zBiR7vG",
+#'   "dimension", "Zfg3cHN5TMz",	"e485zBiR7vG",
+#'   "dimension", "Gxcf2DK8vNc",	"jyUTj5YC3OK",
+#'   "dimension", "Gb0GYkqotaO",	"FokGv0LCTYj")
+#'   GetData_analytics(dimensions_sample, base_url)
+
+GetData_Analytics <-  function(dimensions, base_url){
+  api_call <- paste0(base_url,  
+                     "api/29/analytics.json?",
+                     datapackcommons::FormatForApi_Dimensions(dimensions, "type", 
+                                                              "dim_uid", "dim_item_uid"),
+                     "&outputIdScheme=UID") # gives us UIDs in response                  
+  response <- api_call %>% 
+    utils::URLencode()  %>%
+    RetryAPI("application/json", 20)
+  
+  content <- response %>% 
+    httr::content(., "text") %>% 
+    jsonlite::fromJSON()
+  
+  my_data <- content$rows
+  colnames(my_data) <- content$headers$column
+  my_data <-tibble::as_tibble(my_data) %>% mutate(Value = as.numeric(Value))
+}
+
 ##RUN preceeding functions
 GetSiteDistributionDenom <-  function(base_url, data_element_uid_dsd, data_element_uid_ta,
                          country_uid, planning_level, period, mechanisms_uid, 

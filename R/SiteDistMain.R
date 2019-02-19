@@ -23,13 +23,38 @@ main <- function(){
   output_location <- "/Users/sam/COP data/"
   datapack_export = NULL
   
+
+  
+  dimensions_sample <- tibble::tribble(~type, ~dim_item_uid, ~dim_uid,
+                                       "filter", "DE_GROUP-zhdJiWlPvCz","dx", 
+                                       "filter", "2018Oct", "pe",
+                                       "dimension", "h11OyvlPxpJ", "ou", 
+                                       "dimension", "LEVEL-5", "ou", 
+                                       "dimension", "f5IPTM7mieH", "LxhLO68FcXm", #tech area = hts_tst
+                                       "dimension", "Som9NRMQqV7","lD2x0c8kywj", #numerator or denominator = numerator
+                                       "dimension", "iPfNX6Ylqp1","HWPJnUTMjEq",  #disagg type = emergenvy ward...
+                                       "dimension", "XU54qYp7mcX", "SH885jaRe0o", 
+                                       "dimension", "UQ6CuhPeQvt","SH885jaRe0o", 
+                                       "dimension", "b2CX6dbLHo4", "SH885jaRe0o",
+                                       "dimension", "egW0hBcZeD2",	"e485zBiR7vG",
+                                       "dimension", "Zfg3cHN5TMz",	"e485zBiR7vG",
+                                       "dimension", "Gxcf2DK8vNc",	"jyUTj5YC3OK",
+                                       "dimension", "Gb0GYkqotaO",	"FokGv0LCTYj")
   
   mechanisms_19T <- datapackcommons::Get19TMechanisms(base_url)
   mechanisms_historic_global <- mechanisms_19T #temp
   country_name <-  "Rwanda"
   de_group <- "zhdJiWlPvCz"
   period <- "2018Oct"
+  dimensions_main = c(technical_area = "LxhLO68FcXm",
+                      num_or_denom = "Som9NRMQqV7",
+                      disagg_type = "HWPJnUTMjEq",
+                      ou = "ou"
+                      mechanisms = "SH885jaRe0o")
+  filters_main <- c(dx = "DE_GROUP-zhdJiWlPvCz",
+                    pe = "2018Oct")
 
+  
   DistributeToSites(datapack_export, datapackcommons::Map19Tto20T, de_group,
                     period, datapackcommons::dim_item_sets, mechanisms_19T, 
                     country_name)
@@ -108,29 +133,4 @@ CalculateSiteDensity <- function(data_element_map, dim_item_sets, de_group, coun
                                            "10-14", "Female", NA_character_, "18628", "DSD", "uid11111111", "An Org Unit", "uid22222222","Community", 11)
 } 
 
-
-GetData_Analytics <-  function(base_url, dimensions, filters = NULL){
-  
-  
-  
-  api_call <- paste0(base_url,  
-                     "api/29/analytics.json?filter=dx:Qdn0vmNSflO;mfYq3HGUIX3", # PMTCT_STAT (N, DSD, Age/Sex/KnownNewResult) TARGET: Known Results
-                     # PMTCT_STAT (N, TA, Age/Sex/KnownNewResult) TARGET: Known Results
-                     "&dimension=e485zBiR7vG:tIZRQs0FK5P;QOawCj9oLNS", # some age dimension items
-                     "&dimension=jyUTj5YC3OK:hDBPKTjUPDm;ZOYVg7Hosni;Gxcf2DK8vNc", # some sex dimension items
-                     "&dimension=SH885jaRe0o:", paste0(relevant_mechs, collapse = ";"), # relevant nigeria mechanisms
-                     "&dimension=pe:2018Oct", # FY2019 targets perios
-                     "&dimension=ou:LEVEL-4;PqlFzhuPcF1", # Nigeria
-                     "&outputIdScheme=UID") # gives us UIDs in response                  
-  response <- api_call %>% 
-    utils::URLencode()  %>%
-    RetryAPI("application/json", 20)
-  
-  content <- response %>% 
-    httr::content(., "text") %>% 
-    jsonlite::fromJSON()
-  
-  my_data <- content$rows
-  colnames(my_data) <- content$headers$column
-  my_data <-tibble::as_tibble(my_data) %>% mutate(Value = as.numeric(Value))
   
