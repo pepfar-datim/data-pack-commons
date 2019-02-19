@@ -63,7 +63,7 @@ CopSitesNonMilitary <- function(assignments, data) {
                       by = c("country_name" = "country_name")) %>%
     dplyr::mutate(Site_Type = level)
   
-  data$Site_Type[data$Site_Type == planning_level_in] <- "planning"
+  data$Site_Type[data$Site_Type == planning_level_in] <- "psnu"
   data$Site_Type[data$Site_Type == facility_level_in] <- "facility"
   data$Site_Type[data$Site_Type == community_level_in] <-
     "community"
