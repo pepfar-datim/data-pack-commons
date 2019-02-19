@@ -13,10 +13,10 @@
 
 context("Test interactions with DHIS 2 analytics")
 require(httptest)
-httptest::use_mock_api()
 #DHISLogin("/users/sam/.secrets/play.json")
 ------------
 test_that("We can get data with GetData_Analytics", {
+  DHISLogin("/users/sam/.secrets/play.json")
   dimensions <- tibble::tribble(~type, ~dim_item_uid, ~dim_uid,
                                 "filter", "vihpFUg2WTy", "dx", #PMTCT positive test rate indicator
                                 "dimension", "ImspTQPwCqd", "ou", # sierra leone
@@ -41,6 +41,7 @@ test_that("We can get data with GetData_Analytics", {
 
 
 test_that("We can get data with GetDataWithIndicator", {
+  httptest::use_mock_api()
   item_to_dimension <- data.frame(c("UOqJW6HPvvL", "WAl0OCcIYxr", "uYxK4wmcPqA", "EYbopBOJWsW"),
                             c("veGzholzPQm", "veGzholzPQm", "J5jldMd8OHv", "J5jldMd8OHv"))
 
@@ -79,9 +80,12 @@ test_that("We can get data with GetDataWithIndicator", {
   
 # Sum of values from response and response_filter should be the same
   expect_equal(sum(response$Value), sum(response_filter$Value))
-  })
+  httptest::stop_mocking()
+    })
+
 
 test_that("RetryAPI", {
+  httptest::use_mock_api()
   api_url = paste0("https://play.dhis2.org/2.29/api/29/analytics.csv?outputIdScheme=UID",
   "&dimension=dx:vihpFUg2WTy&dimension=pe:LAST_YEAR&dimension=ou:LEVEL-2;ImspTQPwCqd",
   "&dimension=J5jldMd8OHv:uYxK4wmcPqA;EYbopBOJWsW&dimension=veGzholzPQm:UOqJW6HPvvL;WAl0OCcIYxr")
@@ -89,10 +93,11 @@ test_that("RetryAPI", {
   testthat::expect_error(RetryAPI(api_url, "application/json", 1))
   api_url <- "https://play.dhis2.org/NONSENSE"
   testthat::expect_error(RetryAPI(api_url, "text/html", 1))
-  
+  httptest::stop_mocking()
 })
 
 test_that("GetCountryLevels", {
+  httptest::use_mock_api()
 #  DHISLogin("/users/sam/.secrets/prod.json")
   data <- GetCountryLevels(base_url = "https://www.datim.org/")
   expect_gt(NROW(data), 0)
@@ -106,9 +111,11 @@ test_that("GetCountryLevels", {
   data <- GetCountryLevels(base_url = "https://www.datim.org/", c("Kenya", "Rwanda"))
   expect_equal(NROW(data), 2)
   expect_setequal(data$country_name, c("Kenya", "Rwanda"))
-})
+  httptest::stop_mocking()
+  })
 
 test_that("ValidateCodeIdPairs", {
+  httptest::use_mock_api()
   testthat::expect_true(datapackcommons::ValidateCodeIdPairs("play.dhis2.org/2.29/", 
                                                              c("IN_52486","IN_52491"), 
                                                              c("Uvn6LCg7dVU","OdiHJayrsKo"), 
@@ -138,9 +145,11 @@ test_that("ValidateCodeIdPairs", {
                                          c("IN_52486"), 
                                          c("Uvn6LCg7dVU","OdiHJayrsKo"), 
                                          "indicators"))
+  httptest::stop_mocking()
   })
 
 test_that("ValidateNameIdPairs", {
+  httptest::use_mock_api()
 testthat::expect_true(datapackcommons::ValidateNameIdPairs("play.dhis2.org/2.29/", 
                                                            c("ANC 1 Coverage","ANC 2 Coverage"), 
                                                            c("Uvn6LCg7dVU","OdiHJayrsKo"), 
@@ -170,7 +179,7 @@ testthat::expect_error(
                                        c("ANC 1 Coverage"), 
                                        c("Uvn6LCg7dVU","OdiHJayrsKo"), 
                                        "indicators"))
+httptest::stop_mocking()
 })
 
 
-httptest::stop_mocking()
