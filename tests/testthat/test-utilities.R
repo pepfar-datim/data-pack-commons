@@ -23,7 +23,7 @@ test_that("StackPrefixedCols", {
 
   })
 
-testthat::test_that("Creating PSNU levels and Org unit data to obtain site list data", {
+testthat::test_that("AllSitesList", {
   PSNU_level_test <-
     data.frame(
       "country_level" = 3,
@@ -34,6 +34,8 @@ testthat::test_that("Creating PSNU levels and Org unit data to obtain site list 
       "country_name" = "TestCountry",
       "id" = "TestId"
     )
+  
+  # Same dataframe should have a mix of mil and non mil
   org_list <-
     data.frame(
       "organisationunitid" = 1234,
@@ -57,15 +59,17 @@ testthat::test_that("Creating PSNU levels and Org unit data to obtain site list 
       "uidlevel8" = NA,
       "level8name" = NA,
       "uidlevel9" = NA,
-      "level9name" = NA
+      "level9name" = NA,
+      stringsAsFactors = FALSE
     )
-  testthat::expect_true(datapackcommons::all_sites_list(PSNU_level_test,org_list)$Site_Type == "community")
+  testthat::expect_true(AllSitesList(PSNU_level_test,org_list)$Site_Type == "community")
   
   org_list$level <- 7
-  testthat::expect_true(datapackcommons::all_sites_list(PSNU_level_test,org_list)$Site_Type == "facility")
+  testthat::expect_true(AllSitesList(PSNU_level_test,org_list)$Site_Type == "facility")
   
   org_list$level <- 5
-  testthat::expect_true(datapackcommons::all_sites_list(PSNU_level_test,org_list)$Site_Type == "psnu")
+  testthat::expect_true(AllSitesList(PSNU_level_test,org_list)$Site_Type == "psnu")
   
-  
+  mil_org_list <- rbind(org_list, c(1234,"UnitId","_MilitaryName",4,"Level1Uid","NameAtLevel1","Level2Uid","NameAtLevel2","TestId","TestCountry","Level4Name","_MilitaryName",NA,NA,NA,NA,NA,NA,NA,NA,NA,NA))
+  testthat::expect_true(AllSitesList(PSNU_level_test,mil_org_list)$Site_Type[2] == "Military")
 })

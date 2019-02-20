@@ -1,3 +1,5 @@
+library(plyr)
+
 #' @export
 #' @title StackPrefixedCols(data, prefixes)
 #' 
@@ -89,7 +91,7 @@ MilitarySiteData <- function(org_data) {
 }
 
 #' @export
-#' @title all_sites_list(assignments, org_data)
+#' @title AllSitesList(assignments, org_data)
 #' 
 #' @description Takes the assignments table containing all the countries and their site levels for different types
 #' as well as the orghierarchy data containing all the sites, to combine and give site type and psnu name, id for each site 
@@ -97,11 +99,11 @@ MilitarySiteData <- function(org_data) {
 #' @param org_data dataframe - List of all sites and their data with level names and UIDs, as well as site levels: api/dataStore/dataSetAssignments/ous
 #' @return  dataframe containing all sites and their site types, their psnu names, psnu uids and country/id
 #'
-all_sites_list <- function(assignments, org_data) {
+AllSitesList <- function(assignments, org_data) {
   # This df contains all the non military sites
-  temp = plyr::ddply(
+  non_mil_output = plyr::ddply(
     assignments,
-    .(
+    plyr::.(
       country_level,
       planning_level,
       community_level,
@@ -112,7 +114,8 @@ all_sites_list <- function(assignments, org_data) {
   )
   
   # This df contains all the military sites
-  temp_2 <- MilitarySiteData(org_data)
+  mil_output <- MilitarySiteData(org_data)
   
-  return(all_sites <- dplyr::bind_rows(temp, temp_2))
+  # Check to see if you obtain anything from military site data or non mil data before binding
+  return(all_sites <- dplyr::bind_rows(non_mil_output, mil_output))
 }
