@@ -397,8 +397,11 @@ GetData_Analytics <-  function(dimensions, base_url){
     jsonlite::fromJSON()
   
   my_data <- content$rows
+  if(length(dim(my_data)) != 2){ # empty table returned
+    return(list(results = NULL, api_call = response$url))
+  } 
   colnames(my_data) <- content$headers$column
-  
+ 
   ##TODO add some code to validate what I got back
   
   my_data <-tibble::as_tibble(my_data) %>% dplyr::mutate(Value = as.numeric(Value))
