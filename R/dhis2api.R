@@ -387,7 +387,7 @@ GetData_Analytics <-  function(dimensions, base_url){
                      "api/29/analytics.json?",
                      datapackcommons::FormatForApi_Dimensions(dimensions, "type", 
                                                               "dim_uid", "dim_item_uid"),
-                     "&outputIdScheme=UID") # gives us UIDs in response                  
+                     "&outputIdScheme=UID&hierarchyMeta=true") # gives us UIDs in response                  
   response <- api_call %>% 
     utils::URLencode()  %>%
     RetryAPI("application/json", 20)
@@ -398,14 +398,14 @@ GetData_Analytics <-  function(dimensions, base_url){
   
   my_data <- content$rows
   if(length(dim(my_data)) != 2){ # empty table returned
-    return(list(results = NULL, api_call = response$url))
+    return(list(results = NULL, api_call = response$url, ou_hierarchy = NULL))
   } 
   colnames(my_data) <- content$headers$column
  
   ##TODO add some code to validate what I got back
   
   my_data <-tibble::as_tibble(my_data) %>% dplyr::mutate(Value = as.numeric(Value))
-  return(list(results = my_data, api_call = response$url))
+  return(list(results = my_data, api_call = response$url, ou_hierarchy = content$metaData$ouHierarchy))
 }
 
 ##RUN preceeding functions
@@ -421,7 +421,7 @@ GetSiteDistributionDenom <-  function(base_url, data_element_uid_dsd, data_eleme
    "&dimension=SH885jaRe0o:", paste0(relevant_mechs, collapse = ";"), # relevant nigeria mechanisms
    "&dimension=pe:2018Oct", # FY2019 targets perios
    "&dimension=ou:LEVEL-4;PqlFzhuPcF1", # Nigeria
-   "&outputIdScheme=UID") # gives us UIDs in response                  
+   "&outputIdScheme=UID&hierarchyMeta=true") # gives us UIDs in response                  
     response <- api_call %>% 
      utils::URLencode()  %>%
      RetryAPI("application/json", 20)
