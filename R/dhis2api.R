@@ -401,11 +401,15 @@ GetData_Analytics <-  function(dimensions, base_url){
     return(list(results = NULL, api_call = response$url, ou_hierarchy = NULL))
   } 
   colnames(my_data) <- content$headers$column
+  my_data <- tibble::as_tibble(my_data)
+  ou_hierarchy <- purrr::map_chr(my_data[["Organisation unit"]], function(x) content$metaData$ouHierarchy[[x]])
  
   ##TODO add some code to validate what I got back
   
-  my_data <-tibble::as_tibble(my_data) %>% dplyr::mutate(Value = as.numeric(Value))
-  return(list(results = my_data, api_call = response$url, ou_hierarchy = content$metaData$ouHierarchy))
+  my_data <-
+    dplyr::mutate(my_data, Value = as.numeric(Value), ou_hierarchy = ou_hierarchy)
+  
+  return(list(results = my_data, api_call = response$url))
 }
 
 ##RUN preceeding functions
