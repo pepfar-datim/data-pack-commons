@@ -4,19 +4,19 @@ main <- function(){
                     build = TRUE,
                     upgrade = FALSE)
   
-  # require(datapackcommons)
-  # require(tidyverse)
-  # require(jsonlite)
+  require(plyr)
+  require(datapackcommons)
+  require(tidyverse)
+  require(jsonlite)
   # require(lubridate)
   # require(rlang)
-  # require(assertthat)
-  # require(foreach)
+  require(assertthat)
+  require(foreach)
   # # require(rlist)
   # 
-  require(datapackcommons)
   require(datimvalidation)
-  require(tidyverse)
-  DHISLogin("/users/sam/.secrets/triage.json")
+  
+  DHISLogin("/users/sam/.secrets/prod.json")
   base_url <- getOption("baseurl")
   options(maxCacheAge = 0)
   repo_path <- "/users/sam/Documents/GitHub/COP-19-Target-Setting/"
@@ -41,22 +41,21 @@ main <- function(){
   
   mechanisms_19T <- datapackcommons::Get19TMechanisms(base_url)
   mechanisms_historic_global <- mechanisms_19T #temp
-  country_name <-  "Rwanda"
-  de_group <- "zhdJiWlPvCz"
-  period <- "2018Oct"
-  dimensions_main = c(technical_area = "LxhLO68FcXm",
+  country_details <- datapackcommons::GetCountryLevels(base_url, "Rwanda")
+
+  
+    dimensions_main = c(technical_area = "LxhLO68FcXm",
                       num_or_denom = "Som9NRMQqV7",
                       disagg_type = "HWPJnUTMjEq",
                       ou = "ou",
                       mechanisms = "SH885jaRe0o")
-  filters_main <- c(dx = "DE_GROUP-zhdJiWlPvCz",
-                    pe = "2018Oct")
 
-  
-  DistributeToSites(datapack_export, datapackcommons::Map19Tto20T, de_group,
-                    period, datapackcommons::dim_item_sets, mechanisms_19T, 
-                    country_name)
 
+  dimensions_map <- tibble::tribble(~type, ~dim_item_uid, ~dim_uid,
+                                "filter", "DE_GROUP-zhdJiWlPvCz","dx", 
+                                "filter", "2018Oct", "pe")
+  DistributeToSites(datapack_export, datapackcommons::Map19Tto20T, 
+                    datapackcommons::dim_item_sets, dimensions, country_details)
 }
 
 # Takes data pack export and details for distributiong it and returns required output for site tool 

@@ -338,6 +338,10 @@ ValidateCodeIdPairs <- function(base_url, codes, ids, type){
 }
 
 #' @export
+#' @title Get19TMechanisms(base_url)
+#' 
+#' @description gets data from SQL view vtNAsZcMZiU - mechanisms with 2018Oct data
+#' @param base_url string - base address of instance (text before api/ in URL)
 Get19TMechanisms <- function(base_url){
   # SQL view will retrieve list of mechanisms for which there is FY2019 data - 2018Oct period
   api_call <- paste0(base_url, "api/sqlViews/vtNAsZcMZiU/data.csv") # limit calls to this SQL view on prod
@@ -347,7 +351,6 @@ Get19TMechanisms <- function(base_url){
     httr::content(., "text") %>% 
     readr::read_csv(col_names = TRUE, col_types = readr::cols(.default = "c"))
 }
-
 
 #' @export
 #' @title GetData_Analytics <-  function(dimensions, base_url)
