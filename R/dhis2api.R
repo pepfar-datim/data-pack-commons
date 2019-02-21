@@ -180,7 +180,10 @@ GetDataWithIndicator <- function(base_url, indicator, org_units, level, periods,
         httr::content(., "text") %>% 
         readr::read_csv(col_names = TRUE, col_types = readr::cols(.default = "c", Value = "d"))
       
-      assertthat::has_name(my_data, "Value")
+      assertthat::has_name(my_data, "Value") 
+      # not sure I need preceeding line now that I verify content type in retry api
+      # this was here to catch recieving the "log in" screen which was html
+      
       if(NROW(my_data) > 0 && !(indicator %in% my_data$Data)){
         stop("response$url: ", response$url, " slice(my_data,1): ", slice(my_data,1))
         assertthat::assert_that(indicator %in% my_data$Data)
@@ -417,18 +420,21 @@ GetData_Analytics <-  function(dimensions, base_url){
   
   my_data <- content$rows
   if(length(dim(my_data)) != 2){ # empty table returned
-    return(list(results = NULL, api_call = response$url, ou_hierarchy = NULL))
+    return(list(analytics_output = NULL, api_call = response$url))
   } 
   colnames(my_data) <- content$headers$column
   my_data <- tibble::as_tibble(my_data)
-  ou_hierarchy <- purrr::map_chr(my_data[["Organisation unit"]], function(x) content$metaData$ouHierarchy[[x]])
- 
-  ##TODO add some code to validate what I got back
+
+  ##TODO Sid add some code to validate what we got back from api matches what we requestd
+  ## Perhaps make sure there are columns where we specified the actual uid for a dimension and that 
+  ##the items in these columns were requested.
+  ## If there is a mismatch stop()
   
+  ou_hierarchy <- purrr::map_chr(my_data[["Organisation unit"]], 
+                                 function(x) content$metaData$ouHierarchy[[x]])
   my_data <-
     dplyr::mutate(my_data, Value = as.numeric(Value), ou_hierarchy = ou_hierarchy)
-  
-  return(list(results = my_data, api_call = response$url))
+  return(list(analytics_output = my_data, api_call = response$url))
 }
 
 ##RUN preceeding functions
