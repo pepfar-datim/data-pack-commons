@@ -209,6 +209,3 @@ MapDimToOptions <- function(data, items_to_options, allocate){
   }
 }
 
-
-
-temp=main()
