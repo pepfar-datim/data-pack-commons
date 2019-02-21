@@ -107,7 +107,7 @@ CalculateSiteDensity <- function(data_element_map_item, country_details,
     if(NROW(density_denominators$results) == 0){
       return("No Data") # to do return something more useful?
     }
-    
+    return(density_denominators)
     # Join analytics output (dimensions) to category options
     age_set <- dim_item_sets %>% 
       filter(model_sets == data_element_map_item[[1,"age_set"]])

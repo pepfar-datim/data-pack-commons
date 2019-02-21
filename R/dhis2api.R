@@ -435,7 +435,7 @@ GetData_Analytics <-  function(dimensions, base_url){
                                  function(x) content$metaData$ouHierarchy[[x]])
   my_data <-
     dplyr::mutate(my_data, Value = as.numeric(Value), ou_hierarchy = ou_hierarchy)
-  return(list(results = my_data, api_call = response$url))
+  return(list(results = my_data, api_call = response$url, content = content))
 }
 
 ##RUN preceeding functions
