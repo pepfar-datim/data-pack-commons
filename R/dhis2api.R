@@ -42,7 +42,7 @@ DHISLogin<-function(config_path = NA) {
 
 #' @export
 DHISLogin_Play<-function(version) {
-  url <- URLencode(URL = paste0("play.dhis2.org/", version, "/api/me"))
+  url <- URLencode(URL = paste0("https://play.dhis2.org/", version, "/api/me"))
   #Logging in here will give us a cookie to reuse
   r <- httr::GET(url ,
                  httr::authenticate("admin", "district"),
@@ -387,23 +387,19 @@ Get19TMechanisms <- function(base_url){
 #' @return data frame with the rows of the response
 #'
 #' @example
-#'   dimensions_sample <- tibble::tribble(~type, ~dim_item_uid, ~dim_uid,
-#'   "filter", "DE_GROUP-zhdJiWlPvCz","dx", 
-#'   "filter", "2018Oct", "pe",
-#'   "dimension", "h11OyvlPxpJ", "ou", 
-#'   "dimension", "LEVEL-5", "ou", 
-#'   "dimension", "f5IPTM7mieH", "LxhLO68FcXm", #tech area = hts_tst
-#'   "dimension", "Som9NRMQqV7","lD2x0c8kywj", #numerator or denominator = numerator
-#'   "dimension", "iPfNX6Ylqp1","HWPJnUTMjEq",  #disagg type = emergenvy ward...
-#'   "dimension", "XU54qYp7mcX", "SH885jaRe0o", 
-#'   "dimension", "UQ6CuhPeQvt","SH885jaRe0o", 
-#'   "dimension", "b2CX6dbLHo4", "SH885jaRe0o",
-#'   "dimension", "egW0hBcZeD2",	"e485zBiR7vG",
-#'   "dimension", "Zfg3cHN5TMz",	"e485zBiR7vG",
-#'   "dimension", "Gxcf2DK8vNc",	"jyUTj5YC3OK",
-#'   "dimension", "Gb0GYkqotaO",	"FokGv0LCTYj")
-#'   
-#'   GetData_analytics(dimensions_sample, base_url)
+#'  dimensions_sample <- tibble::tribble(~type, ~dim_item_uid, ~dim_uid,
+#' "filter", "vihpFUg2WTy", "dx", #PMTCT positive test rate indicator
+#' "dimension", "ImspTQPwCqd", "ou", # sierra leone
+#' "dimension", "LEVEL-2", "ou", 
+#' "filter", "LAST_YEAR", "pe",
+#' "dimension", "UOqJW6HPvvL", "veGzholzPQm",
+#' "dimension", "WAl0OCcIYxr", "veGzholzPQm",
+#' "dimension", "uYxK4wmcPqA", "J5jldMd8OHv",
+#' "dimension", "EYbopBOJWsW", "J5jldMd8OHv")
+#' # veGzholzPQm = HIV age, UOqJW6HPvvL = 15-24y, WAl0OCcIYxr = 25-49y, 
+#' # J5jldMd8OHv = Facility Type, uYxK4wmcPqA = CHP, EYbopBOJWsW = MCHP
+#'   datapackcommons::DHISLogin_Play("2.29")
+#'   GetData_Analytics(dimensions_sample, "https://play.dhis2.org/2.29/")
 
 GetData_Analytics <-  function(dimensions, base_url){
   api_call <- paste0(base_url,  
