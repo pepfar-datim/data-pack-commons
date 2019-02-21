@@ -16,7 +16,8 @@ require(httptest)
 #DHISLogin("/users/sam/.secrets/play.json")
 ------------
 test_that("We can get data with GetData_Analytics", {
-httptest::use_mock_api()
+#httptest::use_mock_api()
+  datapackcommons::DHISLogin_Play("2.29")
   dimensions <- tibble::tribble(~type, ~dim_item_uid, ~dim_uid,
                                 "filter", "vihpFUg2WTy", "dx", #PMTCT positive test rate indicator
                                 "dimension", "ImspTQPwCqd", "ou", # sierra leone
@@ -33,11 +34,12 @@ httptest::use_mock_api()
   testthat::expect_equal(response$api_call, paste0("https://play.dhis2.org/2.29/api/29/analytics.json?",
          "dimension=J5jldMd8OHv:uYxK4wmcPqA;EYbopBOJWsW&dimension=ou:ImspTQPwCqd;LEVEL-2",
          "&dimension=veGzholzPQm:UOqJW6HPvvL;WAl0OCcIYxr&filter=dx:vihpFUg2WTy",
-         "&filter=pe:LAST_YEAR&outputIdScheme=UID"))
+         "&filter=pe:LAST_YEAR&outputIdScheme=UID&hierarchyMeta=true"))
   testthat::expect_gt(NROW(response$results),0)
   testthat::expect_named(response$results,
-                         c("Facility Type", "Organisation unit", "HIV age", "Value"))
-  httptest:::stop_mocking()
+                         c("Facility Type", "Organisation unit", 
+                           "HIV age", "Value","ou_hierarchy"))
+#  httptest:::stop_mocking()
 })
 
 

@@ -20,4 +20,5 @@ data frame with the rows of the response
 }
 \description{
 calls the analytics endpoint using the details in the dimensions parameter
+dataframe
 }
