@@ -29,8 +29,8 @@ main <- function(){
   country_name <- "Rwanda" 
   
   DistributeToSites(datapack_export, 
-                    datapackcommons::Map19Tto20T,# %>% 
-    #                  filter(stringr::str_detect(technical_area,"PMTCT")), #TODO remove slice
+                    datapackcommons::Map19Tto20T %>% 
+                      filter(stringr::str_detect(technical_area,"TST")), #TODO remove slice
                     mechanisms_19T_uid,
             datapackcommons::dim_item_sets, 
                     datapackcommons::GetCountryLevels(base_url, country_name), base_url)
@@ -208,3 +208,7 @@ MapDimToOptions <- function(data, items_to_options, allocate){
       RenameDimensionColumns(stringr::str_remove(cop_category, "_set"))
   }
 }
+
+
+
+temp=main()

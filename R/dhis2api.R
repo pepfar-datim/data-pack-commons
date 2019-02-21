@@ -420,7 +420,7 @@ GetData_Analytics <-  function(dimensions, base_url){
   
   my_data <- content$rows
   if(length(dim(my_data)) != 2){ # empty table returned
-    return(list(analytics_output = NULL, api_call = response$url))
+    return(list(analytics_output = NULL, api_call = response$url, content = content))
   } 
   colnames(my_data) <- content$headers$column
   my_data <- tibble::as_tibble(my_data)
