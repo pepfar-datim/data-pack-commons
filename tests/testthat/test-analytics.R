@@ -35,8 +35,8 @@ test_that("We can get data with GetData_Analytics", {
          "dimension=J5jldMd8OHv:uYxK4wmcPqA;EYbopBOJWsW&dimension=ou:ImspTQPwCqd;LEVEL-2",
          "&dimension=veGzholzPQm:UOqJW6HPvvL;WAl0OCcIYxr&filter=dx:vihpFUg2WTy",
          "&filter=pe:LAST_YEAR&outputIdScheme=UID&hierarchyMeta=true"))
-  testthat::expect_gt(NROW(response$analytics_output),0)
-  testthat::expect_named(response$analytics_output,
+  testthat::expect_gt(NROW(response$results),0)
+  testthat::expect_named(response$results,
                          c("Facility Type", "Organisation unit", 
                            "HIV age", "Value","ou_hierarchy"))
 #  httptest:::stop_mocking()

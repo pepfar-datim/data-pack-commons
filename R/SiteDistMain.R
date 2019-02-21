@@ -104,7 +104,7 @@ CalculateSiteDensity <- function(data_element_map_item, country_details,
                       "dimension", paste0("LEVEL-", country_details$planning_level), "ou") %>% 
       dplyr::bind_rows(dimensions_common) %>% 
       datapackcommons::GetData_Analytics(base_url)
-    if(NROW(density_denominators$analytics_output) == 0){
+    if(NROW(density_denominators$results) == 0){
       return("No Data") # to do return something more useful?
     }
     
@@ -117,7 +117,7 @@ CalculateSiteDensity <- function(data_element_map_item, country_details,
       filter(model_sets == data_element_map_item[[1, "kp_set"]])
     other_disagg <-  dim_item_sets %>% 
       filter(model_sets == data_element_map_item[[1, "other_disagg"]])
-    mapped_data <- list(density_denominators$analytics_output, 
+    mapped_data <- list(density_denominators$results, 
                         age_set, 
                         sex_set, 
                         kp_set,

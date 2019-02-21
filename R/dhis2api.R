@@ -429,12 +429,13 @@ GetData_Analytics <-  function(dimensions, base_url){
   ## Perhaps make sure there are columns where we specified the actual uid for a dimension and that 
   ##the items in these columns were requested.
   ## If there is a mismatch stop()
+  ## is there other useful metadata we want to return?
   
   ou_hierarchy <- purrr::map_chr(my_data[["Organisation unit"]], 
                                  function(x) content$metaData$ouHierarchy[[x]])
   my_data <-
     dplyr::mutate(my_data, Value = as.numeric(Value), ou_hierarchy = ou_hierarchy)
-  return(list(analytics_output = my_data, api_call = response$url))
+  return(list(results = my_data, api_call = response$url))
 }
 
 ##RUN preceeding functions
