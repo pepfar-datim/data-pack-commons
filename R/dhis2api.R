@@ -40,6 +40,21 @@ DHISLogin<-function(config_path = NA) {
   }
 }
 
+#' @export
+DHISLogin_Play<-function(version) {
+  url <- URLencode(URL = paste0("play.dhis2.org/", version, "/api/me"))
+  #Logging in here will give us a cookie to reuse
+  r <- httr::GET(url ,
+                 httr::authenticate("admin", "district"),
+                 httr::timeout(60))
+  if(r$status != 200L){
+    stop("Could not authenticate you with the server!")
+  } else {
+    me <- jsonlite::fromJSON(httr::content(r,as = "text"))
+    return(TRUE)
+  }
+}
+
 # #' http_was_redirected
 # #'
 # #' @param response an httr response object, e.g. from a call to httr::GET()
@@ -344,18 +359,25 @@ ValidateCodeIdPairs <- function(base_url, codes, ids, type){
 #' @param base_url string - base address of instance (text before api/ in URL)
 Get19TMechanisms <- function(base_url){
   # SQL view will retrieve list of mechanisms for which there is FY2019 data - 2018Oct period
-  api_call <- paste0(base_url, "api/sqlViews/vtNAsZcMZiU/data.csv") # limit calls to this SQL view on prod
+  api_call <- paste0(base_url, "api/sqlViews/vtNAsZcMZiU/data.csv") 
+  # limit calls to this SQL view on prod
   # it locks data value table
   mech_list_r <-  RetryAPI(api_call, "application/csv")
   mech_list_parsed <- mech_list_r %>% 
     httr::content(., "text") %>% 
     readr::read_csv(col_names = TRUE, col_types = readr::cols(.default = "c"))
+  if(NROW(mech_list_parsed) > 0){
+    return(mech_list_parsed)
+  }
+  # If I got here critical error
+  stop("Unable to get 19T mechanisms")
 }
 
 #' @export
 #' @title GetData_Analytics <-  function(dimensions, base_url)
 #' 
-#' @description calls the analytics endpoint using the details in the dimensions parameter 
+#' @description calls the analytics endpoint using the details in the dimensions parameter
+#' dataframe 
 #' @param dimensions data frame - must contain columns named "type", "dim_uid", 
 #' and "dim_item_uid". Type column contains "filter" or "dimension". dim_uid contains
 #' the uid of a dimension or one of the special dimension types e.g. dx, pe, ou, co. 
@@ -364,7 +386,7 @@ Get19TMechanisms <- function(base_url){
 #' @param base_url string - base address of instance (text before api/ in URL)
 #' @return data frame with the rows of the response
 #'
-#' @example 
+#' @example
 #'   dimensions_sample <- tibble::tribble(~type, ~dim_item_uid, ~dim_uid,
 #'   "filter", "DE_GROUP-zhdJiWlPvCz","dx", 
 #'   "filter", "2018Oct", "pe",
@@ -380,6 +402,7 @@ Get19TMechanisms <- function(base_url){
 #'   "dimension", "Zfg3cHN5TMz",	"e485zBiR7vG",
 #'   "dimension", "Gxcf2DK8vNc",	"jyUTj5YC3OK",
 #'   "dimension", "Gb0GYkqotaO",	"FokGv0LCTYj")
+#'   
 #'   GetData_analytics(dimensions_sample, base_url)
 
 GetData_Analytics <-  function(dimensions, base_url){
