@@ -2,14 +2,16 @@
 % Please edit documentation in R/Utility-Functions.R
 \name{AllSitesList}
 \alias{AllSitesList}
-\title{AllSitesList(assignments, org_data)}
+\title{AllSitesList(assignments, flat_ouhierarchy)}
 \usage{
-AllSitesList(assignments, org_data)
+AllSitesList(assignments, flat_ouhierarchy)
 }
 \arguments{
-\item{assignments}{dataframe - contains data of each country, their planning, community, facility and country level: /api/sqlViews/kEtZ2bSQCu2/data.json}
+\item{assignments}{dataframe - contains data of each country, their planning, community, 
+facility and country level: api/dataStore/dataSetAssignments/ous}
 
-\item{org_data}{dataframe - List of all sites and their data with level names and UIDs, as well as site levels: api/dataStore/dataSetAssignments/ous}
+\item{flat_ouhierarchy}{dataframe - List of all sites and their data with level names and UIDs, 
+as well as site levels: /api/sqlViews/kEtZ2bSQCu2/data.json}
 }
 \value{
 dataframe containing all sites and their site types, their psnu names, psnu uids and country/id

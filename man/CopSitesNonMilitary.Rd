@@ -2,19 +2,24 @@
 % Please edit documentation in R/Utility-Functions.R
 \name{CopSitesNonMilitary}
 \alias{CopSitesNonMilitary}
-\title{CopSitesNonMilitary(assignments, data)}
+\title{CopSitesNonMilitary(assignments, flat_ouhierarchy)}
 \usage{
-CopSitesNonMilitary(assignments, data)
+CopSitesNonMilitary(assignments, flat_ouhierarchy)
 }
 \arguments{
-\item{assignments}{dataframe - contains data of each country, their planning, community, facility and country level: /api/sqlViews/kEtZ2bSQCu2/data.json}
+\item{assignments}{dataframe - contains data of each country, their planning, community, facility and country level: api/dataStore/dataSetAssignments/ous}
 
-\item{data}{dataframe - List of all sites and their data with level names and UIDs, as well as site levels: api/dataStore/dataSetAssignments/ous}
+\item{flat_ouhierarchy}{dataframe - List of all sites and their data with level names and UIDs, as well as site levels: /api/sqlViews/kEtZ2bSQCu2/data.json}
 }
 \value{
 dataframe containing all sites - non military and their site types, their psnu names, psnu uids and country/id
 }
 \description{
 Takes the assignments table containing all the countries and their site levels for different types
-as well as the orghierarchy data containing all the sites, to combine and give site type and psnu name, id for each site
+as well as the orghierarchy data containing all the sites, to combine and give site type and psnu name, id for each site 
+Only works for countries with the same country_level, planning_level, community_level, facility_level.
+Designed to work with ddply over an unfilter assignments table e.g. 
+ plyr::ddply(assignments, plyr::.(country_level,planning_level,community_level,facility_level),
+ CopSitesNonMilitary,flat_ouhierarchy)
+ Called by AllSitesList
 }

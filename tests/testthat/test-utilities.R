@@ -32,7 +32,8 @@ testthat::test_that("AllSitesList", {
       "facility_level" = 7,
       "community_level" = 6,
       "country_name" = "TestCountry",
-      "id" = "TestId"
+      "id" = "TestId",
+      stringsAsFactors = FALSE
     )
   
   # Same dataframe should have a mix of mil and non mil
@@ -72,4 +73,8 @@ testthat::test_that("AllSitesList", {
   
   mil_org_list <- rbind(org_list, c(1234,"UnitId","_MilitaryName",4,"Level1Uid","NameAtLevel1","Level2Uid","NameAtLevel2","TestId","TestCountry","Level4Name","_MilitaryName",NA,NA,NA,NA,NA,NA,NA,NA,NA,NA))
   testthat::expect_true(AllSitesList(PSNU_level_test,mil_org_list)$Site_Type[2] == "Military")
+  
+  # military psnu at wrong level
+  mil_org_list <- rbind(org_list, c(1234,"UnitId","_MilitaryName",5,"Level1Uid","NameAtLevel1","Level2Uid","NameAtLevel2","TestId","TestCountry","Level4Name","_MilitaryName",NA,NA,NA,NA,NA,NA,NA,NA,NA,NA))
+  testthat::expect_error(AllSitesList(PSNU_level_test,mil_org_list))
 })

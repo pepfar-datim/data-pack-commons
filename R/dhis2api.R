@@ -1,5 +1,5 @@
 
-# devtools::check("/Users/siddharth/Documents/GitHub/data-pack-commons")
+# devtools::check("/Users/sam/Documents/GitHub/data-pack-commons")
 # model_data_pack_input_20190201_2
 
 #' @title LoadConfig(config_path)
@@ -168,7 +168,7 @@ GetDataWithIndicator <- function(base_url, indicator, org_units, level, periods,
       
       assertthat::has_name(my_data, "Value")
       if(NROW(my_data) > 0 && !(indicator %in% my_data$Data)){
-        stop("response$url: ", response$url, " slice(my_data,1): ", slice(my_data,1))
+        stop("response$url: ", response$url, " slice(my_data,1): ", dplyr::slice(my_data,1))
         assertthat::assert_that(indicator %in% my_data$Data)
       }
 #      break # if I am here then I got a valid result set

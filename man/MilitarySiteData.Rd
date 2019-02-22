@@ -2,12 +2,13 @@
 % Please edit documentation in R/Utility-Functions.R
 \name{MilitarySiteData}
 \alias{MilitarySiteData}
-\title{MilitarySiteData(org_data)}
+\title{MilitarySiteData(flat_ouhierarchy)}
 \usage{
-MilitarySiteData(org_data)
+MilitarySiteData(flat_ouhierarchy)
 }
 \arguments{
-\item{org_data}{- dataframe - List of all sites and their data with level names and UIDs, as well as site levels: api/dataStore/dataSetAssignments/ous}
+\item{flat_ouhierarchy}{- flat_ouhierarchy dataframe - List of all sites and their data 
+with level names and UIDs, as well as site levels: /api/sqlViews/kEtZ2bSQCu2/data.json}
 }
 \value{
 dataframe with all military sites and their PSNU names, IDs
