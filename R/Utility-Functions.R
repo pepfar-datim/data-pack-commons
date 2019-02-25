@@ -114,10 +114,10 @@ MapDimToOptions <- function(data, items_to_options, allocate){
   if(allocate == "distribute"){
     joined_data %>%
       mutate(Value = Value * weight) %>%
-      RenameDimensionColumns(stringr::str_remove(cop_category, "_set"))
+      RenameDimensionColumns(cop_category)
   } else{
     joined_data %>%
-      RenameDimensionColumns(stringr::str_remove(cop_category, "_set"))
+      RenameDimensionColumns(cop_category)
   }
 }
 
