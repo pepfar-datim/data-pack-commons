@@ -113,7 +113,6 @@ CalculateSiteDensity <- function(data_element_map_item, country_details,
     
     ### ~technical area, , ~psnu, ~old_mechanism_uid, ~new_mechanism_uid, ~weight 
     
-    return(density_denominators)
     # Join analytics output (dimensions) to category options
     age_set <- dim_item_sets %>% 
       filter(model_sets == data_element_map_item[[1,"age_set"]])
@@ -208,10 +207,35 @@ MapDimToOptions <- function(data, items_to_options, allocate){
   if(allocate == "distribute"){
     joined_data %>%
       mutate(Value = Value * weight) %>%
-      RenameDimensionColumns(stringr::str_remove(cop_category, "_set"))
+      RenameDimensionColumns(cop_category)
   } else{
     joined_data %>%
-      RenameDimensionColumns(stringr::str_remove(cop_category, "_set"))
+      RenameDimensionColumns(cop_category)
   }
 }
 
+RenameAnalyticsColumns <- function(data){
+  data %>% dplyr::rename(!!c("value"="Value", indicator_uid="Data", 
+                             "org_unit_uid" = "Organisation unit", 
+                             "period" = "Period")) %>% return()
+  
+
+AggByAgeSexKpOuMech <- function(data) {
+  #to do add assertions must include value and org unit columns
+  aggregated_data <- data %>%
+    select_if(names(.) %in% c("sex_option_uid", "age_option_uid", "kp_option_uid",
+                              "org_unit_uid", "value")) %>%
+    group_by_if(names(.) %in% c("sex_option_uid", "age_option_uid", "kp_option_uid",
+                                "org_unit_uid")) %>%
+    summarise(count = n(), minimum = min(value), 
+              maximum = max(value), value = sum(value)) %>% 
+    ungroup()
+  
+  if (max(aggregated_data$count) == 1) { # nothing aggregated
+    return(list(processed = data, was_aggregated = FALSE))
+  } 
+  else {
+    return(list(processed = aggregated_data, was_aggregated = TRUE, 
+                aggregations = filter(aggregated_data, count>1)))
+  }
+}
