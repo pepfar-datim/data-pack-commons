@@ -107,6 +107,12 @@ CalculateSiteDensity <- function(data_element_map_item, country_details,
     if(NROW(density_denominators$results) == 0){
       return("No Data") # to do return something more useful?
     }
+    
+    ### MEchanism to Mechanism mapping would happen right here.
+    ### The config fle would look something like this
+    
+    ### ~technical area, , ~psnu, ~old_mechanism_uid, ~new_mechanism_uid, ~weight 
+    
     return(density_denominators)
     # Join analytics output (dimensions) to category options
     age_set <- dim_item_sets %>% 
