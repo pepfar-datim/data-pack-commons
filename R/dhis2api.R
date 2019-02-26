@@ -369,8 +369,17 @@ Get19TMechanisms <- function(base_url){
   mech_list_parsed <- mech_list_r %>% 
     httr::content(., "text") %>% 
     readr::read_csv(col_names = TRUE, col_types = readr::cols(.default = "c"))
-  if(NROW(mech_list_parsed) > 0){
-    return(mech_list_parsed)
+  
+  mech_cat_opt_combos <-  datapackcommons::getMetadata(base_url, 
+                                      "categoryCombos", 
+                                      filters = "id:eq:wUpfppgjEza", 
+                                      "categoryOptionCombos[code,id~rename(categoryOptionComboId),name,categoryOptions[id~rename(categoryOptionId)]]")[[1,"categoryOptionCombos"]] %>% 
+    dplyr::as_tibble() %>% 
+    unnest() %>% 
+    dplyr::inner_join(mech_list_parsed, by = c("categoryOptionComboId" = "uid"))
+  
+  if(NROW(mech_cat_opt_combos) > 0){
+    return(mech_cat_opt_combos)
   }
   # If I got here critical error
   stop("Unable to get 19T mechanisms")
@@ -435,7 +444,7 @@ GetData_Analytics <-  function(dimensions, base_url){
                                  function(x) content$metaData$ouHierarchy[[x]])
   my_data <-
     dplyr::mutate(my_data, Value = as.numeric(Value), ou_hierarchy = ou_hierarchy)
-  return(list(results = my_data, api_call = response$url))
+  return(list(results = my_data, api_call = response$url, content = content))
 }
 
 ##RUN preceeding functions
