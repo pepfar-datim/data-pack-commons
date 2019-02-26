@@ -64,8 +64,7 @@ FormatForApi_Dimensions <- function(data, type_col, dim_id_col, item_id_col){
 #' @export
 #' @title RenameDimensionColumns(data, type)
 #' 
-#' @description Takes columns from data with specified prefixes and stacks them based on the unprefixed
-#' portion of the name. Columns not containing one of the prefixes are excluded in returned data. 
+#' @description Renames the original column names of dimensions, especially by removing the '_varname' to 'varname'
 #' @param data dataframe - contains data to stack 
 #' @param prefixes string vector - list of prefixes to include in column selection and stacking
 #' @return  tibble with superset of columns without prefixes in column names
