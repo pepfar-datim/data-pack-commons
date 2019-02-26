@@ -80,7 +80,7 @@ ValidateMap19Tto20T <- function(Map19Tto20T, dim_item_sets, base_url){
     ValidateDimItems("dim_uid_colname", "disagg_type", "disagg_type_uid", base_url) 
   
 # chack for matching model sets in Dimension item sets
-  c(Map19Tto20T$Age_set, Map19Tto20T$Sex_set, Map19Tto20T$KeyPop_set, Map19Tto20T$OtherDisagg_set) %>% 
+  c(Map19Tto20T$age_set, Map19Tto20T$sex_set, Map19Tto20T$kp_set, Map19Tto20T$other_disagg) %>% 
     na.omit() %>% 
     {. %in% dim_item_sets$model_sets} %>% 
     all() %>% 

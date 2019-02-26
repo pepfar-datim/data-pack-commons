@@ -75,10 +75,10 @@ CalculateSiteDensity <- function(data_element_map_item, country_details,
   
 # prepare df of dimensions and filters as expected by GetData_analytics  
   dimension_disaggs <- dim_item_sets %>% dplyr::mutate(type = "dimension") %>%  
-           dplyr::filter(model_sets %in% c(data_element_map_item$Age_set,
-                                    data_element_map_item$Sex_set,
-                                    data_element_map_item$KeyPop_set,
-                                    data_element_map_item$OtherDisagg_set)) %>% 
+           dplyr::filter(model_sets %in% c(data_element_map_item$age_set,
+                                    data_element_map_item$sex_set,
+                                    data_element_map_item$kp_set,
+                                    data_element_map_item$other_disagg)) %>% 
                      dplyr::select(type, dim_item_uid, dim_uid) %>%
            unique()  %>% 
            na.omit() # there are some items in dim item sets with no source dimension
@@ -114,21 +114,19 @@ CalculateSiteDensity <- function(data_element_map_item, country_details,
     ### ~technical area, , ~psnu, ~old_mechanism_uid, ~new_mechanism_uid, ~weight 
     
     # Join analytics output (dimensions) to category options
-    # use purrr reduce to pass the results of each iteration to the next 
-    # thus looping over age, sex, kp, and other disagg
     age_set <- dim_item_sets %>% 
-      filter(model_sets == data_element_map_item[[1,"Age_set"]])
+      filter(model_sets == data_element_map_item[[1,"age_set"]])
     sex_set <- dim_item_sets %>% 
-      filter(model_sets == data_element_map_item[[1,"Sex_set"]])
+      filter(model_sets == data_element_map_item[[1,"sex_set"]])
     kp_set <-  dim_item_sets %>% 
-      filter(model_sets == data_element_map_item[[1, "KeyPop_set"]])
-    other_disagg_set <-  dim_item_sets %>% 
-      filter(model_sets == data_element_map_item[[1, "OtherDisagg_set"]])
+      filter(model_sets == data_element_map_item[[1, "kp_set"]])
+    other_disagg <-  dim_item_sets %>% 
+      filter(model_sets == data_element_map_item[[1, "other_disagg"]])
     mapped_data <- list(density_denominators$results, 
                         age_set, 
                         sex_set, 
                         kp_set,
-                        other_disagg_set) %>% 
+                        other_disagg) %>% 
       purrr::reduce(MapDimToOptions, allocate = "distribute")
     
     return(mapped_data)
@@ -216,27 +214,19 @@ MapDimToOptions <- function(data, items_to_options, allocate){
   }
 }
 
-RenameAnalyticsColumns_SiteDist <- function(data){
-  data %>% dplyr::rename(!!c("value"="Value",
-                             "org_unit_uid" = "Organisation unit",
-                             "period" = "Period",
-                             "mechanism_uid" = "Funding Mechanism",
-                             ))
-}
+RenameAnalyticsColumns <- function(data){
+  data %>% dplyr::rename(!!c("value"="Value", indicator_uid="Data", 
+                             "org_unit_uid" = "Organisation unit", 
+                             "period" = "Period")) %>% return()
   
 
 AggByAgeSexKpOuMech <- function(data) {
   #to do add assertions must include value and org unit columns
   aggregated_data <- data %>%
-    select_if(names(.) %in% c("sex_option_uid", "sex_option_name",
-                              "age_option_uid", "age_option_name",
-                              "kp_option_uid", "kp_option_name",
-                              "org_unit_uid", "mechanism_uid",
-                              "value")) %>%
-    group_by_if(names(.) %in% c("sex_option_uid", "sex_option_name",
-                                "age_option_uid", "age_option_name",
-                                "kp_option_uid", "kp_option_name",
-                                "org_unit_uid", "mechanism_uid")) %>%
+    select_if(names(.) %in% c("sex_option_uid", "age_option_uid", "kp_option_uid",
+                              "org_unit_uid", "value")) %>%
+    group_by_if(names(.) %in% c("sex_option_uid", "age_option_uid", "kp_option_uid",
+                                "org_unit_uid")) %>%
     summarise(count = n(), minimum = min(value), 
               maximum = max(value), value = sum(value)) %>% 
     ungroup()
