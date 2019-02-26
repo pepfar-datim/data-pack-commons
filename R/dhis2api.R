@@ -374,7 +374,9 @@ Get19TMechanisms <- function(base_url){
                                       "categoryCombos", 
                                       filters = "id:eq:wUpfppgjEza", 
                                       "categoryOptionCombos[code,id~rename(categoryOptionComboId),name,categoryOptions[id~rename(categoryOptionId)]]")[[1,"categoryOptionCombos"]] %>% 
-    dplyr::as_tibble() %>% unnest()
+    dplyr::as_tibble() %>% 
+    unnest() %>% 
+    dplyr::inner_join(mech_list_parsed, by = c("categoryOptionComboId" = "uid"))
   
   if(NROW(mech_cat_opt_combos) > 0){
     return(mech_cat_opt_combos)

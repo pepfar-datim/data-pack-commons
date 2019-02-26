@@ -16,22 +16,22 @@ main <- function(){
   # 
   require(datimvalidation)
   
-  DHISLogin("/users/sam/.secrets/prod.json")
+  DHISLogin("/users/sam/.secrets/triage.json")
   base_url <- getOption("baseurl")
   options(maxCacheAge = 0)
   repo_path <- "/users/sam/Documents/GitHub/COP-19-Target-Setting/"
   output_location <- "/Users/sam/COP data/"
   datapack_export = NULL
   
-  if(!exists("mechanisms_19T_uid")){
-    mechanisms_19T_uid <<- datapackcommons::Get19TMechanisms(base_url)
+  if(!exists("mechanisms_19T")){
+    mechanisms_19T <<- datapackcommons::Get19TMechanisms(base_url)
     }
   country_name <- "Rwanda" 
-  
+
   DistributeToSites(datapack_export, 
-                    datapackcommons::Map19Tto20T %>% 
-                      filter(stringr::str_detect(technical_area,"TST")), #TODO remove slice
-                    mechanisms_19T_uid,
+                    datapackcommons::Map19Tto20T, #%>% 
+                      #filter(stringr::str_detect(technical_area,"TST")), #TODO remove slice
+                    mechanisms_19T,
             datapackcommons::dim_item_sets, 
                     datapackcommons::GetCountryLevels(base_url, country_name), base_url)
   
@@ -47,13 +47,13 @@ DistributeToSites <- function(datapack_data,
   
   mechanisms_full_country <- datimvalidation::getMechanismsMap(country_details$id)
   
-  assertthat::assert_that(assertthat::has_name(mechanisms_historic_global, "uid"))
+  assertthat::assert_that(assertthat::has_name(mechanisms_historic_global, "categoryOptionComboId"))
   assertthat::assert_that(assertthat::has_name(mechanisms_full_country, "id"))
   
-  mechanisms_historic_country <- mechanisms_historic_global %>% 
-    dplyr::filter(uid %in% mechanisms_full_country$id)
+  mechanisms_historic_country <- mechanisms_historic_global %>%   
+    dplyr::filter(categoryOptionComboId %in% mechanisms_full_country$id)
 
-  # temp = CalculateSiteDensity(dplyr::slice(data_element_map,1), 
+    # temp = CalculateSiteDensity(dplyr::slice(data_element_map,1), 
   #                      country_details, mechanisms_historic_country, dim_item_sets)
   # return(temp)
   
@@ -72,7 +72,6 @@ CalculateSiteDensity <- function(data_element_map_item, country_details,
                                  mechanisms, dim_item_sets, base_url){
   assertthat::assert_that(NROW(data_element_map_item) == 1,
                           NROW(country_details) == 1)
-  
 # prepare df of dimensions and filters as expected by GetData_analytics  
   dimension_disaggs <- dim_item_sets %>% dplyr::mutate(type = "dimension") %>%  
            dplyr::filter(model_sets %in% c(data_element_map_item$age_set,
@@ -83,8 +82,8 @@ CalculateSiteDensity <- function(data_element_map_item, country_details,
            unique()  %>% 
            na.omit() # there are some items in dim item sets with no source dimension
   
-  dimension_mechanisms <- mechanisms %>% dplyr::transmute(type = "dimension", 
-                                                       dim_item_uid = uid,
+  dimension_mechanisms <- mechanisms["categoryOptionId"] %>% dplyr::transmute(type = "dimension", 
+                                                       dim_item_uid = categoryOptionId,
                                                        dim_uid = "SH885jaRe0o")
 
 # dimensions used by both numerator and denominator and prepped for GetData_Analytics
@@ -99,15 +98,22 @@ CalculateSiteDensity <- function(data_element_map_item, country_details,
     dplyr::bind_rows(dimension_mechanisms, dimension_disaggs)
   
 # denominator adds planning level to dimensions_common ou  
-    density_denominators <- 
+    analytics_output <- 
       tibble::tribble(~type, ~dim_item_uid, ~dim_uid,
                       "dimension", paste0("LEVEL-", country_details$planning_level), "ou") %>% 
       dplyr::bind_rows(dimensions_common) %>% 
-      datapackcommons::GetData_Analytics(base_url)
-    if(NROW(density_denominators$results) == 0){
+      datapackcommons::GetData_Analytics(base_url) 
+    
+    if(NROW(analytics_output$results) == 0){
       return("No Data") # to do return something more useful?
     }
+  
+    analytics_output$results <- analytics_output$results %>% 
+      dplyr::left_join(mechanisms, by = c("Funding Mechanism" = "categoryOptionId")) %>% 
+      dplyr::rename("mechanismCode" = "code")
     
+    
+  
     ### MEchanism to Mechanism mapping would happen right here.
     ### The config fle would look something like this
     
@@ -122,16 +128,15 @@ CalculateSiteDensity <- function(data_element_map_item, country_details,
       filter(model_sets == data_element_map_item[[1, "kp_set"]])
     other_disagg <-  dim_item_sets %>% 
       filter(model_sets == data_element_map_item[[1, "other_disagg"]])
-    mapped_data <- list(density_denominators$results, 
+    mapped_data <- list(analytics_output$results, 
                         age_set, 
                         sex_set, 
                         kp_set,
                         other_disagg) %>% 
-      purrr::reduce(MapDimToOptions, allocate = "distribute")
+      purrr::reduce(MapDimToOptions, allocate = "distribute") %>% 
+       RenameAnalyticsColumns_Site()
     
-    return(mapped_data)
-    # %>% 
-    #   RenameAnalyticsColumns()
+    return(AggByAgeSexKpOuMech(mapped_data)$was_aggregated)
     
 ### aggregate
     
@@ -214,19 +219,24 @@ MapDimToOptions <- function(data, items_to_options, allocate){
   }
 }
 
-RenameAnalyticsColumns <- function(data){
-  data %>% dplyr::rename(!!c("value"="Value", indicator_uid="Data", 
-                             "org_unit_uid" = "Organisation unit", 
-                             "period" = "Period")) %>% return()
+RenameAnalyticsColumns_Site <- function(data){
+  data %>% dplyr::rename(!!c("value"="Value",  
+                             "org_unit_uid" = "Organisation unit"))
+  }
   
 
 AggByAgeSexKpOuMech <- function(data) {
   #to do add assertions must include value and org unit columns
   aggregated_data <- data %>%
-    select_if(names(.) %in% c("sex_option_uid", "age_option_uid", "kp_option_uid",
-                              "org_unit_uid", "value")) %>%
-    group_by_if(names(.) %in% c("sex_option_uid", "age_option_uid", "kp_option_uid",
-                                "org_unit_uid")) %>%
+    select_if(names(.) %in% c("sex_option_uid", "sex_option_name",
+                              "age_option_uid", "age_option_name",
+                              "kp_option_uid", "kp_option_name",
+                              "org_unit_uid", "mechanismCode",
+                              "value")) %>%
+    group_by_if(names(.) %in% c("sex_option_uid", "sex_option_name",
+                                "age_option_uid", "age_option_name",
+                                "kp_option_uid", "kp_option_name",
+                                "org_unit_uid", "mechanismCode")) %>%
     summarise(count = n(), minimum = min(value), 
               maximum = max(value), value = sum(value)) %>% 
     ungroup()
