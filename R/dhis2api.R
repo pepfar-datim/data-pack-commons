@@ -369,8 +369,15 @@ Get19TMechanisms <- function(base_url){
   mech_list_parsed <- mech_list_r %>% 
     httr::content(., "text") %>% 
     readr::read_csv(col_names = TRUE, col_types = readr::cols(.default = "c"))
-  if(NROW(mech_list_parsed) > 0){
-    return(mech_list_parsed)
+  
+  mech_cat_opt_combos <-  datapackcommons::getMetadata(base_url, 
+                                      "categoryCombos", 
+                                      filters = "id:eq:wUpfppgjEza", 
+                                      "categoryOptionCombos[code,id~rename(categoryOptionComboId),name,categoryOptions[id~rename(categoryOptionId)]]")[[1,"categoryOptionCombos"]] %>% 
+    dplyr::as_tibble() %>% unnest()
+  
+  if(NROW(mech_cat_opt_combos) > 0){
+    return(mech_cat_opt_combos)
   }
   # If I got here critical error
   stop("Unable to get 19T mechanisms")
