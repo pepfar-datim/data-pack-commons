@@ -443,7 +443,10 @@ GetData_Analytics <-  function(dimensions, base_url){
   ## is there other useful metadata we want to return?
   
   ou_hierarchy <- purrr::map_chr(my_data[["Organisation unit"]], 
-                                 function(x) content$metaData$ouHierarchy[[x]])
+                                 function(x) content$metaData$ouHierarchy[[x]]) %>% 
+    stringr::str_split("/")
+  
+  
   my_data <-
     dplyr::mutate(my_data, Value = as.numeric(Value), ou_hierarchy = ou_hierarchy)
   return(list(results = my_data, 
