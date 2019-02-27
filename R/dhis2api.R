@@ -429,7 +429,9 @@ GetData_Analytics <-  function(dimensions, base_url){
   
   my_data <- content$rows
   if(length(dim(my_data)) != 2){ # empty table returned
-    return(list(analytics_output = NULL, api_call = response$url, content = content))
+    return(list(analytics_output = NULL, 
+                api_call = response$url)
+           )
   } 
   colnames(my_data) <- content$headers$column
   my_data <- tibble::as_tibble(my_data)
@@ -441,10 +443,15 @@ GetData_Analytics <-  function(dimensions, base_url){
   ## is there other useful metadata we want to return?
   
   ou_hierarchy <- purrr::map_chr(my_data[["Organisation unit"]], 
-                                 function(x) content$metaData$ouHierarchy[[x]])
+                                 function(x) content$metaData$ouHierarchy[[x]]) %>% 
+    stringr::str_split("/")
+  
+  
   my_data <-
     dplyr::mutate(my_data, Value = as.numeric(Value), ou_hierarchy = ou_hierarchy)
-  return(list(results = my_data, api_call = response$url, content = content))
+  return(list(results = my_data, 
+              api_call = response$url)
+         )
 }
 
 ##RUN preceeding functions
