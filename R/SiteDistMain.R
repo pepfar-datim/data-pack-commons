@@ -16,7 +16,7 @@ main <- function(){
   # 
   require(datimvalidation)
   
-  DHISLogin("/users/sam/.secrets/prod.json")
+  DHISLogin("/users/sam/.secrets/triage.json")
   base_url <- getOption("baseurl")
   options(maxCacheAge = 0)
   repo_path <- "/users/sam/Documents/GitHub/COP-19-Target-Setting/"
@@ -90,119 +90,78 @@ CalculateSiteDensity <- function(data_element_map_item, country_details,
 # Combine the facility and community data into a sites data set  
   analytics_output_sites = NULL  
   analytics_output_planning <- analytics_output_list[["planning"]]
+  analytics_output_planning$results <- analytics_output_planning$results %>% 
+    dplyr::left_join(mechanisms, by = c("Funding Mechanism" = "categoryOptionId")) %>% 
+    dplyr::rename("mechanismCode" = "code") %>%
+    dplyr::mutate("psnuid" = `Organisation unit`) %>% 
+    select(-ou_hierarchy, -name, -categoryOptionComboId)
+    
+  
   analytics_output_sites[["results"]] <- 
     dplyr::bind_rows(analytics_output_list[["community"]][["results"]],
                      analytics_output_list[["facility"]][["results"]])
   analytics_output_sites[["api_calls"]] <- 
     c(analytics_output_list[["community"]][["api_call"]],
                      analytics_output_list[["facility"]][["api_call"]])
+
+  # pull psnu from ou_hierarchy list column
+  psnuids <- 
+    purrr::map_chr(analytics_output_sites$results$ou_hierarchy, 
+                   ~.[[as.integer(country_details$planning_level)]])  
+  analytics_output_sites$results <- analytics_output_sites$results %>% 
+    dplyr::left_join(mechanisms, by = c("Funding Mechanism" = "categoryOptionId")) %>% 
+    dplyr::rename("mechanismCode" = "code") %>% 
+    dplyr::mutate("psnuid" = psnuids)%>% 
+    select(-ou_hierarchy, -name, -categoryOptionComboId)
   
-  # sanity check =   makes sure the site level data sums to the psnu level data
-  assert_that(sum(analytics_output_planning$results$Value) ==
-                sum(analytics_output_sites$results$Value))
   
-  analytics_output_list <- list(planning = analytics_output_planning,
-                                sites = analytics_output_sites)
+  ### MEchanism to Mechanism mapping would happen right here.
+  ### The config fle would look something like this
   
-  return(analytics_output_list)
+  ### ~technical area, , ~psnu, ~old_mechanism_uid or code, ~new_mechanism_uid or code, ~weight   
   
-
-# denominator adds planning level to dimensions_common ou  
-    # analytics_output <- 
-    #   tibble::tribble(~type, ~dim_item_uid, ~dim_uid,
-    #                   "dimension", paste0("LEVEL-", country_details$planning_level), "ou") %>% 
-    #   dplyr::bind_rows(dimensions_common) %>% 
-    #   datapackcommons::GetData_Analytics(base_url) 
-    
+  # Join analytics output (dimensions) to category options
+  age_set <- dim_item_sets %>% 
+    filter(model_sets == data_element_map_item[[1,"age_set"]])
+  sex_set <- dim_item_sets %>% 
+    filter(model_sets == data_element_map_item[[1,"sex_set"]])
+  kp_set <-  dim_item_sets %>% 
+    filter(model_sets == data_element_map_item[[1, "kp_set"]])
+  other_disagg <-  dim_item_sets %>% 
+    filter(model_sets == data_element_map_item[[1, "other_disagg"]])
   
-    analytics_output$results <- analytics_output$results %>% 
-      dplyr::left_join(mechanisms, by = c("Funding Mechanism" = "categoryOptionId")) %>% 
-      dplyr::rename("mechanismCode" = "code")
-    
-    
-  
-    ### MEchanism to Mechanism mapping would happen right here.
-    ### The config fle would look something like this
-    
-    ### ~technical area, , ~psnu, ~old_mechanism_uid, ~new_mechanism_uid, ~weight 
-    
-    # Join analytics output (dimensions) to category options
-    age_set <- dim_item_sets %>% 
-      filter(model_sets == data_element_map_item[[1,"age_set"]])
-    sex_set <- dim_item_sets %>% 
-      filter(model_sets == data_element_map_item[[1,"sex_set"]])
-    kp_set <-  dim_item_sets %>% 
-      filter(model_sets == data_element_map_item[[1, "kp_set"]])
-    other_disagg <-  dim_item_sets %>% 
-      filter(model_sets == data_element_map_item[[1, "other_disagg"]])
-    mapped_data_den <- list(analytics_output$results, 
-                        age_set, 
-                        sex_set, 
-                        kp_set,
-                        other_disagg) %>% 
-      purrr::reduce(MapDimToOptions, allocate = "distribute") %>% 
-       RenameAnalyticsColumns_Site() %>% 
-      AggByAgeSexKpOuMech()
-    
-
-        # 
-        # analytics_output <-
-        # tibble::tribble(~type, ~dim_item_uid, ~dim_uid,
-        #                 "dimension", "OU_GROUP-POHZmzofoVx", "ou", #facility and community groups
-        #                 "dimension", "OU_GROUP-PvuaP6YALSA", "ou",
-        #                 "dimension", "iM13vdNLWKb", "TWXpUVE2MqL", #dsd and ta support types
-        #                 "dimension", "cRAGKdWIDn4", "TWXpUVE2MqL") %>%
-        # dplyr::bind_rows(dimensions_common) %>%
-        # datapackcommons::GetData_Analytics(base_url)
-
-      if(NROW(analytics_output$results) == 0){
-        return("No Data") # to do return something more useful?
-      }
-
-      analytics_output$results <- analytics_output$results %>%
-        dplyr::left_join(mechanisms, by = c("Funding Mechanism" = "categoryOptionId")) %>%
-        dplyr::rename("mechanismCode" = "code")
-
-
-
-      ### MEchanism to Mechanism mapping would happen right here.
-      ### The config fle would look something like this
-
-      ### ~technical area, , ~psnu, ~old_mechanism_uid, ~new_mechanism_uid, ~weight
-
-      # Join analytics output (dimensions) to category options
-      age_set <- dim_item_sets %>%
-        filter(model_sets == data_element_map_item[[1,"age_set"]])
-      sex_set <- dim_item_sets %>%
-        filter(model_sets == data_element_map_item[[1,"sex_set"]])
-      kp_set <-  dim_item_sets %>%
-        filter(model_sets == data_element_map_item[[1, "kp_set"]])
-      other_disagg <-  dim_item_sets %>%
-        filter(model_sets == data_element_map_item[[1, "other_disagg"]])
-      mapped_data_num <- list(analytics_output$results,
-                          age_set,
-                          sex_set,
+  mapped_data_planning <- list(analytics_output_planning$results, 
+                          age_set, 
+                          sex_set, 
                           kp_set,
-                          other_disagg) %>%
-        purrr::reduce(MapDimToOptions, allocate = "distribute") %>%
-        RenameAnalyticsColumns_Site() %>%
-        AggByAgeSexKpOuMech()
-
-
-
-
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    #  numerator called seperatly for planning facility and military
+                          other_disagg) %>% 
+    purrr::reduce(MapDimToOptions, allocate = "distribute") %>% 
+    RenameAnalyticsColumns_Site() %>% 
+    AggByAgeSexKpOuMechSt() 
   
-  CombineNumAndDen()
+  mapped_data_sites <- list(analytics_output_sites$results, 
+                               age_set, 
+                               sex_set, 
+                               kp_set,
+                               other_disagg) %>% 
+    purrr::reduce(MapDimToOptions, allocate = "distribute") %>% 
+    RenameAnalyticsColumns_Site() %>% 
+    AggByAgeSexKpOuMechSt()  
+    
+  mapped_data_sites$processed <- 
+    mapped_data_sites$processed %>% 
+    dplyr::rename("siteValue" = "value")
+  
+    
+  # sanity check =   makes sure the site level data sums to the psnu level data
+  assert_that(sum(mapped_data_planning$processed$value) ==
+                sum(mapped_data_sites$processed$siteValue))
+  
+  analytics_output_list <- list(planning = mapped_data_planning,
+                                sites = mapped_data_sites)
+  return(analytics_output_list)
+    
+  ## Sid we now needdt to join the sites (numerators)
   
 #  sample output?
   SiteToolDensityMatrix <- tibble::tribble(~indicatorCode, ~Age, ~Sex, ~KeyPop, 
