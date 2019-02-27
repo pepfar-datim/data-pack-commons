@@ -40,3 +40,11 @@ test_that("FormatForApi_Dimensions", {
   testthat::expect_equal("dimension=LFsZ8v5v7rq:CW81uF03hvV;C6nZpLKjEJr&dimension=ou:O6uvpzGd5pu&filter=dx:BOSZApCrBni;dGdeotKpRed&filter=pe:THIS_FINANCIAL_YEAR")
   testthat::expect_error(FormatForApi_Dimensions(df, "type", "dim_id", "Nonsense"))  
   })
+
+test_that("RenameDimensionColumns", {
+  df = tibble::tribble(~dim_uid, ~dim_name, ~dim_cop_type, ~dim_item_name, ~option_name, ~option_uid, ~sort_order, ~weight, ~model_sets,
+                      "test_1", "test_2", "test_3", "test_4", "test_5", "test_6", "test_7", "test_8", "test_9")
+  new_df = RenameDimensionColumns(df, "test")
+  
+})
+
