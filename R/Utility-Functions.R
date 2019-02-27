@@ -64,10 +64,11 @@ FormatForApi_Dimensions <- function(data, type_col, dim_id_col, item_id_col){
 #' @export
 #' @title RenameDimensionColumns(data, type)
 #' 
-#' @description Renames the original column names of dimensions, especially by removing the '_varname' to 'varname'
-#' @param data dataframe - contains data to stack 
-#' @param prefixes string vector - list of prefixes to include in column selection and stacking
-#' @return  tibble with superset of columns without prefixes in column names
+#' @description Renames the original column names of datapackcommons::dim_items_sets, 
+#' by prepending the string in the type parameter
+#' @param data the unique dim_cop_type that is passed in the MapDimToOptions method
+#' @param type It will pre-pend the string in type to the columns names
+#' @return  The dataframe with renamed column names for dimensions
 #'
 RenameDimensionColumns <- function(data, type){
   data %>% dplyr::rename(!!paste0(type,"_dim_uid") := dim_uid,
@@ -84,11 +85,12 @@ RenameDimensionColumns <- function(data, type){
 #' @export
 #' @title MapDimToOptions(data, items_to_options, allocate)
 #' 
-#' @description Takes columns from data with specified prefixes and stacks them based on the unprefixed
-#' portion of the name. Columns not containing one of the prefixes are excluded in returned data. 
-#' @param data dataframe - contains data to stack 
-#' @param prefixes string vector - list of prefixes to include in column selection and stacking
-#' @return  tibble with superset of columns without prefixes in column names
+#' @description A function that maps dimensions from a dataframe to the options sets
+#' @param data dataframe - containing analytics output (dimensions)
+#' @param items_to_options category options list used to cross with the dimensions
+#' @param allocate If allocate is set to "distriute", mutates a column in the returned df with the weight being multiplied to the value
+#' @return If there are no options provided, returns the analytics output, else if there are no dim_uid in the options list, joins the data using crossing or left join,
+#' else if the allocation is set to "distriute", then renames them adds a value column and finally performs the renaming of the dimension columns.
 #'
 MapDimToOptions <- function(data, items_to_options, allocate){
   
