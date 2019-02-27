@@ -30,7 +30,7 @@ main <- function(){
 
   DistributeToSites(datapack_export, 
                     datapackcommons::Map19Tto20T %>% 
-                      filter(stringr::str_detect(technical_area,"HTS_TST")), #TODO remove slice
+                      filter(stringr::str_detect(technical_area,"PMTCT_STAT")), #TODO remove slice
                     mechanisms_19T,
                     datapackcommons::dim_item_sets, 
                     datapackcommons::GetCountryLevels(base_url, country_name), base_url)
@@ -65,7 +65,8 @@ DistributeToSites <- function(datapack_data,
   # apply distribution weights
   
   return(site_densities)
-   }
+
+     }
 
 # 
 CalculateSiteDensity <- function(data_element_map_item, country_details, 
@@ -81,11 +82,12 @@ CalculateSiteDensity <- function(data_element_map_item, country_details,
   analytics_output_list <-  purrr::map(dimensions_by_ou_level, 
                                        GetData_Analytics, 
                                        base_url)
-  
+
   if(NROW(analytics_output_list$planning$results) == 0){
     return("No Data") # to do return something more useful?
   }  
-  
+
+# Combine the facility and community data into a sites data set  
   analytics_output_sites = NULL  
   analytics_output_planning <- analytics_output_list[["planning"]]
   analytics_output_sites[["results"]] <- 
