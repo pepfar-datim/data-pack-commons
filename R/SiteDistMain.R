@@ -16,7 +16,7 @@ main <- function(){
   # 
   require(datimvalidation)
   
-  DHISLogin("/users/sam/.secrets/triage.json")
+  DHISLogin("/users/sam/.secrets/prod.json")
   base_url <- getOption("baseurl")
   options(maxCacheAge = 0)
   repo_path <- "/users/sam/Documents/GitHub/COP-19-Target-Setting/"
@@ -30,7 +30,7 @@ main <- function(){
 
   DistributeToSites(datapack_export, 
                     datapackcommons::Map19Tto20T %>% 
-                      filter(stringr::str_detect(technical_area,"PMTCT_STAT")), #TODO remove slice
+                      filter(stringr::str_detect(technical_area,"HTS_TST")), #TODO remove slice
                     mechanisms_19T,
                     datapackcommons::dim_item_sets, 
                     datapackcommons::GetCountryLevels(base_url, country_name), base_url)
@@ -73,26 +73,45 @@ CalculateSiteDensity <- function(data_element_map_item, country_details,
   assertthat::assert_that(NROW(data_element_map_item) == 1,
                           NROW(country_details) == 1)
   
-  dimensions_by_level <- BuildDimensionLists(data_element_map_item, dim_item_sets, 
-                                             mechanisms, country_details)
+# get list of dimensions (parameters) for analytics call by level {planning, community, facility} 
+  dimensions_by_ou_level <- BuildDimensionLists(data_element_map_item, dim_item_sets, 
+                                                mechanisms, country_details)
+
+# Grab historical data by level ierating over the list just created
+  analytics_output_list <-  purrr::map(dimensions_by_ou_level, 
+                                       GetData_Analytics, 
+                                       base_url)
   
-  return(purrr::map(dimensions_by_level, 
-                    GetData_Analytics, 
-                    base_url)
-         )
+  if(NROW(analytics_output_list$planning$results) == 0){
+    return("No Data") # to do return something more useful?
+  }  
   
+  analytics_output_sites = NULL  
+  analytics_output_planning <- analytics_output_list[["planning"]]
+  analytics_output_sites[["results"]] <- 
+    dplyr::bind_rows(analytics_output_list[["community"]][["results"]],
+                     analytics_output_list[["facility"]][["results"]])
+  analytics_output_sites[["api_calls"]] <- 
+    c(analytics_output_list[["community"]][["api_call"]],
+                     analytics_output_list[["facility"]][["api_call"]])
   
+  # sanity check =   makes sure the site level data sums to the psnu level data
+  assert_that(sum(analytics_output_planning$results$Value) ==
+                sum(analytics_output_sites$results$Value))
   
+  analytics_output_list <- list(planning = analytics_output_planning,
+                                sites = analytics_output_sites)
+  
+  return(analytics_output_list)
+  
+
 # denominator adds planning level to dimensions_common ou  
-    analytics_output <- 
-      tibble::tribble(~type, ~dim_item_uid, ~dim_uid,
-                      "dimension", paste0("LEVEL-", country_details$planning_level), "ou") %>% 
-      dplyr::bind_rows(dimensions_common) %>% 
-      datapackcommons::GetData_Analytics(base_url) 
+    # analytics_output <- 
+    #   tibble::tribble(~type, ~dim_item_uid, ~dim_uid,
+    #                   "dimension", paste0("LEVEL-", country_details$planning_level), "ou") %>% 
+    #   dplyr::bind_rows(dimensions_common) %>% 
+    #   datapackcommons::GetData_Analytics(base_url) 
     
-    if(NROW(analytics_output$results) == 0){
-      return("No Data") # to do return something more useful?
-    }
   
     analytics_output$results <- analytics_output$results %>% 
       dplyr::left_join(mechanisms, by = c("Funding Mechanism" = "categoryOptionId")) %>% 
@@ -124,15 +143,15 @@ CalculateSiteDensity <- function(data_element_map_item, country_details,
       AggByAgeSexKpOuMech()
     
 
-    
-        analytics_output <-
-        tibble::tribble(~type, ~dim_item_uid, ~dim_uid,
-                        "dimension", "OU_GROUP-POHZmzofoVx", "ou", #facility and community groups
-                        "dimension", "OU_GROUP-PvuaP6YALSA", "ou",
-                        "dimension", "iM13vdNLWKb", "TWXpUVE2MqL", #dsd and ta support types
-                        "dimension", "cRAGKdWIDn4", "TWXpUVE2MqL") %>%
-        dplyr::bind_rows(dimensions_common) %>%
-        datapackcommons::GetData_Analytics(base_url)
+        # 
+        # analytics_output <-
+        # tibble::tribble(~type, ~dim_item_uid, ~dim_uid,
+        #                 "dimension", "OU_GROUP-POHZmzofoVx", "ou", #facility and community groups
+        #                 "dimension", "OU_GROUP-PvuaP6YALSA", "ou",
+        #                 "dimension", "iM13vdNLWKb", "TWXpUVE2MqL", #dsd and ta support types
+        #                 "dimension", "cRAGKdWIDn4", "TWXpUVE2MqL") %>%
+        # dplyr::bind_rows(dimensions_common) %>%
+        # datapackcommons::GetData_Analytics(base_url)
 
       if(NROW(analytics_output$results) == 0){
         return("No Data") # to do return something more useful?
@@ -167,10 +186,6 @@ CalculateSiteDensity <- function(data_element_map_item, country_details,
         RenameAnalyticsColumns_Site() %>%
         AggByAgeSexKpOuMech()
 
-        return(list(den=mapped_data_den,
-                    num=mapped_data_num,
-                    sum_num=sum(mapped_data_num$processed$value),
-                    sum_den=sum(mapped_data_den$processed$value)))
 
 
 
