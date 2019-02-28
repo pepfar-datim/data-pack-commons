@@ -154,21 +154,22 @@ CalculateSiteDensity <- function(data_element_map_item, country_details,
     select(-name, -categoryOptionComboId) %>% 
     mutate(percent = siteValue/value, 
            indicatorCode = data_element_map_item$indicatorCode_fy20_cop)
-#return(joined_data)
+
   check_sum_3p  <- joined_data %>% select(-percent, -siteValue, -`Organisation unit`, -`Support Type`) %>% 
      unique() %>% 
      .[["value"]] %>% 
      sum()
-  
+  assertthat::assert_that(check_sum_3p = check_sum_1p)
   check_sum_3s = joined_data$siteValue %>% sum()
-  
-   return(paste(check_sum_1p, 
-                check_sum_1s, 
-                check_sum_2p, 
-                check_sum_2s, 
-                check_sum_3s, 
-                check_sum_3p))
-  
+  assertthat::assert_that(check_sum_3s = check_sum_1p)
+   # return(paste(check_sum_1p, 
+   #              check_sum_1s, 
+   #              check_sum_2p, 
+   #              check_sum_2s, 
+   #              check_sum_3s, 
+   #              check_sum_3p))
+
+  return(joined_data)
   
   # sanity check =   makes sure the site level data sums to the psnu level data
   # assert_that(sum(mapped_data_planning$processed$value) ==
