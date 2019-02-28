@@ -16,7 +16,7 @@ main <- function(){
   # 
   require(datimvalidation)
   
-  DHISLogin("/users/sam/.secrets/prod.json")
+  DHISLogin("/users/sam/.secrets/triage.json")
   base_url <- getOption("baseurl")
   options(maxCacheAge = 0)
   repo_path <- "/users/sam/Documents/GitHub/COP-19-Target-Setting/"
@@ -28,11 +28,11 @@ main <- function(){
   if(!exists("mechanisms_19T")){
     mechanisms_19T <<- datapackcommons::Get19TMechanisms(base_url)
     }
-  country_name <- "Democratic Republic of the Congo" 
+  country_name <- "Rwanda" 
 
   DistributeToSites(datapack_export, 
                     datapackcommons::Map19Tto20T,# %>% 
-                      #filter(stringr::str_detect(technical_area,"GEND")), #TODO remove slice
+        #              filter(stringr::str_detect(technical_area,"PMTCT")), #TODO remove slice
                     mechanisms_19T,
                     datapackcommons::dim_item_sets, 
                     datapackcommons::GetCountryLevels(base_url, country_name), base_url)
@@ -105,6 +105,7 @@ CalculateSiteDensity <- function(data_element_map_item, country_details,
   check_sum_1p = (sum(analytics_output_list$planning$results$Value))
   check_sum_1s = (sum(analytics_output_list$facility$results$Value) +
                     sum(analytics_output_list$community$results$Value))
+  
   assertthat::assert_that(check_sum_1p == check_sum_1s)
     
   planning_data <- analytics_output_list$planning$results %>% 
@@ -118,9 +119,9 @@ CalculateSiteDensity <- function(data_element_map_item, country_details,
     AggByAgeSexKpOuMechSt() %>% 
     .[["processed"]] %>% 
     dplyr::select(-dplyr::one_of("count", "maximum", "minimum")) %>% 
-    dplyr::rename("value" = "Value")
+    dplyr::rename("psnuValue" = "Value")
   
-  check_sum_2p = planning_data$value %>% sum()
+  check_sum_2p = planning_data$psnuValue %>% sum()
   assert_that(assert_that(check_sum_1p == check_sum_2p))
   
   ### MEchanism to Mechanism mapping would happen right here.
@@ -136,10 +137,11 @@ CalculateSiteDensity <- function(data_element_map_item, country_details,
          dim_item_sets_other_disagg) %>% 
     purrr::reduce(MapDimToOptions, allocate = "distribute")  %>% 
     dplyr::mutate(psnuid = purrr::map_chr(.$ou_hierarchy, planning_level)) %>%      
-    dplyr::select(-ou_hierarchy) %>% 
+    dplyr::select(-ou_hierarchy)%>% 
     AggByAgeSexKpOuMechSt()%>% 
     .[["processed"]] %>% dplyr::select(-dplyr::one_of("count", "maximum", "minimum")) %>% 
     dplyr::rename("siteValue" = "Value")
+  
   check_sum_2s = site_data$siteValue %>% sum()
   assert_that(assert_that(check_sum_1p == check_sum_2s))
   
@@ -152,22 +154,25 @@ CalculateSiteDensity <- function(data_element_map_item, country_details,
     dplyr::left_join(mechanisms, by = c("Funding Mechanism" = "categoryOptionId")) %>% 
     dplyr::rename("mechanismCode" = "code")  %>% 
     select(-name, -categoryOptionComboId) %>% 
-    mutate(percent = siteValue/value, 
+    mutate(percent = siteValue/psnuValue, 
            indicatorCode = data_element_map_item$indicatorCode_fy20_cop)
 
-  check_sum_3p  <- joined_data %>% select(-percent, -siteValue, -`Organisation unit`, -`Support Type`) %>% 
-     unique() %>% 
-     .[["value"]] %>% 
-     sum()
-  assertthat::assert_that(check_sum_3p = check_sum_1p)
-  check_sum_3s = joined_data$siteValue %>% sum()
-  assertthat::assert_that(check_sum_3s = check_sum_1p)
-   # return(paste(check_sum_1p, 
-   #              check_sum_1s, 
-   #              check_sum_2p, 
-   #              check_sum_2s, 
-   #              check_sum_3s, 
-   #              check_sum_3p))
+  check_sum_3p  <- joined_data %>% select(-dplyr::one_of("percent", "siteValue", 
+                                          "Organisation unit", "Support Type",
+                                          "Type of organisational unit")) %>% 
+                                            unique() %>% 
+                                            .[["psnuValue"]] %>% 
+                                            sum()
+  assertthat::assert_that(check_sum_3p == check_sum_1p)
+  check_sum_3s <-  joined_data$siteValue %>% sum()
+#  return(check_sum_3p - check_sum_3s)
+ assertthat::assert_that(check_sum_3s == check_sum_1p)
+# return(paste(check_sum_1p,
+#              check_sum_1s,
+#             check_sum_2p,
+#              check_sum_2s,
+#              check_sum_3s,
+#              check_sum_3p))
 
   return(joined_data)
   
@@ -178,12 +183,12 @@ CalculateSiteDensity <- function(data_element_map_item, country_details,
     
   
 #  sample output?
-  SiteToolDensityMatrix <- tibble::tribble(~indicatorCode, ~Age, ~Sex, ~KeyPop, 
-                                           ~mechanismCode, ~DsdOrTa, ~OrgUnitUid, 
-                                           ~OrgUnitName, ~psnuid,  ~CommOrFac, 
-                                           ~value,
-                                           "HTS_INDEX_COM.N.Age/Sex/Result.20T.NewNeg", 
-                                           "10-14", "Female", NA_character_, "18628", "DSD", "uid11111111", "An Org Unit", "uid22222222","Community", 11)
+  # SiteToolDensityMatrix <- tibble::tribble(~indicatorCode, ~Age, ~Sex, ~KeyPop, 
+  #                                          ~mechanismCode, ~DsdOrTa, ~OrgUnitUid, 
+  #                                          ~OrgUnitName, ~psnuid,  ~CommOrFac, 
+  #                                          ~value,
+  #                                          "HTS_INDEX_COM.N.Age/Sex/Result.20T.NewNeg", 
+  #                                          "10-14", "Female", NA_character_, "18628", "DSD", "uid11111111", "An Org Unit", "uid22222222","Community", 11)
 } 
 
 
@@ -233,9 +238,6 @@ MapDimToOptions <- function(data, items_to_options, allocate){
       RenameDimensionColumns(cop_category)
   }
 }
-
-
-  
 
 AggByAgeSexKpOuMechSt <- function(data) {
   #to do add assertions must include value and org unit columns
