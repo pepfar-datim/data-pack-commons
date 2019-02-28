@@ -51,4 +51,9 @@ test_that("RenameDimensionColumns", {
   testthat::expect_error(RenameDimensionColumns(df_2, "test"))
 })
 
-test_that("MapDimToOptions")
+test_that("MapDimToOptions", {
+  test_data <- data.frame()
+  test_items_top_options <- data.frame("sample_age_set")
+  mapped_output <- MapDimToOptions(test_data, test_items_to_options, allocate = "distribute") %>%
+    testthat::expect_equal(output)
+})
