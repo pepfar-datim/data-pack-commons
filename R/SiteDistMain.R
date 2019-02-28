@@ -79,6 +79,14 @@ CalculateSiteDensity <- function(data_element_map_item, country_details,
   planning_level = as.integer(country_details$planning_level)
   
 # create subsets of dim_item_sets for the relevant dimension items to be used later
+  
+  dimension_set_columns <- c("age_set", "sex_set", "kp_set", "other_disagg")
+  dim_item_subsets <- purrr::map(dimension_set_columns, 
+                                 ~dplyr::filter(datapackcommons::dim_item_sets,
+                                                model_sets ==  datapackcommons::Map19Tto20T[[3,.]]
+                                                )
+                                 ) %>% rlang::set_names(dimension_set_columns)
+  
   dim_item_sets_age <- dim_item_sets %>% 
     filter(model_sets == data_element_map_item[[1,"age_set"]])
   dim_item_sets_sex <- dim_item_sets %>% 
