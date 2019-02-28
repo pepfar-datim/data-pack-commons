@@ -429,7 +429,7 @@ GetData_Analytics <-  function(dimensions, base_url){
   
   my_data <- content$rows
   if(length(dim(my_data)) != 2){ # empty table returned
-    return(list(analytics_output = NULL, 
+    return(list(results = NULL, 
                 api_call = response$url)
            )
   } 
@@ -441,11 +441,12 @@ GetData_Analytics <-  function(dimensions, base_url){
   ##the items in these columns were requested.
   ## If there is a mismatch stop()
   ## is there other useful metadata we want to return?
-  
+
+  # list column(vector) of the org hiearchy including the org unit itself
+  # added to the data in a mutate below
   ou_hierarchy <- purrr::map_chr(my_data[["Organisation unit"]], 
-                                 function(x) content$metaData$ouHierarchy[[x]]) %>% 
+                                 function(x) paste0(content$metaData$ouHierarchy[[x]], "/", x)) %>% 
     stringr::str_split("/")
-  
   
   my_data <-
     dplyr::mutate(my_data, Value = as.numeric(Value), ou_hierarchy = ou_hierarchy)
