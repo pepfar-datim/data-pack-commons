@@ -16,21 +16,23 @@ main <- function(){
   # 
   require(datimvalidation)
   
-  DHISLogin("/users/sam/.secrets/triage.json")
+  DHISLogin("/users/sam/.secrets/prod.json")
   base_url <- getOption("baseurl")
   options(maxCacheAge = 0)
   repo_path <- "/users/sam/Documents/GitHub/COP-19-Target-Setting/"
   output_location <- "/Users/sam/COP data/"
   datapack_export = NULL
+  # sample input file
+  #d=read_rds("/Users/sam/Downloads/South Africa_Results_Archive20190215143802.rds")
   
   if(!exists("mechanisms_19T")){
     mechanisms_19T <<- datapackcommons::Get19TMechanisms(base_url)
     }
-  country_name <- "Rwanda" 
+  country_name <- "Democratic Republic of the Congo" 
 
   DistributeToSites(datapack_export, 
-                    datapackcommons::Map19Tto20T %>% 
-                      filter(stringr::str_detect(technical_area,"PMTCT_STAT")), #TODO remove slice
+                    datapackcommons::Map19Tto20T,# %>% 
+                      #filter(stringr::str_detect(technical_area,"GEND")), #TODO remove slice
                     mechanisms_19T,
                     datapackcommons::dim_item_sets, 
                     datapackcommons::GetCountryLevels(base_url, country_name), base_url)
@@ -74,7 +76,20 @@ CalculateSiteDensity <- function(data_element_map_item, country_details,
   assertthat::assert_that(NROW(data_element_map_item) == 1,
                           NROW(country_details) == 1)
   
-# get list of dimensions (parameters) for analytics call by level {planning, community, facility} 
+  planning_level = as.integer(country_details$planning_level)
+  
+# create subsets of dim_item_sets for the relevant dimension items to be used later
+  dim_item_sets_age <- dim_item_sets %>% 
+    filter(model_sets == data_element_map_item[[1,"age_set"]])
+  dim_item_sets_sex <- dim_item_sets %>% 
+    filter(model_sets == data_element_map_item[[1,"sex_set"]])
+  dim_item_sets_kp <-  dim_item_sets %>% 
+    filter(model_sets == data_element_map_item[[1, "kp_set"]])
+  dim_item_sets_other_disagg <-  dim_item_sets %>% 
+    filter(model_sets == data_element_map_item[[1, "other_disagg"]])
+  
+# get list of dimensions (parameters) for analytics call by level {planning, community, facility}
+# analytics will be called seperatly for each level  
   dimensions_by_ou_level <- BuildDimensionLists(data_element_map_item, dim_item_sets, 
                                                 mechanisms, country_details)
 
@@ -82,86 +97,84 @@ CalculateSiteDensity <- function(data_element_map_item, country_details,
   analytics_output_list <-  purrr::map(dimensions_by_ou_level, 
                                        GetData_Analytics, 
                                        base_url)
-
+  
   if(NROW(analytics_output_list$planning$results) == 0){
     return("No Data") # to do return something more useful?
   }  
 
-# Combine the facility and community data into a sites data set  
-  analytics_output_sites = NULL  
-  analytics_output_planning <- analytics_output_list[["planning"]]
-  analytics_output_planning$results <- analytics_output_planning$results %>% 
-    dplyr::left_join(mechanisms, by = c("Funding Mechanism" = "categoryOptionId")) %>% 
-    dplyr::rename("mechanismCode" = "code") %>%
-    dplyr::mutate("psnuid" = `Organisation unit`) %>% 
-    select(-ou_hierarchy, -name, -categoryOptionComboId)
+  check_sum_1p = (sum(analytics_output_list$planning$results$Value))
+  check_sum_1s = (sum(analytics_output_list$facility$results$Value) +
+                    sum(analytics_output_list$community$results$Value))
+  assertthat::assert_that(check_sum_1p == check_sum_1s)
     
+  planning_data <- analytics_output_list$planning$results %>% 
+    list(dim_item_sets_age, 
+         dim_item_sets_sex, 
+         dim_item_sets_kp,
+         dim_item_sets_other_disagg) %>% 
+    purrr::reduce(MapDimToOptions, allocate = "distribute") %>% 
+    dplyr::mutate(psnuid = purrr::map_chr(.$ou_hierarchy, planning_level)) %>% 
+    dplyr::select(-`Organisation unit`, -ou_hierarchy) %>% 
+    AggByAgeSexKpOuMechSt() %>% 
+    .[["processed"]] %>% 
+    dplyr::select(-dplyr::one_of("count", "maximum", "minimum")) %>% 
+    dplyr::rename("value" = "Value")
   
-  analytics_output_sites[["results"]] <- 
-    dplyr::bind_rows(analytics_output_list[["community"]][["results"]],
-                     analytics_output_list[["facility"]][["results"]])
-  analytics_output_sites[["api_calls"]] <- 
-    c(analytics_output_list[["community"]][["api_call"]],
-                     analytics_output_list[["facility"]][["api_call"]])
-
-  # pull psnu from ou_hierarchy list column
-  psnuids <- 
-    purrr::map_chr(analytics_output_sites$results$ou_hierarchy, 
-                   ~.[[as.integer(country_details$planning_level)]])  
-  analytics_output_sites$results <- analytics_output_sites$results %>% 
-    dplyr::left_join(mechanisms, by = c("Funding Mechanism" = "categoryOptionId")) %>% 
-    dplyr::rename("mechanismCode" = "code") %>% 
-    dplyr::mutate("psnuid" = psnuids)%>% 
-    select(-ou_hierarchy, -name, -categoryOptionComboId)
-  
+  check_sum_2p = planning_data$value %>% sum()
+  assert_that(assert_that(check_sum_1p == check_sum_2p))
   
   ### MEchanism to Mechanism mapping would happen right here.
   ### The config fle would look something like this
   
-  ### ~technical area, , ~psnu, ~old_mechanism_uid or code, ~new_mechanism_uid or code, ~weight   
+  ### ~technical area, , ~psnu, ~old_mechanism_uid or code, ~new_mechanism_uid or code, ~weight  
   
-  # Join analytics output (dimensions) to category options
-  age_set <- dim_item_sets %>% 
-    filter(model_sets == data_element_map_item[[1,"age_set"]])
-  sex_set <- dim_item_sets %>% 
-    filter(model_sets == data_element_map_item[[1,"sex_set"]])
-  kp_set <-  dim_item_sets %>% 
-    filter(model_sets == data_element_map_item[[1, "kp_set"]])
-  other_disagg <-  dim_item_sets %>% 
-    filter(model_sets == data_element_map_item[[1, "other_disagg"]])
+  site_data <- dplyr::bind_rows(analytics_output_list$community$results,
+                                analytics_output_list$facility$results) %>% 
+    list(dim_item_sets_age, 
+         dim_item_sets_sex, 
+         dim_item_sets_kp,
+         dim_item_sets_other_disagg) %>% 
+    purrr::reduce(MapDimToOptions, allocate = "distribute")  %>% 
+    dplyr::mutate(psnuid = purrr::map_chr(.$ou_hierarchy, planning_level)) %>%      
+    dplyr::select(-ou_hierarchy) %>% 
+    AggByAgeSexKpOuMechSt()%>% 
+    .[["processed"]] %>% dplyr::select(-dplyr::one_of("count", "maximum", "minimum")) %>% 
+    dplyr::rename("siteValue" = "Value")
+  check_sum_2s = site_data$siteValue %>% sum()
+  assert_that(assert_that(check_sum_1p == check_sum_2s))
   
-  mapped_data_planning <- list(analytics_output_planning$results, 
-                          age_set, 
-                          sex_set, 
-                          kp_set,
-                          other_disagg) %>% 
-    purrr::reduce(MapDimToOptions, allocate = "distribute") %>% 
-    RenameAnalyticsColumns_Site() %>% 
-    AggByAgeSexKpOuMechSt() 
+  ### MEchanism to Mechanism mapping would happen right here.
+  ### The config fle would look something like this
   
-  mapped_data_sites <- list(analytics_output_sites$results, 
-                               age_set, 
-                               sex_set, 
-                               kp_set,
-                               other_disagg) %>% 
-    purrr::reduce(MapDimToOptions, allocate = "distribute") %>% 
-    RenameAnalyticsColumns_Site() %>% 
-    AggByAgeSexKpOuMechSt()  
-    
-  mapped_data_sites$processed <- 
-    mapped_data_sites$processed %>% 
-    dplyr::rename("siteValue" = "value")
+  ### ~technical area, , ~psnu, ~old_mechanism_uid or code, ~new_mechanism_uid or code, ~weight
+  ### join data after mech to mech mapping if implementes
+  joined_data <- dplyr::left_join(site_data, planning_data) %>%
+    dplyr::left_join(mechanisms, by = c("Funding Mechanism" = "categoryOptionId")) %>% 
+    dplyr::rename("mechanismCode" = "code")  %>% 
+    select(-name, -categoryOptionComboId) %>% 
+    mutate(percent = siteValue/value, 
+           indicatorCode = data_element_map_item$indicatorCode_fy20_cop)
+#return(joined_data)
+  check_sum_3p  <- joined_data %>% select(-percent, -siteValue, -`Organisation unit`, -`Support Type`) %>% 
+     unique() %>% 
+     .[["value"]] %>% 
+     sum()
   
-    
+  check_sum_3s = joined_data$siteValue %>% sum()
+  
+   return(paste(check_sum_1p, 
+                check_sum_1s, 
+                check_sum_2p, 
+                check_sum_2s, 
+                check_sum_3s, 
+                check_sum_3p))
+  
+  
   # sanity check =   makes sure the site level data sums to the psnu level data
-  assert_that(sum(mapped_data_planning$processed$value) ==
-                sum(mapped_data_sites$processed$siteValue))
+  # assert_that(sum(mapped_data_planning$processed$value) ==
+  #               sum(mapped_data_sites$processed$siteValue))
   
-  analytics_output_list <- list(planning = mapped_data_planning,
-                                sites = mapped_data_sites)
-  return(analytics_output_list)
     
-  ## Sid we now needdt to join the sites (numerators)
   
 #  sample output?
   SiteToolDensityMatrix <- tibble::tribble(~indicatorCode, ~Age, ~Sex, ~KeyPop, 
@@ -220,28 +233,26 @@ MapDimToOptions <- function(data, items_to_options, allocate){
   }
 }
 
-RenameAnalyticsColumns_Site <- function(data){
-  data %>% dplyr::rename(!!c("value"="Value",  
-                             "org_unit_uid" = "Organisation unit"))
-  }
+
   
 
 AggByAgeSexKpOuMechSt <- function(data) {
   #to do add assertions must include value and org unit columns
   aggregated_data <- data %>%
-    select_if(names(.) %in% c("sex_option_uid", "sex_option_name",
+    dplyr::select_if(names(.) %in% c("sex_option_uid", "sex_option_name",
                               "age_option_uid", "age_option_name",
                               "kp_option_uid", "kp_option_name",
-                              "org_unit_uid","ou_hierarchy", 
-                              "mechanismCode", "Support Type",
-                              "value")) %>%
-    group_by_if(names(.) %in% c("sex_option_uid", "sex_option_name",
+                              "Organisation unit", 
+                              "Funding Mechanism", "Support Type",
+                              "psnuid", "Value")) %>%
+    dplyr::group_by_if(names(.) %in% c("sex_option_uid", "sex_option_name",
                                 "age_option_uid", "age_option_name",
                                 "kp_option_uid", "kp_option_name",
-                                "org_unit_uid","ou_hierarchy", 
-                                "mechanismCode", "Support Type")) %>%
-    summarise(count = n(), minimum = min(value), 
-              maximum = max(value), value = sum(value)) %>% 
+                                "Organisation unit", 
+                                "Funding Mechanism", "Support Type",
+                                "psnuid")) %>%
+    dplyr::summarise(count = n(), minimum = min(Value), 
+              maximum = max(Value), Value = sum(Value)) %>% 
     ungroup()
   
   if (max(aggregated_data$count) == 1) { # nothing aggregated
