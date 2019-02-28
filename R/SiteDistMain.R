@@ -16,37 +16,41 @@ main <- function(){
   # 
   require(datimvalidation)
   
-  DHISLogin("/users/sam/.secrets/triage.json")
+  datapackcommons::DHISLogin("/users/sam/.secrets/prod.json")
   base_url <- getOption("baseurl")
   options(maxCacheAge = 0)
-  repo_path <- "/users/sam/Documents/GitHub/COP-19-Target-Setting/"
-  output_location <- "/Users/sam/COP data/"
-  datapack_export = NULL
-  # sample input file
-  #d=read_rds("/Users/sam/Downloads/South Africa_Results_Archive20190215143802.rds")
   
-  if(!exists("mechanisms_19T")){
-    mechanisms_19T <<- datapackcommons::Get19TMechanisms(base_url)
-    }
-  country_name <- "Rwanda" 
+  # sample input file
+  d = readr::read_rds("/Users/sam/Downloads/South Africa_Results_Archive20190215143802.rds")
+  
+   if(!exists("mechanisms_19T")){
+     mechanisms_19T <<- datapackcommons::Get19TMechanisms(base_url)
+     }
+  # country_name <- "Rwanda" 
 
-  DistributeToSites(datapack_export, 
-                    datapackcommons::Map19Tto20T,# %>% 
-        #              filter(stringr::str_detect(technical_area,"PMTCT")), #TODO remove slice
-                    mechanisms_19T,
-                    datapackcommons::dim_item_sets, 
-                    datapackcommons::GetCountryLevels(base_url, country_name), base_url)
+  DistributeToSites(d, mechanisms_historic_global = mechanisms_19T)
+  
+  
+  # DistributeToSites(datapack_export, 
+  #                   datapackcommons::Map19Tto20T,# %>% 
+  #       #              filter(stringr::str_detect(technical_area,"PMTCT")), #TODO remove slice
+  #                   mechanisms_19T,
+  #                   datapackcommons::dim_item_sets,
+  #       country_name = country_name, base_url = base_url)
   
   }
 
 # Takes data pack export and details for distributiong it and returns required output for site tool 
 # import process
-DistributeToSites <- function(datapack_data, 
-                              data_element_map, 
-                              mechanisms_historic_global,
-                              dim_item_sets,
-                              country_details, base_url){
-  
+DistributeToSites <- function(d, 
+                              data_element_map = datapackcommons::Map19Tto20T, 
+                              mechanisms_historic_global = datapackcommons::Get19TMechanisms("https://www.datim.org/"),
+                              dim_item_sets = datapackcommons::dim_item_sets,
+                              country_name = NULL, base_url = getOption("baseurl")){
+  if(is.null(country_name)){
+    country_name = d$info$datapack_name
+  }
+  country_details <- datapackcommons::GetCountryLevels(base_url, country_name) 
   mechanisms_full_country <- datimvalidation::getMechanismsMap(country_details$id)
   
   assertthat::assert_that(assertthat::has_name(mechanisms_historic_global, "categoryOptionComboId"))
@@ -80,12 +84,12 @@ CalculateSiteDensity <- function(data_element_map_item, country_details,
   
 # create subsets of dim_item_sets for the relevant dimension items to be used later
   
-  dimension_set_columns <- c("age_set", "sex_set", "kp_set", "other_disagg")
-  dim_item_subsets <- purrr::map(dimension_set_columns, 
-                                 ~dplyr::filter(datapackcommons::dim_item_sets,
-                                                model_sets ==  datapackcommons::Map19Tto20T[[3,.]]
-                                                )
-                                 ) %>% rlang::set_names(dimension_set_columns)
+  # dimension_set_columns <- c("age_set", "sex_set", "kp_set", "other_disagg")
+  # dim_item_subsets <- purrr::map(dimension_set_columns, 
+  #                                ~dplyr::filter(datapackcommons::dim_item_sets,
+  #                                               model_sets ==  datapackcommons::Map19Tto20T[[3,.]]
+  #                                               )
+  #                                ) %>% rlang::set_names(dimension_set_columns)
   
   dim_item_sets_age <- dim_item_sets %>% 
     filter(model_sets == data_element_map_item[[1,"age_set"]])
