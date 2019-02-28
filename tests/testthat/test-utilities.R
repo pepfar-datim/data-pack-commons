@@ -42,9 +42,13 @@ test_that("FormatForApi_Dimensions", {
   })
 
 test_that("RenameDimensionColumns", {
-  df = tibble::tribble(~dim_uid, ~dim_name, ~dim_cop_type, ~dim_item_name, ~option_name, ~option_uid, ~sort_order, ~weight, ~model_sets,
+  df_1 = tibble::tribble(~dim_uid, ~dim_name, ~dim_cop_type, ~dim_item_name, ~option_name, ~option_uid, ~sort_order, ~weight, ~model_sets,
                       "test_1", "test_2", "test_3", "test_4", "test_5", "test_6", "test_7", "test_8", "test_9")
-  new_df = RenameDimensionColumns(df, "test")
-  
+  colnames(RenameDimensionColumns(df_1, "test")) %>%
+    testthat::expect_equal(c("test_dim_uid", "test_dim_name", "test_dim_cop_type", "test_dim_item_name", "test_option_name", "test_option_uid", "test_sort_order", "test_weight", "test_model_sets"))
+  df_2 = tibble::tribble(~dim_name, ~dim_name, ~dim_cop_type, ~dim_item_name, ~option_name, ~option_uid, ~sort_order, ~weight, ~model_sets,
+                       "test_1", "test_2", "test_3", "test_4", "test_5", "test_6", "test_7", "test_8", "test_9")
+  testthat::expect_error(RenameDimensionColumns(df_2, "test"))
 })
 
+test_that("MapDimToOptions")

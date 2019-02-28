@@ -1,6 +1,6 @@
 
 main <- function(){
-  devtools::install(pkg = "/Users/sam/Documents/GitHub/data-pack-commons",
+  devtools::install(pkg = "/Users/siddharth/Documents/GitHub/data-pack-commons",
                     build = TRUE,
                     upgrade = FALSE)
   
@@ -16,11 +16,11 @@ main <- function(){
   # 
   require(datimvalidation)
   
-  DHISLogin("/users/sam/.secrets/prod.json")
+  DHISLogin("/users/siddharth/.secrets/datim.json")
   base_url <- getOption("baseurl")
   options(maxCacheAge = 0)
-  repo_path <- "/users/sam/Documents/GitHub/COP-19-Target-Setting/"
-  output_location <- "/Users/sam/COP data/"
+  repo_path <- "/users/siddharth/Documents/GitHub/COP-19-Target-Setting/"
+  output_location <- "/Users/siddharth/COP data/"
   datapack_export = NULL
   
   if(!exists("mechanisms_19T")){
