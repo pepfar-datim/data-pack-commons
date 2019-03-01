@@ -4,31 +4,32 @@ main <- function(){
                     build = TRUE,
                     upgrade = FALSE)
   
-  require(plyr)
-  require(datapackcommons)
-  require(tidyverse)
-  require(jsonlite)
-  # require(lubridate)
-  # require(rlang)
-  require(assertthat)
-  require(foreach)
-  # # require(rlist)
-  # 
-  require(datimvalidation)
+  # require(plyr)
+  # require(datapackcommons)
+  # require(tidyverse)
+  # require(jsonlite)
+  # # require(lubridate)
+  # # require(rlang)
+  # require(assertthat)
+  # require(foreach)
+  # require(rlist)
+  # require(datimvalidation)
   
-  datapackcommons::DHISLogin("/users/sam/.secrets/prod.json")
+  
+  datapackcommons::DHISLogin("/users/sam/.secrets/triage.json")
   base_url <- getOption("baseurl")
-  options(maxCacheAge = 0)
+
   
   # sample input file
-  d = readr::read_rds("/Users/sam/Downloads/South Africa_Results_Archive20190215143802.rds")
+  d = readr::read_rds("/Users/sam/Downloads/Eswatini_Results_Archive20190221222235.rds")
+  
   
    if(!exists("mechanisms_19T")){
      mechanisms_19T <<- datapackcommons::Get19TMechanisms(base_url)
      }
-  # country_name <- "Rwanda" 
+   #country_name <- "Rwanda" 
 
-  DistributeToSites(d, mechanisms_historic_global = mechanisms_19T)
+  DistributeToSites(d,   mechanisms_historic_global = mechanisms_19T)
   
   
   # DistributeToSites(datapack_export, 
@@ -40,18 +41,25 @@ main <- function(){
   
   }
 
+#' @importFrom dplyr %>%
 # Takes data pack export and details for distributiong it and returns required output for site tool 
 # import process
 DistributeToSites <- function(d, 
                               data_element_map = datapackcommons::Map19Tto20T, 
                               mechanisms_historic_global = datapackcommons::Get19TMechanisms("https://www.datim.org/"),
                               dim_item_sets = datapackcommons::dim_item_sets,
-                              country_name = NULL, base_url = getOption("baseurl")){
+                              country_name = NULL, base_url = getOption("baseurl"), verbose = FALSE){
+
   if(is.null(country_name)){
     country_name = d$info$datapack_name
   }
   country_details <- datapackcommons::GetCountryLevels(base_url, country_name) 
+  
+# cache options required for datim valudation function to work
+  cache_in = getOption("maxCacheAge")
+  options(maxCacheAge = 0)
   mechanisms_full_country <- datimvalidation::getMechanismsMap(country_details$id)
+  options(maxCacheAge = cache_in)
   
   assertthat::assert_that(assertthat::has_name(mechanisms_historic_global, "categoryOptionComboId"))
   assertthat::assert_that(assertthat::has_name(mechanisms_full_country, "id"))
@@ -67,12 +75,63 @@ DistributeToSites <- function(d,
                                 country_details, mechanisms_historic_country, 
                                 dim_item_sets, base_url, 
                                 .parallel = TRUE)
-  # match density Values with datapack data
-  # apply distribution weights
-  
-  return(site_densities)
 
-     }
+  # grab the datapack data 
+  # add copies of disagg columns with column names used by this process
+  # recode some of the ages to match names in datim required for join
+  site_data  <-  d[["data"]][["distributedMER"]] 
+  names_in = names(site_data)
+   #names_out = c(names_in, "")
+  site_data  <- site_data %>% mutate(age_option_name = Age, 
+                                     sex_option_name = Sex,
+                                     kp_option_name = KeyPop) 
+  site_data$age_option_name[site_data$age_option_name == "<01"] <- "<1" 
+  site_data$age_option_name[site_data$age_option_name == "01-04"] <- "1-4"
+  site_data$age_option_name[site_data$age_option_name == "05-09"] <- "5-9"
+  
+
+#  bind all of the list items together
+  # historic_data <-  purrr::reduce(site_densities, dplyr::bind_rows)
+# do individual joins for each data element since the site densities do not contain irrelevant disaggs but site data might
+# then bind the seperate results  
+  historic_data <-  purrr::map(site_densities, dplyr::inner_join, site_data) %>% 
+    purrr::reduce(dplyr::bind_rows)
+  
+  site_data <- dplyr::left_join(site_data, historic_data) %>% 
+    dplyr::mutate(siteValue = percent * value)
+  site_data$`Support Type`[site_data$`Support Type` == "cRAGKdWIDn4"] <- "TA" 
+    site_data$`Support Type`[site_data$`Support Type` == "iM13vdNLWKb"] <- "DSD"
+
+      
+    columns <- c(names_in, "type", "percent", "siteValue", "siteValueH", "psnuValueH")
+    site_data <- site_data %>% dplyr::rename("type" = "Support Type") %>% dplyr::select(columns)
+    d[["data"]][["site"]][["distributed"]] <- site_data
+  # left = dplyr::left_join(site_data, historic_data)
+  # inner = dplyr::inner_join(site_data, historic_data)
+  # anti_dp = dplyr::anti_join(site_data, historic_data)
+  # anti_h = dplyr::anti_join(historic_data, site_data)
+  # 
+  
+  # setdiff(site_data$psnuid, historic_data$psnuid)
+  # setdiff(site_data$mechanismCode, historic_data$mechanismCode)
+  # setdiff(site_data$indicatorCode, historic_data$indicatorCode)
+  # setdiff(site_data$age_option_name, historic_data$age_option_name)
+  
+# eswitani reconciliation
+  #     HTS_INDEX_COM.N.Age/Sex/Result.20T.NewPos
+  # reconcile <- anti_dp %>% 
+  #   filter(psnuid != "WtniIbuJk7k",
+  #          !(indicatorCode %in% setdiff(site_data$indicatorCode, historic_data$indicatorCode)),
+  #          (indicatorCode != "HTS_INDEX_COM.N.Age/Sex/Result.20T.NewNeg"), #eswatini
+  #          (indicatorCode != "HTS_INDEX_COM.N.Age/Sex/Result.20T.NewPos"),#eswatini
+  #          Age != "<15", Age != "15+",
+  #          !(mechanismCode %in% setdiff(site_data$mechanismCode, historic_data$mechanismCode)) )
+  # 
+  # drill <- historic_data %>% filter(#psnuid=="nxGb6sd7p7D", 
+  #                                   indicatorCode == "PMTCT_STAT.D.Age/Sex.20T")#,
+  #                                   #mechanismCode=="18599")
+  return(d)
+  }
 
 # 
 CalculateSiteDensity <- function(data_element_map_item, country_details, 
@@ -107,11 +166,12 @@ CalculateSiteDensity <- function(data_element_map_item, country_details,
 
 # Grab historical data by level ierating over the list just created
   analytics_output_list <-  purrr::map(dimensions_by_ou_level, 
-                                       GetData_Analytics, 
+                                       datapackcommons::GetData_Analytics, 
                                        base_url)
   
   if(NROW(analytics_output_list$planning$results) == 0){
-    return("No Data") # to do return something more useful?
+    return(na.omit(tibble::tribble(~indicatorCode,
+                           NA_character_))) # to do return something more useful?
   }  
 
   check_sum_1p = (sum(analytics_output_list$planning$results$Value))
@@ -131,10 +191,10 @@ CalculateSiteDensity <- function(data_element_map_item, country_details,
     AggByAgeSexKpOuMechSt() %>% 
     .[["processed"]] %>% 
     dplyr::select(-dplyr::one_of("count", "maximum", "minimum")) %>% 
-    dplyr::rename("psnuValue" = "Value")
+    dplyr::rename("psnuValueH" = "Value")
   
-  check_sum_2p = planning_data$psnuValue %>% sum()
-  assert_that(assert_that(check_sum_1p == check_sum_2p))
+  check_sum_2p = planning_data$psnuValueH %>% sum()
+  assertthat::assert_that(check_sum_1p == check_sum_2p)
   
   ### MEchanism to Mechanism mapping would happen right here.
   ### The config fle would look something like this
@@ -152,10 +212,10 @@ CalculateSiteDensity <- function(data_element_map_item, country_details,
     dplyr::select(-ou_hierarchy)%>% 
     AggByAgeSexKpOuMechSt()%>% 
     .[["processed"]] %>% dplyr::select(-dplyr::one_of("count", "maximum", "minimum")) %>% 
-    dplyr::rename("siteValue" = "Value")
+    dplyr::rename("siteValueH" = "Value")
   
-  check_sum_2s = site_data$siteValue %>% sum()
-  assert_that(assert_that(check_sum_1p == check_sum_2s))
+  check_sum_2s = site_data$siteValueH %>% sum()
+  assertthat::assert_that(check_sum_1p == check_sum_2s)
   
   ### MEchanism to Mechanism mapping would happen right here.
   ### The config fle would look something like this
@@ -166,41 +226,27 @@ CalculateSiteDensity <- function(data_element_map_item, country_details,
     dplyr::left_join(mechanisms, by = c("Funding Mechanism" = "categoryOptionId")) %>% 
     dplyr::rename("mechanismCode" = "code")  %>% 
     select(-name, -categoryOptionComboId) %>% 
-    mutate(percent = siteValue/psnuValue, 
+    mutate(percent = siteValueH/psnuValueH, 
            indicatorCode = data_element_map_item$indicatorCode_fy20_cop)
 
-  check_sum_3p  <- joined_data %>% select(-dplyr::one_of("percent", "siteValue", 
+  check_sum_3p  <- joined_data %>% select(-dplyr::one_of("percent", "siteValueH", 
                                           "Organisation unit", "Support Type",
                                           "Type of organisational unit")) %>% 
                                             unique() %>% 
-                                            .[["psnuValue"]] %>% 
+                                            .[["psnuValueH"]] %>% 
                                             sum()
   assertthat::assert_that(check_sum_3p == check_sum_1p)
-  check_sum_3s <-  joined_data$siteValue %>% sum()
+  check_sum_3s <-  joined_data$siteValueH %>% sum()
 #  return(check_sum_3p - check_sum_3s)
- assertthat::assert_that(check_sum_3s == check_sum_1p)
+ 
+  assertthat::assert_that(check_sum_3s == check_sum_1p)
 # return(paste(check_sum_1p,
 #              check_sum_1s,
 #             check_sum_2p,
 #              check_sum_2s,
 #              check_sum_3s,
 #              check_sum_3p))
-
   return(joined_data)
-  
-  # sanity check =   makes sure the site level data sums to the psnu level data
-  # assert_that(sum(mapped_data_planning$processed$value) ==
-  #               sum(mapped_data_sites$processed$siteValue))
-  
-    
-  
-#  sample output?
-  # SiteToolDensityMatrix <- tibble::tribble(~indicatorCode, ~Age, ~Sex, ~KeyPop, 
-  #                                          ~mechanismCode, ~DsdOrTa, ~OrgUnitUid, 
-  #                                          ~OrgUnitName, ~psnuid,  ~CommOrFac, 
-  #                                          ~value,
-  #                                          "HTS_INDEX_COM.N.Age/Sex/Result.20T.NewNeg", 
-  #                                          "10-14", "Female", NA_character_, "18628", "DSD", "uid11111111", "An Org Unit", "uid22222222","Community", 11)
 } 
 
 
