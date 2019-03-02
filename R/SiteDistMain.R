@@ -23,15 +23,15 @@ main <- function(){
   # sample input file
   d = readr::read_rds("/Users/sam/Downloads/Eswatini_Results_Archive20190221222235.rds")
   
-  
+  # mechanisms with data for FY19. calling this places a lock on data value table in datim, 
+  # so run as little as possible 
    if(!exists("mechanisms_19T")){
      mechanisms_19T <<- datapackcommons::Get19TMechanisms(base_url)
      }
    #country_name <- "Rwanda" 
 
+  
   DistributeToSites(d,   mechanisms_historic_global = mechanisms_19T)
-  
-  
   # DistributeToSites(datapack_export, 
   #                   datapackcommons::Map19Tto20T,# %>% 
   #       #              filter(stringr::str_detect(technical_area,"PMTCT")), #TODO remove slice
@@ -42,33 +42,48 @@ main <- function(){
   }
 
 #' @importFrom dplyr %>%
-# Takes data pack export and details for distributiong it and returns required output for site tool 
-# import process
-DistributeToSites <- function(d, 
-                              data_element_map = datapackcommons::Map19Tto20T, 
-                              mechanisms_historic_global = datapackcommons::Get19TMechanisms("https://www.datim.org/"),
-                              dim_item_sets = datapackcommons::dim_item_sets,
-                              country_name = NULL, base_url = getOption("baseurl"), verbose = FALSE){
+#' @title DistributeToSites(d, 
+#' data_element_map = datapackcommons::Map19Tto20T, 
+#' mechanisms_historic_global = datapackcommons::Get19TMechanisms("https://www.datim.org/"),
+#' dim_item_sets = datapackcommons::dim_item_sets,
+#' country_name = NULL, base_url = getOption("baseurl"), verbose = FALSE)
+#'
+#' @description Takes data pack export (TargetxPSNUxIM) and several other configuration files and 
+#' distributes targets to Site x DSD/TA. Historic data is pulled from the DATIM api and is used to disaggregate 
+#' the PSNUxIM level targets. Maping between New targets and historic data in the data_element_map.
+#' Data element map references dim_item_sets to know which dissags to use and maps from dimension items to category 
+#' options.  
+DistributeToSites <- 
+  function(d, data_element_map = datapackcommons::Map19Tto20T, 
+           mechanisms_historic_global = datapackcommons::Get19TMechanisms("https://www.datim.org/"),
+           dim_item_sets = datapackcommons::dim_item_sets,
+           country_name = NULL, base_url = getOption("baseurl"), verbose = FALSE){
 
   if(is.null(country_name)){
     country_name = d$info$datapack_name
   }
+# contains country uis, planning, facility, and community levels    
   country_details <- datapackcommons::GetCountryLevels(base_url, country_name) 
   
-# cache options required for datim valudation function to work
+# Get the mechanisms for the specifc country being processed
+# cache options required for datimvalidation function to work.
+# cache age only reverts to original after calling datim validation
   cache_in = getOption("maxCacheAge")
   options(maxCacheAge = 0)
   mechanisms_full_country <- datimvalidation::getMechanismsMap(country_details$id)
   options(maxCacheAge = cache_in)
   
-  assertthat::assert_that(assertthat::has_name(mechanisms_historic_global, "categoryOptionComboId"))
+  assertthat::assert_that(assertthat::has_name(mechanisms_historic_global, 
+                                               "categoryOptionComboId"))
   assertthat::assert_that(assertthat::has_name(mechanisms_full_country, "id"))
-  
+
+# filter to just those mechanisms with data for the relevant time period   
   mechanisms_historic_country <- mechanisms_historic_global %>%   
     dplyr::filter(categoryOptionComboId %in% mechanisms_full_country$id)
 
-# adply to call SiteDensity for each row of data_element_map
-# will have a distribution for each DSD/TA, site given psnu/IM
+# alply to call SiteDensity for each row of data_element_map
+# will have a historic distribution for each target, DSD/TA, and site given psnu/IM
+# alply uses parallel processing
   
   doMC::registerDoMC(cores = 5) # or however many cores you have access to
   site_densities <- plyr::alply(data_element_map, 1, CalculateSiteDensity, 
@@ -76,12 +91,12 @@ DistributeToSites <- function(d,
                                 dim_item_sets, base_url, 
                                 .parallel = TRUE)
 
-  # grab the datapack data 
+  # grab the datapack export data from the main data object 
   # add copies of disagg columns with column names used by this process
   # recode some of the ages to match names in datim required for join
   site_data  <-  d[["data"]][["distributedMER"]] 
   names_in = names(site_data)
-   #names_out = c(names_in, "")
+
   site_data  <- site_data %>% mutate(age_option_name = Age, 
                                      sex_option_name = Sex,
                                      kp_option_name = KeyPop) 
@@ -89,23 +104,32 @@ DistributeToSites <- function(d,
   site_data$age_option_name[site_data$age_option_name == "01-04"] <- "1-4"
   site_data$age_option_name[site_data$age_option_name == "05-09"] <- "5-9"
   
-
-#  bind all of the list items together
-  # historic_data <-  purrr::reduce(site_densities, dplyr::bind_rows)
-# do individual joins for each data element since the site densities do not contain irrelevant disaggs but site data might
-# then bind the seperate results  
+# do individual joins for each data element 
+# The site densities contain different columns depending on the data elements 
+# so doing each inner join seperatly makes sure the join occurs only on the columns
+# in site densities 
+# After the joins bind the results of each individual join
   historic_data <-  purrr::map(site_densities, dplyr::inner_join, site_data) %>% 
     purrr::reduce(dplyr::bind_rows)
+
+# Now join the historic data back to the original input data so we have both the data matched to historic data
+# and the unmatched data which is still only at the PSNU level.
+# Where applicable give the distributed site value by multiplying PSNU level target
+# by Site x DSD/TA density
+# recode the dsd/ta dimension item ids to names
   
   site_data <- dplyr::left_join(site_data, historic_data) %>% 
     dplyr::mutate(siteValue = percent * value)
   site_data$`Support Type`[site_data$`Support Type` == "cRAGKdWIDn4"] <- "TA" 
     site_data$`Support Type`[site_data$`Support Type` == "iM13vdNLWKb"] <- "DSD"
 
-      
+# Select the columns of interest for the site tool generation process.      
     columns <- c(names_in, "type", "percent", "siteValue", "siteValueH", "psnuValueH")
     site_data <- site_data %>% dplyr::rename("type" = "Support Type") %>% dplyr::select(columns)
     d[["data"]][["site"]][["distributed"]] <- site_data
+    
+    
+  
   # left = dplyr::left_join(site_data, historic_data)
   # inner = dplyr::inner_join(site_data, historic_data)
   # anti_dp = dplyr::anti_join(site_data, historic_data)
