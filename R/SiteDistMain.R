@@ -4,24 +4,33 @@ main <- function(){
                     build = TRUE,
                     upgrade = FALSE)
   
-  # require(plyr)
-  # require(datapackcommons)
-  # require(tidyverse)
-  # require(jsonlite)
+   require(plyr)
+   require(datapackcommons)
+   require(tidyverse)
+   require(jsonlite)
   # # require(lubridate)
   # # require(rlang)
-  # require(assertthat)
-  # require(foreach)
+   require(assertthat)
+   require(foreach)
   # require(rlist)
-  # require(datimvalidation)
+   require(datimvalidation)
   
   
-  datapackcommons::DHISLogin("/users/sam/.secrets/triage.json")
+  datapackcommons::DHISLogin("/users/sam/.secrets/prod.json")
   base_url <- getOption("baseurl")
 
   
-  # sample input file
-  d = readr::read_rds("/Users/sam/Downloads/Eswatini_Results_Archive20190221222235.rds")
+  # sample input file from sharepoint
+  
+# d =  readr::read_rds("/Users/sam/Desktop/site tool samples/Eswatini_Results_Archive20190221222235.rds")
+# d =    readr::read_rds("/Users/sam/Desktop/site tool samples/Ethiopia_Results_Archive20190214204719.rds")
+# d =    readr::read_rds("/Users/sam/Desktop/site tool samples/Malawi_Results_Archive20190214165548.rds")
+ d =    readr::read_rds("/Users/sam/Desktop/site tool samples/Mozambique_Results_Archive20190215144113.rds")
+# d =    readr::read_rds("/Users/sam/Desktop/site tool samples/Namibia_Results_Archive20190215163433.rds")
+# d =    readr::read_rds("/Users/sam/Desktop/site tool samples/South Africa_Results_Archive20190215143802.rds")
+# d =   readr::read_rds("/Users/sam/Desktop/site tool samples/West-Central Africa Region_Results_Archive20190222135620.rds")
+# d =    readr::read_rds("/Users/sam/Desktop/site tool samples/Zambia_Results_Archive20190214200342.rds")
+# d =   readr::read_rds("/Users/sam/Desktop/site tool samples/Zimbabwe_Results_Archive20190214184527.rds")
   
   # mechanisms with data for FY19. calling this places a lock on data value table in datim, 
   # so run as little as possible 
@@ -96,6 +105,10 @@ DistributeToSites <-
   # recode some of the ages to match names in datim required for join
   site_data  <-  d[["data"]][["distributedMER"]] 
   names_in = names(site_data)
+  sum_in = sum(site_data$value, na.rm=TRUE)
+  
+  sum_in = site_data %>% dplyr::group_by(indicatorCode) %>% 
+    dplyr::summarise(original = sum(value, na.rm=TRUE))
 
   site_data  <- site_data %>% mutate(age_option_name = Age, 
                                      sex_option_name = Sex,
@@ -123,10 +136,26 @@ DistributeToSites <-
   site_data$`Support Type`[site_data$`Support Type` == "cRAGKdWIDn4"] <- "TA" 
     site_data$`Support Type`[site_data$`Support Type` == "iM13vdNLWKb"] <- "DSD"
 
+# sanity check that the sum of targets in the input 
+#    equals the sum of targets in the output file
+sum_out_psnu = site_data %>% dplyr::filter(is.na(siteValue)) %>% 
+  .$value %>% sum(na.rm=TRUE)
+sum_out_site = sum(site_data$siteValue, na.rm=TRUE)
+
+sum_out_psnu = site_data %>% dplyr::filter(is.na(siteValue)) %>% 
+   dplyr::group_by(indicatorCode) %>% dplyr::summarise(psnu = sum(value, na.rm=TRUE)) %>% ungroup()
+sum_out = site_data %>% dplyr::group_by(indicatorCode) %>% 
+  dplyr::summarise(site = sum(siteValue, na.rm=TRUE)) %>% ungroup() %>% dplyr::full_join(sum_out_psnu) %>% 
+  dplyr::full_join(sum_in) %>% 
+  dplyr::mutate(sited = site+psnu)
+#print(sum_in)
+#print(sum_out_psnu + sum_out_site)
+#assertthat::assert_that(sum_in == sum_out_psnu + sum_out_site)
 # Select the columns of interest for the site tool generation process.      
     columns <- c(names_in, "type", "percent", "siteValue", "siteValueH", "psnuValueH")
     site_data <- site_data %>% dplyr::rename("type" = "Support Type") %>% dplyr::select(columns)
     d[["data"]][["site"]][["distributed"]] <- site_data
+    d[["data"]][["site"]][["other"]] <- sum_out
     
     
   
