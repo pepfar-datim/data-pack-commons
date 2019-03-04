@@ -8,24 +8,18 @@ main <- function(){
    require(datapackcommons)
    require(tidyverse)
    require(jsonlite)
-  # # require(lubridate)
-  # # require(rlang)
    require(assertthat)
    require(foreach)
-  # require(rlist)
    require(datimvalidation)
-  
   
   datapackcommons::DHISLogin("/users/sam/.secrets/prod.json")
   base_url <- getOption("baseurl")
-
-  
   # sample input file from sharepoint
   
-# d =  readr::read_rds("/Users/sam/Desktop/site tool samples/Eswatini_Results_Archive20190221222235.rds")
+ d =  readr::read_rds("/Users/sam/Desktop/site tool samples/Eswatini_Results_Archive20190221222235.rds")
 # d =    readr::read_rds("/Users/sam/Desktop/site tool samples/Ethiopia_Results_Archive20190214204719.rds")
 # d =    readr::read_rds("/Users/sam/Desktop/site tool samples/Malawi_Results_Archive20190214165548.rds")
- d =    readr::read_rds("/Users/sam/Desktop/site tool samples/Mozambique_Results_Archive20190215144113.rds")
+# d =    readr::read_rds("/Users/sam/Desktop/site tool samples/Mozambique_Results_Archive20190215144113.rds")
 # d =    readr::read_rds("/Users/sam/Desktop/site tool samples/Namibia_Results_Archive20190215163433.rds")
 # d =    readr::read_rds("/Users/sam/Desktop/site tool samples/South Africa_Results_Archive20190215143802.rds")
 # d =   readr::read_rds("/Users/sam/Desktop/site tool samples/West-Central Africa Region_Results_Archive20190222135620.rds")
@@ -33,21 +27,24 @@ main <- function(){
 # d =   readr::read_rds("/Users/sam/Desktop/site tool samples/Zimbabwe_Results_Archive20190214184527.rds")
   
   # mechanisms with data for FY19. calling this places a lock on data value table in datim, 
-  # so run as little as possible 
+  # so run as little as possible. Run once here and pass as argument toDistributeToSites 
    if(!exists("mechanisms_19T")){
      mechanisms_19T <<- datapackcommons::Get19TMechanisms(base_url)
-     }
-   #country_name <- "Rwanda" 
-
+   }
+ 
+   #country_name <- "Rwanda"
+# if passing a country level data pack to DistributeToSites 
+# without passing country_name parameter then the country will be pulled from main data object
+# d$info$datapack_name
   
-  DistributeToSites(d,   mechanisms_historic_global = mechanisms_19T)
-  # DistributeToSites(datapack_export, 
-  #                   datapackcommons::Map19Tto20T,# %>% 
-  #       #              filter(stringr::str_detect(technical_area,"PMTCT")), #TODO remove slice
-  #                   mechanisms_19T,
-  #                   datapackcommons::dim_item_sets,
-  #       country_name = country_name, base_url = base_url)
-  
+ DistributeToSites(d,
+                   #, data_element_map = 
+                   #  datapackcommons::Map19Tto20T # %>% filter(stringr::str_detect(technical_area,"PMTCT")) 
+                   , mechanisms_historic_global = mechanisms_19T
+                   #, datapackcommons::dim_item_sets,
+                   #, country_name = "Tanzania", 
+                   #, base_url = base_url
+                    , verbose = TRUE)
   }
 
 #' @importFrom dplyr %>%
@@ -62,67 +59,98 @@ main <- function(){
 #' the PSNUxIM level targets. Maping between New targets and historic data in the data_element_map.
 #' Data element map references dim_item_sets to know which dissags to use and maps from dimension items to category 
 #' options.  
+#' If country_name is passed explicitly and d = NULL then this function returns the distribution 
+#' densities 
 DistributeToSites <- 
-  function(d, data_element_map = datapackcommons::Map19Tto20T, 
-           mechanisms_historic_global = datapackcommons::Get19TMechanisms("https://www.datim.org/"),
+  function(d, 
+           data_element_map = datapackcommons::Map19Tto20T, 
+           mechanisms_historic_global = 
+             datapackcommons::Get19TMechanisms("https://www.datim.org/"),
            dim_item_sets = datapackcommons::dim_item_sets,
-           country_name = NULL, base_url = getOption("baseurl"), verbose = FALSE){
+           country_name = NULL, 
+           base_url = getOption("baseurl"), 
+           verbose = FALSE){
 
+# get country name from data pack data object unless a country name is provided
   if(is.null(country_name)){
     country_name = d$info$datapack_name
   }
-# contains country uis, planning, facility, and community levels    
+# contains country uids, planning, facility, and community levels    
   country_details <- datapackcommons::GetCountryLevels(base_url, country_name) 
   
-# Get the mechanisms for the specifc country being processed
+# Get the mechanisms relevant for the specifc country being processed
 # cache options required for datimvalidation function to work.
-# cache age only reverts to original after calling datim validation
+# cache age option reverts to original after calling datim validation
   cache_in = getOption("maxCacheAge")
   options(maxCacheAge = 0)
   mechanisms_full_country <- datimvalidation::getMechanismsMap(country_details$id)
   options(maxCacheAge = cache_in)
   
+# filter to just those mechanisms with data for the relevant time period
   assertthat::assert_that(assertthat::has_name(mechanisms_historic_global, 
-                                               "categoryOptionComboId"))
-  assertthat::assert_that(assertthat::has_name(mechanisms_full_country, "id"))
-
-# filter to just those mechanisms with data for the relevant time period   
+                                               "categoryOptionComboId"),
+                          assertthat::has_name(mechanisms_full_country, "id"))
   mechanisms_historic_country <- mechanisms_historic_global %>%   
     dplyr::filter(categoryOptionComboId %in% mechanisms_full_country$id)
 
-# alply to call SiteDensity for each row of data_element_map
+# alply to call SiteDensity for each row of data_element_map (each target data element)
 # will have a historic distribution for each target, DSD/TA, and site given psnu/IM
-# alply uses parallel processing
+# alply uses parallel processing here 
   
   doMC::registerDoMC(cores = 5) # or however many cores you have access to
   site_densities <- plyr::alply(data_element_map, 1, CalculateSiteDensity, 
                                 country_details, mechanisms_historic_country, 
                                 dim_item_sets, base_url, 
                                 .parallel = TRUE)
-
-  # grab the datapack export data from the main data object 
-  # add copies of disagg columns with column names used by this process
-  # recode some of the ages to match names in datim required for join
-  site_data  <-  d[["data"]][["distributedMER"]] 
-  names_in = names(site_data)
-  sum_in = sum(site_data$value, na.rm=TRUE)
+# if user passed a country name and a null datapack export object 
+# then we return the historic site density
+  if(is.null(d)){
+    return(site_densities)
+  }
   
-  sum_in = site_data %>% dplyr::group_by(indicatorCode) %>% 
-    dplyr::summarise(original = sum(value, na.rm=TRUE))
+  if(verbose == TRUE){ # add a copy of the denities to output, useful for debugging but can make file large
+    d[["data"]][["site"]][["densities"]] <- site_densities
+  }
 
-  site_data  <- site_data %>% mutate(age_option_name = Age, 
-                                     sex_option_name = Sex,
-                                     kp_option_name = KeyPop) 
-  site_data$age_option_name[site_data$age_option_name == "<01"] <- "<1" 
-  site_data$age_option_name[site_data$age_option_name == "01-04"] <- "1-4"
-  site_data$age_option_name[site_data$age_option_name == "05-09"] <- "5-9"
+# grab the datapack export data from the main data object
+# store column names
+  datapack_data  <-  d[["data"]][["distributedMER"]] 
+  names_in = names(datapack_data)
+  
+# save the original total by indicator of incoming targets for checking later
+  sum_in = datapack_data %>% dplyr::group_by(indicatorCode) %>% 
+    dplyr::summarise(original = sum(value, na.rm=TRUE)) %>% dplyr::ungroup()
+  print(sum_in)
+  
+# add copies of Age, Sex, KeyPop columns from data pack
+# with columns named as in site densities age_option_name, sex_option_name, kp_option_name
+  datapack_data  <- datapack_data %>% mutate(age_option_name = Age, 
+                                             sex_option_name = Sex,
+                                             kp_option_name = KeyPop) 
+# modify some age_option_names in input data to match names in site densities
+# do this in the newly created columns leaving originals as is
+  datapack_data$age_option_name[datapack_data$age_option_name == "<01"] <- "<1" 
+  datapack_data$age_option_name[datapack_data$age_option_name == "01-04"] <- "1-4"
+  datapack_data$age_option_name[datapack_data$age_option_name == "05-09"] <- "5-9"
+
+  
+# make sure all the historic disaggs map to a disagg in the datapack data
+  # ages_density_data <- purrr::map(site_densities, "age_option_name") %>% purrr::reduce(dplyr::union)
+  # sexes_density_data <- purrr::map(site_densities, "sex_option_name") %>% purrr::reduce(dplyr::union)
+  # kps_density_data <- purrr::map(site_densities, "kp_option_name") %>% purrr::reduce(dplyr::union)
+  # print( unique(datapack_data$kp_option_name))
+  # assertthat::assert_that(setequal(ages_density_data, datapack_data$age_option_name),
+  #                         setequal(sexes_density_data, datapack_data$sex_option_name),
+  #                         setequal(kps_density_data, datapack_data$kp_option_name)
+  #                         )
   
 # do individual joins for each data element 
 # The site densities contain different columns depending on the data elements 
+# e.g. sometime age and sex columns other time just key population columns
 # so doing each inner join seperatly makes sure the join occurs only on the columns
-# in site densities 
-# After the joins bind the results of each individual join
-  historic_data <-  purrr::map(site_densities, dplyr::inner_join, site_data) %>% 
+# in site densities (in common with the data pack data) 
+# After the joins bind the results of each individual join into one large data frame
+  matched_data <-  purrr::map(site_densities, dplyr::inner_join, datapack_data) %>% 
     purrr::reduce(dplyr::bind_rows)
 
 # Now join the historic data back to the original input data so we have both the data matched to historic data
@@ -131,21 +159,23 @@ DistributeToSites <-
 # by Site x DSD/TA density
 # recode the dsd/ta dimension item ids to names
   
-  site_data <- dplyr::left_join(site_data, historic_data) %>% 
+  site_tool_data <- dplyr::left_join(datapack_data, matched_data) %>% 
     dplyr::mutate(siteValue = percent * value)
-  site_data$`Support Type`[site_data$`Support Type` == "cRAGKdWIDn4"] <- "TA" 
-    site_data$`Support Type`[site_data$`Support Type` == "iM13vdNLWKb"] <- "DSD"
+  site_tool_data$`Support Type`[site_tool_data$`Support Type` == "cRAGKdWIDn4"] <- "TA" 
+  site_tool_data$`Support Type`[site_tool_data$`Support Type` == "iM13vdNLWKb"] <- "DSD"
 
 # sanity check that the sum of targets in the input 
 #    equals the sum of targets in the output file
-sum_out_psnu = site_data %>% dplyr::filter(is.na(siteValue)) %>% 
+sum_out_psnu = site_tool_data %>% dplyr::filter(is.na(siteValue)) %>% 
   .$value %>% sum(na.rm=TRUE)
-sum_out_site = sum(site_data$siteValue, na.rm=TRUE)
+sum_out_site = sum(site_tool_data$siteValue, na.rm=TRUE)
 
-sum_out_psnu = site_data %>% dplyr::filter(is.na(siteValue)) %>% 
-   dplyr::group_by(indicatorCode) %>% dplyr::summarise(psnu = sum(value, na.rm=TRUE)) %>% ungroup()
-sum_out = site_data %>% dplyr::group_by(indicatorCode) %>% 
-  dplyr::summarise(site = sum(siteValue, na.rm=TRUE)) %>% ungroup() %>% dplyr::full_join(sum_out_psnu) %>% 
+sum_out_psnu = site_tool_data %>% dplyr::filter(is.na(siteValue)) %>% 
+   dplyr::group_by(indicatorCode) %>% dplyr::summarise(psnu = sum(value, na.rm=TRUE)) %>% 
+  ungroup()
+sum_out = site_tool_data %>% dplyr::group_by(indicatorCode) %>% 
+  dplyr::summarise(site = sum(siteValue, na.rm=TRUE)) %>% 
+  ungroup() %>% dplyr::full_join(sum_out_psnu) %>% 
   dplyr::full_join(sum_in) %>% 
   dplyr::mutate(sited = site+psnu)
 #print(sum_in)
@@ -153,34 +183,35 @@ sum_out = site_data %>% dplyr::group_by(indicatorCode) %>%
 #assertthat::assert_that(sum_in == sum_out_psnu + sum_out_site)
 # Select the columns of interest for the site tool generation process.      
     columns <- c(names_in, "type", "percent", "siteValue", "siteValueH", "psnuValueH")
-    site_data <- site_data %>% dplyr::rename("type" = "Support Type") %>% dplyr::select(columns)
-    d[["data"]][["site"]][["distributed"]] <- site_data
+    site_tool_data <- site_tool_data %>% dplyr::rename("type" = "Support Type") %>% 
+      dplyr::select(columns)
+    d[["data"]][["site"]][["distributed"]] <- site_tool_data
     d[["data"]][["site"]][["other"]] <- sum_out
     
     
   
-  # left = dplyr::left_join(site_data, historic_data)
-  # inner = dplyr::inner_join(site_data, historic_data)
-  # anti_dp = dplyr::anti_join(site_data, historic_data)
-  # anti_h = dplyr::anti_join(historic_data, site_data)
+  # left = dplyr::left_join(site_tool_data, matched_data)
+  # inner = dplyr::inner_join(site_tool_data, matched_data)
+  # anti_dp = dplyr::anti_join(site_tool_data, matched_data)
+  # anti_h = dplyr::anti_join(matched_data, site_tool_data)
   # 
   
-  # setdiff(site_data$psnuid, historic_data$psnuid)
-  # setdiff(site_data$mechanismCode, historic_data$mechanismCode)
-  # setdiff(site_data$indicatorCode, historic_data$indicatorCode)
-  # setdiff(site_data$age_option_name, historic_data$age_option_name)
+  # setdiff(site_tool_data$psnuid, matched_data$psnuid)
+  # setdiff(site_tool_data$mechanismCode, matched_data$mechanismCode)
+  # setdiff(site_tool_data$indicatorCode, matched_data$indicatorCode)
+  # setdiff(site_tool_data$age_option_name, matched_data$age_option_name)
   
 # eswitani reconciliation
   #     HTS_INDEX_COM.N.Age/Sex/Result.20T.NewPos
   # reconcile <- anti_dp %>% 
   #   filter(psnuid != "WtniIbuJk7k",
-  #          !(indicatorCode %in% setdiff(site_data$indicatorCode, historic_data$indicatorCode)),
+  #          !(indicatorCode %in% setdiff(datapack_data$indicatorCode, historic_data$indicatorCode)),
   #          (indicatorCode != "HTS_INDEX_COM.N.Age/Sex/Result.20T.NewNeg"), #eswatini
   #          (indicatorCode != "HTS_INDEX_COM.N.Age/Sex/Result.20T.NewPos"),#eswatini
   #          Age != "<15", Age != "15+",
-  #          !(mechanismCode %in% setdiff(site_data$mechanismCode, historic_data$mechanismCode)) )
+  #          !(mechanismCode %in% setdiff(datapack_data$mechanismCode, historic_data$mechanismCode)) )
   # 
-  # drill <- historic_data %>% filter(#psnuid=="nxGb6sd7p7D", 
+  # drill <- matched_data %>% filter(#psnuid=="nxGb6sd7p7D", 
   #                                   indicatorCode == "PMTCT_STAT.D.Age/Sex.20T")#,
   #                                   #mechanismCode=="18599")
   return(d)
