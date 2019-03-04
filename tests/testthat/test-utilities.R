@@ -128,7 +128,8 @@ test_that("RenameDimensionColumns", {
 
 test_that("MapDimToOptions", {
   value <- 10
-  dimension <-  tibble::tribble(
+  # Sample data for Cascade sex, taking a few rows with value being 10 for each of them
+  sample_data <-  tibble::tribble(
     ~ `Cascade sex`,
     ~ Value,
     "ZOYVg7Hosni",
@@ -138,19 +139,22 @@ test_that("MapDimToOptions", {
     "hDBPKTjUPDm",
     value
   )
+  
+  # Taking the sex dimention item sets with model sets as "F/M/U"
   sex_set <- datapackcommons::dim_item_sets %>%
     dplyr::filter(model_sets == "F/M/U")
+  
   
   unique(sex_set$dim_name) %>%
     testthat::expect_equal("Cascade sex")
   
   joined_output_1 <-
-    MapDimToOptions(dimension, sex_set, "distribute")
+    MapDimToOptions(sample_data, sex_set, "distribute")
   joined_output_1$Value %>%
     testthat::expect_equal(joined_output_1$sex_weight * value)
   
   nrow(joined_output_1 %>%
-         dplyr::filter(stringr::str_detect(sex_dim_item_name, "Unspecified sex"))) %>%
+         dplyr::filter((sex_dim_item_name == "Unspecified sex"))) %>%
     testthat::expect_equal(2)
   
   
@@ -158,40 +162,34 @@ test_that("MapDimToOptions", {
     dplyr::filter(model_sets == "missing_sex_1")
   
   nrow(joined_output_2 <-
-         MapDimToOptions(dimension, missing_sex_set, "replicate")) %>%
-    testthat::expect_equal(nrow(dimension) * 2)
-  
-  replicate <- MapDimToOptions(dimension, missing_sex_set, "replicate")
+         MapDimToOptions(sample_data, missing_sex_set, "replicate")) %>%
+    testthat::expect_equal(nrow(sample_data) * 2)
 
-  testthat::expect_false(isTRUE(all.equal(replicate$Value, replicate$sex_weight * value)))
+  # Testing all the values being generated in the output column -> "Value" and making sure they're not being multiplied by weights
+  # isTRUE(all.equal) returns true if all of the cells in Value are the same as output$sex_weight * value, else it returns false
+  testthat::expect_false(isTRUE(all.equal(joined_output_2$Value, joined_output_2$sex_weight * value)))
 
   age_set <- datapackcommons::dim_item_sets %>%
     dplyr::filter(model_sets == "<1-50+")
   
-  dimension_2 <- tibble::tribble(
+  sample_data_2 <- tibble::tribble(
     ~ `Age: Cascade Age bands`, ~ Value,
     "Z8MTaDxRBP6", value,
     "egW0hBcZeD2", value,
     "tIZRQs0FK5P", value
   )
   
-  joined_output_3 <- 
-    MapDimToOptions(dimension_2, age_set, "distribute")
-  
-  joined_output_3$Value %>%
-    testthat::expect_equal(joined_output_3$age_weight * value)
-  
-  dimension_3 <- dplyr::bind_rows(dimension, dimension_2)
-  
-  joined_output_4 <- MapDimToOptions(dimension_3, age_set, "distribute")
+  testthat::expect_error(joined_output_4 <- MapDimToOptions(sample_data, datapackcommons::dim_item_sets, "distribute"))
   
   any(is.na(joined_output_4$Value)) %>%
         testthat::expect_equal(TRUE)
   
+  # Selecting 0 rows from dimension item sets to be sent to a test
   no_data_set <- datapackcommons::dim_item_sets %>%
     dplyr::filter(model_sets == "no data")
   
-  joined_no_items_to_options <- MapDimToOptions(dimension, no_data_set, "distribute")
+  # Send the 0 row dataframe to MapDimToOpsions and making sure we get the Sample data back
+  joined_no_items_to_options <- MapDimToOptions(sample_data, no_data_set, "distribute")
   
-  testthat::expect_equal(dimension, joined_no_items_to_options)
+  testthat::expect_equal(sample_data, joined_no_items_to_options)
 })
