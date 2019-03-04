@@ -149,7 +149,7 @@ test_that("MapDimToOptions", {
     testthat::expect_equal("Cascade sex")
   
   joined_output_1 <-
-    MapDimToOptions(sample_data, sex_set, "distribute")
+    datapackcommons::MapDimToOptions(sample_data, sex_set, "distribute")
   joined_output_1$Value %>%
     testthat::expect_equal(joined_output_1$sex_weight * value)
   
@@ -162,34 +162,21 @@ test_that("MapDimToOptions", {
     dplyr::filter(model_sets == "missing_sex_1")
   
   nrow(joined_output_2 <-
-         MapDimToOptions(sample_data, missing_sex_set, "replicate")) %>%
+         datapackcommons::MapDimToOptions(sample_data, missing_sex_set, "replicate")) %>%
     testthat::expect_equal(nrow(sample_data) * 2)
 
   # Testing all the values being generated in the output column -> "Value" and making sure they're not being multiplied by weights
   # isTRUE(all.equal) returns true if all of the cells in Value are the same as output$sex_weight * value, else it returns false
   testthat::expect_false(isTRUE(all.equal(joined_output_2$Value, joined_output_2$sex_weight * value)))
-
-  age_set <- datapackcommons::dim_item_sets %>%
-    dplyr::filter(model_sets == "<1-50+")
   
-  sample_data_2 <- tibble::tribble(
-    ~ `Age: Cascade Age bands`, ~ Value,
-    "Z8MTaDxRBP6", value,
-    "egW0hBcZeD2", value,
-    "tIZRQs0FK5P", value
-  )
-  
-  testthat::expect_error(joined_output_4 <- MapDimToOptions(sample_data, datapackcommons::dim_item_sets, "distribute"))
-  
-  any(is.na(joined_output_4$Value)) %>%
-        testthat::expect_equal(TRUE)
+  testthat::expect_error(joined_output_3 <- datapackcommons::MapDimToOptions(sample_data, datapackcommons::dim_item_sets, "distribute"))
   
   # Selecting 0 rows from dimension item sets to be sent to a test
   no_data_set <- datapackcommons::dim_item_sets %>%
     dplyr::filter(model_sets == "no data")
   
   # Send the 0 row dataframe to MapDimToOpsions and making sure we get the Sample data back
-  joined_no_items_to_options <- MapDimToOptions(sample_data, no_data_set, "distribute")
+  joined_no_items_to_options <- datapackcommons::MapDimToOptions(sample_data, no_data_set, "distribute")
   
   testthat::expect_equal(sample_data, joined_no_items_to_options)
 })

@@ -109,12 +109,12 @@ MapDimToOptions <- function(data, items_to_options, allocate){
   } else {
     dim_name <-  items_to_options[[1,"dim_name"]]
     joined_data <- data %>%
-      left_join(items_to_options, by = setNames("dim_item_uid", dim_name))
+      dplyr::left_join(items_to_options, by = setNames("dim_item_uid", dim_name))
   }
   
   if(allocate == "distribute"){
     joined_data %>%
-      mutate(Value = Value * weight) %>%
+      dplyr::mutate(Value = Value * weight) %>%
       RenameDimensionColumns(cop_category)
   } else{
     joined_data %>%
