@@ -161,6 +161,10 @@ test_that("MapDimToOptions", {
          MapDimToOptions(dimension, missing_sex_set, "replicate")) %>%
     testthat::expect_equal(nrow(dimension) * 2)
   
+  replicate <- MapDimToOptions(dimension, missing_sex_set, "replicate")
+
+  testthat::expect_false(isTRUE(all.equal(replicate$Value, replicate$sex_weight * value)))
+
   age_set <- datapackcommons::dim_item_sets %>%
     dplyr::filter(model_sets == "<1-50+")
   
@@ -177,5 +181,17 @@ test_that("MapDimToOptions", {
   joined_output_3$Value %>%
     testthat::expect_equal(joined_output_3$age_weight * value)
   
+  dimension_3 <- dplyr::bind_rows(dimension, dimension_2)
   
+  joined_output_4 <- MapDimToOptions(dimension_3, age_set, "distribute")
+  
+  any(is.na(joined_output_4$Value)) %>%
+        testthat::expect_equal(TRUE)
+  
+  no_data_set <- datapackcommons::dim_item_sets %>%
+    dplyr::filter(model_sets == "no data")
+  
+  joined_no_items_to_options <- MapDimToOptions(dimension, no_data_set, "distribute")
+  
+  testthat::expect_equal(dimension, joined_no_items_to_options)
 })
