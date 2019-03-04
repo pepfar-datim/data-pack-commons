@@ -16,7 +16,7 @@ main <- function(){
   base_url <- getOption("baseurl")
   # sample input file from sharepoint
   
- d =  readr::read_rds("/Users/sam/Desktop/site tool samples/Eswatini_Results_Archive20190221222235.rds")
+ d =  readr::read_rds("/Users/sam/Desktop/site tool samples/Results Archive_Eswatini_20190304170332.rds")
 # d =    readr::read_rds("/Users/sam/Desktop/site tool samples/Ethiopia_Results_Archive20190214204719.rds")
 # d =    readr::read_rds("/Users/sam/Desktop/site tool samples/Malawi_Results_Archive20190214165548.rds")
 # d =    readr::read_rds("/Users/sam/Desktop/site tool samples/Mozambique_Results_Archive20190215144113.rds")
@@ -132,6 +132,8 @@ DistributeToSites <-
   datapack_data$age_option_name[datapack_data$age_option_name == "<01"] <- "<1" 
   datapack_data$age_option_name[datapack_data$age_option_name == "01-04"] <- "1-4"
   datapack_data$age_option_name[datapack_data$age_option_name == "05-09"] <- "5-9"
+  datapack_data$age_option_name[datapack_data$age_option_name == "<= 02 months"] <- "<= 2 months"
+  datapack_data$age_option_name[datapack_data$age_option_name == "02 - 12 months"] <- "2 - 12 months"
 
   
 # make sure all the historic disaggs map to a disagg in the datapack data
@@ -258,6 +260,8 @@ CalculateSiteDensity <- function(data_element_map_item, country_details,
                            NA_character_))) # to do return something more useful?
   }  
 
+  # Do I need to be concerned about rounding error
+  
   check_sum_1p = (sum(analytics_output_list$planning$results$Value))
   check_sum_1s = (sum(analytics_output_list$facility$results$Value) +
                     sum(analytics_output_list$community$results$Value))

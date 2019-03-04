@@ -1,5 +1,5 @@
 ﻿dim_uid,dim_name,dim_item_uid,dim_cop_type,dim_item_name,option_name,option_uid,sort_order,weight,model_sets,<1-50+,1-50+,10-50+,15-50+,<1-18+,<15/>15.d,1-4,1-50+/<5,missing_age,10-50+.all,sex,F/M,F/M/U,kp,tr,<2mo,2-12mo,tss,vt,st,as,ti
-e485zBiR7vG,Age: Cascade Age bands,M8W7M5GlOPh,age,<2 Months (Specific),< 2 months,pElywX5bn06,3,1.0000,<2mo,,,,,,,,,,,,,,,,<2mo,,,,,,
+e485zBiR7vG,Age: Cascade Age bands,M8W7M5GlOPh,age,<2 Months (Specific),<= 2 months,J4SQd7SnDi2,3,1.0000,<2mo,,,,,,,,,,,,,,,,<2mo,,,,,,
 e485zBiR7vG,Age: Cascade Age bands,V1TzJFJTdHd,age,2-12 Months (Specific),2 - 12 months,pbXCUjm50XK,7,1.0000,2-12mo,,,,,,,,,,,,,,,,,2-12mo,,,,,
 e485zBiR7vG,Age: Cascade Age bands,Z8MTaDxRBP6,age,<1 (Specific),<1,sMBMO5xAq5T,10,1.0000,<1-50+;<1-18+,<1-50+,,,,<1-18+,,,,,,,,,,,,,,,,,
 e485zBiR7vG,Age: Cascade Age bands,dHewx3ia8a6,age,<15 (Specific),<1,sMBMO5xAq5T,10,0.2500,<15/>15.d,,,,,,<15/>15.d,,,,,,,,,,,,,,,,
