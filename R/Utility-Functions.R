@@ -60,3 +60,65 @@ FormatForApi_Dimensions <- function(data, type_col, dim_id_col, item_id_col){
      .[[1]] %>% 
      paste0(collapse="&")
 }
+
+#' @export
+#' @title RenameDimensionColumns(data, type)
+#' 
+#' @description Renames the original column names of datapackcommons::dim_items_sets, 
+#' by prepending the string in the type parameter
+#' @param data the unique dim_cop_type that is passed in the MapDimToOptions method
+#' @param type It will pre-pend the string in type to the columns names
+#' @return  The dataframe with renamed column names for dimensions
+#'
+RenameDimensionColumns <- function(data, type){
+  data %>% dplyr::rename(!!paste0(type,"_dim_uid") := dim_uid,
+                         !!paste0(type,"_dim_name") := dim_name,
+                         !!paste0(type,"_dim_cop_type") := dim_cop_type,
+                         !!paste0(type,"_dim_item_name") := dim_item_name,
+                         !!paste0(type,"_option_name") := option_name,
+                         !!paste0(type,"_option_uid") := option_uid,
+                         !!paste0(type,"_sort_order") := sort_order,
+                         !!paste0(type,"_weight") := weight,
+                         !!paste0(type,"_model_sets") := model_sets) %>% return()
+}
+
+#' @export
+#' @title MapDimToOptions(data, items_to_options, allocate)
+#' 
+#' @description A function that maps dimensions from a dataframe to the options sets
+#' @param data dataframe - dimension name and dimension UID, along with the quantity
+#' @param items_to_options dimension item sets dataframe filtered by one of the model sets
+#' @param allocate If allocate is set to "distriute", mutates a column in the returned df with the weight being multiplied to the value
+#' @return If there are no options provided, returns the analytics output, else if there are no dim_uid in the options list, joins the data using crossing or left join,
+#' else if the allocation is set to "distriute", then renames them adds a value column and finally performs the renaming of the dimension columns.
+#'
+MapDimToOptions <- function(data, items_to_options, allocate){
+  
+  if(NROW(items_to_options) == 0){
+    return(data)
+  }
+  
+  dimension_uid <- unique(items_to_options$dim_uid)
+  cop_category <- unique(items_to_options$dim_cop_type)
+  assertthat::assert_that(NROW(dimension_uid) == 1, NROW(cop_category) == 1)
+  
+  if(is.na(dimension_uid)){
+    # We are in a scenario of distributing to category options in the absence of a source dimension
+    # so we need cartesian product of data with item_to_dim entries
+    joined_data <- tidyr::crossing(data, items_to_options)
+  } else {
+    dim_name <-  items_to_options[[1,"dim_name"]]
+    joined_data <- data %>%
+      dplyr::left_join(items_to_options, by = setNames("dim_item_uid", dim_name))
+  }
+  
+  if(allocate == "distribute"){
+    joined_data %>%
+      dplyr::mutate(Value = Value * weight) %>%
+      RenameDimensionColumns(cop_category)
+  } else{
+    joined_data %>%
+      RenameDimensionColumns(cop_category)
+  }
+}
+

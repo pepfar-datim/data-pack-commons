@@ -1,5 +1,5 @@
 main <- function(){
-  devtools::install(pkg = "/Users/sam/Documents/GitHub/data-pack-commons",
+  devtools::install(pkg = "/Users/siddharth/Documents/GitHub/data-pack-commons",
                     build = TRUE,
                     upgrade = FALSE)
   
@@ -348,54 +348,6 @@ CalculateSiteDensity <- function(data_element_map_item, country_details,
 #              check_sum_3p))
   return(joined_data)
 } 
-
-
-### COPY OF FUNCTION CURRENTLY IN COP!9 REPO MODEL CALCULATIONS DO NOT CHANGE
-### WE SHOULD INCORPORATE INTO DATA PACK COMMONS PACKAGE
-RenameDimensionColumns <- function(data, type){
-  data %>% dplyr::rename(!!paste0(type,"_dim_uid") := dim_uid,
-                         !!paste0(type,"_dim_name") := dim_name,
-                         !!paste0(type,"_dim_cop_type") := dim_cop_type,
-                         !!paste0(type,"_dim_item_name") := dim_item_name,
-                         !!paste0(type,"_option_name") := option_name,
-                         !!paste0(type,"_option_uid") := option_uid,
-                         !!paste0(type,"_sort_order") := sort_order,
-                         !!paste0(type,"_weight") := weight,
-                         !!paste0(type,"_model_sets") := model_sets) %>% return()
-}
-
-### COPY OF FUNCTION CURRENTLY IN COP!9 REPO MODEL CALCULATIONS DO NOT CHANGE
-### WE SHOULD INCORPORATE INTO DATA PACK COMMONS PACKAGE
-
-MapDimToOptions <- function(data, items_to_options, allocate){
-  
-  if(NROW(items_to_options) == 0){
-    return(data)
-  }
-  
-  dimension_uid <- unique(items_to_options$dim_uid)
-  cop_category <- unique(items_to_options$dim_cop_type)
-  assertthat::assert_that(NROW(dimension_uid) == 1, NROW(cop_category) == 1)
-  
-  if(is.na(dimension_uid)){
-    # We are in a scenario of distributing to category options in the absence of a source dimension
-    # so we need cartesian product of data with item_to_dim entries
-    joined_data <- tidyr::crossing(data, items_to_options)
-  } else {
-    dim_name <-  items_to_options[[1,"dim_name"]]
-    joined_data <- data %>%
-      left_join(items_to_options, by = setNames("dim_item_uid", dim_name))
-  }
-  
-  if(allocate == "distribute"){
-    joined_data %>%
-      mutate(Value = Value * weight) %>%
-      RenameDimensionColumns(cop_category)
-  } else{
-    joined_data %>%
-      RenameDimensionColumns(cop_category)
-  }
-}
 
 AggByAgeSexKpOuMechSt <- function(data) {
   #to do add assertions must include value and org unit columns
