@@ -455,53 +455,6 @@ GetData_Analytics <-  function(dimensions, base_url = getOption("baseurl")){
          )
 }
 
-##RUN preceeding functions
-GetSiteDistributionDenom <-  function(base_url, data_element_uid_dsd, data_element_uid_ta,
-                         country_uid, planning_level, period, mechanisms_uid, 
-                         additional_dimensions = NULL, additional_filters = NULL){
-  
-   api_call <- paste0(base_url,  
-   "api/29/analytics.json?filter=dx:Qdn0vmNSflO;mfYq3HGUIX3", # PMTCT_STAT (N, DSD, Age/Sex/KnownNewResult) TARGET: Known Results
-                                                              # PMTCT_STAT (N, TA, Age/Sex/KnownNewResult) TARGET: Known Results
-   "&dimension=e485zBiR7vG:tIZRQs0FK5P;QOawCj9oLNS", # some age dimension items
-   "&dimension=jyUTj5YC3OK:hDBPKTjUPDm;ZOYVg7Hosni;Gxcf2DK8vNc", # some sex dimension items
-   "&dimension=SH885jaRe0o:", paste0(relevant_mechs, collapse = ";"), # relevant nigeria mechanisms
-   "&dimension=pe:2018Oct", # FY2019 targets perios
-   "&dimension=ou:LEVEL-4;PqlFzhuPcF1", # Nigeria
-   "&outputIdScheme=UID&hierarchyMeta=true") # gives us UIDs in response                  
-    response <- api_call %>% 
-     utils::URLencode()  %>%
-     RetryAPI("application/json", 20)
-   
- content <- response %>% 
-     httr::content(., "text") %>% 
-     jsonlite::fromJSON()
- 
- my_data <- content$rows
- colnames(my_data) <- content$headers$column
- my_data <-tibble::as_tibble(my_data) %>% mutate(Value = as.numeric(Value))
- 
-  # 
-  # assertthat::has_name(my_data, "Value")
-  # if(NROW(my_data) > 0 && !(indicator %in% my_data$Data)){
-  #   stop("response$url: ", response$url, " slice(my_data,1): ", slice(my_data,1))
-  #   assertthat::assert_that(indicator %in% my_data$Data)
-  # }
-  # #      break # if I am here then I got a valid result set
-  # #    })
-  # #    if(i == 3){stop("three attempts to obtain valid result set in GetDataWithIndicator failed")}
-  # #    }
-  # #if ("Value" %in% names(my_data)) { # make sure we got a data table - we should always get one back even if empty
-  # # if we got back an empty data set return it, 
-  # # if we got back a set with data make sure it the indicator uid matches to validate we got back the data we requested
-  # #    if(NROW(my_data) == 0 | (NROW(my_data) > 0 & indicator %in% my_data$Data)){
-  # return(list("api_call" = web_api_call,
-  #             "time" = lubridate::now("UTC"),
-  #             "results" = my_data))
-  # #       }
-  # #}
-  # #  stop("Call to GetDataWithIndicator failed")
-}
 
 ## EARLY FUNCTION USED TO GET RAW DATA 
 
