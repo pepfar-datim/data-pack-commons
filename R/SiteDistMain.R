@@ -172,6 +172,7 @@ CalculateSiteDensities <- function(data_element_map, country_details,
                                 country_details, mechanisms, 
                                 dim_item_sets, base_url, 
                                 .parallel = TRUE)
+  stats::setNames(site_densities, data_element_map$indicatorCode_fy20_cop)
 }
   
   
