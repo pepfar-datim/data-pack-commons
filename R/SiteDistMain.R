@@ -11,12 +11,14 @@ main <- function(){
    require(foreach)
    require(datimvalidation)
   
-  datapackcommons::DHISLogin("/users/sam/.secrets/triage.json")
+  datapackcommons::DHISLogin("/users/sam/.secrets/prod.json")
   base_url <- getOption("baseurl")
   # sample input file from sharepoint
   
  d =  readr::read_rds("/Users/sam/Desktop/site tool samples/Results Archive_Eswatini_20190304170332.rds")
-# d =  readr::read_rds("/Users/sam/Desktop/site tool samples/Results Archive_Nigeria_20190304170241.rds")
+ # readr::write_rds(d, "/Users/sam/Desktop/site tool samples/Eswatini_site_sample_2.rds", compress = c("gz"))
+
+ # d =  readr::read_rds("/Users/sam/Desktop/site tool samples/Results Archive_Nigeria_20190304170241.rds")
 # d =    readr::read_rds("/Users/sam/Desktop/site tool samples/Ethiopia_Results_Archive20190214204719.rds")
 # d =    readr::read_rds("/Users/sam/Desktop/site tool samples/Malawi_Results_Archive20190214165548.rds")
 # d =    readr::read_rds("/Users/sam/Desktop/site tool samples/Mozambique_Results_Archive20190215144113.rds")
@@ -152,8 +154,9 @@ DistributeToSites <-
   site_tool_data$`Support Type`[site_tool_data$`Support Type` == "cRAGKdWIDn4"] <- "TA" 
   site_tool_data$`Support Type`[site_tool_data$`Support Type` == "iM13vdNLWKb"] <- "DSD"
   # Select the columns of interest for the site tool generation process.      
-  columns <- c(names_in, "type", "percent", "siteValue", "siteValueH", "psnuValueH")
-  site_tool_data <- site_tool_data %>% dplyr::rename("type" = "Support Type") %>% 
+  columns <- c(names_in, "org_unit", "type", "percent", "siteValue", "siteValueH", "psnuValueH")
+  site_tool_data <- site_tool_data %>% 
+    dplyr::rename("type" = "Support Type", "org_unit" = "Organisation unit") %>% 
     dplyr::select(columns)
   d[["data"]][["site"]][["distributed"]] <- site_tool_data
 
@@ -414,14 +417,16 @@ CheckSiteToolData <- function(d, d_old = NULL, issue_error = FALSE){
                      site_tool_total = sum(site, na.rm=TRUE) + sum(psnu, na.rm=TRUE),
                      difference = input_total - site_tool_total) %>% 
     ungroup()
-  
+  print(totals)
   mechanisms_not_distributed <- dplyr::setdiff(datapack_data$mechanismCode, 
                                              site_tool_data_site$mechanismCode)
+  print(mechanisms_not_distributed)
   psnus_not_distributed <- dplyr::setdiff(datapack_data$psnuid, 
                                                site_tool_data_site$psnuid)
-  
+  print(psnus_not_distributed)
   targets_not_distributed <- dplyr::setdiff(datapack_data$indicatorCode, 
                                           site_tool_data_site$indicatorCode)    
+  print(targets_not_distributed)
   
   indicators_ages_dp <- datapack_data %>% select(indicatorCode, Age) %>% unique()
   indicators_ages_site <- site_tool_data_site %>% select(indicatorCode, Age) %>% unique()
