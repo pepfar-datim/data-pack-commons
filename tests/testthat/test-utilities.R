@@ -31,36 +31,14 @@ test_that("FormatForApi_Dimensions", {
   # &dimension=ou:O6uvpzGd5pu
   # &filter=dx:BOSZApCrBni;dGdeotKpRed;eRwOwCpMzyP;zYkwbCBALhn
   # &filter=pe:THIS_FINANCIAL_YEAR
-  df = tibble::tribble(
-    ~ type,
-    ~ dim_id,
-    ~ item_id,
-    ~ other_col,
-    "dimension",
-    "LFsZ8v5v7rq",
-    "CW81uF03hvV",
-    "Implementing Partner: AIDSRelief Consortium",
-    "dimension",
-    "LFsZ8v5v7rq",
-    "C6nZpLKjEJr",
-    "Implementing Partner: African Medical and Research Foundation",
-    "filter",
-    "dx",
-    "BOSZApCrBni",
-    "ART enrollment stage 1",
-    "filter",
-    "dx",
-    "dGdeotKpRed",
-    "ART enrollment stage 2",
-    "dimension",
-    "ou",
-    "O6uvpzGd5pu",
-    "Bo",
-    "filter",
-    "pe",
-    "THIS_FINANCIAL_YEAR",
-    ""
-  )
+  df = tibble::tribble(~ type, ~ dim_id, ~ item_id, ~ other_col,
+    "dimension", "LFsZ8v5v7rq", "CW81uF03hvV", "Implementing Partner: AIDSRelief Consortium",
+    "dimension", "LFsZ8v5v7rq", "C6nZpLKjEJr", "Implementing Partner: African Medical and Research Foundation",
+    "filter", "dx", "BOSZApCrBni", "ART enrollment stage 1",
+    "filter", "dx", "dGdeotKpRed", "ART enrollment stage 2",
+    "dimension", "ou", "O6uvpzGd5pu", "Bo",
+    "filter", "pe", "THIS_FINANCIAL_YEAR", ""
+    )
   FormatForApi_Dimensions(df, "type", "dim_id", "item_id") %>%
     testthat::expect_equal(
       "dimension=LFsZ8v5v7rq:CW81uF03hvV;C6nZpLKjEJr&dimension=ou:O6uvpzGd5pu&filter=dx:BOSZApCrBni;dGdeotKpRed&filter=pe:THIS_FINANCIAL_YEAR"
@@ -69,25 +47,12 @@ test_that("FormatForApi_Dimensions", {
 })
 
 test_that("RenameDimensionColumns", {
-  df_1 = tibble::tribble(
-    ~ dim_uid,
-    ~ dim_name,
-    ~ dim_cop_type,
-    ~ dim_item_name,
-    ~ option_name,
-    ~ option_uid,
-    ~ sort_order,
-    ~ weight,
-    ~ model_sets,
-    "test_1",
-    "test_2",
-    "test_3",
-    "test_4",
-    "test_5",
-    "test_6",
-    "test_7",
-    "test_8",
-    "test_9"
+  df_1 <-  
+    tibble::tribble(~ dim_uid, ~ dim_name, ~ dim_cop_type, ~ dim_item_name, ~ option_name,
+                    ~ option_uid, ~ sort_order, ~ weight, ~ model_sets,
+                    
+                    "test_1", "test_2", "test_3", "test_4", "test_5",
+                    "test_6", "test_7", "test_8", "test_9"
   )
   colnames(RenameDimensionColumns(df_1, "test")) %>%
     testthat::expect_equal(
@@ -130,14 +95,10 @@ test_that("MapDimToOptions", {
   value <- 10
   # Sample data for Cascade sex, taking a few rows with value being 10 for each of them
   sample_data <-  tibble::tribble(
-    ~ `Cascade sex`,
-    ~ Value,
-    "ZOYVg7Hosni",
-    value,
-    "Gxcf2DK8vNc",
-    value,
-    "hDBPKTjUPDm",
-    value
+    ~ `Cascade sex`, ~ Value,
+    "ZOYVg7Hosni", value,
+    "Gxcf2DK8vNc", value,
+    "hDBPKTjUPDm", value
   )
   
   # Taking the sex dimention item sets with model sets as "F/M/U"
