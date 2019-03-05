@@ -3,21 +3,13 @@ main <- function(){
                     build = TRUE,
                     upgrade = FALSE)
   
-   # require(plyr)
-   # require(datapackcommons)
-   # require(tidyverse)
-   # require(jsonlite)
-   # require(assertthat)
-   # require(foreach)
-   # require(datimvalidation)
-  
-  datapackcommons::DHISLogin("/users/sam/.secrets/prod.json")
+  datapackcommons::DHISLogin("/users/sam/.secrets/triage.json")
   base_url <- getOption("baseurl")
   # sample input file from sharepoint
   
- d =  readr::read_rds("/Users/sam/Desktop/site tool samples/Results Archive_Eswatini_20190304170332.rds")
+ #d =  readr::read_rds("/Users/sam/Desktop/site tool samples/Results Archive_Eswatini_20190304170332.rds")
  # readr::write_rds(d, "/Users/sam/Desktop/site tool samples/Eswatini_site_sample_2.rds", compress = c("gz"))
-
+  # readr::write_rds(density, "/Users/sam/Desktop/site tool samples/Burundi_density_20190305.rds", compress = c("gz"))
  # d =  readr::read_rds("/Users/sam/Desktop/site tool samples/Results Archive_Nigeria_20190304170241.rds")
 # d =    readr::read_rds("/Users/sam/Desktop/site tool samples/Ethiopia_Results_Archive20190214204719.rds")
 # d =    readr::read_rds("/Users/sam/Desktop/site tool samples/Malawi_Results_Archive20190214165548.rds")
@@ -40,12 +32,12 @@ main <- function(){
 # without passing country_name parameter then the country will be pulled from main data object
 # d$info$datapack_name
   
- DistributeToSites(d,
+ datapackcommons::DistributeToSites(d = NULL,
                    #, data_element_map = 
                    #  datapackcommons::Map19Tto20T # %>% filter(stringr::str_detect(technical_area,"PMTCT")) 
                    , mechanisms_historic_global = mechanisms_19T
                    #, datapackcommons::dim_item_sets,
-                   #, country_name = "Tanzania", 
+                   , country_name = "Burundi", 
                    #, base_url = base_url
                     , verbose = TRUE)
   }
