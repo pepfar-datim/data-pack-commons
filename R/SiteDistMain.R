@@ -1,4 +1,3 @@
-
 main <- function(){
   devtools::install(pkg = "/Users/sam/Documents/GitHub/data-pack-commons",
                     build = TRUE,
@@ -12,11 +11,12 @@ main <- function(){
    require(foreach)
    require(datimvalidation)
   
-  datapackcommons::DHISLogin("/users/sam/.secrets/prod.json")
+  datapackcommons::DHISLogin("/users/sam/.secrets/triage.json")
   base_url <- getOption("baseurl")
   # sample input file from sharepoint
   
  d =  readr::read_rds("/Users/sam/Desktop/site tool samples/Results Archive_Eswatini_20190304170332.rds")
+# d =  readr::read_rds("/Users/sam/Desktop/site tool samples/Results Archive_Nigeria_20190304170241.rds")
 # d =    readr::read_rds("/Users/sam/Desktop/site tool samples/Ethiopia_Results_Archive20190214204719.rds")
 # d =    readr::read_rds("/Users/sam/Desktop/site tool samples/Malawi_Results_Archive20190214165548.rds")
 # d =    readr::read_rds("/Users/sam/Desktop/site tool samples/Mozambique_Results_Archive20190215144113.rds")
@@ -25,7 +25,8 @@ main <- function(){
 # d =   readr::read_rds("/Users/sam/Desktop/site tool samples/West-Central Africa Region_Results_Archive20190222135620.rds")
 # d =    readr::read_rds("/Users/sam/Desktop/site tool samples/Zambia_Results_Archive20190214200342.rds")
 # d =   readr::read_rds("/Users/sam/Desktop/site tool samples/Zimbabwe_Results_Archive20190214184527.rds")
-  
+ # d_old <- readr::read_rds("/Users/sam/Desktop/site tool samples/Results Archive_Eswatini_20190304170332_site.rds")
+ # all_equal(d_new$data$site$distributed, d_old$data$site$distributed)
   # mechanisms with data for FY19. calling this places a lock on data value table in datim, 
   # so run as little as possible. Run once here and pass as argument toDistributeToSites 
    if(!exists("mechanisms_19T")){
@@ -97,11 +98,10 @@ DistributeToSites <-
 # will have a historic distribution for each target, DSD/TA, and site given psnu/IM
 # alply uses parallel processing here 
   
-  doMC::registerDoMC(cores = 5) # or however many cores you have access to
-  site_densities <- plyr::alply(data_element_map, 1, CalculateSiteDensity, 
-                                country_details, mechanisms_historic_country, 
-                                dim_item_sets, base_url, 
-                                .parallel = TRUE)
+  site_densities <- CalculateSiteDensities(data_element_map, country_details, 
+                                           mechanisms_historic_country, 
+                                           dim_item_sets, base_url, cores = 5)
+
 # if user passed a country name and a null datapack export object 
 # then we return the historic site density
   if(is.null(d)){
@@ -120,7 +120,6 @@ DistributeToSites <-
 # save the original total by indicator of incoming targets for checking later
   sum_in = datapack_data %>% dplyr::group_by(indicatorCode) %>% 
     dplyr::summarise(original = sum(value, na.rm=TRUE)) %>% dplyr::ungroup()
-  print(sum_in)
   
 # add copies of Age, Sex, KeyPop columns from data pack
 # with columns named as in site densities age_option_name, sex_option_name, kp_option_name
@@ -165,38 +164,37 @@ DistributeToSites <-
     dplyr::mutate(siteValue = percent * value)
   site_tool_data$`Support Type`[site_tool_data$`Support Type` == "cRAGKdWIDn4"] <- "TA" 
   site_tool_data$`Support Type`[site_tool_data$`Support Type` == "iM13vdNLWKb"] <- "DSD"
+  # Select the columns of interest for the site tool generation process.      
+  columns <- c(names_in, "type", "percent", "siteValue", "siteValueH", "psnuValueH")
+  site_tool_data <- site_tool_data %>% dplyr::rename("type" = "Support Type") %>% 
+    dplyr::select(columns)
+  d[["data"]][["site"]][["distributed"]] <- site_tool_data
 
 # sanity check that the sum of targets in the input 
 #    equals the sum of targets in the output file
-sum_out_psnu = site_tool_data %>% dplyr::filter(is.na(siteValue)) %>% 
-  .$value %>% sum(na.rm=TRUE)
-sum_out_site = sum(site_tool_data$siteValue, na.rm=TRUE)
 
 sum_out_psnu = site_tool_data %>% dplyr::filter(is.na(siteValue)) %>% 
    dplyr::group_by(indicatorCode) %>% dplyr::summarise(psnu = sum(value, na.rm=TRUE)) %>% 
   ungroup()
-sum_out = site_tool_data %>% dplyr::group_by(indicatorCode) %>% 
+sum_reconcile = site_tool_data %>% dplyr::group_by(indicatorCode) %>% 
   dplyr::summarise(site = sum(siteValue, na.rm=TRUE)) %>% 
   ungroup() %>% dplyr::full_join(sum_out_psnu) %>% 
-  dplyr::full_join(sum_in) %>% 
-  dplyr::mutate(sited = site+psnu)
-#print(sum_in)
-#print(sum_out_psnu + sum_out_site)
+  dplyr::full_join(sum_in) %>% dplyr::group_by(indicatorCode) %>% 
+  dplyr::summarise(input_total = sum(input = sum(original, na.rm=TRUE)), 
+                   site_tool_total = sum(site, na.rm=TRUE) + sum(psnu, na.rm=TRUE),
+                   difference = input_total - site_tool_total) %>% ungroup()
+
 #assertthat::assert_that(sum_in == sum_out_psnu + sum_out_site)
-# Select the columns of interest for the site tool generation process.      
-    columns <- c(names_in, "type", "percent", "siteValue", "siteValueH", "psnuValueH")
-    site_tool_data <- site_tool_data %>% dplyr::rename("type" = "Support Type") %>% 
-      dplyr::select(columns)
-    d[["data"]][["site"]][["distributed"]] <- site_tool_data
-    d[["data"]][["site"]][["other"]] <- sum_out
+
+    d[["data"]][["site"]][["other"]] <- sum_reconcile
     
     
   
-  # left = dplyr::left_join(site_tool_data, matched_data)
-  # inner = dplyr::inner_join(site_tool_data, matched_data)
-  # anti_dp = dplyr::anti_join(site_tool_data, matched_data)
-  # anti_h = dplyr::anti_join(matched_data, site_tool_data)
-  # 
+  # left <<- dplyr::left_join(site_tool_data, matched_data)
+  # inner <<- dplyr::inner_join(site_tool_data, matched_data)
+  # anti_dp <<- dplyr::anti_join(site_tool_data, matched_data)
+  # anti_h <<- dplyr::anti_join(matched_data, site_tool_data)
+
   
   # setdiff(site_tool_data$psnuid, matched_data$psnuid)
   # setdiff(site_tool_data$mechanismCode, matched_data$mechanismCode)
@@ -219,7 +217,21 @@ sum_out = site_tool_data %>% dplyr::group_by(indicatorCode) %>%
   return(d)
   }
 
-# 
+# wrapper function to functionalize and parallelize calls to CalculateSiteDensity
+CalculateSiteDensities <- function(data_element_map, country_details, 
+                                   mechanisms, dim_item_sets, base_url, cores = 1){
+  # alply to call SiteDensity for each row of data_element_map (each target data element)
+  # will have a historic distribution for each target, DSD/TA, and site given psnu/IM
+  # alply uses parallel processing here 
+  
+  doMC::registerDoMC(cores = cores) 
+  site_densities <- plyr::alply(data_element_map, 1, CalculateSiteDensity, 
+                                country_details, mechanisms, 
+                                dim_item_sets, base_url, 
+                                .parallel = TRUE)
+}
+  
+  
 CalculateSiteDensity <- function(data_element_map_item, country_details, 
                                  mechanisms, dim_item_sets, base_url){
   assertthat::assert_that(NROW(data_element_map_item) == 1,
