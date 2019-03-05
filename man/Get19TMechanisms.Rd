@@ -4,7 +4,7 @@
 \alias{Get19TMechanisms}
 \title{Get19TMechanisms(base_url)}
 \usage{
-Get19TMechanisms(base_url)
+Get19TMechanisms(base_url = getOption("baseurl"))
 }
 \arguments{
 \item{base_url}{string - base address of instance (text before api/ in URL)}

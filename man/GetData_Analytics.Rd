@@ -4,7 +4,7 @@
 \alias{GetData_Analytics}
 \title{GetData_Analytics <-  function(dimensions, base_url)}
 \usage{
-GetData_Analytics(dimensions, base_url)
+GetData_Analytics(dimensions, base_url = getOption("baseurl"))
 }
 \arguments{
 \item{dimensions}{data frame - must contain columns named "type", "dim_uid", 

@@ -360,7 +360,7 @@ ValidateCodeIdPairs <- function(base_url, codes, ids, type){
 #' 
 #' @description gets data from SQL view vtNAsZcMZiU - mechanisms with 2018Oct data
 #' @param base_url string - base address of instance (text before api/ in URL)
-Get19TMechanisms <- function(base_url){
+Get19TMechanisms <- function(base_url = getOption("baseurl")){
   # SQL view will retrieve list of mechanisms for which there is FY2019 data - 2018Oct period
   api_call <- paste0(base_url, "api/sqlViews/vtNAsZcMZiU/data.csv") 
   # limit calls to this SQL view on prod
@@ -375,7 +375,7 @@ Get19TMechanisms <- function(base_url){
                                       filters = "id:eq:wUpfppgjEza", 
                                       "categoryOptionCombos[code,id~rename(categoryOptionComboId),name,categoryOptions[id~rename(categoryOptionId)]]")[[1,"categoryOptionCombos"]] %>% 
     dplyr::as_tibble() %>% 
-    unnest() %>% 
+    tidyr::unnest() %>% 
     dplyr::inner_join(mech_list_parsed, by = c("categoryOptionComboId" = "uid"))
   
   if(NROW(mech_cat_opt_combos) > 0){
@@ -413,7 +413,7 @@ Get19TMechanisms <- function(base_url){
 #'   datapackcommons::DHISLogin_Play("2.29")
 #'   GetData_Analytics(dimensions_sample, "https://play.dhis2.org/2.29/")
 
-GetData_Analytics <-  function(dimensions, base_url){
+GetData_Analytics <-  function(dimensions, base_url = getOption("baseurl")){
   api_call <- paste0(base_url,  
                      "api/29/analytics.json?",
                      datapackcommons::FormatForApi_Dimensions(dimensions, "type", 
@@ -429,7 +429,7 @@ GetData_Analytics <-  function(dimensions, base_url){
   
   my_data <- content$rows
   if(length(dim(my_data)) != 2){ # empty table returned
-    return(list(analytics_output = NULL, 
+    return(list(results = NULL, 
                 api_call = response$url)
            )
   } 
@@ -441,11 +441,12 @@ GetData_Analytics <-  function(dimensions, base_url){
   ##the items in these columns were requested.
   ## If there is a mismatch stop()
   ## is there other useful metadata we want to return?
-  
+
+  # list column(vector) of the org hiearchy including the org unit itself
+  # added to the data in a mutate below
   ou_hierarchy <- purrr::map_chr(my_data[["Organisation unit"]], 
-                                 function(x) content$metaData$ouHierarchy[[x]]) %>% 
+                                 function(x) paste0(content$metaData$ouHierarchy[[x]], "/", x)) %>% 
     stringr::str_split("/")
-  
   
   my_data <-
     dplyr::mutate(my_data, Value = as.numeric(Value), ou_hierarchy = ou_hierarchy)
