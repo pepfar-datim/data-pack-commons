@@ -2,6 +2,7 @@
 
 export(DHISLogin)
 export(DHISLogin_Play)
+export(DistributeToSites)
 export(FormatForApi_Dimensions)
 export(Get19TMechanisms)
 export(GetCountryLevels)
@@ -14,4 +15,5 @@ export(ValidateCodeIdPairs)
 export(ValidateNameIdPairs)
 export(getMetadata)
 importFrom(dplyr,"%>%")
+importFrom(magrittr,"%>%")
 importFrom(utils,URLencode)

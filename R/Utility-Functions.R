@@ -109,7 +109,7 @@ MapDimToOptions <- function(data, items_to_options, allocate){
   } else {
     dim_name <-  items_to_options[[1,"dim_name"]]
     joined_data <- data %>%
-      dplyr::left_join(items_to_options, by = setNames("dim_item_uid", dim_name))
+      dplyr::left_join(items_to_options, by = stats::setNames("dim_item_uid", dim_name))
   }
   
   if(allocate == "distribute"){

@@ -185,7 +185,7 @@ GetDataWithIndicator <- function(base_url, indicator, org_units, level, periods,
       # this was here to catch recieving the "log in" screen which was html
       
       if(NROW(my_data) > 0 && !(indicator %in% my_data$Data)){
-        stop("response$url: ", response$url, " slice(my_data,1): ", slice(my_data,1))
+        stop("response$url: ", response$url, " slice(my_data,1): ", dplyr::slice(my_data,1))
         assertthat::assert_that(indicator %in% my_data$Data)
       }
 #      break # if I am here then I got a valid result set

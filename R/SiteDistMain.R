@@ -3,13 +3,13 @@ main <- function(){
                     build = TRUE,
                     upgrade = FALSE)
   
-   require(plyr)
-   require(datapackcommons)
-   require(tidyverse)
-   require(jsonlite)
-   require(assertthat)
-   require(foreach)
-   require(datimvalidation)
+   # require(plyr)
+   # require(datapackcommons)
+   # require(tidyverse)
+   # require(jsonlite)
+   # require(assertthat)
+   # require(foreach)
+   # require(datimvalidation)
   
   datapackcommons::DHISLogin("/users/sam/.secrets/prod.json")
   base_url <- getOption("baseurl")
@@ -50,12 +50,9 @@ main <- function(){
                     , verbose = TRUE)
   }
 
-#' @importFrom dplyr %>%
-#' @title DistributeToSites(d, 
-#' data_element_map = datapackcommons::Map19Tto20T, 
-#' mechanisms_historic_global = datapackcommons::Get19TMechanisms("https://www.datim.org/"),
-#' dim_item_sets = datapackcommons::dim_item_sets,
-#' country_name = NULL, base_url = getOption("baseurl"), verbose = FALSE)
+#' @importFrom magrittr %>%
+#' @export
+#' @title DistributeToSites()
 #'
 #' @description Takes data pack export (TargetxPSNUxIM) and several other configuration files and 
 #' distributes targets to Site x DSD/TA. Historic data is pulled from the DATIM api and is used to disaggregate 
@@ -121,7 +118,7 @@ DistributeToSites <-
   
 # add copies of Age, Sex, KeyPop columns from data pack
 # with columns named as in site densities age_option_name, sex_option_name, kp_option_name
-  datapack_data  <- datapack_data %>% mutate(age_option_name = Age, 
+  datapack_data  <- datapack_data %>% dplyr::mutate(age_option_name = Age, 
                                              sex_option_name = Sex,
                                              kp_option_name = KeyPop) 
 # modify some age_option_names in input data to match names in site densities
@@ -196,13 +193,13 @@ CalculateSiteDensity <- function(data_element_map_item, country_details,
   #                                ) %>% rlang::set_names(dimension_set_columns)
   
   dim_item_sets_age <- dim_item_sets %>% 
-    filter(model_sets == data_element_map_item[[1,"age_set"]])
+    dplyr::filter(model_sets == data_element_map_item[[1,"age_set"]])
   dim_item_sets_sex <- dim_item_sets %>% 
-    filter(model_sets == data_element_map_item[[1,"sex_set"]])
+    dplyr::filter(model_sets == data_element_map_item[[1,"sex_set"]])
   dim_item_sets_kp <-  dim_item_sets %>% 
-    filter(model_sets == data_element_map_item[[1, "kp_set"]])
+    dplyr::filter(model_sets == data_element_map_item[[1, "kp_set"]])
   dim_item_sets_other_disagg <-  dim_item_sets %>% 
-    filter(model_sets == data_element_map_item[[1, "other_disagg"]])
+    dplyr::filter(model_sets == data_element_map_item[[1, "other_disagg"]])
   
 # get list of dimensions (parameters) for analytics call by level {planning, community, facility}
 # analytics will be called seperatly for each level  
@@ -215,7 +212,7 @@ CalculateSiteDensity <- function(data_element_map_item, country_details,
                                        base_url)
   
   if(NROW(analytics_output_list$planning$results) == 0){
-    return(na.omit(tibble::tribble(~indicatorCode,
+    return(stats::na.omit(tibble::tribble(~indicatorCode,
                            NA_character_))) # to do return something more useful?
   }  
 
@@ -272,11 +269,11 @@ CalculateSiteDensity <- function(data_element_map_item, country_details,
   joined_data <- dplyr::left_join(site_data, planning_data) %>%
     dplyr::left_join(mechanisms, by = c("Funding Mechanism" = "categoryOptionId")) %>% 
     dplyr::rename("mechanismCode" = "code")  %>% 
-    select(-name, -categoryOptionComboId) %>% 
-    mutate(percent = siteValueH/psnuValueH, 
+    dplyr::select(-name, -categoryOptionComboId) %>% 
+    dplyr::mutate(percent = siteValueH/psnuValueH, 
            indicatorCode = data_element_map_item$indicatorCode_fy20_cop)
 
-  check_sum_3p  <- joined_data %>% select(-dplyr::one_of("percent", "siteValueH", 
+  check_sum_3p  <- joined_data %>% dplyr::select(-dplyr::one_of("percent", "siteValueH", 
                                           "Organisation unit", "Support Type",
                                           "Type of organisational unit")) %>% 
                                             unique() %>% 
@@ -311,16 +308,16 @@ AggByAgeSexKpOuMechSt <- function(data) {
                                 "Organisation unit", 
                                 "Funding Mechanism", "Support Type",
                                 "psnuid")) %>%
-    dplyr::summarise(count = n(), minimum = min(Value), 
+    dplyr::summarise(count = dplyr::n(), minimum = min(Value), 
               maximum = max(Value), Value = sum(Value)) %>% 
-    ungroup()
+    dplyr::ungroup()
   
   if (max(aggregated_data$count) == 1) { # nothing aggregated
     return(list(processed = data, was_aggregated = FALSE))
   } 
   else {
     return(list(processed = aggregated_data, was_aggregated = TRUE, 
-                aggregations = filter(aggregated_data, count>1)))
+                aggregations = dplyr::filter(aggregated_data, count > 1)))
   }
 }
 
@@ -334,7 +331,7 @@ BuildDimensionLists <- function(data_element_map_item, dim_item_sets,
                                     data_element_map_item$other_disagg)) %>% 
     dplyr::select(type, dim_item_uid, dim_uid) %>%
     unique()  %>% 
-    na.omit() # there are some items in dim item sets with no source dimension
+    stats::na.omit() # there are some items in dim item sets with no source dimension
   
   dimension_mechanisms <- mechanisms["categoryOptionId"] %>% dplyr::transmute(type = "dimension", 
                                                                               dim_item_uid = categoryOptionId,
@@ -394,8 +391,8 @@ CheckSiteToolData <- function(d, d_old = NULL, issue_error = FALSE){
   
   datapack_data  <-  d[["data"]][["distributedMER"]]
   site_tool_data  <-  d[["data"]][["site"]][["distributed"]]
-  site_tool_data_site <- filter(site_tool_data, !is.na(siteValue))
-  site_tool_data_psnu_only <- filter(site_tool_data, is.na(siteValue))
+  site_tool_data_site <- dplyr::filter(site_tool_data, !is.na(siteValue))
+  site_tool_data_psnu_only <- dplyr::filter(site_tool_data, is.na(siteValue))
 # sum of the value column in the input data by indicator code
   sum_dp = datapack_data %>% dplyr::group_by(indicatorCode) %>% 
     dplyr::summarise(original = sum(value, na.rm=TRUE)) %>% dplyr::ungroup()
@@ -405,18 +402,18 @@ CheckSiteToolData <- function(d, d_old = NULL, issue_error = FALSE){
     site_tool_data_psnu_only %>% 
     dplyr::group_by(indicatorCode) %>% 
     dplyr::summarise(psnu = sum(value, na.rm=TRUE)) %>% 
-    ungroup()
+    dplyr::ungroup()
   
   totals <-  
     site_tool_data %>% 
     dplyr::group_by(indicatorCode) %>% 
     dplyr::summarise(site = sum(siteValue, na.rm=TRUE)) %>% 
-    ungroup() %>% dplyr::full_join(sum_site_psnu_only) %>% 
+    dplyr::ungroup() %>% dplyr::full_join(sum_site_psnu_only) %>% 
     dplyr::full_join(sum_dp) %>% dplyr::group_by(indicatorCode) %>% 
     dplyr::summarise(input_total = sum(input = sum(original, na.rm=TRUE)), 
                      site_tool_total = sum(site, na.rm=TRUE) + sum(psnu, na.rm=TRUE),
                      difference = input_total - site_tool_total) %>% 
-    ungroup()
+    dplyr::ungroup()
   print(totals)
   mechanisms_not_distributed <- dplyr::setdiff(datapack_data$mechanismCode, 
                                              site_tool_data_site$mechanismCode)
@@ -428,16 +425,16 @@ CheckSiteToolData <- function(d, d_old = NULL, issue_error = FALSE){
                                           site_tool_data_site$indicatorCode)    
   print(targets_not_distributed)
   
-  indicators_ages_dp <- datapack_data %>% select(indicatorCode, Age) %>% unique()
-  indicators_ages_site <- site_tool_data_site %>% select(indicatorCode, Age) %>% unique()
+  indicators_ages_dp <- datapack_data %>% dplyr::select(indicatorCode, Age) %>% unique()
+  indicators_ages_site <- site_tool_data_site %>% dplyr::select(indicatorCode, Age) %>% unique()
   indicator_age_combos_not_distributed = dplyr::anti_join(indicators_ages_dp, indicators_ages_site)
   
-  indicators_sexes_dp <- datapack_data %>% select(indicatorCode, Sex) %>% unique()
-  indicators_sexes_site <- site_tool_data_site %>% select(indicatorCode, Sex) %>% unique()
+  indicators_sexes_dp <- datapack_data %>% dplyr::select(indicatorCode, Sex) %>% unique()
+  indicators_sexes_site <- site_tool_data_site %>% dplyr::select(indicatorCode, Sex) %>% unique()
   indicator_sexes_combos_not_distributed = dplyr::anti_join(indicators_sexes_dp, indicators_sexes_site)
   
-  indicators_kps_dp <- datapack_data %>% select(indicatorCode, KeyPop) %>% unique()
-  indicators_kps_site <- site_tool_data_site %>% select(indicatorCode, KeyPop) %>% unique()
+  indicators_kps_dp <- datapack_data %>% dplyr::select(indicatorCode, KeyPop) %>% unique()
+  indicators_kps_site <- site_tool_data_site %>% dplyr::select(indicatorCode, KeyPop) %>% unique()
   indicator_kps_combos_not_distributed = dplyr::anti_join(indicators_kps_dp, indicators_kps_site)
   
   # make sure all the historic disaggs map to a disagg in the datapack data
@@ -489,5 +486,5 @@ CheckSiteToolData <- function(d, d_old = NULL, issue_error = FALSE){
   #                                   indicatorCode == "PMTCT_STAT.D.Age/Sex.20T")#,
   #                                   #mechanismCode=="18599")
   
-  # all_equal(d_new$data$site$distributed, d_old$data$site$distributed) 
+  # dplyr::all_equal(d_new$data$site$distributed, d_old$data$site$distributed) 
 }
