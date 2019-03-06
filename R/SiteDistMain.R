@@ -266,18 +266,19 @@ CalculateSiteDensity <- function(data_element_map_item, country_details,
 AggByAgeSexKpOuMechSt <- function(data) {
   #to do add assertions must include value and org unit columns
   aggregated_data <- data %>%
-    dplyr::select_if(names(.) %in% c("sex_option_uid", "sex_option_name",
+    dplyr::select(dplyr::one_of(c("sex_option_uid", "sex_option_name",
                               "age_option_uid", "age_option_name",
                               "kp_option_uid", "kp_option_name",
                               "Organisation unit", 
                               "Funding Mechanism", "Support Type",
-                              "psnuid", "Value")) %>%
-    dplyr::group_by_if(names(.) %in% c("sex_option_uid", "sex_option_name",
-                                "age_option_uid", "age_option_name",
-                                "kp_option_uid", "kp_option_name",
-                                "Organisation unit", 
-                                "Funding Mechanism", "Support Type",
-                                "psnuid")) %>%
+                              "psnuid", "Value"))) %>%
+    dplyr::group_by_at(dplyr::vars(-Value)) %>% 
+    # dplyr::group_by_if(dplyr::one_of(c("sex_option_uid", "sex_option_name",
+    #                             "age_option_uid", "age_option_name",
+    #                             "kp_option_uid", "kp_option_name",
+    #                             "Organisation unit", 
+    #                             "Funding Mechanism", "Support Type",
+    #                             "psnuid"))) %>%
     dplyr::summarise(count = dplyr::n(), minimum = min(Value), 
               maximum = max(Value), Value = sum(Value)) %>% 
     dplyr::ungroup()
