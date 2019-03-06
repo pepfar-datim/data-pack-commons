@@ -1,9 +1,9 @@
 main <- function(){
-  devtools::install(pkg = "/Users/sam/Documents/GitHub/data-pack-commons",
+  devtools::install(pkg = "/Users/siddharth/Documents/GitHub/data-pack-commons",
                     build = TRUE,
                     upgrade = FALSE)
   
-  datapackcommons::DHISLogin("/users/sam/.secrets/triage.json")
+  datapackcommons::DHISLogin("/users/siddharth/.secrets/datim.json")
   base_url <- getOption("baseurl")
   # sample input file from sharepoint
   
@@ -37,7 +37,7 @@ main <- function(){
                    #  datapackcommons::Map19Tto20T # %>% filter(stringr::str_detect(technical_area,"PMTCT")) 
                    , mechanisms_historic_global = mechanisms_19T
                    #, datapackcommons::dim_item_sets,
-                   , country_name = "Burundi", 
+                   , country_name = "Ethiopia", 
                    #, base_url = base_url
                     , verbose = TRUE)
   }
@@ -152,7 +152,16 @@ DistributeToSites <-
   return(d)
   }
 
-# wrapper function to functionalize and parallelize calls to CalculateSiteDensity
+#' @title CalculateSiteDensities(data_element_map, country_details, mechanisms, dim_item_sets, base_url, cores)
+#' 
+#' @description Wrapper function to functionalize and parallelize calls to CalculateSiteDensity
+#' @param data_element_map Dataframe to be processed with CalculateSiteDensity
+#' @param country_details Country levels for a country
+#' @param mechanisms All historic mechanisms for the country filtered by id
+#' @param dim_item_sets Dataframe containing all the dimension item sets
+#' @param base_url Refers to instance of datim being accessed
+#' @param cores Number of cores to use for parallel execution
+#' @return  Data containing all site densities for the parameters passed
 CalculateSiteDensities <- function(data_element_map, country_details, 
                                    mechanisms, dim_item_sets, base_url, cores = 1){
   # alply to call SiteDensity for each row of data_element_map (each target data element)
@@ -167,7 +176,15 @@ CalculateSiteDensities <- function(data_element_map, country_details,
   stats::setNames(site_densities, data_element_map$indicatorCode_fy20_cop)
 }
   
-  
+#' @title CalculateSiteDensity(data_element_map_item, country_details, mechanisms, dim_item_sets, base_url)
+#' 
+#' @description Calculates historic distribution for each target, DSD/TA, and site given psnu/IM
+#' @param data_element_map_item Each row of data_element_map being sliced and passed
+#' @param country_details Country levels for a country
+#' @param mechanisms All historic mechanisms for the country filtered by id
+#' @param dim_item_sets Dataframe containing all the dimension item sets
+#' @param base_url Refers to instance of datim being accessed
+#' @return  Dataframe containing site density for the parameters passed
 CalculateSiteDensity <- function(data_element_map_item, country_details, 
                                  mechanisms, dim_item_sets, base_url){
   assertthat::assert_that(NROW(data_element_map_item) == 1,
@@ -285,6 +302,11 @@ CalculateSiteDensity <- function(data_element_map_item, country_details,
   return(joined_data)
 } 
 
+#' @title AggBySexKpOuMechSt(data)
+#' 
+#' @description Calculates the aggregated data and returns it depending on the options present
+#' @param data Input data which is read and processed to calculate the aggregate value
+#' @return  Aggregated data for the input with summarized Value
 AggByAgeSexKpOuMechSt <- function(data) {
   #to do add assertions must include value and org unit columns
   aggregated_data <- data %>%
@@ -313,6 +335,15 @@ AggByAgeSexKpOuMechSt <- function(data) {
   }
 }
 
+#' @title BuildDimensionLists(data_element_map_item, dim_item_sets, mechanisms, country_details)
+#' 
+#' @description # get list of dimensions (parameters) for analytics call by level {planning, community, facility}
+#' analytics will be called seperatly for each level 
+#' @param data_element_map_item Each row of data_element_map being sliced and passed
+#' @param dim_item_sets Dataframe containing all the dimension item sets
+#' @param mechanisms All historic mechanisms for the country filtered by id
+#' @param country_details Country levels for a country
+#' @return  List of dimensions for the analytics call
 BuildDimensionLists <- function(data_element_map_item, dim_item_sets, 
                                 mechanisms, country_details){
   # prepare df of dimensions and filters as expected by GetData_analytics  
