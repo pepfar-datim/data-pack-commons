@@ -15,7 +15,7 @@ DistributeToSites <-
            mechanisms_historic_global = 
              datapackcommons::Get19TMechanisms("https://www.datim.org/"),
            dim_item_sets = datapackcommons::dim_item_sets,
-           density = NULL,
+           site_densities = NULL,
            country_name = NULL, 
            base_url = getOption("baseurl"), 
            verbose = FALSE){
@@ -46,12 +46,10 @@ DistributeToSites <-
 # will have a historic distribution for each target, DSD/TA, and site given psnu/IM
 # alply uses parallel processing here 
   
-  if (is.null(density)) {
+  if (is.null(site_densities)) {
     site_densities <- CalculateSiteDensities(data_element_map, country_details, 
                                              mechanisms_historic_country, 
                                              dim_item_sets, base_url, cores = 5)
-  } else {
-    site_densities <- readr::read_rds(density)
   }
 
 # if user passed a country name and a null datapack export object 
