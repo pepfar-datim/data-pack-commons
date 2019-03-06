@@ -44,7 +44,7 @@ ValidateDimItemSets <- function(dim_item_sets, base_url){
 
   # validate category option combination rows
   dim_item_sets %>% dplyr::filter(dim_uid == "co") %>%
-    .$dim_name %>% unique() %>% assertthat::are_equal("categoryOptionCombo") %>% 
+    .$dim_name %>% unique() %>% assertthat::are_equal("Category option combo") %>% 
     assertthat::assert_that()  
   # category option combination names and ids
   dim_item_sets %>%  dplyr::filter(dim_uid == "co") %>%

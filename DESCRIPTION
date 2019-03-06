@@ -10,17 +10,21 @@ License: What license is it under?
 Encoding: UTF-8
 LazyData: true
 Imports: assertthat,
+    datimvalidation,
+    doMC,
     dplyr,
     glue,
     httr,
     jsonlite,
     lubridate,
+    magrittr,
     plyr,
     purrr,
     readr,
     rlist,
     stringr,
-    tibble
+    tibble,
+    tidyr
 Suggests: 
     httptest,
     testthat

@@ -1,0 +1,366 @@
+{
+    "headers": [
+        {
+            "name": "J5jldMd8OHv",
+            "column": "Facility Type",
+            "valueType": "TEXT",
+            "type": "java.lang.String",
+            "hidden": false,
+            "meta": true
+        },
+        {
+            "name": "ou",
+            "column": "Organisation unit",
+            "valueType": "TEXT",
+            "type": "java.lang.String",
+            "hidden": false,
+            "meta": true
+        },
+        {
+            "name": "veGzholzPQm",
+            "column": "HIV age",
+            "valueType": "TEXT",
+            "type": "java.lang.String",
+            "hidden": false,
+            "meta": true
+        },
+        {
+            "name": "value",
+            "column": "Value",
+            "valueType": "NUMBER",
+            "type": "java.lang.Double",
+            "hidden": false,
+            "meta": false
+        }
+    ],
+    "metaData": {
+        "items": {
+            "jUb8gELQApl": {
+                "name": "Kailahun"
+            },
+            "TEQlaapDQoK": {
+                "name": "Port Loko"
+            },
+            "eIQbndfxQMb": {
+                "name": "Tonkolili"
+            },
+            "Vth0fbpFcsO": {
+                "name": "Kono"
+            },
+            "J5jldMd8OHv": {
+                "name": "Facility Type"
+            },
+            "PMa2VCrupOd": {
+                "name": "Kambia"
+            },
+            "ou": {
+                "name": "Organisation unit"
+            },
+            "WAl0OCcIYxr": {
+                "name": "25-49y"
+            },
+            "O6uvpzGd5pu": {
+                "name": "Bo"
+            },
+            "bL4ooGhyHRQ": {
+                "name": "Pujehun"
+            },
+            "kJq2mPyFEHo": {
+                "name": "Kenema"
+            },
+            "uYxK4wmcPqA": {
+                "name": "CHP"
+            },
+            "fdc6uOvgoji": {
+                "name": "Bombali"
+            },
+            "2018": {
+                "name": "2018"
+            },
+            "at6UHUQatSo": {
+                "name": "Western Area"
+            },
+            "dx": {
+                "name": "Data"
+            },
+            "pe": {
+                "name": "Period"
+            },
+            "UOqJW6HPvvL": {
+                "name": "15-24y"
+            },
+            "vihpFUg2WTy": {
+                "name": "PMTCT positive test rate"
+            },
+            "EYbopBOJWsW": {
+                "name": "MCHP"
+            },
+            "lc3eMKXaEfw": {
+                "name": "Bonthe"
+            },
+            "qhqAxPSTUXp": {
+                "name": "Koinadugu"
+            },
+            "jmIPBj66vD6": {
+                "name": "Moyamba"
+            },
+            "veGzholzPQm": {
+                "name": "HIV age"
+            }
+        },
+        "dimensions": {
+            "dx": [
+                "vihpFUg2WTy"
+            ],
+            "pe": [
+                "2018"
+            ],
+            "J5jldMd8OHv": [
+                "uYxK4wmcPqA",
+                "EYbopBOJWsW"
+            ],
+            "ou": [
+                "O6uvpzGd5pu",
+                "fdc6uOvgoji",
+                "lc3eMKXaEfw",
+                "jUb8gELQApl",
+                "PMa2VCrupOd",
+                "kJq2mPyFEHo",
+                "qhqAxPSTUXp",
+                "Vth0fbpFcsO",
+                "jmIPBj66vD6",
+                "TEQlaapDQoK",
+                "bL4ooGhyHRQ",
+                "eIQbndfxQMb",
+                "at6UHUQatSo"
+            ],
+            "co": [
+
+            ],
+            "veGzholzPQm": [
+                "UOqJW6HPvvL",
+                "WAl0OCcIYxr"
+            ]
+        }
+    },
+    "height": 36,
+    "width": 4,
+    "rows": [
+        [
+            "uYxK4wmcPqA",
+            "fdc6uOvgoji",
+            "UOqJW6HPvvL",
+            "0.0"
+        ],
+        [
+            "uYxK4wmcPqA",
+            "fdc6uOvgoji",
+            "WAl0OCcIYxr",
+            "0.0"
+        ],
+        [
+            "uYxK4wmcPqA",
+            "lc3eMKXaEfw",
+            "UOqJW6HPvvL",
+            "0.96"
+        ],
+        [
+            "uYxK4wmcPqA",
+            "lc3eMKXaEfw",
+            "WAl0OCcIYxr",
+            "0.44"
+        ],
+        [
+            "uYxK4wmcPqA",
+            "jUb8gELQApl",
+            "UOqJW6HPvvL",
+            "0.0"
+        ],
+        [
+            "uYxK4wmcPqA",
+            "jUb8gELQApl",
+            "WAl0OCcIYxr",
+            "0.0"
+        ],
+        [
+            "uYxK4wmcPqA",
+            "kJq2mPyFEHo",
+            "UOqJW6HPvvL",
+            "1.7"
+        ],
+        [
+            "uYxK4wmcPqA",
+            "kJq2mPyFEHo",
+            "WAl0OCcIYxr",
+            "1.1"
+        ],
+        [
+            "uYxK4wmcPqA",
+            "qhqAxPSTUXp",
+            "UOqJW6HPvvL",
+            "0.0"
+        ],
+        [
+            "uYxK4wmcPqA",
+            "qhqAxPSTUXp",
+            "WAl0OCcIYxr",
+            "0.0"
+        ],
+        [
+            "uYxK4wmcPqA",
+            "Vth0fbpFcsO",
+            "UOqJW6HPvvL",
+            "4.8"
+        ],
+        [
+            "uYxK4wmcPqA",
+            "Vth0fbpFcsO",
+            "WAl0OCcIYxr",
+            "3.9"
+        ],
+        [
+            "uYxK4wmcPqA",
+            "jmIPBj66vD6",
+            "UOqJW6HPvvL",
+            "0.0"
+        ],
+        [
+            "uYxK4wmcPqA",
+            "jmIPBj66vD6",
+            "WAl0OCcIYxr",
+            "0.0"
+        ],
+        [
+            "uYxK4wmcPqA",
+            "bL4ooGhyHRQ",
+            "UOqJW6HPvvL",
+            "0.66"
+        ],
+        [
+            "uYxK4wmcPqA",
+            "bL4ooGhyHRQ",
+            "WAl0OCcIYxr",
+            "0.0"
+        ],
+        [
+            "uYxK4wmcPqA",
+            "at6UHUQatSo",
+            "UOqJW6HPvvL",
+            "15.5"
+        ],
+        [
+            "uYxK4wmcPqA",
+            "at6UHUQatSo",
+            "WAl0OCcIYxr",
+            "9.5"
+        ],
+        [
+            "EYbopBOJWsW",
+            "fdc6uOvgoji",
+            "UOqJW6HPvvL",
+            "0.0"
+        ],
+        [
+            "EYbopBOJWsW",
+            "fdc6uOvgoji",
+            "WAl0OCcIYxr",
+            "1.7"
+        ],
+        [
+            "EYbopBOJWsW",
+            "lc3eMKXaEfw",
+            "UOqJW6HPvvL",
+            "4.8"
+        ],
+        [
+            "EYbopBOJWsW",
+            "lc3eMKXaEfw",
+            "WAl0OCcIYxr",
+            "5.7"
+        ],
+        [
+            "EYbopBOJWsW",
+            "PMa2VCrupOd",
+            "UOqJW6HPvvL",
+            "0.0"
+        ],
+        [
+            "EYbopBOJWsW",
+            "PMa2VCrupOd",
+            "WAl0OCcIYxr",
+            "0.0"
+        ],
+        [
+            "EYbopBOJWsW",
+            "kJq2mPyFEHo",
+            "UOqJW6HPvvL",
+            "1.0"
+        ],
+        [
+            "EYbopBOJWsW",
+            "kJq2mPyFEHo",
+            "WAl0OCcIYxr",
+            "2.1"
+        ],
+        [
+            "EYbopBOJWsW",
+            "qhqAxPSTUXp",
+            "UOqJW6HPvvL",
+            "0.6"
+        ],
+        [
+            "EYbopBOJWsW",
+            "qhqAxPSTUXp",
+            "WAl0OCcIYxr",
+            "0.85"
+        ],
+        [
+            "EYbopBOJWsW",
+            "Vth0fbpFcsO",
+            "UOqJW6HPvvL",
+            "3.0"
+        ],
+        [
+            "EYbopBOJWsW",
+            "Vth0fbpFcsO",
+            "WAl0OCcIYxr",
+            "2.6"
+        ],
+        [
+            "EYbopBOJWsW",
+            "jmIPBj66vD6",
+            "UOqJW6HPvvL",
+            "3.4"
+        ],
+        [
+            "EYbopBOJWsW",
+            "jmIPBj66vD6",
+            "WAl0OCcIYxr",
+            "0.0"
+        ],
+        [
+            "EYbopBOJWsW",
+            "bL4ooGhyHRQ",
+            "UOqJW6HPvvL",
+            "0.0"
+        ],
+        [
+            "EYbopBOJWsW",
+            "bL4ooGhyHRQ",
+            "WAl0OCcIYxr",
+            "0.0"
+        ],
+        [
+            "EYbopBOJWsW",
+            "at6UHUQatSo",
+            "UOqJW6HPvvL",
+            "16.2"
+        ],
+        [
+            "EYbopBOJWsW",
+            "at6UHUQatSo",
+            "WAl0OCcIYxr",
+            "15.9"
+        ]
+    ]
+}

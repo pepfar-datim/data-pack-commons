@@ -40,6 +40,21 @@ DHISLogin<-function(config_path = NA) {
   }
 }
 
+#' @export
+DHISLogin_Play<-function(version) {
+  url <- URLencode(URL = paste0("https://play.dhis2.org/", version, "/api/me"))
+  #Logging in here will give us a cookie to reuse
+  r <- httr::GET(url ,
+                 httr::authenticate("admin", "district"),
+                 httr::timeout(60))
+  if(r$status != 200L){
+    stop("Could not authenticate you with the server!")
+  } else {
+    me <- jsonlite::fromJSON(httr::content(r,as = "text"))
+    return(TRUE)
+  }
+}
+
 # #' http_was_redirected
 # #'
 # #' @param response an httr response object, e.g. from a call to httr::GET()
@@ -165,9 +180,12 @@ GetDataWithIndicator <- function(base_url, indicator, org_units, level, periods,
         httr::content(., "text") %>% 
         readr::read_csv(col_names = TRUE, col_types = readr::cols(.default = "c", Value = "d"))
       
-      assertthat::has_name(my_data, "Value")
+      assertthat::has_name(my_data, "Value") 
+      # not sure I need preceeding line now that I verify content type in retry api
+      # this was here to catch recieving the "log in" screen which was html
+      
       if(NROW(my_data) > 0 && !(indicator %in% my_data$Data)){
-        stop("response$url: ", response$url, " slice(my_data,1): ", slice(my_data,1))
+        stop("response$url: ", response$url, " slice(my_data,1): ", dplyr::slice(my_data,1))
         assertthat::assert_that(indicator %in% my_data$Data)
       }
 #      break # if I am here then I got a valid result set
@@ -337,239 +355,105 @@ ValidateCodeIdPairs <- function(base_url, codes, ids, type){
     }
 }
 
-
-
-# ## No Longer needed function that would add a column with names corresponding to a given
-# ## column with UIDs
-# add_name_col <- function(data_tib, column_str, end_point_str) {
-#   unique_items =   unique(data_tib[[column_str]])
-#   unique_items = paste0(unique_items, collapse = ",")
-#   item_name_id <-
-#     paste0(
-#       getOption("baseurl"),
-#       "api/",
-#       end_point_str,
-#       ".csv?paging=false&fields=name,id&filter=id:in:[",
-#       unique_items,
-#       "]"
-#     ) %>%
-#     httr::GET() %>%
-#     httr::content(., "text")  %>%
-#     readr::read_csv(col_names = TRUE)
-# 
-# 
-#   item_name_id <-
-#     item_name_id %>%
-#     dplyr::rename(!!paste0(column_str, "_name") := name) %>%
-#     dplyr::rename(!!column_str := id)
-# 
-#   data_tib <- dplyr::inner_join(data_tib, item_name_id)
-#   return(data_tib)
-# }
-
-
-# VERSION USING THE 5 MAIN DIMESNIONS TO GET DATA - BEFORE SWITCHING TO USE INDICATORS
-#' #' export
-#' #' param technical_area type string - technical area data element group name
-#' #' param numerator_or_denominator type string - numerator / denominator data element group name
-#' #' param disagg_to_group_set type string - numerator / denominator data element group name
-#' #' disagg_element_to_dimension
-#' #' param disagg_element_to_dimension type tibble cols(
-#' #' disaggregation_type_element = col_character(),
-#' #' data_dimension = col_character()
-#' #' ) 
-#' #' 
-#' GetAnalyticsByDimensions <-
-#'   function(technical_area, numerator_or_denominator, disaggregation_type,
-#'            targets_or_results, organisation_unit_ids, period,
-#'            additional_dimensions = NULL, support_types = c("TA", "DSD")) {
-#'     
-#'     # Get uids for 5 Standard dimensions     
-#'     filters = paste0("name:in:[", technical_area, ",", numerator_or_denominator, ",",
-#'                      disaggregation_type, ",", targets_or_results, ",", 
-#'                      support_types %>% paste0(collapse = ","),
-#'                      "]")
-#'     name_uid <- datapackcommons::getMetadata(end_point = "dataElementGroups", filters, fields ="name,id")
-#'     
-#'     technical_area_uid  <- name_uid %>% dplyr::filter(name==technical_area) %>% .$id
-#'     numerator_or_denominator_uid  <- name_uid %>% dplyr::filter(name==numerator_or_denominator) %>% .$id
-#'     disaggregation_type_uid  <- name_uid %>% dplyr::filter(name==disaggregation_type) %>% .$id
-#'     targets_or_results_uid  <- name_uid %>% dplyr::filter(name==targets_or_results) %>% .$id
-#'     support_types_uid <- name_uid %>% dplyr::filter(name %in% support_types) %>% .$id %>% paste0(collapse = ",")
-#'     ####
-#'     
-#'     if (!is.null(additional_dimensions)) {
-#'       end_point = "dimensions"
-#'       filters = paste0("name:in:[", additional_dimensions %>% paste0(collapse = ","), "]")
-#'       additional_dimensions_uid <-
-#'         datapackcommons::getMetadata(end_point, filters, "id")$id
-#'       additional_dimensions <-
-#'         additional_dimensions_uid %>% paste0("&dimension=", ., collapse = "")
-#'     }
-#'     
-#'     # divide org units in to multiple calls
-#'     # TODO decide if 40 is reasonable or maybe auto try with smaller chunks if api call fails
-#'    
-#'     org_unit_chunks <-
-#'       organisation_unit_ids %>% split(., ceiling(seq_along(.) / 40))
-#'     
-#'     for (ou_chunk in 1:NROW(org_unit_chunks))
-#'     {
-#'       #TODO add error handling
-#'       web_api_call <- paste0(getOption("baseurl"), "api/analytics.csv?",
-#'                              "dimension=ou:", paste0(org_unit_chunks[[ou_chunk]], collapse = ";"),
-#'                              additional_dimensions,
-#'                              "&filter=LxhLO68FcXm:", technical_area_uid,
-#'                              "&filter=lD2x0c8kywj:", numerator_or_denominator_uid,
-#'                              "&filter=TWXpUVE2MqL:", paste0(support_types_uid, collapse = ";"),
-#'                              "&filter=HWPJnUTMjEq:", disaggregation_type_uid,
-#'                              "&filter=IeMmjHyBUpi:", targets_or_results_uid,
-#'                              "&filter=pe:", period
-#'       )
-#'       data_chunk <- web_api_call  %>%
-#'         httr::GET() %>%
-#'         httr::content(., "text")
-#'       
-#'       if (exists("my_data")) {
-#'         my_data <- data_chunk %>%
-#'           readr::read_csv(col_names = TRUE) %>%
-#'           dplyr::bind_rows(my_data, .)
-#'       } else{
-#'         my_data <- data_chunk %>%
-#'           readr::read_csv(col_names = TRUE)
-#'       }
-#'     }
-#'     return(my_data)
-#'   }
+#' @export
+#' @title Get19TMechanisms(base_url)
 #' 
+#' @description gets data from SQL view vtNAsZcMZiU - mechanisms with 2018Oct data
+#' @param base_url string - base address of instance (text before api/ in URL)
+Get19TMechanisms <- function(base_url = getOption("baseurl")){
+  # SQL view will retrieve list of mechanisms for which there is FY2019 data - 2018Oct period
+  api_call <- paste0(base_url, "api/sqlViews/vtNAsZcMZiU/data.csv") 
+  # limit calls to this SQL view on prod
+  # it locks data value table
+  mech_list_r <-  RetryAPI(api_call, "application/csv")
+  mech_list_parsed <- mech_list_r %>% 
+    httr::content(., "text") %>% 
+    readr::read_csv(col_names = TRUE, col_types = readr::cols(.default = "c"))
+  
+  mech_cat_opt_combos <-  datapackcommons::getMetadata(base_url, 
+                                      "categoryCombos", 
+                                      filters = "id:eq:wUpfppgjEza", 
+                                      "categoryOptionCombos[code,id~rename(categoryOptionComboId),name,categoryOptions[id~rename(categoryOptionId)]]")[[1,"categoryOptionCombos"]] %>% 
+    dplyr::as_tibble() %>% 
+    tidyr::unnest() %>% 
+    dplyr::inner_join(mech_list_parsed, by = c("categoryOptionComboId" = "uid"))
+  
+  if(NROW(mech_cat_opt_combos) > 0){
+    return(mech_cat_opt_combos)
+  }
+  # If I got here critical error
+  stop("Unable to get 19T mechanisms")
+}
 
-## EARLIER VERSION OF GETTING DATA WITH THE % MAIN DIMENSIONS
-
-#' export
-# GetAnalytics <-
-#   function(technical_area, numerator_or_denominator, support_types,
-#            disaggregation_type, targets_or_results,organisation_units,
-#            dimensions_row=NULL,dimensions_col=NULL,period){
-#     
-#     if (!is.null(dimensions_row)) {
-#       dimensions_row <-  dimensions_row %>% paste0("&dimension=", ., collapse = "")
-#     }
-#     
-#     if (!is.null(dimensions_col)) {
-#       dimensions_col <- dimensions_col %>% paste0("&dimension=", ., collapse = "")
-#     }
-#     
-#     
-#     #TODO add error handling
-#     web_api_call <- paste0(
-#       getOption("baseurl"),
-#       "api/analytics.csv?",
-#       "dimension=ou:",  paste0(organisation_units,collapse = ";"),
-#       dimensions_row, dimensions_col,
-#       "&filter=LxhLO68FcXm:", technical_area,
-#       "&filter=lD2x0c8kywj:", numerator_or_denominator,
-#       "&filter=TWXpUVE2MqL:", paste0(support_types,collapse = ";"),
-#       "&filter=HWPJnUTMjEq:", disaggregation_type,
-#       "&filter=IeMmjHyBUpi:", targets_or_results,
-#       "&filter=pe:", period
-#     )
-#     #print(web_api_call)
-#     
-#     data <- web_api_call  %>%
-#       httr::GET() %>%
-#       httr::content(., "text")
-#     
-#     data <- data  %>%
-#       readr::read_csv(col_names=TRUE)
-#     return(data)
-#   }
-
-# VERSION OF GETTING DATA WIHT INDICATORS THAT USED NAMES AND DID NOT US LEVEL WHEN CALLING ANALYTICS ENDPOINT
+#' @export
+#' @title GetData_Analytics <-  function(dimensions, base_url)
 #' 
-#' #' export
-#' #' param indicator_uid type string - uid of indicator to call
-#' #' param organisation_units_uid type character vector -  org unit uids to include in api call
-#' #' param period type string - the period to use in api call
-#' #' param dimensions_required type list - with dimension names and 
-#' #' vector of specific dimension item names for api call e.g.
-#' #' list("dimension1" = c("item1"), "dimension1" = c("item1", "item2"), "dimension1" = NULL)
-#' #' NULL in the item vector indicates to return all items that are defined to be a member of 
-#' #' the dimension in DATIM
-#' GetIndicatorByDimensions <- function(indicator_uid, organisation_units_uid, 
-#'                                      period, dimensions_required = NULL) {
-#'   web_api_call <- paste0(getOption("baseurl"), "api/29/analytics.csv?dimension=dx:", indicator_uid, 
-#'                          "&dimension=pe:", period, "&outputIdScheme=NAME")
-#'   
-#'   # get name,id,items[id,name] for each dimension
-#'   end_point = "dimensions"
-#'   filters = paste0("name:in:[",
-#'                    names(dimensions_required) %>% paste0(collapse = ","),
-#'                    "]")
-#'   dimensions_metadata <-
-#'     datapackcommons::getMetadata(end_point, filters, "name,id,items[id,name]")
-#'   
-#'   # add each dimension along with any specified items to the api call string    
-#'   for (dimension_required in names(dimensions_required)) {
-#'     dimension_metadata <-
-#'       dimensions_metadata %>% dplyr::filter(name == dimension_required)
-#'     if (NROW(dimension_metadata) != 1) {
-#'       stop(
-#'         paste(
-#'           "Unable to match exactly input dimension name to DATIM dimension",
-#'           dimension_required
-#'         )
-#'       )
-#'     }
-#'     
-#'     if (is.null(dimensions_required[[dimension_required]])) {
-#'       # There dimension specified without specifc list of items - will return all options
-#'       web_api_call <-
-#'         paste0(web_api_call, "&dimension=", dimension_metadata$id)
-#'       next
-#'     } else{
-#'       web_api_call <-
-#'         #add dimension uid to api call string then contiune to add specific items 
-#'         paste0(web_api_call, "&dimension=", dimension_metadata$id, ":")
-#'       items_required <-
-#'         tibble::tibble(name = dimensions_required[[dimension_required]])
-#'     }
-#'     
-#'     dimension_metadata_items <-
-#'       dplyr::left_join(items_required, dimension_metadata[[1, "items"]])
-#'     if (anyNA(dimension_metadata_items$id)) {
-#'       dimension_metadata_items %>% dplyr::filter(is.na(id)) %>% .$name %>%
-#'         paste("Unable to find uid for required dimension item", .) %>% stop()
-#'     }
-#'     
-#'     web_api_call <-  paste0(dimension_metadata_items$id, collapse = ";") %>% paste0(web_api_call, .)
-#'   }
-#'   
-#'   # divide org units in to multiple calls
-#'   # TODO decide if 40 is reasonable or maybe auto try with smaller chunks if api call fails
-#'   
-#'   org_unit_chunks <-
-#'     organisation_unit_ids %>% split(., ceiling(seq_along(.) / 40))
-#'   
-#'   for (ou_chunk in 1:NROW(org_unit_chunks)){
-#'     
-#'     web_api_call_chunk <- paste0(web_api_call, "&dimension=ou:", 
-#'                                  paste0(org_unit_chunks[[ou_chunk]], collapse = ";"))
-#'     
-#'     data_chunk <- web_api_call_chunk  %>%
-#'       httr::GET() %>%
-#'       httr::content(., "text")
-#'     
-#'     if (exists("my_data")) {
-#'       my_data <- data_chunk %>%
-#'         readr::read_csv(col_names = TRUE) %>%
-#'         dplyr::bind_rows(my_data, .)
-#'     } else{
-#'       my_data <- data_chunk %>%
-#'         readr::read_csv(col_names = TRUE)
-#'     }
-#'   }
-#'   return(my_data)
-#' }
+#' @description calls the analytics endpoint using the details in the dimensions parameter
+#' dataframe 
+#' @param dimensions data frame - must contain columns named "type", "dim_uid", 
+#' and "dim_item_uid". Type column contains "filter" or "dimension". dim_uid contains
+#' the uid of a dimension or one of the special dimension types e.g. dx, pe, ou, co. 
+#' Column dim_item_uid contains the uid of the dimension item to use which can also be
+#' a "special" uid such as DE_GROUP-zhdJiWlPvCz  
+#' @param base_url string - base address of instance (text before api/ in URL)
+#' @return data frame with the rows of the response
+#'
+#' @example
+#'  dimensions_sample <- tibble::tribble(~type, ~dim_item_uid, ~dim_uid,
+#' "filter", "vihpFUg2WTy", "dx", #PMTCT positive test rate indicator
+#' "dimension", "ImspTQPwCqd", "ou", # sierra leone
+#' "dimension", "LEVEL-2", "ou", 
+#' "filter", "LAST_YEAR", "pe",
+#' "dimension", "UOqJW6HPvvL", "veGzholzPQm",
+#' "dimension", "WAl0OCcIYxr", "veGzholzPQm",
+#' "dimension", "uYxK4wmcPqA", "J5jldMd8OHv",
+#' "dimension", "EYbopBOJWsW", "J5jldMd8OHv")
+#' # veGzholzPQm = HIV age, UOqJW6HPvvL = 15-24y, WAl0OCcIYxr = 25-49y, 
+#' # J5jldMd8OHv = Facility Type, uYxK4wmcPqA = CHP, EYbopBOJWsW = MCHP
+#'   datapackcommons::DHISLogin_Play("2.29")
+#'   GetData_Analytics(dimensions_sample, "https://play.dhis2.org/2.29/")
+
+GetData_Analytics <-  function(dimensions, base_url = getOption("baseurl")){
+  api_call <- paste0(base_url,  
+                     "api/29/analytics.json?",
+                     datapackcommons::FormatForApi_Dimensions(dimensions, "type", 
+                                                              "dim_uid", "dim_item_uid"),
+                     "&outputIdScheme=UID&hierarchyMeta=true") # gives us UIDs in response                  
+  response <- api_call %>% 
+    utils::URLencode()  %>%
+    RetryAPI("application/json", 20)
+  
+  content <- response %>% 
+    httr::content(., "text") %>% 
+    jsonlite::fromJSON()
+  
+  my_data <- content$rows
+  if(length(dim(my_data)) != 2){ # empty table returned
+    return(list(results = NULL, 
+                api_call = response$url)
+           )
+  } 
+  colnames(my_data) <- content$headers$column
+  my_data <- tibble::as_tibble(my_data)
+
+  ##TODO Sid add some code to validate what we got back from api matches what we requestd
+  ## Perhaps make sure there are columns where we specified the actual uid for a dimension and that 
+  ##the items in these columns were requested.
+  ## If there is a mismatch stop()
+  ## is there other useful metadata we want to return?
+
+  # list column(vector) of the org hiearchy including the org unit itself
+  # added to the data in a mutate below
+  ou_hierarchy <- purrr::map_chr(my_data[["Organisation unit"]], 
+                                 function(x) paste0(content$metaData$ouHierarchy[[x]], "/", x)) %>% 
+    stringr::str_split("/")
+  
+  my_data <-
+    dplyr::mutate(my_data, Value = as.numeric(Value), ou_hierarchy = ou_hierarchy)
+  return(list(results = my_data, 
+              api_call = response$url)
+         )
+}
 
 
 ## EARLY FUNCTION USED TO GET RAW DATA 
