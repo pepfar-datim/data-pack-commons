@@ -356,6 +356,7 @@ BuildDimensionLists <- function(data_element_map_item, dim_item_sets,
        community = dimensions_community)
 }
 
+## Draft perhaps temporary Function
 #' @title CheckSiteToolData(d, d_old)
 #' 
 #' @description Performs some checks on the results of distributing data to sites
