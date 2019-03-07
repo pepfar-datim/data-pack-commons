@@ -9,12 +9,22 @@
 #' options.  
 #' If country_name is passed explicitly and d = NULL then this function returns the distribution 
 #' densities 
+#' @param d Object from data pack export (TargetxPSNUxIM)
+#' @param data_element_map Dataframe containing indicator codes for fy20 cop and their details
+#' @param mechanisms_historic_global Historic mechanism data pulled from datim api to disaggregate PSNUxIM level targets
+#' @param dim_tem_sets Dataframe containing all the dimension item sets
+#' @param site_densities An object containing all the site densities of a particular country
+#' @param country_name Name of the country used to extract the country levels in a separate object
+#' @param base_url Specifies the datim instance being used for the api calls
+#' @param verbose If set to true, adds a copy of the densities to output, useful for debugging but can make file large
+#' @return An object containing targets distributed to Site x DSD/TA
 DistributeToSites <- 
   function(d, 
            data_element_map = datapackcommons::Map19Tto20T, 
            mechanisms_historic_global = 
              datapackcommons::Get19TMechanisms("https://www.datim.org/"),
            dim_item_sets = datapackcommons::dim_item_sets,
+           site_densities = NULL,
            country_name = NULL, 
            base_url = getOption("baseurl"), 
            verbose = FALSE){
@@ -45,9 +55,11 @@ DistributeToSites <-
 # will have a historic distribution for each target, DSD/TA, and site given psnu/IM
 # alply uses parallel processing here 
   
-  site_densities <- CalculateSiteDensities(data_element_map, country_details, 
-                                           mechanisms_historic_country, 
-                                           dim_item_sets, base_url, cores = 5)
+  if (is.null(site_densities)) {
+    site_densities <- CalculateSiteDensities(data_element_map, country_details, 
+                                             mechanisms_historic_country, 
+                                             dim_item_sets, base_url, cores = 5)
+  }
 
 # if user passed a country name and a null datapack export object 
 # then we return the historic site density
@@ -55,7 +67,7 @@ DistributeToSites <-
     return(site_densities)
   }
   
-  if(verbose == TRUE){ # add a copy of the denities to output, useful for debugging but can make file large
+  if(verbose == TRUE){ # add a copy of the densities to output, useful for debugging but can make file large
     d[["data"]][["site"]][["densities"]] <- site_densities
   }
 
@@ -469,3 +481,4 @@ CheckSiteToolData <- function(d, d_old = NULL, issue_error = FALSE){
   
   # dplyr::all_equal(d_new$data$site$distributed, d_old$data$site$distributed) 
 }
+
