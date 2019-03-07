@@ -292,12 +292,6 @@ AggByAgeSexKpOuMechSt <- function(data) {
                               "Funding Mechanism", "Support Type",
                               "psnuid", "Value"))) %>%
     dplyr::group_by_at(dplyr::vars(-Value)) %>% 
-    # dplyr::group_by_if(dplyr::one_of(c("sex_option_uid", "sex_option_name",
-    #                             "age_option_uid", "age_option_name",
-    #                             "kp_option_uid", "kp_option_name",
-    #                             "Organisation unit", 
-    #                             "Funding Mechanism", "Support Type",
-    #                             "psnuid"))) %>%
     dplyr::summarise(count = dplyr::n(), minimum = min(Value), 
               maximum = max(Value), Value = sum(Value)) %>% 
     dplyr::ungroup()
@@ -492,3 +486,23 @@ CheckSiteToolData <- function(d, d_old = NULL, issue_error = FALSE){
   # dplyr::all_equal(d_new$data$site$distributed, d_old$data$site$distributed) 
 }
 
+TransformAnalyticsOutput_site <- function(analytics_results, dim_item_sets, data_element_map_item){
+
+# Create a list of data frames each with the specific dimension item catepgyr 
+# option combinations specidfied in data element map 
+  disagg_sets  <-  c("age_set", "sex_set", "kp_set", "other_disagg") %>% 
+    purrr::map(~dplyr::filter(dim_item_sets,
+                              model_sets == data_element_map_item[[1, .]]))
+  
+  purrr::reduce(disagg_sets, 
+                MapDimToOptions, 
+                allocate = "distribute", 
+                .init = analytics_results) %>%  
+  
+    dplyr::mutate(psnuid = purrr::map_chr(.$ou_hierarchy, planning_level)) %>% 
+    dplyr::select(-`Organisation unit`, -ou_hierarchy) %>% 
+    AggByAgeSexKpOuMechSt()
+  
+  
+  
+}
