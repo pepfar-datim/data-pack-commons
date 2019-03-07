@@ -165,26 +165,6 @@ CalculateSiteDensity <- function(data_element_map_item, country_details,
   assertthat::assert_that(NROW(data_element_map_item) == 1,
                           NROW(country_details) == 1)
   
-  # planning_level = as.integer(country_details$planning_level)
-  
-# create subsets of dim_item_sets for the relevant dimension items to be used later
-  
-  # dimension_set_columns <- c("age_set", "sex_set", "kp_set", "other_disagg")
-  # dim_item_subsets <- purrr::map(dimension_set_columns, 
-  #                                ~dplyr::filter(datapackcommons::dim_item_sets,
-  #                                               model_sets ==  datapackcommons::Map19Tto20T[[3,.]]
-  #                                               )
-  #                                ) %>% rlang::set_names(dimension_set_columns)
-  
-  # dim_item_sets_age <- dim_item_sets %>% 
-  #   dplyr::filter(model_sets == data_element_map_item[[1,"age_set"]])
-  # dim_item_sets_sex <- dim_item_sets %>% 
-  #   dplyr::filter(model_sets == data_element_map_item[[1,"sex_set"]])
-  # dim_item_sets_kp <-  dim_item_sets %>% 
-  #   dplyr::filter(model_sets == data_element_map_item[[1, "kp_set"]])
-  # dim_item_sets_other_disagg <-  dim_item_sets %>% 
-  #   dplyr::filter(model_sets == data_element_map_item[[1, "other_disagg"]])
-  
 # get list of dimensions (parameters) for analytics call by level {planning, community, facility}
 # analytics will be called seperatly for each level  
   dimensions_by_ou_level <- BuildDimensionLists(data_element_map_item, dim_item_sets, 
@@ -208,32 +188,6 @@ CalculateSiteDensity <- function(data_element_map_item, country_details,
   
   assertthat::assert_that(check_sum_1p == check_sum_1s)
     
-  # planning_data <- analytics_output_list$planning$results %>% 
-  #   list(dim_item_sets_age, 
-  #        dim_item_sets_sex, 
-  #        dim_item_sets_kp,
-  #        dim_item_sets_other_disagg) %>% 
-  #   purrr::reduce(MapDimToOptions, allocate = "distribute") %>% 
-  #   dplyr::mutate(psnuid = purrr::map_chr(.$ou_hierarchy, planning_level)) %>% 
-  #   dplyr::select(-`Organisation unit`, -ou_hierarchy) %>% 
-  #   AggByAgeSexKpOuMechSt() %>% 
-  #   .[["processed"]] %>% 
-  #   dplyr::select(-dplyr::one_of("count", "maximum", "minimum")) %>% 
-  #   dplyr::rename("psnuValueH" = "Value")
-  
-  # site_data <- dplyr::bind_rows(analytics_output_list$community$results,
-  #                               analytics_output_list$facility$results) %>% 
-  #   list(dim_item_sets_age, 
-  #        dim_item_sets_sex, 
-  #        dim_item_sets_kp,
-  #        dim_item_sets_other_disagg) %>% 
-  #   purrr::reduce(MapDimToOptions, allocate = "distribute")  %>% 
-  #   dplyr::mutate(psnuid = purrr::map_chr(.$ou_hierarchy, planning_level)) %>%      
-  #   dplyr::select(-ou_hierarchy)%>% 
-  #   AggByAgeSexKpOuMechSt()%>% 
-  #   .[["processed"]] %>% dplyr::select(-dplyr::one_of("count", "maximum", "minimum")) %>% 
-  #   dplyr::rename("siteValueH" = "Value")
-
   planning_data <- 
     TransformAnalyticsOutput_SiteTool(analytics_output_list$planning$results, 
                                       dim_item_sets, data_element_map_item,
@@ -256,7 +210,6 @@ CalculateSiteDensity <- function(data_element_map_item, country_details,
     dplyr::select(-name, -categoryOptionComboId) %>% 
     dplyr::mutate(percent = siteValueH/psnuValueH, 
                   indicatorCode = data_element_map_item$indicatorCode_fy20_cop)
-  
   
   check_sum_2p = planning_data$psnuValueH %>% sum()
   assertthat::assert_that(check_sum_1p == check_sum_2p)
