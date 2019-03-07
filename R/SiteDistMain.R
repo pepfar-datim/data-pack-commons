@@ -314,12 +314,15 @@ AggByAgeSexKpOuMechSt <- function(data) {
 #' @title BuildDimensionLists(data_element_map_item, dim_item_sets, mechanisms, country_details)
 #' 
 #' @description # get list of dimensions (parameters) for analytics call by level {planning, community, facility}
-#' analytics will be called seperatly for each level 
-#' @param data_element_map_item Each row of data_element_map being sliced and passed
-#' @param dim_item_sets Dataframe containing all the dimension item sets
+#' analytics will be called seperatly for each level.
+#' Tightly coupled to DATIM as it contains some hard coded dimension uids for Funding Mechanism, technical area, 
+#' num or denom, disagg type, support type, and type of organization unit. Also some hard coded dimension items for
+#' type of organization unit and support type
+#' @param data_element_map_item Single row of data_element_map being sliced and passed
+#' @param dim_item_sets Dataframe containing all the dimension item sets e.g. datapackcommons::dim_item_sets
 #' @param mechanisms All historic mechanisms for the country filtered by id
 #' @param country_details Country levels for a country
-#' @return  List of dimensions for the analytics call
+#' @return  List of dimensions for the analytics call GetData_Analytics
 BuildDimensionLists <- function(data_element_map_item, dim_item_sets, 
                                 mechanisms, country_details){
   # prepare df of dimensions and filters as expected by GetData_analytics  
