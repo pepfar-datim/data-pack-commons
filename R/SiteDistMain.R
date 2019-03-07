@@ -165,7 +165,7 @@ CalculateSiteDensity <- function(data_element_map_item, country_details,
   assertthat::assert_that(NROW(data_element_map_item) == 1,
                           NROW(country_details) == 1)
   
-  planning_level = as.integer(country_details$planning_level)
+  # planning_level = as.integer(country_details$planning_level)
   
 # create subsets of dim_item_sets for the relevant dimension items to be used later
   
@@ -176,14 +176,14 @@ CalculateSiteDensity <- function(data_element_map_item, country_details,
   #                                               )
   #                                ) %>% rlang::set_names(dimension_set_columns)
   
-  dim_item_sets_age <- dim_item_sets %>% 
-    dplyr::filter(model_sets == data_element_map_item[[1,"age_set"]])
-  dim_item_sets_sex <- dim_item_sets %>% 
-    dplyr::filter(model_sets == data_element_map_item[[1,"sex_set"]])
-  dim_item_sets_kp <-  dim_item_sets %>% 
-    dplyr::filter(model_sets == data_element_map_item[[1, "kp_set"]])
-  dim_item_sets_other_disagg <-  dim_item_sets %>% 
-    dplyr::filter(model_sets == data_element_map_item[[1, "other_disagg"]])
+  # dim_item_sets_age <- dim_item_sets %>% 
+  #   dplyr::filter(model_sets == data_element_map_item[[1,"age_set"]])
+  # dim_item_sets_sex <- dim_item_sets %>% 
+  #   dplyr::filter(model_sets == data_element_map_item[[1,"sex_set"]])
+  # dim_item_sets_kp <-  dim_item_sets %>% 
+  #   dplyr::filter(model_sets == data_element_map_item[[1, "kp_set"]])
+  # dim_item_sets_other_disagg <-  dim_item_sets %>% 
+  #   dplyr::filter(model_sets == data_element_map_item[[1, "other_disagg"]])
   
 # get list of dimensions (parameters) for analytics call by level {planning, community, facility}
 # analytics will be called seperatly for each level  
@@ -208,54 +208,61 @@ CalculateSiteDensity <- function(data_element_map_item, country_details,
   
   assertthat::assert_that(check_sum_1p == check_sum_1s)
     
-  planning_data <- analytics_output_list$planning$results %>% 
-    list(dim_item_sets_age, 
-         dim_item_sets_sex, 
-         dim_item_sets_kp,
-         dim_item_sets_other_disagg) %>% 
-    purrr::reduce(MapDimToOptions, allocate = "distribute") %>% 
-    dplyr::mutate(psnuid = purrr::map_chr(.$ou_hierarchy, planning_level)) %>% 
-    dplyr::select(-`Organisation unit`, -ou_hierarchy) %>% 
-    AggByAgeSexKpOuMechSt() %>% 
+  # planning_data <- analytics_output_list$planning$results %>% 
+  #   list(dim_item_sets_age, 
+  #        dim_item_sets_sex, 
+  #        dim_item_sets_kp,
+  #        dim_item_sets_other_disagg) %>% 
+  #   purrr::reduce(MapDimToOptions, allocate = "distribute") %>% 
+  #   dplyr::mutate(psnuid = purrr::map_chr(.$ou_hierarchy, planning_level)) %>% 
+  #   dplyr::select(-`Organisation unit`, -ou_hierarchy) %>% 
+  #   AggByAgeSexKpOuMechSt() %>% 
+  #   .[["processed"]] %>% 
+  #   dplyr::select(-dplyr::one_of("count", "maximum", "minimum")) %>% 
+  #   dplyr::rename("psnuValueH" = "Value")
+  
+  # site_data <- dplyr::bind_rows(analytics_output_list$community$results,
+  #                               analytics_output_list$facility$results) %>% 
+  #   list(dim_item_sets_age, 
+  #        dim_item_sets_sex, 
+  #        dim_item_sets_kp,
+  #        dim_item_sets_other_disagg) %>% 
+  #   purrr::reduce(MapDimToOptions, allocate = "distribute")  %>% 
+  #   dplyr::mutate(psnuid = purrr::map_chr(.$ou_hierarchy, planning_level)) %>%      
+  #   dplyr::select(-ou_hierarchy)%>% 
+  #   AggByAgeSexKpOuMechSt()%>% 
+  #   .[["processed"]] %>% dplyr::select(-dplyr::one_of("count", "maximum", "minimum")) %>% 
+  #   dplyr::rename("siteValueH" = "Value")
+
+  planning_data <- 
+    TransformAnalyticsOutput_SiteTool(analytics_output_list$planning$results, 
+                                      dim_item_sets, data_element_map_item,
+                                      country_details$planning_level) %>% 
     .[["processed"]] %>% 
-    dplyr::select(-dplyr::one_of("count", "maximum", "minimum")) %>% 
+    dplyr::select(-dplyr::one_of("Organisation unit", "count", "maximum", "minimum")) %>% 
     dplyr::rename("psnuValueH" = "Value")
-  
-  check_sum_2p = planning_data$psnuValueH %>% sum()
-  assertthat::assert_that(check_sum_1p == check_sum_2p)
-  
-  ### MEchanism to Mechanism mapping would happen right here.
-  ### The config fle would look something like this
-  
-  ### ~technical area, , ~psnu, ~old_mechanism_uid or code, ~new_mechanism_uid or code, ~weight  
   
   site_data <- dplyr::bind_rows(analytics_output_list$community$results,
                                 analytics_output_list$facility$results) %>% 
-    list(dim_item_sets_age, 
-         dim_item_sets_sex, 
-         dim_item_sets_kp,
-         dim_item_sets_other_disagg) %>% 
-    purrr::reduce(MapDimToOptions, allocate = "distribute")  %>% 
-    dplyr::mutate(psnuid = purrr::map_chr(.$ou_hierarchy, planning_level)) %>%      
-    dplyr::select(-ou_hierarchy)%>% 
-    AggByAgeSexKpOuMechSt()%>% 
-    .[["processed"]] %>% dplyr::select(-dplyr::one_of("count", "maximum", "minimum")) %>% 
+    TransformAnalyticsOutput_SiteTool(dim_item_sets, data_element_map_item,
+                                      country_details$planning_level) %>% 
+    .[["processed"]] %>% 
+    dplyr::select(-dplyr::one_of("count", "maximum", "minimum")) %>% 
     dplyr::rename("siteValueH" = "Value")
   
-  check_sum_2s = site_data$siteValueH %>% sum()
-  assertthat::assert_that(check_sum_1p == check_sum_2s)
-  
-  ### MEchanism to Mechanism mapping would happen right here.
-  ### The config fle would look something like this
-  
-  ### ~technical area, , ~psnu, ~old_mechanism_uid or code, ~new_mechanism_uid or code, ~weight
-  ### join data after mech to mech mapping if implementes
   joined_data <- dplyr::left_join(site_data, planning_data) %>%
     dplyr::left_join(mechanisms, by = c("Funding Mechanism" = "categoryOptionId")) %>% 
     dplyr::rename("mechanismCode" = "code")  %>% 
     dplyr::select(-name, -categoryOptionComboId) %>% 
     dplyr::mutate(percent = siteValueH/psnuValueH, 
-           indicatorCode = data_element_map_item$indicatorCode_fy20_cop)
+                  indicatorCode = data_element_map_item$indicatorCode_fy20_cop)
+  
+  
+  check_sum_2p = planning_data$psnuValueH %>% sum()
+  assertthat::assert_that(check_sum_1p == check_sum_2p)
+  
+  check_sum_2s = site_data$siteValueH %>% sum()
+  assertthat::assert_that(check_sum_1p == check_sum_2s)
 
   check_sum_3p  <- joined_data %>% dplyr::select(-dplyr::one_of("percent", "siteValueH", 
                                           "Organisation unit", "Support Type",
@@ -486,23 +493,30 @@ CheckSiteToolData <- function(d, d_old = NULL, issue_error = FALSE){
   # dplyr::all_equal(d_new$data$site$distributed, d_old$data$site$distributed) 
 }
 
-TransformAnalyticsOutput_site <- function(analytics_results, dim_item_sets, data_element_map_item){
+TransformAnalyticsOutput_SiteTool <- function(analytics_results, dim_item_sets, 
+                                          data_element_map_item, planning_level){
+# data_element_map_item = datapackcommons::Map19Tto20T %>% dplyr::slice(3)
+# dim_item_sets=datapackcommons::dim_item_sets
 
-# Create a list of data frames each with the specific dimension item catepgyr 
-# option combinations specidfied in data element map 
-  disagg_sets  <-  c("age_set", "sex_set", "kp_set", "other_disagg") %>% 
+# Create a list of data frames each with the specific dimension item category 
+# option combinations specified in data element map 
+  disagg_sets  <-  c("age_set", 
+                     "sex_set", 
+                     "kp_set", 
+                     "other_disagg") %>% 
     purrr::map(~dplyr::filter(dim_item_sets,
                               model_sets == data_element_map_item[[1, .]]))
   
-  purrr::reduce(disagg_sets, 
+  temp2=purrr::reduce(disagg_sets, 
                 MapDimToOptions, 
                 allocate = "distribute", 
                 .init = analytics_results) %>%  
-  
     dplyr::mutate(psnuid = purrr::map_chr(.$ou_hierarchy, planning_level)) %>% 
-    dplyr::select(-`Organisation unit`, -ou_hierarchy) %>% 
+    dplyr::select(-ou_hierarchy) %>% 
     AggByAgeSexKpOuMechSt()
   
+  ### MEchanism to Mechanism mapping would happen right here.
+  ### The config fle would look something like this
   
-  
+  ### ~technical area, , ~psnu, ~old_mechanism_uid or code, ~new_mechanism_uid or code, ~weight
 }
