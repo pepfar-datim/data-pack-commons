@@ -2,22 +2,29 @@
 #' @export
 #' @title DistributeToSites()
 #'
-#' @description Takes data pack export (TargetxPSNUxIM) and several other configuration files and 
-#' distributes targets to Site x DSD/TA. Historic data is pulled from the DATIM api and is used to disaggregate 
+#' @description Based on input parameters - can either 1) return a site density object for a specified country, 
+#' 2) apply a provided site density to a provided datapack export, or 3) calculate the density and apply it to
+#' a datapack export
+#' 
+#' Takes data pack export (TargetxPSNUxIM) and several other configuration files and 
+#' distributes targets to Site x DSD/TA. The standard COP19 configuration files are included as defaults.
+#' Historic data is pulled from the DATIM api and is used to disaggregate 
 #' the PSNUxIM level targets. Maping between New targets and historic data in the data_element_map.
 #' Data element map references dim_item_sets to know which dissags to use and maps from dimension items to category 
 #' options.  
 #' If country_name is passed explicitly and d = NULL then this function returns the distribution 
 #' densities 
 #' @param d Object from data pack export (TargetxPSNUxIM)
-#' @param data_element_map Dataframe containing indicator codes for fy20 cop and their details
+#' @param data_element_map Dataframe containing indicator codes for fy20, their details and mapping to historic data
 #' @param mechanisms_historic_global Historic mechanism data pulled from datim api to disaggregate PSNUxIM level targets
-#' @param dim_tem_sets Dataframe containing all the dimension item sets
+#' @param dim_tem_sets Dataframe containing all the dimension item sets - standard version is datapackcommons::dim_item_sets
 #' @param site_densities An object containing all the site densities of a particular country
-#' @param country_name Name of the country used to extract the country levels in a separate object
-#' @param base_url Specifies the datim instance being used for the api calls
+#' @param country_name Name of the country used to extract the country levels in a separate object, if parameter d is provided
+#' country name is extracted from datapack export object (d$info$datapack_name)
+#' @param base_url Specifies the datim instance being used for the api calls, defaults to prod
 #' @param verbose If set to true, adds a copy of the densities to output, useful for debugging but can make file large
-#' @return An object containing targets distributed to Site x DSD/TA
+#' @return An object containing targets distributed to Site x DSD/TA if datapack export was provided,
+#' if data pack export is NULL then returns site density object
 DistributeToSites <- 
   function(d, 
            data_element_map = datapackcommons::Map19Tto20T, 

@@ -23,6 +23,9 @@ LoadConfigFile <- function(config_path = NA) {
 }
 
 #' @export
+#' @description Login to DATIM
+#' @param config_path Path to the DHIS2 credentials
+#' @return boolean TRUE if log in succesful 
 DHISLogin<-function(config_path = NA) {
   
   dhis_config<-LoadConfigFile(config_path)
