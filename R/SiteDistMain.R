@@ -446,10 +446,25 @@ CheckSiteToolData <- function(d, d_old = NULL, issue_error = FALSE){
   # dplyr::all_equal(d_new$data$site$distributed, d_old$data$site$distributed) 
 }
 
+#' @title TransformAnalyticsOutput_SiteTool()
+#' 
+#' @description Transforms API results into a table ready for downstream processing.
+#' Takes API analytics output (which is disaggrepgated by dimensions 
+#' and dimension items) and maps to cateogry options needed in output. This
+#' includes splitting or aggregating dimension items related to age, sex, kp, and other_disagge 
+#' as specified in config files, dim_item_sets and data element map.
+#' 
+#' Additionally creates a psnuid column from the ou_hierarchy column and drops
+#' the ou_hierarchy column.
+#' @param analytics_results - data frame - this is a results list item returned from
+#' calling GetData_Analytics and corresponds to the data element map item  
+#' @param dim_item_sets Dataframe containing all the dimension item sets 
+#' e.g. datapackcommons::dim_item_sets
+#' @param data_element_map_item Single row of data_element_map being sliced and passed
+#' @param planning_level the planning level to use when pulling psnuid from 
+#' analytics_results$ou_hierarchy
 TransformAnalyticsOutput_SiteTool <- function(analytics_results, dim_item_sets, 
                                           data_element_map_item, planning_level){
-# data_element_map_item = datapackcommons::Map19Tto20T %>% dplyr::slice(3)
-# dim_item_sets=datapackcommons::dim_item_sets
 
 # Create a list of data frames each with the specific dimension item category 
 # option combinations specified in data element map 
