@@ -460,7 +460,7 @@ TransformAnalyticsOutput_SiteTool <- function(analytics_results, dim_item_sets,
     purrr::map(~dplyr::filter(dim_item_sets,
                               model_sets == data_element_map_item[[1, .]]))
   
-  temp2=purrr::reduce(disagg_sets, 
+  purrr::reduce(disagg_sets, 
                 MapDimToOptions, 
                 allocate = "distribute", 
                 .init = analytics_results) %>%  
