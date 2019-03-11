@@ -185,6 +185,7 @@ testthat::expect_error(
 httptest::stop_mocking()
 })
 
+# This method is not yet exported
 test_that("TransformAnalyticsOutput_SiteTool", {
    dimensions_sample <- tibble::tribble(~type, ~dim_item_uid, ~dim_uid,
   "filter", "vihpFUg2WTy", "dx", #PMTCT positive test rate indicator
@@ -199,5 +200,9 @@ test_that("TransformAnalyticsOutput_SiteTool", {
   # J5jldMd8OHv = Facility Type, uYxK4wmcPqA = CHP, EYbopBOJWsW = MCHP
   datapackcommons::DHISLogin_Play("2.29")
   analytics_data <- datapackcommons::GetData_Analytics(dimensions_sample, "https://play.dhis2.org/2.29/")
+  data_element_map = datapackcommons::Map19Tto20T[51,]
   
+  # MapDimToOptions not found (so prefaced it in SiteDistMain)
+  test_output <- TransformAnalyticsOutput_SiteTool(analytics_data, datapackcommons::dim_item_sets,
+                                                                    data_element_map, 4)
 })

@@ -476,7 +476,7 @@ TransformAnalyticsOutput_SiteTool <- function(analytics_results, dim_item_sets,
                               model_sets == data_element_map_item[[1, .]]))
   
   purrr::reduce(disagg_sets, 
-                MapDimToOptions, 
+                datapackcommons::MapDimToOptions, 
                 allocate = "distribute", 
                 .init = analytics_results) %>%  
     dplyr::mutate(psnuid = purrr::map_chr(.$ou_hierarchy, planning_level)) %>% 
