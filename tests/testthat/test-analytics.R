@@ -185,4 +185,17 @@ testthat::expect_error(
 httptest::stop_mocking()
 })
 
+dimensions_sample <- tibble::tribble(~type, ~dim_item_uid, ~dim_uid,
+                                     "filter", "vihpFUg2WTy", "dx", #PMTCT positive test rate indicator
+                                     "dimension", "ImspTQPwCqd", "ou", # sierra leone
+                                     "dimension", "LEVEL-2", "ou",
+                                     "filter", "LAST_YEAR", "pe",
+                                     "dimension", "UOqJW6HPvvL", "veGzholzPQm",
+                                     "dimension", "WAl0OCcIYxr", "veGzholzPQm",
+                                     "dimension", "uYxK4wmcPqA", "J5jldMd8OHv",
+                                     "dimension", "EYbopBOJWsW", "J5jldMd8OHv")
+# veGzholzPQm = HIV age, UOqJW6HPvvL = 15-24y, WAl0OCcIYxr = 25-49y,
+# J5jldMd8OHv = Facility Type, uYxK4wmcPqA = CHP, EYbopBOJWsW = MCHP
+datapackcommons::DHISLogin_Play("2.29")
+analytics_data <- datapackcommons::GetData_Analytics(dimensions_sample, "https://play.dhis2.org/2.29/")
 
