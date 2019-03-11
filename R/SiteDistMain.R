@@ -490,11 +490,22 @@ TransformAnalyticsOutput_SiteTool <- function(analytics_results, dim_item_sets,
   ### ~technical area, , ~psnu, ~old_mechanism_uid or code, ~new_mechanism_uid or code, ~weight
 }
 
-
-TransformSiteDensity <- function(site_density, mech_to_mech_map){
+# this takes a stored density and alters it based on mechanism to mechanism mapping and 
+# dropping of some sites
+AdjustSiteDensity <- function(site_density, mech_to_mech_map, site_list){
+  
+  purrr::map(site_density, MapMechToMech, mech_to_mech_map)
+  
   mech_to_mech_map <- tibble::tribble(~psnuid, ~`Technical Area`, ~`Numerator / Denominator`, 
                                       ~`Support Type`, ~oldMech, ~newMech, ~percent,
-                                      "psnu1", "TX_CURR", "N", "DSD", "14298", "70270", ".7")
+                                      "psnu1", "TX_CURR", "N", "DSD", "14298", "70270", ".7",
+                                      "psnu1", "OVC_SERV", "N", "DSD", "14298", "70270", ".7")
   select(mech_to_mech_map, `Technical Area`, `Numerator / Denominator`)  
+  
+  
+}
+
+MapMechToMech <- function(site_density, mech_to_mech_map){
+  return(site_density)
   
 }
