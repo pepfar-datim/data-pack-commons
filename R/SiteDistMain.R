@@ -29,12 +29,13 @@ DistributeToSites <-
   function(d, 
            data_element_map = datapackcommons::Map19Tto20T, 
            mechanisms_historic_global = 
-             datapackcommons::Get19TMechanisms("https://www.datim.org/"),
+             datapackcommons::Get19TMechanisms(getOption("baseurl")),
            dim_item_sets = datapackcommons::dim_item_sets,
            site_densities = NULL,
            country_name = NULL, 
            base_url = getOption("baseurl"), 
-           verbose = FALSE){
+           verbose = FALSE,
+           mech_to_mech_map = NULL){
 
 # get country name from data pack data object unless a country name is provided
   if(is.null(country_name)){
@@ -106,14 +107,14 @@ DistributeToSites <-
 # After the joins bind the results of each individual join into one large data frame
   matched_data <-  purrr::map(site_densities, dplyr::inner_join, datapack_data) %>% 
     purrr::reduce(dplyr::bind_rows)
-
+return(matched_data)
 # Now join the historic data back to the original input data so we have both the data matched to historic data
 # and the unmatched data which is still only at the PSNU level.
 # Where applicable give the distributed site value by multiplying PSNU level target
 # by Site x DSD/TA density
 # recode the dsd/ta dimension item ids to names
   
-  site_tool_data <- dplyr::left_join(datapack_data, matched_data) %>% 
+  site_tool_data <- dplyr::left_join(datapack_data, matched_data) %>% ## 
     dplyr::mutate(siteValue = percent * value)
   site_tool_data$`Support Type`[site_tool_data$`Support Type` == "cRAGKdWIDn4"] <- "TA" 
   site_tool_data$`Support Type`[site_tool_data$`Support Type` == "iM13vdNLWKb"] <- "DSD"
@@ -487,4 +488,13 @@ TransformAnalyticsOutput_SiteTool <- function(analytics_results, dim_item_sets,
   ### The config fle would look something like this
   
   ### ~technical area, , ~psnu, ~old_mechanism_uid or code, ~new_mechanism_uid or code, ~weight
+}
+
+
+TransformSiteDensity <- function(site_density, mech_to_mech_map){
+  mech_to_mech_map <- tibble::tribble(~psnuid, ~`Technical Area`, ~`Numerator / Denominator`, 
+                                      ~`Support Type`, ~oldMech, ~newMech, ~percent,
+                                      "psnu1", "TX_CURR", "N", "DSD", "14298", "70270", ".7")
+  select(mech_to_mech_map, `Technical Area`, `Numerator / Denominator`)  
+  
 }
