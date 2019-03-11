@@ -441,6 +441,29 @@ GetData_Analytics <-  function(dimensions, base_url = getOption("baseurl")){
   ##the items in these columns were requested.
   ## If there is a mismatch stop()
   ## is there other useful metadata we want to return?
+  
+  # Assertion to check output for dim_uid "veGzholzPQm"
+  # Taken from the input
+  dim_list <- dimensions %>% 
+    filter(dimensions$dim_uid == "veGzholzPQm")
+  dim_list <- unique(dim_list$dim_item_uid)
+  pipe_dim_list <- paste(dim_list, collapse = "|")
+  
+  # Asserting the values from input being present in output column of api call
+  assertthat::assert_that(grepl(pipe_dim_list, my_data[3]) == TRUE)
+  
+  # Assertion to check output for dim_uid "J5jldMd8OHv"
+  # Taken from the input
+  facility_list <- dimensions %>% 
+    filter(dimensions$dim_uid == "J5jldMd8OHv")
+  facility_list <- unique(dim_list$dim_item_uid)
+  pipe_facility_list <- paste(dim_list, collapse = "|")
+  
+  # Asserting the values from input being present in output column of api call
+  assertthat::assert_that(grepl(pipe_facility_list, my_data[1]) == TRUE)
+  
+  # Assertion for detecting the right OU being present
+  assertthat::assert_that(all(grepl(dimensions[2,2] ,content$metaData$ouHierarchy)) == TRUE)
 
   # list column(vector) of the org hiearchy including the org unit itself
   # added to the data in a mutate below
