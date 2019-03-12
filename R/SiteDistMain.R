@@ -492,11 +492,10 @@ TransformAnalyticsOutput_SiteTool <- function(analytics_results, dim_item_sets,
 
 # this takes a stored density and alters it based on mechanism to mechanism mapping and 
 # dropping of some sites
-AdjustSiteDensity <- function(site_density, mech_to_mech_map = NULL, sites = NULL){
-  sites = c("11111111111", "22222222222")
-  if(!is.null(sites)){
-  purrr::map(site_density, DropSitesFromDensity, mech_to_mech_map)
-  }
+AdjustSiteDensity <- function(site_densities, mech_to_mech_map = NULL, sites = NULL){
+
+# I run this even if sites is null because it adds some expected columns even in the null case
+  site_densities_post_site_drop = purrr::map(site_densities, DropSitesFromDensity, sites)
   
   purrr::map(site_density, MapMechToMech, mech_to_mech_map)
   
@@ -505,8 +504,6 @@ AdjustSiteDensity <- function(site_density, mech_to_mech_map = NULL, sites = NUL
                                       "psnu1", "TX_CURR", "N", "DSD", "14298", "70270", ".7",
                                       "psnu1", "OVC_SERV", "N", "DSD", "14298", "70270", ".7")
   select(mech_to_mech_map, `Technical Area`, `Numerator / Denominator`)  
-  
-  
 }
 
 #' @title DropSitesFromDensity
@@ -518,14 +515,18 @@ AdjustSiteDensity <- function(site_density, mech_to_mech_map = NULL, sites = NUL
 #' @return Returns original density with two additional columns: dropped_site_reduction and
 #' psnuValueH_after_site_drop. Additionally recalculated the percent column if sites are 
 #' dropped. 
-DropSitesFromDensity <- function(site_density, sites) {
-  #  sites <-  dplyr::setdiff(site_density$`Organisation unit`, c("ISH3IkN5aWO","SPSmmQeD6Rg"))
+DropSitesFromDensity <- function(site_density, sites = NULL) {
+
+  if(NROW(site_density) == 0){
+    return(site_density)
+  }
+
   site_data_to_drop <- site_density %>%
     dplyr::filter(!(site_density$`Organisation unit` %in% sites)) %>%
     select(-percent)
   
   # if no data to drop add columns some expected columns to site_density and return
-  if (NROW(site_data_to_drop == 0)) {
+  if (NROW(site_data_to_drop) == 0) {
     return(
       site_density %>%
         mutate(
