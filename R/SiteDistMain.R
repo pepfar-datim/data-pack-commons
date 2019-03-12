@@ -511,7 +511,7 @@ AdjustSiteDensity <- function(site_densities, mech_to_mech_map = NULL, sites = N
 #' psnuValueH_after_site_drop. Additionally recalculated the percent column if sites are 
 #' dropped. 
 DropSitesFromDensity <- function(site_density, sites = NULL) {
-
+#  sites <-  dplyr::setdiff(site_density$`Organisation unit`, c("ISH3IkN5aWO","SPSmmQeD6Rg"))
   if(NROW(site_density) == 0){
     return(site_density)
   }
@@ -580,9 +580,10 @@ MapMechToMech <- function(site_density, mech_to_mech_map_full){
   mech_to_mech_map_full <- 
     tibble::tribble(~psnuid, ~`Technical Area`, ~`Numerator / Denominator`, 
                     ~`Support Type`, ~oldMech, ~newMech, ~percent,
-                    "nxGb6sd7p7D", "PMTCT_STAT", "D", "DSD", "17460", "70270", ".7",
-                    "nxGb6sd7p7D", "PMTCT_STAT", "D", "DSD", "17460", "70271", ".3",
-                    "nxGb6sd7p7D", "OVC_SERV", "N", "DSD", "14298", "70270", ".7")
+                    "nxGb6sd7p7D", "PMTCT_STAT", "D", "DSD", "17460", "70270", .7,
+                    "nxGb6sd7p7D", "PMTCT_STAT", "D", "DSD", "17460", "70271", .3,
+                    "nxGb6sd7p7D", "PMTCT_STAT", "D", "DSD", "18599", "70270", .5, 
+                    "nxGb6sd7p7D", "PMTCT_STAT", "D", "DSD", "18599", "70271", .5)
   
   mech_to_mech_map_full$`Support Type`[mech_to_mech_map_full$`Support Type` == "TA"] <- "cRAGKdWIDn4" 
   mech_to_mech_map_full$`Support Type`[mech_to_mech_map_full$`Support Type` == "DSD"] <- "iM13vdNLWKb" 
@@ -602,7 +603,8 @@ MapMechToMech <- function(site_density, mech_to_mech_map_full){
                   `Numerator / Denominator` == num_or_den) %>% 
     dplyr::select(-`Technical Area`, -`Numerator / Denominator`)
 
-# see if any mapping required after filtering to relevant rows of mech_to_mech_map
+
+  # see if any mapping required after filtering to relevant rows of mech_to_mech_map
   if(NROW(mech_to_mech_map) == 0){
     return(site_density)
     #TODO make sure I don't need to add any columns
@@ -610,19 +612,96 @@ MapMechToMech <- function(site_density, mech_to_mech_map_full){
   
 # see if there are rows to be recoded, if not throw an error since we really shouldn't
 # receive a mapping that has elements which do not match data 
-  if(!any(mech_to_mech_map$`Support Type` == site_density$`Support Type` & 
-     mech_to_mech_map$psnuid == site_density$psnuid &
-     mech_to_mech_map$oldMech == site_density$mechanismCode)){
-    stop(paste("Mechanism map in MapMechToMech has entries with no matching data.",
-                technical_area, num_or_den, 
-        utils::str(mech_to_mech_map)))
-  }
+  # if(!any(mech_to_mech_map$`Support Type` == site_density$`Support Type` & 
+  #    mech_to_mech_map$psnuid == site_density$psnuid &
+  #    mech_to_mech_map$oldMech == site_density$mechanismCode)){
+  #   stop(paste("Mechanism map in MapMechToMech has entries with no matching data.",
+  #               technical_area, num_or_den, 
+  #       utils::str(mech_to_mech_map)))
+  # }
   
   site_density_new  <-  site_density %>% dplyr::rename("oldMech" = "mechanismCode")
   mech_to_mech_map <- mech_to_mech_map %>% dplyr::rename("weight" = "percent")
-  
+
+  site_density_new %>% dplyr::select("psnuid", "age_option_name", "sex_option_name", 
+                                            "Funding Mechanism","psnuValueH_after_site_drop") %>%
+    unique() %>%
+    .[["psnuValueH_after_site_drop"]] %>%
+    sum()
+    
   site_density_new  <- dplyr::left_join(site_density_new, mech_to_mech_map) %>% 
-    dplyr::mutate(mechanismCode = dplyr::if_else(is.na(newMech), oldMech, newMech))
+    dplyr::mutate(mechanismCode = dplyr::if_else(is.na(newMech), oldMech, newMech)) %>% 
+    mutate(weight = tidyr::replace_na(weight, 1)) %>% 
+    mutate(siteValueH_adjusted = siteValueH * weight,
+           psnuValueH_adjusted = psnuValueH_after_site_drop * weight)
+  
+  site_density_new %>% dplyr::select("psnuid", "age_option_name", "sex_option_name", 
+                                     "mechanismCode","psnuValueH_after_site_drop") %>%
+    unique() %>%
+    .[["psnuValueH_after_site_drop"]] %>%
+    sum()
+  
+site_density_new %>% dplyr::select("psnuid", "age_option_name", "sex_option_name", 
+                                     "mechanismCode","psnuValueH_adjusted") %>%
+    unique() %>%
+    .[["psnuValueH_adjusted"]] %>%
+    sum()
+
+
+temp = site_density_new %>% dplyr::group_by_at (dplyr::vars("psnuid", "oldMech","age_option_name", "sex_option_name", 
+                                   "mechanismCode")) %>%
+  dplyr::summarise(count = dplyr::n(),min = min(psnuValueH_adjusted), max = 
+                     max(psnuValueH_adjusted)) %>% ungroup() %>% .["psnuValueH_adjusted"] %>% 
+  sum()
+
+### looks like I am not getting back the psnu total because I am getting a DSD and a TA line for some of these due to the 
+### spklite to new mech only affecting DSDD (in my example)
+  
+%>%  
+    dplyr::group_by_at(dplyr::vars(-`Funding Mechanism`,
+                                   -siteValueH, -psnuValueH, -oldMech, -dropped_site_reduction,
+                                   -psnuValueH_after_site_drop, -percent, -weight,
+                                   -siteValueH_adjusted, -psnuValueH_adjusted)) %>% 
+    dplyr::summarise(count = dplyr::n(), 
+                     weights = list(weight),
+                     siteValueH_adjusted_i = list(siteValueH_adjusted),
+                     psnuValueH_adjusted_i = list(psnuValueH_adjusted),
+                     siteValueH_adjusted = sum(siteValueH_adjusted),
+                     psnuValueH_adjusted = sum(psnuValueH_adjusted),
+                     `Funding Mechanism` = list(`Funding Mechanism`),
+                     siteValueH = list(siteValueH), 
+                     psnuValueH = list(psnuValueH), 
+                     oldMech = list(oldMech), 
+                     dropped_site_reduction = list(dropped_site_reduction),
+                     psnuValueH_after_site_drop = list(psnuValueH_after_site_drop)) %>%
+    ungroup() %>% 
+    dplyr::mutate(percent = siteValueH_adjusted / psnuValueH_adjusted)
+
+  # sum(new_site_density$percent)
+  # site_data_to_keep %>% dplyr::select(-dplyr::one_of("percent", "siteValueH",
+  #                                                    "Organisation unit", "Support Type",
+  #                                                    "Type of organisational unit")) %>%
+  #   unique() %>%
+  #   .[["psnuValueH"]] %>%
+  #   sum()
+  #
+
+  temp = site_density_new %>% dplyr::select("psnuid", "age_option_name", "sex_option_name", 
+                                             "mechanismCode","psnuValueH_adjusted") %>%
+    unique() %>%
+    .[["psnuValueH_adjusted"]] %>%
+    sum()
+  
+  
+    temp = site_density_new %>% dplyr::select(-dplyr::one_of("percent", "siteValueH", "psnuValueH",
+                                                    "oldMech", "dropped_site_reduction",
+                                                    "psnuValueH_after_site_drop", "siteValueH_adjusted", 
+                                                 "Organisation unit", "Support Type",
+                                                 "Type of organisational unit", "weight",
+                                                 "newMech", "Funding Mechanism")) %>%
+    unique() %>%
+    .[["psnuValueH_adjusted"]] %>%
+    sum()
   
   return(site_density)
   
