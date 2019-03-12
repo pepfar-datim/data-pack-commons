@@ -187,7 +187,9 @@ httptest::stop_mocking()
 
 # This method is not yet exported
 test_that("TransformAnalyticsOutput_SiteTool", {
-   dimensions_sample <- tibble::tribble(~type, ~dim_item_uid, ~dim_uid,
+  # Add sample data at top of the file so its reusable
+  # OVC Serv sample data, aggregates two ages together, combine 18-24 and 25+ ages, look at dataset from mapdimtooptions test
+  dimensions_sample <- tibble::tribble(~type, ~dim_item_uid, ~dim_uid,
   "filter", "vihpFUg2WTy", "dx", #PMTCT positive test rate indicator
   "dimension", "ImspTQPwCqd", "ou", # sierra leone
   "dimension", "LEVEL-2", "ou",
