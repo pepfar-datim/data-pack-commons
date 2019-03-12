@@ -497,13 +497,8 @@ AdjustSiteDensity <- function(site_densities, mech_to_mech_map = NULL, sites = N
 # I run this even if sites is null because it adds some expected columns even in the null case
   site_densities_post_site_drop = purrr::map(site_densities, DropSitesFromDensity, sites)
   
-  purrr::map(site_density, MapMechToMech, mech_to_mech_map)
+  purrr::map(site_densities_post_site_drop, MapMechToMech, mech_to_mech_map)
   
-  mech_to_mech_map <- tibble::tribble(~psnuid, ~`Technical Area`, ~`Numerator / Denominator`, 
-                                      ~`Support Type`, ~oldMech, ~newMech, ~percent,
-                                      "psnu1", "TX_CURR", "N", "DSD", "14298", "70270", ".7",
-                                      "psnu1", "OVC_SERV", "N", "DSD", "14298", "70270", ".7")
-  select(mech_to_mech_map, `Technical Area`, `Numerator / Denominator`)  
 }
 
 #' @title DropSitesFromDensity
@@ -580,7 +575,55 @@ DropSitesFromDensity <- function(site_density, sites = NULL) {
   return(new_site_density)
 }
 
-MapMechToMech <- function(site_density, mech_to_mech_map){
+MapMechToMech <- function(site_density, mech_to_mech_map_full){
+
+  mech_to_mech_map_full <- 
+    tibble::tribble(~psnuid, ~`Technical Area`, ~`Numerator / Denominator`, 
+                    ~`Support Type`, ~oldMech, ~newMech, ~percent,
+                    "nxGb6sd7p7D", "PMTCT_STAT", "D", "DSD", "17460", "70270", ".7",
+                    "nxGb6sd7p7D", "PMTCT_STAT", "D", "DSD", "17460", "70271", ".3",
+                    "nxGb6sd7p7D", "OVC_SERV", "N", "DSD", "14298", "70270", ".7")
+  
+  mech_to_mech_map_full$`Support Type`[mech_to_mech_map_full$`Support Type` == "TA"] <- "cRAGKdWIDn4" 
+  mech_to_mech_map_full$`Support Type`[mech_to_mech_map_full$`Support Type` == "DSD"] <- "iM13vdNLWKb" 
+
+  if(NROW(site_density) == 0){
+    return(site_density)
+  }
+  
+  technical_area = site_density[[1, "indicatorCode"]]  %>% 
+    stringr::str_split("\\.") %>% .[[1]] %>% .[[1]]
+  num_or_den = site_density[[1, "indicatorCode"]]  %>% 
+    stringr::str_split("\\.") %>% .[[1]] %>% .[[2]]
+  
+  
+  mech_to_mech_map <- mech_to_mech_map_full %>% 
+    dplyr::filter(`Technical Area` == technical_area,
+                  `Numerator / Denominator` == num_or_den) %>% 
+    dplyr::select(-`Technical Area`, -`Numerator / Denominator`)
+
+# see if any mapping required after filtering to relevant rows of mech_to_mech_map
+  if(NROW(mech_to_mech_map) == 0){
+    return(site_density)
+    #TODO make sure I don't need to add any columns
+  }
+  
+# see if there are rows to be recoded, if not throw an error since we really shouldn't
+# receive a mapping that has elements which do not match data 
+  if(!any(mech_to_mech_map$`Support Type` == site_density$`Support Type` & 
+     mech_to_mech_map$psnuid == site_density$psnuid &
+     mech_to_mech_map$oldMech == site_density$mechanismCode)){
+    stop(paste("Mechanism map in MapMechToMech has entries with no matching data.",
+                technical_area, num_or_den, 
+        utils::str(mech_to_mech_map)))
+  }
+  
+  site_density_new  <-  site_density %>% dplyr::rename("oldMech" = "mechanismCode")
+  mech_to_mech_map <- mech_to_mech_map %>% dplyr::rename("weight" = "percent")
+  
+  site_density_new  <- dplyr::left_join(site_density_new, mech_to_mech_map) %>% 
+    dplyr::mutate(mechanismCode = dplyr::if_else(is.na(newMech), oldMech, newMech))
+  
   return(site_density)
   
 }
