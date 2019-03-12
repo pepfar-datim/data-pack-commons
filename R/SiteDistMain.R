@@ -534,6 +534,7 @@ DropSitesFromDensity <- function(site_density, sites) {
         )
     )
   }
+  
   site_data_to_keep <- site_density %>%
     dplyr::filter((site_density$`Organisation unit` %in% sites)) %>%
     select(-percent) # we need to recalculate percent so drop it here
