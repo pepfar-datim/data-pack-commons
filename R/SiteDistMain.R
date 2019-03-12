@@ -492,7 +492,11 @@ TransformAnalyticsOutput_SiteTool <- function(analytics_results, dim_item_sets,
 
 # this takes a stored density and alters it based on mechanism to mechanism mapping and 
 # dropping of some sites
-AdjustSiteDensity <- function(site_density, mech_to_mech_map, site_list){
+AdjustSiteDensity <- function(site_density, mech_to_mech_map = NULL, sites = NULL){
+  sites = c("11111111111", "22222222222")
+  if(!is.null(sites)){
+  purrr::map(site_density, DropSitesFromDensity, mech_to_mech_map)
+  }
   
   purrr::map(site_density, MapMechToMech, mech_to_mech_map)
   
@@ -503,6 +507,75 @@ AdjustSiteDensity <- function(site_density, mech_to_mech_map, site_list){
   select(mech_to_mech_map, `Technical Area`, `Numerator / Denominator`)  
   
   
+}
+
+#' @title DropSitesFromDensity
+#'
+#' @description Drops sites from a density data frame if they are not part of a list in sites,
+#' recalculates psnuValueH and percent (density) based on dropping the sites 
+#' @param site_density dataframe from density object
+#' @param sites character vector - list of site uids to KEEP 
+#' @return Returns original density with two additional columns: dropped_site_reduction and
+#' psnuValueH_after_site_drop. Additionally recalculated the percent column if sites are 
+#' dropped. 
+DropSitesFromDensity <- function(site_density, sites) {
+  #  sites <-  dplyr::setdiff(site_density$`Organisation unit`, c("ISH3IkN5aWO","SPSmmQeD6Rg"))
+  site_data_to_drop <- site_density %>%
+    dplyr::filter(!(site_density$`Organisation unit` %in% sites)) %>%
+    select(-percent)
+  
+  # if no data to drop add columns some expected columns to site_density and return
+  if (NROW(site_data_to_drop == 0)) {
+    return(
+      site_density %>%
+        mutate(
+          dropped_site_reduction = 0,
+          psnuValueH_after_site_drop = psnuValueH
+        )
+    )
+  }
+  site_data_to_keep <- site_density %>%
+    dplyr::filter((site_density$`Organisation unit` %in% sites)) %>%
+    select(-percent) # we need to recalculate percent so drop it here
+  
+  
+  # get the IM x PSNU adjustment, group by excludes all columns that are
+  # site specific sunce we want a sum of siteValueH for dropped sites by psnu x im
+  psnu_reductions =  site_data_to_drop %>%
+    dplyr::group_by_at(dplyr::vars(
+      -siteValueH,
+      -psnuValueH,-`Organisation unit`,
+      -`Support Type`
+    )) %>%
+    dplyr::summarise(dropped_site_reduction = sum(siteValueH)) %>%
+    ungroup()
+  
+  # psnu_reductions retained all variables common to all sites + disaggs and dropped the site
+  # specific variables, so we can use left join attach the new column and perform the
+  # new density calculation
+  new_site_density <- site_data_to_keep %>%
+    left_join(psnu_reductions) %>%
+    mutate(dropped_site_reduction = tidyr::replace_na(dropped_site_reduction, 0)) %>%
+    mutate(
+      psnuValueH_after_site_drop = psnuValueH - dropped_site_reduction,
+      percent = siteValueH / (psnuValueH - dropped_site_reduction)
+    )
+  
+  # sum(new_site_density$percent)
+  # site_data_to_keep %>% dplyr::select(-dplyr::one_of("percent", "siteValueH",
+  #                                                    "Organisation unit", "Support Type",
+  #                                                    "Type of organisational unit")) %>%
+  #   unique() %>%
+  #   .[["psnuValueH"]] %>%
+  #   sum()
+  #
+  # new_site_density %>% dplyr::select(-dplyr::one_of("percent", "siteValueH",
+  #                                                "Organisation unit", "Support Type",
+  #                                                "Type of organisational unit")) %>%
+  #   unique() %>%
+  #   .[["psnuValueH_after_site_drop"]] %>%
+  #   sum()
+  return(new_site_density)
 }
 
 MapMechToMech <- function(site_density, mech_to_mech_map){
