@@ -493,7 +493,7 @@ TransformAnalyticsOutput_SiteTool <- function(analytics_results, dim_item_sets,
 # this takes a stored density and alters it based on mechanism to mechanism mapping and 
 # dropping of some sites
 AdjustSiteDensity <- function(site_densities, mech_to_mech_map = NULL, sites = NULL){
-
+# to do if both mech to mech and sites = NULL return site densities
 # I run this even if sites is null because it adds some expected columns even in the null case
   site_densities_post_site_drop = purrr::map(site_densities, DropSitesFromDensity, sites)
   
@@ -583,7 +583,8 @@ MapMechToMech <- function(site_density, mech_to_mech_map_full){
                     "nxGb6sd7p7D", "PMTCT_STAT", "D", "DSD", "17460", "70270", .7,
                     "nxGb6sd7p7D", "PMTCT_STAT", "D", "DSD", "17460", "70271", .3,
                     "nxGb6sd7p7D", "PMTCT_STAT", "D", "DSD", "18599", "70270", .5, 
-                    "nxGb6sd7p7D", "PMTCT_STAT", "D", "DSD", "18599", "70271", .5)
+                    "nxGb6sd7p7D", "PMTCT_STAT", "D", "DSD", "18599", "70271", .5,
+                    "nxGb6sd7p7D", "OVC_SERV", "N", "DSD", "18599", "70271", 1)
   
   mech_to_mech_map_full$`Support Type`[mech_to_mech_map_full$`Support Type` == "TA"] <- "cRAGKdWIDn4" 
   mech_to_mech_map_full$`Support Type`[mech_to_mech_map_full$`Support Type` == "DSD"] <- "iM13vdNLWKb" 
@@ -623,41 +624,23 @@ MapMechToMech <- function(site_density, mech_to_mech_map_full){
   site_density_new  <-  site_density %>% dplyr::rename("oldMech" = "mechanismCode")
   mech_to_mech_map <- mech_to_mech_map %>% dplyr::rename("weight" = "percent")
 
-  site_density_new %>% dplyr::select("psnuid", "age_option_name", "sex_option_name", 
-                                            "Funding Mechanism","psnuValueH_after_site_drop") %>%
-    unique() %>%
-    .[["psnuValueH_after_site_drop"]] %>%
-    sum()
-    
+  # site_density_new %>% dplyr::select("psnuid", "age_option_name", "sex_option_name", 
+  #                                           "Funding Mechanism","psnuValueH_after_site_drop") %>%
+  #   unique() %>%
+  #   .[["psnuValueH_after_site_drop"]] %>%
+  #   sum()
+
+# join site density to mechanism map (may creat new rows in an old mech becomes 2 or more new mechs)
+# apply the weights from the mech to mech map to the site value and psnu value
+# aggregate multiple rows for new mech (same disagg, site etc) - occurs when a new mech gets data
+# from 2 or more historic mech
+# perform final percent (density) calculation on the adjusted site and psnu values
+  
   site_density_new  <- dplyr::left_join(site_density_new, mech_to_mech_map) %>% 
     dplyr::mutate(mechanismCode = dplyr::if_else(is.na(newMech), oldMech, newMech)) %>% 
     mutate(weight = tidyr::replace_na(weight, 1)) %>% 
     mutate(siteValueH_adjusted = siteValueH * weight,
-           psnuValueH_adjusted = psnuValueH_after_site_drop * weight)
-  
-  site_density_new %>% dplyr::select("psnuid", "age_option_name", "sex_option_name", 
-                                     "mechanismCode","psnuValueH_after_site_drop") %>%
-    unique() %>%
-    .[["psnuValueH_after_site_drop"]] %>%
-    sum()
-  
-site_density_new %>% dplyr::select("psnuid", "age_option_name", "sex_option_name", 
-                                     "mechanismCode","psnuValueH_adjusted") %>%
-    unique() %>%
-    .[["psnuValueH_adjusted"]] %>%
-    sum()
-
-
-temp = site_density_new %>% dplyr::group_by_at (dplyr::vars("psnuid", "oldMech","age_option_name", "sex_option_name", 
-                                   "mechanismCode")) %>%
-  dplyr::summarise(count = dplyr::n(),min = min(psnuValueH_adjusted), max = 
-                     max(psnuValueH_adjusted)) %>% ungroup() %>% .["psnuValueH_adjusted"] %>% 
-  sum()
-
-### looks like I am not getting back the psnu total because I am getting a DSD and a TA line for some of these due to the 
-### spklite to new mech only affecting DSDD (in my example)
-  
-%>%  
+           psnuValueH_adjusted = psnuValueH_after_site_drop * weight) %>%  
     dplyr::group_by_at(dplyr::vars(-`Funding Mechanism`,
                                    -siteValueH, -psnuValueH, -oldMech, -dropped_site_reduction,
                                    -psnuValueH_after_site_drop, -percent, -weight,
@@ -676,6 +659,30 @@ temp = site_density_new %>% dplyr::group_by_at (dplyr::vars("psnuid", "oldMech",
                      psnuValueH_after_site_drop = list(psnuValueH_after_site_drop)) %>%
     ungroup() %>% 
     dplyr::mutate(percent = siteValueH_adjusted / psnuValueH_adjusted)
+  
+#   site_density_new %>% dplyr::select("psnuid", "age_option_name", "sex_option_name", 
+#                                      "mechanismCode","psnuValueH_after_site_drop") %>%
+#     unique() %>%
+#     .[["psnuValueH_after_site_drop"]] %>%
+#     sum()
+#   
+# site_density_new %>% dplyr::select("psnuid", "age_option_name", "sex_option_name", 
+#                                      "mechanismCode","psnuValueH_adjusted") %>%
+#     unique() %>%
+#     .[["psnuValueH_adjusted"]] %>%
+#     sum()
+# 
+# 
+# temp = site_density_new %>% dplyr::group_by_at (dplyr::vars("psnuid", "oldMech","age_option_name", "sex_option_name", 
+#                                    "mechanismCode")) %>%
+#   dplyr::summarise(count = dplyr::n(),min = min(psnuValueH_adjusted), max = 
+#                      max(psnuValueH_adjusted)) %>% ungroup() %>% .["psnuValueH_adjusted"] %>% 
+#   sum()
+# 
+### looks like I am not getting back the psnu total because I am getting a DSD and a TA line for some of these due to the 
+### spklite to new mech only affecting DSDD (in my example)
+  
+
 
   # sum(new_site_density$percent)
   # site_data_to_keep %>% dplyr::select(-dplyr::one_of("percent", "siteValueH",
@@ -686,22 +693,22 @@ temp = site_density_new %>% dplyr::group_by_at (dplyr::vars("psnuid", "oldMech",
   #   sum()
   #
 
-  temp = site_density_new %>% dplyr::select("psnuid", "age_option_name", "sex_option_name", 
-                                             "mechanismCode","psnuValueH_adjusted") %>%
-    unique() %>%
-    .[["psnuValueH_adjusted"]] %>%
-    sum()
-  
-  
-    temp = site_density_new %>% dplyr::select(-dplyr::one_of("percent", "siteValueH", "psnuValueH",
-                                                    "oldMech", "dropped_site_reduction",
-                                                    "psnuValueH_after_site_drop", "siteValueH_adjusted", 
-                                                 "Organisation unit", "Support Type",
-                                                 "Type of organisational unit", "weight",
-                                                 "newMech", "Funding Mechanism")) %>%
-    unique() %>%
-    .[["psnuValueH_adjusted"]] %>%
-    sum()
+  # temp = site_density_new %>% dplyr::select("psnuid", "age_option_name", "sex_option_name", 
+  #                                            "mechanismCode","psnuValueH_adjusted") %>%
+  #   unique() %>%
+  #   .[["psnuValueH_adjusted"]] %>%
+  #   sum()
+  # 
+  # 
+  #   temp = site_density_new %>% dplyr::select(-dplyr::one_of("percent", "siteValueH", "psnuValueH",
+  #                                                   "oldMech", "dropped_site_reduction",
+  #                                                   "psnuValueH_after_site_drop", "siteValueH_adjusted", 
+  #                                                "Organisation unit", "Support Type",
+  #                                                "Type of organisational unit", "weight",
+  #                                                "newMech", "Funding Mechanism")) %>%
+  #   unique() %>%
+  #   .[["psnuValueH_adjusted"]] %>%
+  #   sum()
   
   return(site_density)
   
