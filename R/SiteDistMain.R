@@ -607,7 +607,7 @@ MapMechToMech <- function(site_density, mech_to_mech_map_full = NULL){
   #                   "nxGb6sd7p7D", "PMTCT_STAT", "D", "DSD", "18599", "70271", .5,
   #                   "nxGb6sd7p7D", "OVC_SERV", "N", "DSD", "18599", "70271", 1)
   
-  if(is.null(mech_to_mech_map_full){
+  if(is.null(mech_to_mech_map_full)){
     return(site_density)
     #TODO make sure I don't need to add any columns    
   }
