@@ -4,7 +4,7 @@
 \alias{DropSitesFromDensity}
 \title{DropSitesFromDensity}
 \usage{
-DropSitesFromDensity(site_density, sites)
+DropSitesFromDensity(site_density, sites = NULL)
 }
 \arguments{
 \item{site_density}{dataframe from density object}

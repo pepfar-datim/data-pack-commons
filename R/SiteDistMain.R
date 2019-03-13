@@ -35,7 +35,8 @@ DistributeToSites <-
            country_name = NULL, 
            base_url = getOption("baseurl"), 
            verbose = FALSE,
-           mech_to_mech_map = NULL){
+           mech_to_mech_map = NULL,
+           sites = NULL){
 
 # get country name from data pack data object unless a country name is provided
   if(is.null(country_name)){
@@ -98,7 +99,10 @@ DistributeToSites <-
   datapack_data$age_option_name[datapack_data$age_option_name == "02 - 12 months"] <- "2 - 12 months"
 
 
-  
+if(!(is.null(mech_to_mech_map) && is.null(sites))){
+  site_densities <- AdjustSiteDensity(site_densities, mech_to_mech_map, sites)    
+}
+
 # do individual joins for each data element 
 # The site densities contain different columns depending on the data elements 
 # e.g. sometime age and sex columns other time just key population columns
@@ -107,14 +111,14 @@ DistributeToSites <-
 # After the joins bind the results of each individual join into one large data frame
   matched_data <-  purrr::map(site_densities, dplyr::inner_join, datapack_data) %>% 
     purrr::reduce(dplyr::bind_rows)
-return(matched_data)
+
 # Now join the historic data back to the original input data so we have both the data matched to historic data
 # and the unmatched data which is still only at the PSNU level.
 # Where applicable give the distributed site value by multiplying PSNU level target
 # by Site x DSD/TA density
 # recode the dsd/ta dimension item ids to names
   
-  site_tool_data <- dplyr::left_join(datapack_data, matched_data) %>% ## 
+  site_tool_data <- dplyr::left_join(datapack_data, matched_data) %>%  
     dplyr::mutate(siteValue = percent * value)
   site_tool_data$`Support Type`[site_tool_data$`Support Type` == "cRAGKdWIDn4"] <- "TA" 
   site_tool_data$`Support Type`[site_tool_data$`Support Type` == "iM13vdNLWKb"] <- "DSD"
@@ -493,7 +497,7 @@ TransformAnalyticsOutput_SiteTool <- function(analytics_results, dim_item_sets,
 # this takes a stored density and alters it based on mechanism to mechanism mapping and 
 # dropping of some sites
 AdjustSiteDensity <- function(site_densities, mech_to_mech_map = NULL, sites = NULL){
-# to do if both mech to mech and sites = NULL return site densities
+
 # I run this even if sites is null because it adds some expected columns even in the null case
   site_densities_post_site_drop = purrr::map(site_densities, DropSitesFromDensity, sites)
   
@@ -545,7 +549,7 @@ DropSitesFromDensity <- function(site_density, sites = NULL) {
       -`Support Type`
     )) %>%
     dplyr::summarise(dropped_site_reduction = sum(siteValueH)) %>%
-    ungroup()
+    dplyr::ungroup()
   
   # psnu_reductions retained all variables common to all sites + disaggs and dropped the site
   # specific variables, so we can use left join attach the new column and perform the
@@ -577,14 +581,14 @@ DropSitesFromDensity <- function(site_density, sites = NULL) {
 
 MapMechToMech <- function(site_density, mech_to_mech_map_full){
 
-  mech_to_mech_map_full <- 
-    tibble::tribble(~psnuid, ~`Technical Area`, ~`Numerator / Denominator`, 
-                    ~`Support Type`, ~oldMech, ~newMech, ~percent,
-                    "nxGb6sd7p7D", "PMTCT_STAT", "D", "DSD", "17460", "70270", .7,
-                    "nxGb6sd7p7D", "PMTCT_STAT", "D", "DSD", "17460", "70271", .3,
-                    "nxGb6sd7p7D", "PMTCT_STAT", "D", "DSD", "18599", "70270", .5, 
-                    "nxGb6sd7p7D", "PMTCT_STAT", "D", "DSD", "18599", "70271", .5,
-                    "nxGb6sd7p7D", "OVC_SERV", "N", "DSD", "18599", "70271", 1)
+  # mech_to_mech_map_full <- 
+  #   tibble::tribble(~psnuid, ~`Technical Area`, ~`Numerator / Denominator`, 
+  #                   ~`Support Type`, ~oldMech, ~newMech, ~percent,
+  #                   "nxGb6sd7p7D", "PMTCT_STAT", "D", "DSD", "17460", "70270", .7,
+  #                   "nxGb6sd7p7D", "PMTCT_STAT", "D", "DSD", "17460", "70271", .3,
+  #                   "nxGb6sd7p7D", "PMTCT_STAT", "D", "DSD", "18599", "70270", .5, 
+  #                   "nxGb6sd7p7D", "PMTCT_STAT", "D", "DSD", "18599", "70271", .5,
+  #                   "nxGb6sd7p7D", "OVC_SERV", "N", "DSD", "18599", "70271", 1)
   
   mech_to_mech_map_full$`Support Type`[mech_to_mech_map_full$`Support Type` == "TA"] <- "cRAGKdWIDn4" 
   mech_to_mech_map_full$`Support Type`[mech_to_mech_map_full$`Support Type` == "DSD"] <- "iM13vdNLWKb" 
@@ -627,11 +631,11 @@ MapMechToMech <- function(site_density, mech_to_mech_map_full){
 
   site_density_new  <- dplyr::left_join(site_density_new, mech_to_mech_map) %>% 
     dplyr::mutate(mechanismCode = dplyr::if_else(is.na(newMech), oldMech, newMech)) %>% 
-    mutate(weight = tidyr::replace_na(weight, 1)) %>% 
-    mutate(siteValueH_adjusted = siteValueH * weight) %>% 
+    dplyr::mutate(weight = tidyr::replace_na(weight, 1)) %>% 
+    dplyr::mutate(siteValueH_adjusted = siteValueH * weight) %>% 
     dplyr::group_by_at(dplyr::vars(-`Funding Mechanism`, -psnuValueH, -oldMech, -psnuValueH_after_site_drop, 
                                    -percent, -weight, -siteValueH_adjusted)) %>%
-    dplyr::summarise(siteValueH_adjusted = sum(siteValueH_adjusted)) %>% ungroup()
+    dplyr::summarise(siteValueH_adjusted = sum(siteValueH_adjusted)) %>% dplyr::ungroup()
     
     #TODO figure out how to include kp_option_name
     psnu_new  <-  

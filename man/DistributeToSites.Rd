@@ -9,7 +9,7 @@ DistributeToSites(d, data_element_map = datapackcommons::Map19Tto20T,
   dim_item_sets = datapackcommons::dim_item_sets,
   site_densities = NULL, country_name = NULL,
   base_url = getOption("baseurl"), verbose = FALSE,
-  mech_to_mech_map = NULL)
+  mech_to_mech_map = NULL, sites = NULL)
 }
 \arguments{
 \item{d}{Object from data pack export (TargetxPSNUxIM)}
