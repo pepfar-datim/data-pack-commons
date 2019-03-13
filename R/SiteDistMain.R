@@ -622,43 +622,32 @@ MapMechToMech <- function(site_density, mech_to_mech_map_full){
   # }
   
   site_density_new  <-  site_density %>% dplyr::rename("oldMech" = "mechanismCode")
-  mech_to_mech_map <- mech_to_mech_map %>% dplyr::rename("weight" = "percent")
+  mech_to_mech_map <- mech_to_mech_map %>% dplyr::rename("weight" = "percent") 
+    
 
-  # site_density_new %>% dplyr::select("psnuid", "age_option_name", "sex_option_name", 
-  #                                           "Funding Mechanism","psnuValueH_after_site_drop") %>%
-  #   unique() %>%
-  #   .[["psnuValueH_after_site_drop"]] %>%
-  #   sum()
-
-# join site density to mechanism map (may creat new rows in an old mech becomes 2 or more new mechs)
-# apply the weights from the mech to mech map to the site value and psnu value
-# aggregate multiple rows for new mech (same disagg, site etc) - occurs when a new mech gets data
-# from 2 or more historic mech
-# perform final percent (density) calculation on the adjusted site and psnu values
-  
   site_density_new  <- dplyr::left_join(site_density_new, mech_to_mech_map) %>% 
     dplyr::mutate(mechanismCode = dplyr::if_else(is.na(newMech), oldMech, newMech)) %>% 
     mutate(weight = tidyr::replace_na(weight, 1)) %>% 
-    mutate(siteValueH_adjusted = siteValueH * weight,
-           psnuValueH_adjusted = psnuValueH_after_site_drop * weight) %>%  
-    dplyr::group_by_at(dplyr::vars(-`Funding Mechanism`,
-                                   -siteValueH, -psnuValueH, -oldMech, -dropped_site_reduction,
-                                   -psnuValueH_after_site_drop, -percent, -weight,
-                                   -siteValueH_adjusted, -psnuValueH_adjusted)) %>% 
-    dplyr::summarise(count = dplyr::n(), 
-                     weights = list(weight),
-                     siteValueH_adjusted_i = list(siteValueH_adjusted),
-                     psnuValueH_adjusted_i = list(psnuValueH_adjusted),
-                     siteValueH_adjusted = sum(siteValueH_adjusted),
-                     psnuValueH_adjusted = sum(psnuValueH_adjusted),
-                     `Funding Mechanism` = list(`Funding Mechanism`),
-                     siteValueH = list(siteValueH), 
-                     psnuValueH = list(psnuValueH), 
-                     oldMech = list(oldMech), 
-                     dropped_site_reduction = list(dropped_site_reduction),
-                     psnuValueH_after_site_drop = list(psnuValueH_after_site_drop)) %>%
-    ungroup() %>% 
-    dplyr::mutate(percent = siteValueH_adjusted / psnuValueH_adjusted)
+    mutate(siteValueH_adjusted = siteValueH * weight) %>% 
+    dplyr::group_by_at(dplyr::vars(-`Funding Mechanism`, -psnuValueH, -oldMech, -psnuValueH_after_site_drop, 
+                                   -percent, -weight, -siteValueH_adjusted)) %>%
+    dplyr::summarise(siteValueH_adjusted = sum(siteValueH_adjusted)) %>% ungroup()
+    
+    #TODO figure out how to include kp_option_name
+    psnu_new  <-  
+      suppressWarnings(dplyr::select(site_density_new,
+                                     dplyr::one_of("psnuid", "mechanismCode",
+                                                   "age_option_name", "sex_option_name", 
+                                                   "kp_option_name", "siteValueH_adjusted"))) %>% 
+      dplyr::group_by_at(dplyr::vars(-siteValueH_adjusted)) %>%
+      dplyr::summarise(psnu_new = sum(siteValueH_adjusted))
+      
+  site_density_new <- dplyr::left_join(site_density_new, psnu_new) %>% 
+    dplyr::mutate(percent = siteValueH_adjusted/psnu_new)
+  
+# temp =  site_density_new %>% dplyr::group_by_at(dplyr::vars(age_option_name, sex_option_name, psnuid, mechanismCode)) %>%
+#   dplyr::summarise(sum=sum(percent))
+  
   
 #   site_density_new %>% dplyr::select("psnuid", "age_option_name", "sex_option_name", 
 #                                      "mechanismCode","psnuValueH_after_site_drop") %>%
@@ -710,6 +699,5 @@ MapMechToMech <- function(site_density, mech_to_mech_map_full){
   #   .[["psnuValueH_adjusted"]] %>%
   #   sum()
   
-  return(site_density)
-  
-}
+  return(site_density_new)
+  }
