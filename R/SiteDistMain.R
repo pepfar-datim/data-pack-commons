@@ -100,6 +100,7 @@ DistributeToSites <-
 
 
 if(!(is.null(mech_to_mech_map) && is.null(sites))){
+  
   site_densities <- AdjustSiteDensity(site_densities, mech_to_mech_map, sites)    
 }
 
@@ -500,7 +501,7 @@ AdjustSiteDensity <- function(site_densities, mech_to_mech_map = NULL, sites = N
 
 # I run this even if sites is null because it adds some expected columns even in the null case
   site_densities_post_site_drop = purrr::map(site_densities, DropSitesFromDensity, sites)
-  
+
   purrr::map(site_densities_post_site_drop, MapMechToMech, mech_to_mech_map)
   
 }
@@ -515,16 +516,30 @@ AdjustSiteDensity <- function(site_densities, mech_to_mech_map = NULL, sites = N
 #' psnuValueH_after_site_drop. Additionally recalculated the percent column if sites are 
 #' dropped. 
 DropSitesFromDensity <- function(site_density, sites = NULL) {
-#  sites <-  dplyr::setdiff(site_density$`Organisation unit`, c("ISH3IkN5aWO","SPSmmQeD6Rg"))
+
+# check to see if we have any historic data for this data element
   if(NROW(site_density) == 0){
     return(site_density)
   }
 
+  # if no sites to drop (meaning no explicit site list provided) 
+  # add some columns expected down stream to site_density and return
+  if (is.null(sites)) {
+    return(
+      site_density %>%
+        mutate(
+          dropped_site_reduction = 0,
+          psnuValueH_after_site_drop = psnuValueH
+        )
+    )
+  }
+  
   site_data_to_drop <- site_density %>%
     dplyr::filter(!(site_density$`Organisation unit` %in% sites)) %>%
-    select(-percent)
+    dplyr::select(-percent) # we need to recalculate percent so drop it here
   
-  # if no data to drop add columns some expected columns to site_density and return
+# we are keeping all the data as is
+# add some columns expected down stream to site_density and return
   if (NROW(site_data_to_drop) == 0) {
     return(
       site_density %>%
@@ -538,10 +553,12 @@ DropSitesFromDensity <- function(site_density, sites = NULL) {
   site_data_to_keep <- site_density %>%
     dplyr::filter((site_density$`Organisation unit` %in% sites)) %>%
     select(-percent) # we need to recalculate percent so drop it here
-  
+
+## TODO change to work like mech to mech mapping? - get psnu total by summing the 
+## site total instead of reducing the psnu value originally pulled via API
   
   # get the IM x PSNU adjustment, group by excludes all columns that are
-  # site specific sunce we want a sum of siteValueH for dropped sites by psnu x im
+  # site specific since we want a sum of siteValueH for dropped sites by psnu x im
   psnu_reductions =  site_data_to_drop %>%
     dplyr::group_by_at(dplyr::vars(
       -siteValueH,
@@ -552,7 +569,7 @@ DropSitesFromDensity <- function(site_density, sites = NULL) {
     dplyr::ungroup()
   
   # psnu_reductions retained all variables common to all sites + disaggs and dropped the site
-  # specific variables, so we can use left join attach the new column and perform the
+  # specific variables, so we can use left join to attach the new column and perform the
   # new density calculation
   new_site_density <- site_data_to_keep %>%
     left_join(psnu_reductions) %>%
@@ -579,8 +596,8 @@ DropSitesFromDensity <- function(site_density, sites = NULL) {
   return(new_site_density)
 }
 
-MapMechToMech <- function(site_density, mech_to_mech_map_full){
-
+MapMechToMech <- function(site_density, mech_to_mech_map_full = NULL){
+ # a testing mech to mech map
   # mech_to_mech_map_full <- 
   #   tibble::tribble(~psnuid, ~`Technical Area`, ~`Numerator / Denominator`, 
   #                   ~`Support Type`, ~oldMech, ~newMech, ~percent,
@@ -589,6 +606,11 @@ MapMechToMech <- function(site_density, mech_to_mech_map_full){
   #                   "nxGb6sd7p7D", "PMTCT_STAT", "D", "DSD", "18599", "70270", .5, 
   #                   "nxGb6sd7p7D", "PMTCT_STAT", "D", "DSD", "18599", "70271", .5,
   #                   "nxGb6sd7p7D", "OVC_SERV", "N", "DSD", "18599", "70271", 1)
+  
+  if(is.null(mech_to_mech_map_full){
+    return(site_density)
+    #TODO make sure I don't need to add any columns    
+  }
   
   mech_to_mech_map_full$`Support Type`[mech_to_mech_map_full$`Support Type` == "TA"] <- "cRAGKdWIDn4" 
   mech_to_mech_map_full$`Support Type`[mech_to_mech_map_full$`Support Type` == "DSD"] <- "iM13vdNLWKb" 
@@ -626,8 +648,6 @@ MapMechToMech <- function(site_density, mech_to_mech_map_full){
   # }
   
   site_density_new  <-  site_density %>% dplyr::rename("oldMech" = "mechanismCode")
-  mech_to_mech_map <- mech_to_mech_map %>% dplyr::rename("weight" = "percent") 
-    
 
   site_density_new  <- dplyr::left_join(site_density_new, mech_to_mech_map) %>% 
     dplyr::mutate(mechanismCode = dplyr::if_else(is.na(newMech), oldMech, newMech)) %>% 
