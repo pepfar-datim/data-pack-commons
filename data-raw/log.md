@@ -1,5 +1,10 @@
 ### 2019.03.14
 
+Distributed Site Tool Data for
+- Namibia
+
+### 2019.03.14
+
 Densities run for:
 - Angola
 - Botswana
