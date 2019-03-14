@@ -399,24 +399,24 @@ Get19TMechanisms <- function(base_url = getOption("baseurl")){
 #' @return data frame with the rows of the response
 #'
 #' @example
- dimensions_sample <- tibble::tribble(~type, ~dim_item_uid, ~dim_uid,
-"filter", "vihpFUg2WTy", "dx", #PMTCT positive test rate indicator
-"dimension", "ImspTQPwCqd", "ou", # sierra leone
-"dimension", "LEVEL-2", "ou",
-"filter", "LAST_YEAR", "pe",
-"dimension", "UOqJW6HPvvL", "veGzholzPQm",
-"dimension", "WAl0OCcIYxr", "veGzholzPQm",
-"dimension", "uYxK4wmcPqA", "J5jldMd8OHv",
-"dimension", "EYbopBOJWsW", "J5jldMd8OHv")
+#  dimensions_sample <- tibble::tribble(~type, ~dim_item_uid, ~dim_uid,
+# "filter", "vihpFUg2WTy", "dx", #PMTCT positive test rate indicator
+# "dimension", "ImspTQPwCqd", "ou", # sierra leone
+# "dimension", "LEVEL-2", "ou",
+# "filter", "LAST_YEAR", "pe",
+# "dimension", "UOqJW6HPvvL", "veGzholzPQm",
+# "dimension", "WAl0OCcIYxr", "veGzholzPQm",
+# "dimension", "uYxK4wmcPqA", "J5jldMd8OHv",
+# "dimension", "EYbopBOJWsW", "J5jldMd8OHv")
 # veGzholzPQm = HIV age, UOqJW6HPvvL = 15-24y, WAl0OCcIYxr = 25-49y,
 # J5jldMd8OHv = Facility Type, uYxK4wmcPqA = CHP, EYbopBOJWsW = MCHP
-  datapackcommons::DHISLogin_Play("2.29")
-  datapackcommons::GetData_Analytics(dimensions_sample, "https://play.dhis2.org/2.29/")
+  # datapackcommons::DHISLogin_Play("2.29")
+  # datapackcommons::GetData_Analytics(dimensions_sample, "https://play.dhis2.org/2.29/")
 
 GetData_Analytics <-  function(dimensions, base_url = getOption("baseurl")){
-  api_call <- paste0("https://play.dhis2.org/2.29/",  
+  api_call <- paste0(base_url,  
                      "api/29/analytics.json?",
-                     datapackcommons::FormatForApi_Dimensions(dimensions_sample, "type", 
+                     datapackcommons::FormatForApi_Dimensions(dimensions, "type", 
                                                               "dim_uid", "dim_item_uid"),
                      "&outputIdScheme=UID&hierarchyMeta=true") # gives us UIDs in response                  
   response <- api_call %>% 
@@ -442,29 +442,24 @@ GetData_Analytics <-  function(dimensions, base_url = getOption("baseurl")){
   ## If there is a mismatch stop()
   ## is there other useful metadata we want to return?
   
-  # Assertion to check output for dim_uid "veGzholzPQm"
-  # Taken from the input
-  dim_list <- dimensions_sample %>% 
-    dplyr::filter(dim_uid == "veGzholzPQm")
+  # Assertion to check output for dim_itemuid 
+  dim_list <- dimensions %>% 
+    dplyr::filter(dim_uid == content[["headers"]][["name"]][3])
   dim_list <- unique(dim_list$dim_item_uid)
   pipe_dim_list <- paste(dim_list, collapse = "|")
   
   # Asserting the values from input being present in output column of api call
   assertthat::assert_that(grepl(pipe_dim_list, my_data[3]) == TRUE)
   
-  # Assertion to check output for dim_uid "J5jldMd8OHv"
-  # Taken from the input
+  # Assertion to check output for facilities obtained
   facility_list <- dimensions %>% 
     # No need to hardcode, you can find these in content
-    dplyr::filter(dim_uid == "J5jldMd8OHv")
-  facility_list <- unique(dim_list$dim_item_uid)
-  pipe_facility_list <- paste(dim_list, collapse = "|")
+    dplyr::filter(dim_uid == content[["headers"]][["name"]][1])
+  facility_list <- unique(facility_list$dim_item_uid)
+  pipe_facility_list <- paste(facility_list, collapse = "|")
   
   # Asserting the values from input being present in output column of api call
   assertthat::assert_that(grepl(pipe_facility_list, my_data[1]) == TRUE)
-  
-  # Assertion for detecting the right OU being present
-  assertthat::assert_that(all(grepl(dimensions[2,2] ,content$metaData$ouHierarchy)) == TRUE)
 
   # list column(vector) of the org hiearchy including the org unit itself
   # added to the data in a mutate below
