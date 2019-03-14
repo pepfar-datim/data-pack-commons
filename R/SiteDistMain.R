@@ -77,7 +77,7 @@ DistributeToSites <-
   }
   
   if(verbose == TRUE){ # add a copy of the densities to output, useful for debugging but can make file large
-    d[["data"]][["site"]][["densities"]] <- site_densities
+    d[["data"]][["site"]][["densities_original"]] <- site_densities
   }
 
 # grab the datapack export data from the main data object
@@ -100,10 +100,16 @@ DistributeToSites <-
 
 
 if(!(is.null(mech_to_mech_map) && is.null(sites))){
+  site_densities <- AdjustSiteDensity(site_densities, mech_to_mech_map, sites)
   
-  site_densities <- AdjustSiteDensity(site_densities, mech_to_mech_map, sites)    
+  if(verbose == TRUE){ # add a copy of the densities to output, useful for debugging but can make file large
+    d[["data"]][["site"]][["densities_adjusted"]] <- site_densities
+  }  
+  
 }
 
+
+  
 # do individual joins for each data element 
 # The site densities contain different columns depending on the data elements 
 # e.g. sometime age and sex columns other time just key population columns
