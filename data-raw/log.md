@@ -1,3 +1,16 @@
+### 2019.03.14
+
+Densities run for:
+- Angola
+- Botswana
+- Eswatini
+- Lesotho
+- Mozambique
+- Namibia
+- South Africa
+- Zambia
+- Zimbabwe
+
 ### 2019.03.08
 
 Densities run for:
