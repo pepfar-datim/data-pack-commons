@@ -630,11 +630,16 @@ MapMechToMech <- function(site_density, mech_to_mech_map_full = NULL){
   num_or_den = site_density[[1, "indicatorCode"]]  %>% 
     stringr::str_split("\\.") %>% .[[1]] %>% .[[2]]
   
-  
+
+# TODO Sid - for ethiopia here we would also need to retain rows of mechanism map 
+# where technical area is null or NA  
   mech_to_mech_map <- mech_to_mech_map_full %>% 
     dplyr::filter(`Technical Area` == technical_area,
                   `Numerator / Denominator` == num_or_den) %>% 
     dplyr::select(-`Technical Area`, -`Numerator / Denominator`)
+  
+# if support type in mech to mech map is null add a row for 
+# DSD and a row for TA 
 
 
   # see if any mapping required after filtering to relevant rows of mech_to_mech_map
