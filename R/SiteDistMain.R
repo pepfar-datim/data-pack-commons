@@ -133,7 +133,7 @@ if(!(is.null(mech_to_mech_map) && is.null(sites))){
   columns <- c(names_in, "org_unit", "type", "percent", "siteValue", "siteValueH", "psnuValueH")
   site_tool_data <- site_tool_data %>% 
     dplyr::rename("type" = "Support Type", "org_unit" = "Organisation unit") %>% 
-    dplyr::select(columns)
+    dplyr::select(dplyr::one_of(columns))
   d[["data"]][["site"]][["distributed"]] <- site_tool_data
 
   return(d)
