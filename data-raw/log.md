@@ -1,5 +1,9 @@
 ### 2019.03.15
 
+Malawi_distributed_20190315_210438
+  Mechanism Map_Malawi_20190313 
+  DataPack_Malawi_03152019
+
 Uganda_distributed_20190315_120037
   With Mech map and site list
 
