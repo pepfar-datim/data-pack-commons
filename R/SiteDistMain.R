@@ -108,8 +108,6 @@ if(!(is.null(mech_to_mech_map) && is.null(sites))){
   
 }
 
-
-  
 # do individual joins for each data element 
 # The site densities contain different columns depending on the data elements 
 # e.g. sometime age and sex columns other time just key population columns
@@ -659,7 +657,7 @@ MapMechToMech <- function(site_density, mech_to_mech_map_full = NULL){
     dplyr::mutate(mechanismCode = dplyr::if_else(is.na(newMech), oldMech, newMech)) %>% 
     dplyr::mutate(weight = tidyr::replace_na(weight, 1)) %>% 
     dplyr::mutate(siteValueH_adjusted = siteValueH * weight) %>% 
-    dplyr::group_by_at(dplyr::vars(-`Funding Mechanism`, -psnuValueH, -oldMech, -psnuValueH_after_site_drop, 
+    dplyr::group_by_at(dplyr::vars(-`Funding Mechanism`, -psnuValueH, -oldMech, -newMech, -psnuValueH_after_site_drop, 
                                    -percent, -weight, -siteValueH_adjusted)) %>%
     dplyr::summarise(siteValueH_adjusted = sum(siteValueH_adjusted)) %>% dplyr::ungroup()
     
