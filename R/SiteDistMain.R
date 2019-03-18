@@ -602,18 +602,6 @@ DropSitesFromDensity <- function(site_density, sites = NULL) {
 
 MapMechToMech <- function(site_density, mech_to_mech_map_full = NULL){
  # a testing mech to mech map
-<<<<<<< HEAD
-  mech_to_mech_map_full <-
-    tibble::tribble(~psnuid, ~`Technical Area`, ~`Numerator / Denominator`,
-                    ~`Support Type`, ~oldMech, ~newMech, ~percent,
-                    "nxGb6sd7p7D", "PMTCT_STAT", "D", "DSD", "17460", "70270", .7,
-                    "nxGb6sd7p7D", "PMTCT_STAT", "D", "DSD", "17460", "70271", .3,
-                    "nxGb6sd7p7D", "PMTCT_STAT", "D", "DSD", "18599", "70270", .5,
-                    "nxGb6sd7p7D", "PMTCT_STAT", "D", "DSD", "18599", "70271", .5,
-                    "nxGb6sd7p7D", "OVC_SERV", "N", "DSD", "18599", "70271", 1,
-                    "nxGb6sd7p7D", NA, "N", "DSD", "18599", "70271", 1)
-  
-=======
   # mech_to_mech_map_full <- bind_rows(mech_to_mech_map_full,
   #   tibble::tribble(~psnuid, ~`Technical Area`, ~`Numerator / Denominator`,
   #                   ~`Support Type`, ~oldMech, ~newMech, ~weight,
@@ -624,7 +612,7 @@ MapMechToMech <- function(site_density, mech_to_mech_map_full = NULL){
   #                   "nxGb6sd7p7D", "OVC_SERV", "N", "DSD", "18599", "70271", 1,
   #                   "nxGb6sd7p7D", "(ALL)", NA_character_, "DSD", "18599", "70271", 1)
   # )
->>>>>>> 71af9eca501dbfb344933d90caf7062b4557ed30
+
   if(is.null(mech_to_mech_map_full)){
     return(site_density)
     #TODO make sure I don't need to add any columns    
@@ -662,20 +650,6 @@ MapMechToMech <- function(site_density, mech_to_mech_map_full = NULL){
     stringr::str_split("\\.") %>% .[[1]] %>% .[[2]]
   
 
-<<<<<<< HEAD
-# TODO Sid - for ethiopia here we would also need to retain rows of mechanism map 
-# where technical area is null or NA  
-  mech_to_mech_map <- mech_to_mech_map_full %>% 
-    dplyr::filter(`Technical Area` == technical_area | `Technical Area` == NA,
-                  `Numerator / Denominator` == num_or_den) %>% 
-    dplyr::select(-`Technical Area`, -`Numerator / Denominator`)
-  
-  
-# if support type in mech to mech map is null add a row for 
-# DSD and a row for TA 
-
-
-=======
 # filter to those mechanism mappings that apply to all data elements or
 # that are specific to the data element being processed
   
@@ -686,7 +660,6 @@ MapMechToMech <- function(site_density, mech_to_mech_map_full = NULL){
     dplyr::select(-`Technical Area`, -`Numerator / Denominator`) %>% 
     dplyr::distinct()
   
->>>>>>> 71af9eca501dbfb344933d90caf7062b4557ed30
   # see if any mapping required after filtering to relevant rows of mech_to_mech_map
   if(NROW(mech_to_mech_map) == 0){
     return(site_density)
