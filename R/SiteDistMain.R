@@ -612,8 +612,7 @@ MapMechToMech <- function(site_density, mech_to_mech_map_full = NULL){
                     "nxGb6sd7p7D", "PMTCT_STAT", "D", "DSD", "18599", "70270", .5,
                     "nxGb6sd7p7D", "PMTCT_STAT", "D", "DSD", "18599", "70271", .5,
                     "nxGb6sd7p7D", "OVC_SERV", "N", "DSD", "18599", "70271", 1,
-                    "nxGb6sd7p7D", NA, "D", "DSD", "18599", "70271", 1,
-                    "nxGb6sd7p7D", "PMCTC_STAT", "D", NA, "18599", "70271", 1)
+                    "nxGb6sd7p7D", NA, "N", "DSD", "18599", "70271", 1)
   
   if(is.null(mech_to_mech_map_full)){
     return(site_density)
@@ -621,21 +620,7 @@ MapMechToMech <- function(site_density, mech_to_mech_map_full = NULL){
   }
   
   mech_to_mech_map_full$`Support Type`[mech_to_mech_map_full$`Support Type` == "TA"] <- "cRAGKdWIDn4" 
-  mech_to_mech_map_full$`Support Type`[mech_to_mech_map_full$`Support Type` == "DSD"] <- "iM13vdNLWKb"
-  
-  for (i in 1:nrow(mech_to_mech_map_full))
-  {
-    if (is.na(mech_to_mech_map_full[i, `Support Type`])) {
-      supp_type_na_Row <- mech_to_mech_map_full[i,]
-      supp_type_na_Row_DSD <- supp_type_na_Row
-      supp_type_na_Row_DSD$`Support Type` <- "iM13vdNLWKb"
-      supp_type_na_Row_TA <- supp_type_na_Row
-      supp_type_na_Row_TA$`Support Type` <- "cRAGKdWIDn4"
-      rbind(mech_to_mech_map_full, supp_type_na_Row_TA, supp_type_na_Row_DSD)
-    }
-  }
-  
-  df[!is.na(mech_to_mech_map_full$`Support Type`), ]
+  mech_to_mech_map_full$`Support Type`[mech_to_mech_map_full$`Support Type` == "DSD"] <- "iM13vdNLWKb" 
 
   if(NROW(site_density) == 0){
     return(site_density)
@@ -650,9 +635,10 @@ MapMechToMech <- function(site_density, mech_to_mech_map_full = NULL){
 # TODO Sid - for ethiopia here we would also need to retain rows of mechanism map 
 # where technical area is null or NA  
   mech_to_mech_map <- mech_to_mech_map_full %>% 
-    dplyr::filter(`Technical Area` == technical_area | is.na(`Technical Area`),
+    dplyr::filter(`Technical Area` == technical_area | `Technical Area` == NA,
                   `Numerator / Denominator` == num_or_den) %>% 
     dplyr::select(-`Technical Area`, -`Numerator / Denominator`)
+  
   
 # if support type in mech to mech map is null add a row for 
 # DSD and a row for TA 
