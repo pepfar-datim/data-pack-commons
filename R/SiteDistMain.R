@@ -604,21 +604,38 @@ DropSitesFromDensity <- function(site_density, sites = NULL) {
 
 MapMechToMech <- function(site_density, mech_to_mech_map_full = NULL){
  # a testing mech to mech map
-  mech_to_mech_map_full <-
-    tibble::tribble(~psnuid, ~`Technical Area`, ~`Numerator / Denominator`,
-                    ~`Support Type`, ~oldMech, ~newMech, ~percent,
-                    "nxGb6sd7p7D", "PMTCT_STAT", "D", "DSD", "17460", "70270", .7,
-                    "nxGb6sd7p7D", "PMTCT_STAT", "D", "DSD", "17460", "70271", .3,
-                    "nxGb6sd7p7D", "PMTCT_STAT", "D", "DSD", "18599", "70270", .5,
-                    "nxGb6sd7p7D", "PMTCT_STAT", "D", "DSD", "18599", "70271", .5,
-                    "nxGb6sd7p7D", "OVC_SERV", "N", "DSD", "18599", "70271", 1,
-                    "nxGb6sd7p7D", NA, "N", "DSD", "18599", "70271", 1)
+  # mech_to_mech_map_full <-
+  #   tibble::tribble(~psnuid, ~`Technical Area`, ~`Numerator / Denominator`,
+  #                   ~`Support Type`, ~oldMech, ~newMech, ~percent,
+  #                   "nxGb6sd7p7D", "PMTCT_STAT", "D", "DSD", "17460", "70270", .7,
+  #                   "nxGb6sd7p7D", "PMTCT_STAT", "D", "DSD", "17460", "70271", .3,
+  #                   "nxGb6sd7p7D", "PMTCT_STAT", "D", "DSD", "18599", "70270", .5,
+  #                   "nxGb6sd7p7D", "PMTCT_STAT", "D", "DSD", "18599", "70271", .5,
+  #                   "nxGb6sd7p7D", "OVC_SERV", "N", "DSD", "18599", "70271", 1,
+  #                   "nxGb6sd7p7D", NA, "N", "DSD", "18599", "70271", 1)
   
   if(is.null(mech_to_mech_map_full)){
     return(site_density)
     #TODO make sure I don't need to add any columns    
   }
-  
+
+# where support type is (BOTH) in mech to mech map
+# add a row for ta and a row for dsd
+  if(any(mech_to_mech_map_full[["Support Type"]] == "(BOTH)")){
+    standard_subset <- dplyr::filter(mech_to_mech_map_full, 
+                                      mech_to_mech_map_full[["Support Type"]] %in% 
+                                       c("DSD", "TA"))
+    both_subset_ta <-  dplyr::filter(mech_to_mech_map_full,
+                                     mech_to_mech_map_full[["Support Type"]] == "(BOTH)") %>% 
+      dplyr::mutate(`Support Type` = "TA")
+    both_subset_dsd  <-  dplyr::filter(mech_to_mech_map_full,
+                                      mech_to_mech_map_full[["Support Type"]] == "(BOTH)") %>% 
+      dplyr::mutate(`Support Type` = "DSD")
+    mech_to_mech_map_full = dplyr::bind_rows(standard_subset,
+                                             both_subset_dsd,
+                                             both_subset_ta)
+  }
+
   mech_to_mech_map_full$`Support Type`[mech_to_mech_map_full$`Support Type` == "TA"] <- "cRAGKdWIDn4" 
   mech_to_mech_map_full$`Support Type`[mech_to_mech_map_full$`Support Type` == "DSD"] <- "iM13vdNLWKb" 
 
