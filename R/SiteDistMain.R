@@ -602,39 +602,64 @@ DropSitesFromDensity <- function(site_density, sites = NULL) {
 
 MapMechToMech <- function(site_density, mech_to_mech_map_full = NULL){
  # a testing mech to mech map
-  # mech_to_mech_map_full <- 
-  #   tibble::tribble(~psnuid, ~`Technical Area`, ~`Numerator / Denominator`, 
-  #                   ~`Support Type`, ~oldMech, ~newMech, ~percent,
+  # mech_to_mech_map_full <- bind_rows(mech_to_mech_map_full,
+  #   tibble::tribble(~psnuid, ~`Technical Area`, ~`Numerator / Denominator`,
+  #                   ~`Support Type`, ~oldMech, ~newMech, ~weight,
   #                   "nxGb6sd7p7D", "PMTCT_STAT", "D", "DSD", "17460", "70270", .7,
   #                   "nxGb6sd7p7D", "PMTCT_STAT", "D", "DSD", "17460", "70271", .3,
-  #                   "nxGb6sd7p7D", "PMTCT_STAT", "D", "DSD", "18599", "70270", .5, 
+  #                   "nxGb6sd7p7D", "PMTCT_STAT", "D", "DSD", "18599", "70270", .5,
   #                   "nxGb6sd7p7D", "PMTCT_STAT", "D", "DSD", "18599", "70271", .5,
-  #                   "nxGb6sd7p7D", "OVC_SERV", "N", "DSD", "18599", "70271", 1)
-  
+  #                   "nxGb6sd7p7D", "OVC_SERV", "N", "DSD", "18599", "70271", 1,
+  #                   "nxGb6sd7p7D", "(ALL)", NA_character_, "DSD", "18599", "70271", 1)
+  # )
+
   if(is.null(mech_to_mech_map_full)){
     return(site_density)
     #TODO make sure I don't need to add any columns    
   }
-  
+
+# where support type is (BOTH) in mech to mech map
+# add a row for ta and a row for dsd
+  if(any(mech_to_mech_map_full[["Support Type"]] == "(BOTH)")){
+    standard_subset <- dplyr::filter(mech_to_mech_map_full, 
+                                      mech_to_mech_map_full[["Support Type"]] %in% 
+                                       c("DSD", "TA"))
+    both_subset_ta <-  dplyr::filter(mech_to_mech_map_full,
+                                     mech_to_mech_map_full[["Support Type"]] == "(BOTH)") %>% 
+      dplyr::mutate(`Support Type` = "TA")
+    both_subset_dsd  <-  dplyr::filter(mech_to_mech_map_full,
+                                      mech_to_mech_map_full[["Support Type"]] == "(BOTH)") %>% 
+      dplyr::mutate(`Support Type` = "DSD")
+    mech_to_mech_map_full = dplyr::bind_rows(standard_subset,
+                                             both_subset_dsd,
+                                             both_subset_ta)
+  }
+
   mech_to_mech_map_full$`Support Type`[mech_to_mech_map_full$`Support Type` == "TA"] <- "cRAGKdWIDn4" 
   mech_to_mech_map_full$`Support Type`[mech_to_mech_map_full$`Support Type` == "DSD"] <- "iM13vdNLWKb" 
 
   if(NROW(site_density) == 0){
     return(site_density)
   }
-  
+
+# parse the indicator code in the site density to be able to match the the 
+# Technical Area and Numerator / Denominator columns in mech to mech map 
   technical_area = site_density[[1, "indicatorCode"]]  %>% 
     stringr::str_split("\\.") %>% .[[1]] %>% .[[1]]
   num_or_den = site_density[[1, "indicatorCode"]]  %>% 
     stringr::str_split("\\.") %>% .[[1]] %>% .[[2]]
   
+
+# filter to those mechanism mappings that apply to all data elements or
+# that are specific to the data element being processed
   
   mech_to_mech_map <- mech_to_mech_map_full %>% 
-    dplyr::filter(`Technical Area` == technical_area,
-                  `Numerator / Denominator` == num_or_den) %>% 
-    dplyr::select(-`Technical Area`, -`Numerator / Denominator`)
-
-
+    dplyr::filter(`Technical Area` == "(ALL)" |
+                    (`Technical Area` == technical_area & 
+                       `Numerator / Denominator` == num_or_den)) %>% 
+    dplyr::select(-`Technical Area`, -`Numerator / Denominator`) %>% 
+    dplyr::distinct()
+  
   # see if any mapping required after filtering to relevant rows of mech_to_mech_map
   if(NROW(mech_to_mech_map) == 0){
     return(site_density)
