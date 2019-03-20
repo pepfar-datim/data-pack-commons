@@ -566,7 +566,7 @@ DropSitesFromDensity <- function(site_density, sites = NULL) {
   psnu_reductions =  site_data_to_drop %>%
     dplyr::group_by_at(dplyr::vars(
       -siteValueH,
-      -psnuValueH,-`Organisation unit`,
+      -psnuValueH,-`Organisation unit`,-`Type of organisational unit`,
       -`Support Type`
     )) %>%
     dplyr::summarise(dropped_site_reduction = sum(siteValueH)) %>%
