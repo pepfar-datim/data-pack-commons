@@ -2,6 +2,15 @@
 Site Tool_Burundi_20190320152913
   COP19_Burundi_DataPack_FINAL JOHANNESBURGnmb
   SiteList_Burundi_20190308102043_edited
+  
+Densities for:
+- Cameroon
+- Cote d'Ivoire
+- DRC
+- Nigeria
+- Ukraine
+- Vietnam
+- Ghana
 
 ### 2019.03.18
 
