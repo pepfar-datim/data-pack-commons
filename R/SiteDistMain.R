@@ -564,11 +564,9 @@ DropSitesFromDensity <- function(site_density, sites = NULL) {
   # get the IM x PSNU adjustment, group by excludes all columns that are
   # site specific since we want a sum of siteValueH for dropped sites by psnu x im
   psnu_reductions =  site_data_to_drop %>%
-    dplyr::group_by_at(dplyr::vars(
-      -siteValueH,
-      -psnuValueH,-`Organisation unit`,-`Type of organisational unit`,
-      -`Support Type`
-    )) %>%
+    dplyr::select(-dplyr::one_of("Organisation unit","Type of organisational unit",
+                                 "Support Type", "psnuValueH")) %>% 
+    dplyr::group_by_at(dplyr::vars(-siteValueH)) %>%
     dplyr::summarise(dropped_site_reduction = sum(siteValueH)) %>%
     dplyr::ungroup()
   
