@@ -252,7 +252,7 @@ test_that("TransformAnalyticsOutput_SiteTool", {
   #                                                                                                               ), c("ImspTQPwCqd", "bL4ooGhyHRQ"), c("ImspTQPwCqd", "at6UHUQatSo"
   #                                                                                                               ), c("ImspTQPwCqd", "at6UHUQatSo"))), class = c("tbl_df", 
   #                                                                                                                                                               "tbl", "data.frame"), row.names = c(NA, -36L))
-  data_element_map = datapackcommons::Map19Tto20T[51,]
+  data_element_map = datapackcommons::Map19Tto20T[36,]
   # Sample data_element_map
   # structure(list(indicatorCode_fy20_cop = "TB_ART.N.Age/Sex/NewExistingART/HIVStatus.20T.Already", 
   #                `Technical Area_fy20_cop` = "TB_ART", `Numerator / Denominator_fy20_cop` = "N", 
@@ -264,6 +264,20 @@ test_that("TransformAnalyticsOutput_SiteTool", {
   #                pe = "2018Oct", age_set = "<15/>15.d", sex_set = "F/M", kp_set = NA_character_, 
   #                other_disagg = NA_character_, allocate = "distribute"), class = c("tbl_df", 
   #                                                                                  "tbl", "data.frame"), row.names = c(NA, -1L))
+  
+  analytics_data <- structure(list(`Age: Cascade Age bands` = c("noEF3Mx7aBu", "Z8MTaDxRBP6", 
+                                                                "noEF3Mx7aBu"), `Disaggregation Type` = c("Qbz6SrpmJ1y", "Qbz6SrpmJ1y", 
+                                                                                                          "Qbz6SrpmJ1y"), `Cascade sex` = c("hDBPKTjUPDm", "Gxcf2DK8vNc", 
+                                                                                                                                            "ZOYVg7Hosni"), `Numerator / Denominator` = c("Som9NRMQqV7", 
+                                                                                                                                                                                          "Som9NRMQqV7", "Som9NRMQqV7"), `Technical Area` = c("RxyNwEV3oQf", 
+                                                                                                                                                                                                                                              "RxyNwEV3oQf", "RxyNwEV3oQf"), `Organisation unit` = c("qYzGABaWyCf", 
+                                                                                                                                                                                                                                                                                                     "Z3IDOaDDkwG", "nxGb6sd7p7D"), `Funding Mechanism` = c("eX9p46QTgjL", 
+                                                                                                                                                                                                                                                                                                                                                            "Y8JtX87RYYP", "eX9p46QTgjL"), Value = c(108, 807, 120), ou_hierarchy = list(
+                                                                                                                                                                                                                                                                                                                                                              c("ybg3MO3hcf4", "KSkooYTy8FB", "V0qMZH29CtN", "qYzGABaWyCf"
+                                                                                                                                                                                                                                                                                                                                                              ), c("ybg3MO3hcf4", "KSkooYTy8FB", "V0qMZH29CtN", "Z3IDOaDDkwG"
+                                                                                                                                                                                                                                                                                                                                                              ), c("ybg3MO3hcf4", "KSkooYTy8FB", "V0qMZH29CtN", "nxGb6sd7p7D"
+                                                                                                                                                                                                                                                                                                                                                              ))), class = c("tbl_df", "tbl", "data.frame"), row.names = c(NA, 
+                                                                                                                                                                                                                                                                                                                                                                                                                           -3L))
   
   # MapDimToOptions not found (so prefaced it in SiteDistMain)
   test_output <- TransformAnalyticsOutput_SiteTool(analytics_data, datapackcommons::dim_item_sets,
