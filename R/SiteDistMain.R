@@ -616,17 +616,21 @@ MapMechToMech <- function(site_density, mech_to_mech_map_full = NULL){
     #TODO make sure I don't need to add any columns    
   }
 
-# where support type is (BOTH) in mech to mech map
-# add a row for ta and a row for dsd
-  if(any(mech_to_mech_map_full[["Support Type"]] == "(BOTH)")){
+# where support type is (ALL) in mech to mech map
+# add a row for TA and a row for DSD
+# recode (BOTH) to (ALL) for support type as we accept both
+  
+  mech_to_mech_map_full$`Support Type`[mech_to_mech_map_full$`Support Type` == "(BOTH)"] <- "(ALL)"
+  
+  if(any(mech_to_mech_map_full[["Support Type"]] == "(ALL)")){
     standard_subset <- dplyr::filter(mech_to_mech_map_full, 
                                       mech_to_mech_map_full[["Support Type"]] %in% 
                                        c("DSD", "TA"))
     both_subset_ta <-  dplyr::filter(mech_to_mech_map_full,
-                                     mech_to_mech_map_full[["Support Type"]] == "(BOTH)") %>% 
+                                     mech_to_mech_map_full[["Support Type"]] == "(ALL)") %>% 
       dplyr::mutate(`Support Type` = "TA")
     both_subset_dsd  <-  dplyr::filter(mech_to_mech_map_full,
-                                      mech_to_mech_map_full[["Support Type"]] == "(BOTH)") %>% 
+                                      mech_to_mech_map_full[["Support Type"]] == "(ALL)") %>% 
       dplyr::mutate(`Support Type` = "DSD")
     mech_to_mech_map_full = dplyr::bind_rows(standard_subset,
                                              both_subset_dsd,
