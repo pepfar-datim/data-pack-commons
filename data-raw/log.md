@@ -4,6 +4,11 @@ Site Tool_Tanzania_20190325141603
 - Tanzania_site_density_20190308_085254.rds
 - Mechanism Map_Tanzania_11March2019_Merged.xlsx
 
+Site Tool_Lesotho_20190325212529
+- DataPack_Lesotho_Binary_v20190325
+- Mechanism Map_Lesotho_20190325
+- Lesotho_site_density_20190314_102104
+
 ### 2019.03.23
 Site Tool_Zimbabwe_20190323174612
 - DataPack_Zimbabwe_Final 03-23-2019.xlsx"
