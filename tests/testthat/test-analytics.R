@@ -187,34 +187,18 @@ httptest::stop_mocking()
 
 # This method is not yet exported
 testthat::test_that("TransformAnalyticsOutput_SiteTool", {
-  # Add sample data at top of the file so its reusable
-  # OVC Serv sample data, aggregates two ages together, combine 18-24 and 25+ ages, look at dataset from mapdimtooptions test
-  dimensions_sample <- tibble::tribble(~type, ~dim_item_uid, ~dim_uid,
-  "filter", "vihpFUg2WTy", "dx", #PMTCT positive test rate indicator
-  "dimension", "ImspTQPwCqd", "ou", # sierra leone
-  "dimension", "LEVEL-2", "ou",
-  "filter", "LAST_YEAR", "pe",
-  "dimension", "UOqJW6HPvvL", "veGzholzPQm",
-  "dimension", "WAl0OCcIYxr", "veGzholzPQm",
-  "dimension", "uYxK4wmcPqA", "J5jldMd8OHv",
-  "dimension", "EYbopBOJWsW", "J5jldMd8OHv")
-  # veGzholzPQm = HIV age, UOqJW6HPvvL = 15-24y, WAl0OCcIYxr = 25-49y,
-  # J5jldMd8OHv = Facility Type, uYxK4wmcPqA = CHP, EYbopBOJWsW = MCHP
-  datapackcommons::DHISLogin_Play("2.29")
-  analytics_data <- datapackcommons::GetData_Analytics(dimensions_sample, "https://play.dhis2.org/2.29/")$results
   
-  data_element_map = datapackcommons::Map19Tto20T[36,]
-  # Sample data_element_map
-  # structure(list(indicatorCode_fy20_cop = "OVC_SERV.N.Age/Sex/ProgramStatus.20T.Active", 
-  #                `Technical Area_fy20_cop` = "OVC_SERV", `Numerator / Denominator_fy20_cop` = "N", 
-  #                `Disagregation Type_fy20_cop` = "Age/Sex/ProgramStatus", 
-  #                Other_fy20_cop = "Active", dx = "DE_GROUP-zhdJiWlPvCz", technical_area = "OVC_SERV", 
-  #                technical_area_uid = "RxyNwEV3oQf", num_or_den = "Numerator", 
-  #                num_or_den_uid = "Som9NRMQqV7", disagg_type = "Age/Sex", 
-  #                disagg_type_uid = "Qbz6SrpmJ1y", pe = "2018Oct", age_set = "<1-18+", 
-  #                sex_set = "F/M/U", kp_set = NA_character_, other_disagg = NA_character_, 
-  #                allocate = "distribute"), class = c("tbl_df", "tbl", "data.frame"
-  #                ), row.names = c(NA, -1L))
+  # Data element map row for OVC SERV
+  data_element_map = structure(list(indicatorCode_fy20_cop = "OVC_SERV.N.Age/Sex/ProgramStatus.20T.Active",
+                 `Technical Area_fy20_cop` = "OVC_SERV", `Numerator / Denominator_fy20_cop` = "N",
+                 `Disagregation Type_fy20_cop` = "Age/Sex/ProgramStatus",
+                 Other_fy20_cop = "Active", dx = "DE_GROUP-zhdJiWlPvCz", technical_area = "OVC_SERV",
+                 technical_area_uid = "RxyNwEV3oQf", num_or_den = "Numerator",
+                 num_or_den_uid = "Som9NRMQqV7", disagg_type = "Age/Sex",
+                 disagg_type_uid = "Qbz6SrpmJ1y", pe = "2018Oct", age_set = "<1-18+",
+                 sex_set = "F/M/U", kp_set = NA_character_, other_disagg = NA_character_,
+                 allocate = "distribute"), class = c("tbl_df", "tbl", "data.frame"
+                 ), row.names = c(NA, -1L))
                                                                                                                                                                                                                                                                                                                                                                                                                     
   sample_data_1to9 <- structure(list(`Age: Cascade Age bands` = "egW0hBcZeD2", `Disaggregation Type` = "Qbz6SrpmJ1y", 
                                      `Cascade sex` = "Gxcf2DK8vNc", `Numerator / Denominator` = "Som9NRMQqV7", 
