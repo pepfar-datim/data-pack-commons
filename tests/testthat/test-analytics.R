@@ -190,15 +190,15 @@ testthat::test_that("TransformAnalyticsOutput_SiteTool", {
   
   # Data element map row for OVC SERV
   data_element_map = structure(list(indicatorCode_fy20_cop = "OVC_SERV.N.Age/Sex/ProgramStatus.20T.Active",
-                 `Technical Area_fy20_cop` = "OVC_SERV", `Numerator / Denominator_fy20_cop` = "N",
-                 `Disagregation Type_fy20_cop` = "Age/Sex/ProgramStatus",
-                 Other_fy20_cop = "Active", dx = "DE_GROUP-zhdJiWlPvCz", technical_area = "OVC_SERV",
-                 technical_area_uid = "RxyNwEV3oQf", num_or_den = "Numerator",
-                 num_or_den_uid = "Som9NRMQqV7", disagg_type = "Age/Sex",
-                 disagg_type_uid = "Qbz6SrpmJ1y", pe = "2018Oct", age_set = "<1-18+",
-                 sex_set = "F/M/U", kp_set = NA_character_, other_disagg = NA_character_,
-                 allocate = "distribute"), class = c("tbl_df", "tbl", "data.frame"
-                 ), row.names = c(NA, -1L))
+                                   `Technical Area_fy20_cop` = "OVC_SERV", `Numerator / Denominator_fy20_cop` = "N",
+                                   `Disagregation Type_fy20_cop` = "Age/Sex/ProgramStatus",
+                                   Other_fy20_cop = "Active", dx = "DE_GROUP-zhdJiWlPvCz", technical_area = "OVC_SERV",
+                                   technical_area_uid = "RxyNwEV3oQf", num_or_den = "Numerator",
+                                   num_or_den_uid = "Som9NRMQqV7", disagg_type = "Age/Sex",
+                                   disagg_type_uid = "Qbz6SrpmJ1y", pe = "2018Oct", age_set = "<1-18+",
+                                   sex_set = "F/M/U", kp_set = NA_character_, other_disagg = NA_character_,
+                                   allocate = "distribute"), class = c("tbl_df", "tbl", "data.frame"
+                                   ), row.names = c(NA, -1L))
                                                                                                                                                                                                                                                                                                                                                                                                                     
   sample_data_1to9 <- structure(list(`Age: Cascade Age bands` = "egW0hBcZeD2", `Disaggregation Type` = "Qbz6SrpmJ1y", 
                                      `Cascade sex` = "Gxcf2DK8vNc", `Numerator / Denominator` = "Som9NRMQqV7", 
@@ -222,13 +222,13 @@ testthat::test_that("TransformAnalyticsOutput_SiteTool", {
                                           ))), class = c("tbl_df", "tbl", "data.frame"), row.names = c(NA, -1L))
   
   # MapDimToOptions not found (so prefaced it in SiteDistMain)
-  test_output <- TransformAnalyticsOutput_SiteTool(sample_data_1to9, datapackcommons::dim_item_sets,
+  test_output <- datapackcommons::TransformAnalyticsOutput_SiteTool(sample_data_1to9, datapackcommons::dim_item_sets,
                                                                     data_element_map, 4)
   
   disagg_input <- rbind(sample_data_1to9, sample_data_18to24, sample_data_25_plus)
   # I can dput the binded rows but creating them separately is more explanatory.
   
-  agg_output <- TransformAnalyticsOutput_SiteTool(disagg_input, datapackcommons::dim_item_sets,
+  agg_output <- datapackcommons::TransformAnalyticsOutput_SiteTool(disagg_input, datapackcommons::dim_item_sets,
                                                   data_element_map, 4)
   
   # Test to check that the value is being aggregated
@@ -243,4 +243,6 @@ testthat::test_that("TransformAnalyticsOutput_SiteTool", {
   
   # Making sure the age disaggs happen for input ages 1-9
   testthat::expect_equal(non_agg_data$age_option_name, rep(c("5-9","1-4"), times = (2)))
+  
+  # Test the ou hierarchy is dropped and psnu level id is pulled out
 })
