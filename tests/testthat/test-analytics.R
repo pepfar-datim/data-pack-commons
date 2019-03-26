@@ -245,4 +245,18 @@ testthat::test_that("TransformAnalyticsOutput_SiteTool", {
   testthat::expect_equal(non_agg_data$age_option_name, rep(c("5-9","1-4"), times = (2)))
   
   # Test the ou hierarchy is dropped and psnu level id is pulled out
+  # Using grep for the test as it sends the location of a string and hence can help detect ou hierarchy in any object
+  # and returns "integer(0)" if an element is not present
+  # ou_hierarchy is as follows: c("Test3", "Test4", "Test5", "Test1"), with Test1 being the PSNU level UID
+  testthat::expect_equal(grep("Test3", disagg_input), 9)
+  testthat::expect_equal(grep("Test3", agg_output), integer(0))
+  
+  testthat::expect_equal(grep("Test4", disagg_input), 9)
+  testthat::expect_equal(grep("Test4", agg_output), integer(0))
+  
+  testthat::expect_equal(grep("Test5", disagg_input), 9)
+  testthat::expect_equal(grep("Test5", agg_output), integer(0))
+  
+  testthat::expect_equal(grep("Test1", disagg_input), c(6, 9))
+  testthat::expect_equal(grep("Test1", agg_output), c(1, 3))
 })
