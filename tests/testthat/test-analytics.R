@@ -202,61 +202,66 @@ testthat::test_that("TransformAnalyticsOutput_SiteTool", {
                                                                                                                                                                                                                                                                                                                                                                                                                     
   sample_data_1to9 <- structure(list(`Age: Cascade Age bands` = "egW0hBcZeD2", `Disaggregation Type` = "Qbz6SrpmJ1y", 
                                      `Cascade sex` = "Gxcf2DK8vNc", `Numerator / Denominator` = "Som9NRMQqV7", 
-                                     `Technical Area` = "RxyNwEV3oQf", `Organisation unit` = "Test1", 
-                                     `Funding Mechanism` = "Test2", Value = 333, ou_hierarchy = list(
-                                       c("Test3", "Test4", "Test5", "Test1"
+                                     `Technical Area` = "RxyNwEV3oQf", `Organisation unit` = "OrgU1111111", 
+                                     `Funding Mechanism` = "Mech1111111", Value = 333, ou_hierarchy = list(
+                                       c("Global11111", "Region11111", "Country1111", "OrgU1111111"
                                        ))), class = c("tbl_df", "tbl", "data.frame"), row.names = c(NA, -1L))
   
   sample_data_18to24 <- structure(list(`Age: Cascade Age bands` = "N0PwGN3UKWx", `Disaggregation Type` = "Qbz6SrpmJ1y", 
                                        `Cascade sex` = "hDBPKTjUPDm", `Numerator / Denominator` = "Som9NRMQqV7", 
-                                       `Technical Area` = "RxyNwEV3oQf", `Organisation unit` = "Test1", 
-                                       `Funding Mechanism` = "Test2", Value = 333, ou_hierarchy = list(
-                                         c("Test3", "Test4", "Test5", "Test1"
+                                       `Technical Area` = "RxyNwEV3oQf", `Organisation unit` = "OrgU1111111", 
+                                       `Funding Mechanism` = "Mech1111111", Value = 333, ou_hierarchy = list(
+                                         c("Global11111", "Region11111", "Country1111", "OrgU1111111"
                                          ))), class = c("tbl_df", "tbl", "data.frame"), row.names = c(NA, -1L))
   
   sample_data_25_plus <- structure(list(`Age: Cascade Age bands` = "pk98FEsOJcz", `Disaggregation Type` = "Qbz6SrpmJ1y", 
                                         `Cascade sex` = "hDBPKTjUPDm", `Numerator / Denominator` = "Som9NRMQqV7", 
-                                        `Technical Area` = "RxyNwEV3oQf", `Organisation unit` = "Test1", 
-                                        `Funding Mechanism` = "Test2", Value = 333, ou_hierarchy = list(
-                                          c("Test3", "Test4", "Test5", "Test1"
+                                        `Technical Area` = "RxyNwEV3oQf", `Organisation unit` = "OrgU1111111", 
+                                        `Funding Mechanism` = "Mech1111111", Value = 333, ou_hierarchy = list(
+                                          c("Global11111", "Region11111", "Country1111", "OrgU1111111"
                                           ))), class = c("tbl_df", "tbl", "data.frame"), row.names = c(NA, -1L))
   
-  # MapDimToOptions not found (so prefaced it in SiteDistMain)
-  test_output <- TransformAnalyticsOutput_SiteTool(sample_data_1to9, datapackcommons::dim_item_sets,
-                                                                    data_element_map, 4)
-  
-  disagg_input <- rbind(sample_data_1to9, sample_data_18to24, sample_data_25_plus)
+  sample_data_just_mapped <- structure(list(`Age: Cascade Age bands` = "tIZRQs0FK5P", `Disaggregation Type` = "Qbz6SrpmJ1y", 
+                                        `Cascade sex` = "hDBPKTjUPDm", `Numerator / Denominator` = "Som9NRMQqV7", 
+                                        `Technical Area` = "RxyNwEV3oQf", `Organisation unit` = "OrgU1111111", 
+                                        `Funding Mechanism` = "Mech1111111", Value = 333, ou_hierarchy = list(
+                                          c("Global11111", "Region11111", "Country1111", "OrgU1111111"
+                                          ))), class = c("tbl_df", "tbl", "data.frame"), row.names = c(NA, -1L))
+#TODO this references the dim_item_sets data set, but if this changes next year it may break the unit test.
+# need sample data for this too
+
+  disagg_input <- rbind(sample_data_1to9, sample_data_18to24, sample_data_25_plus,   sample_data_just_mapped)
   # I can dput the binded rows but creating them separately is more explanatory.
   
   agg_output <- TransformAnalyticsOutput_SiteTool(disagg_input, datapackcommons::dim_item_sets,
                                                   data_element_map, 4)
   
-  # Test to check that the value is being aggregated
-  testthat::expect_equal(agg_output[["aggregations"]]$Value, disagg_input$Value[2]*2)
+  # Test to check that the value for 18-24 and 25+ is being aggregated,
+  # the initial values are both 333
+  testthat::expect_equal(agg_output[["aggregations"]]$Value, 666)
+  agg_output[["processed"]] %>% dplyr::filter(age_option_name == "18+") %>% .[["Value"]] %>% 
+    testthat::expect_equal(666)
+
+  # Asserts that 1-9 unknown sex gets evenly divided into 1-4, F; 5-9, F; 1-4, M; 5-9, M  
+  agg_output[["processed"]] %>% dplyr::filter(age_option_name == "1-4" & sex_option_name == "Female") %>% 
+    .$Value %>% testthat::expect_equal(83.25)
+  agg_output[["processed"]] %>% dplyr::filter(age_option_name == "1-4" & sex_option_name == "Male") %>% 
+    .$Value %>% testthat::expect_equal(83.25)
+  agg_output[["processed"]] %>% dplyr::filter(age_option_name == "5-9" & sex_option_name == "Female") %>% 
+    .$Value %>% testthat::expect_equal(83.25)
+  agg_output[["processed"]] %>% dplyr::filter(age_option_name == "5-9" & sex_option_name == "Male") %>% 
+    .$Value %>% testthat::expect_equal(83.25)
   
-  # Test to check that the right age option is being aggregated
-  testthat::expect_equal("Q6xWcyHDq6e", agg_output[["aggregations"]]$age_option_uid)
+# Check that the number of rows in processed reflects splitting and aggregating 
+# 1-9, unspecified sex becomes 4 rows
+# 18-24 and 25+ becomes 1 row 
+  testthat::expect_equal(NROW(agg_output[["processed"]]), 6)
+
+# Test the ou hierarchy is dropped and psnu level id is pulled out
   
-  # Asserts that all other rows have disagg values
-  non_agg_data <- agg_output[["processed"]] %>% dplyr::filter(age_option_uid != "Q6xWcyHDq6e")
-  testthat::expect_equal(non_agg_data$Value, rep(333/nrow(non_agg_data), times = (4)))
-  
-  # Making sure the age disaggs happen for input ages 1-9
-  testthat::expect_equal(non_agg_data$age_option_name, rep(c("5-9","1-4"), times = (2)))
-  
-  # Test the ou hierarchy is dropped and psnu level id is pulled out
-  # Using grep for the test as it sends the location of a string and hence can help detect ou hierarchy in any object
-  # and returns "integer(0)" if an element is not present
-  # ou_hierarchy is as follows: c("Test3", "Test4", "Test5", "Test1"), with Test1 being the PSNU level UID
-  testthat::expect_equal(grep("Test3", disagg_input), 9)
-  testthat::expect_equal(grep("Test3", agg_output), integer(0))
-  
-  testthat::expect_equal(grep("Test4", disagg_input), 9)
-  testthat::expect_equal(grep("Test4", agg_output), integer(0))
-  
-  testthat::expect_equal(grep("Test5", disagg_input), 9)
-  testthat::expect_equal(grep("Test5", agg_output), integer(0))
-  
-  testthat::expect_equal(grep("Test1", disagg_input), c(6, 9))
-  testthat::expect_equal(grep("Test1", agg_output), c(1, 3))
+  testthat::expect_false("ou_hierarchy" %in% names(agg_output$processed))
+
+  agg_output$processed$psnuid %>% unique() %>% 
+    testthat::expect_equal("OrgU1111111")
+
 })
