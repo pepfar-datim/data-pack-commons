@@ -220,10 +220,17 @@ testthat::test_that("TransformAnalyticsOutput_SiteTool", {
                                         `Funding Mechanism` = "Mech1111111", Value = 333, ou_hierarchy = list(
                                           c("Global11111", "Region11111", "Country1111", "OrgU1111111"
                                           ))), class = c("tbl_df", "tbl", "data.frame"), row.names = c(NA, -1L))
+  
+  sample_data_just_mapped <- structure(list(`Age: Cascade Age bands` = "tIZRQs0FK5P", `Disaggregation Type` = "Qbz6SrpmJ1y", 
+                                        `Cascade sex` = "hDBPKTjUPDm", `Numerator / Denominator` = "Som9NRMQqV7", 
+                                        `Technical Area` = "RxyNwEV3oQf", `Organisation unit` = "OrgU1111111", 
+                                        `Funding Mechanism` = "Mech1111111", Value = 333, ou_hierarchy = list(
+                                          c("Global11111", "Region11111", "Country1111", "OrgU1111111"
+                                          ))), class = c("tbl_df", "tbl", "data.frame"), row.names = c(NA, -1L))
 #TODO this references the dim_item_sets data set, but if this changes next year it may break the unit test.
 # need sample data for this too
 
-  disagg_input <- rbind(sample_data_1to9, sample_data_18to24, sample_data_25_plus)
+  disagg_input <- rbind(sample_data_1to9, sample_data_18to24, sample_data_25_plus,   sample_data_just_mapped)
   # I can dput the binded rows but creating them separately is more explanatory.
   
   agg_output <- TransformAnalyticsOutput_SiteTool(disagg_input, datapackcommons::dim_item_sets,
@@ -248,7 +255,7 @@ testthat::test_that("TransformAnalyticsOutput_SiteTool", {
 # Check that the number of rows in processed reflects splitting and aggregating 
 # 1-9, unspecified sex becomes 4 rows
 # 18-24 and 25+ becomes 1 row 
-  testthat::expect_equal(NROW(agg_output[["processed"]]), 5)
+  testthat::expect_equal(NROW(agg_output[["processed"]]), 6)
 
 # Test the ou hierarchy is dropped and psnu level id is pulled out
   
@@ -256,4 +263,5 @@ testthat::expect_false("ou_hierarchy" %in% names(agg_output$processed))
 
 agg_output$processed$psnuid %>% unique() %>% 
   testthat::expect_equal("OrgU1111111")
+
 })
