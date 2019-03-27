@@ -202,26 +202,27 @@ testthat::test_that("TransformAnalyticsOutput_SiteTool", {
                                                                                                                                                                                                                                                                                                                                                                                                                     
   sample_data_1to9 <- structure(list(`Age: Cascade Age bands` = "egW0hBcZeD2", `Disaggregation Type` = "Qbz6SrpmJ1y", 
                                      `Cascade sex` = "Gxcf2DK8vNc", `Numerator / Denominator` = "Som9NRMQqV7", 
-                                     `Technical Area` = "RxyNwEV3oQf", `Organisation unit` = "Test1", 
-                                     `Funding Mechanism` = "Test2", Value = 333, ou_hierarchy = list(
-                                       c("Test3", "Test4", "Test5", "Test1"
+                                     `Technical Area` = "RxyNwEV3oQf", `Organisation unit` = "OrgU1111111", 
+                                     `Funding Mechanism` = "Mech1111111", Value = 333, ou_hierarchy = list(
+                                       c("Global11111", "Region11111", "Country1111", "OrgU1111111"
                                        ))), class = c("tbl_df", "tbl", "data.frame"), row.names = c(NA, -1L))
   
   sample_data_18to24 <- structure(list(`Age: Cascade Age bands` = "N0PwGN3UKWx", `Disaggregation Type` = "Qbz6SrpmJ1y", 
                                        `Cascade sex` = "hDBPKTjUPDm", `Numerator / Denominator` = "Som9NRMQqV7", 
-                                       `Technical Area` = "RxyNwEV3oQf", `Organisation unit` = "Test1", 
-                                       `Funding Mechanism` = "Test2", Value = 333, ou_hierarchy = list(
-                                         c("Test3", "Test4", "Test5", "Test1"
+                                       `Technical Area` = "RxyNwEV3oQf", `Organisation unit` = "Ou111111111", 
+                                       `Funding Mechanism` = "Mech1111111", Value = 333, ou_hierarchy = list(
+                                         c("Global11111", "Region11111", "Country1111", "OrgU1111111"
                                          ))), class = c("tbl_df", "tbl", "data.frame"), row.names = c(NA, -1L))
   
   sample_data_25_plus <- structure(list(`Age: Cascade Age bands` = "pk98FEsOJcz", `Disaggregation Type` = "Qbz6SrpmJ1y", 
                                         `Cascade sex` = "hDBPKTjUPDm", `Numerator / Denominator` = "Som9NRMQqV7", 
-                                        `Technical Area` = "RxyNwEV3oQf", `Organisation unit` = "Test1", 
-                                        `Funding Mechanism` = "Test2", Value = 333, ou_hierarchy = list(
-                                          c("Test3", "Test4", "Test5", "Test1"
+                                        `Technical Area` = "RxyNwEV3oQf", `Organisation unit` = "OrgU1111111", 
+                                        `Funding Mechanism` = "Mech1111111", Value = 333, ou_hierarchy = list(
+                                          c("Global11111", "Region11111", "Country1111", "OrgU1111111"
                                           ))), class = c("tbl_df", "tbl", "data.frame"), row.names = c(NA, -1L))
-  
-  # MapDimToOptions not found (so prefaced it in SiteDistMain)
+#TODO this references the dim_item_sets data set, but if this changes next year it may break the unit test.
+# need sample data for this too
+
   test_output <- TransformAnalyticsOutput_SiteTool(sample_data_1to9, datapackcommons::dim_item_sets,
                                                                     data_element_map, 4)
   
