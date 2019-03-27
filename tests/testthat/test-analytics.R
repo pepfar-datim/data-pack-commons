@@ -245,20 +245,15 @@ testthat::test_that("TransformAnalyticsOutput_SiteTool", {
   agg_output[["processed"]] %>% dplyr::filter(age_option_name == "5-9" & sex_option_name == "Male") %>% 
     .$Value %>% testthat::expect_equal(83.25)
   
+# Check that the number of rows in processed reflects splitting and aggregating 
+# 1-9, unspecified sex becomes 4 rows
+# 18-24 and 25+ becomes 1 row 
+  testthat::expect_equal(NROW(agg_output[["processed"]]), 5)
+
+# Test the ou hierarchy is dropped and psnu level id is pulled out
   
-  # Test the ou hierarchy is dropped and psnu level id is pulled out
-  # Using grep for the test as it sends the location of a string and hence can help detect ou hierarchy in any object
-  # and returns "integer(0)" if an element is not present
-  # ou_hierarchy is as follows: c("Global11111", "Region11111", "Country1111", "OrgU1111111"), with Test1 being the PSNU level UID
-  testthat::expect_equal(grep("Global11111", disagg_input), 9)
-  testthat::expect_equal(grep("Global11111", agg_output), integer(0))
-  
-  testthat::expect_equal(grep("Region11111", disagg_input), 9)
-  testthat::expect_equal(grep("Region11111", agg_output), integer(0))
-  
-  testthat::expect_equal(grep("Country1111", disagg_input), 9)
-  testthat::expect_equal(grep("Country1111", agg_output), integer(0))
-  
-  testthat::expect_equal(grep("OrgU1111111", disagg_input), c(6, 9))
-  testthat::expect_equal(grep("OrgU1111111", agg_output), c(1, 3))
+testthat::expect_false("ou_hierarchy" %in% names(agg_output$processed))
+
+agg_output$processed$psnuid %>% unique() %>% 
+  testthat::expect_equal("OrgU1111111")
 })
