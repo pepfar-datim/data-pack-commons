@@ -222,13 +222,13 @@ testthat::test_that("TransformAnalyticsOutput_SiteTool", {
                                           ))), class = c("tbl_df", "tbl", "data.frame"), row.names = c(NA, -1L))
   
   # MapDimToOptions not found (so prefaced it in SiteDistMain)
-  test_output <- datapackcommons::TransformAnalyticsOutput_SiteTool(sample_data_1to9, datapackcommons::dim_item_sets,
+  test_output <- TransformAnalyticsOutput_SiteTool(sample_data_1to9, datapackcommons::dim_item_sets,
                                                                     data_element_map, 4)
   
   disagg_input <- rbind(sample_data_1to9, sample_data_18to24, sample_data_25_plus)
   # I can dput the binded rows but creating them separately is more explanatory.
   
-  agg_output <- datapackcommons::TransformAnalyticsOutput_SiteTool(disagg_input, datapackcommons::dim_item_sets,
+  agg_output <- TransformAnalyticsOutput_SiteTool(disagg_input, datapackcommons::dim_item_sets,
                                                   data_element_map, 4)
   
   # Test to check that the value is being aggregated
