@@ -235,9 +235,9 @@ testthat::test_that("TransformAnalyticsOutput_SiteTool", {
   agg_output[["processed"]] %>% dplyr::filter(age_option_name == "18+") %>% .[["Value"]] %>% 
     testthat::expect_equal(666)
 
-  # Asserts that all other rows have disagg values
-  non_agg_data <- agg_output[["processed"]] %>% dplyr::filter(age_option_uid != "Q6xWcyHDq6e")
-  testthat::expect_equal(non_agg_data$Value, rep(333/nrow(non_agg_data), times = (4)))
+  # Asserts that 1-9 unknown sex gets evenly divided into 1-4, F; 5-9, F; 1-4, M; 5-9, M  
+  non_agg_data <- agg_output[["processed"]] %>% dplyr::filter(age_option_name %in% c("1-4", "5-9"))
+  testthat::expect_equal(non_agg_data$Value, c(83.25, 83.25, 83.25, 83.25))
   
   # Making sure the age disaggs happen for input ages 1-9
   testthat::expect_equal(non_agg_data$age_option_name, rep(c("5-9","1-4"), times = (2)))
