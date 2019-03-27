@@ -223,9 +223,6 @@ testthat::test_that("TransformAnalyticsOutput_SiteTool", {
 #TODO this references the dim_item_sets data set, but if this changes next year it may break the unit test.
 # need sample data for this too
 
-  test_output <- TransformAnalyticsOutput_SiteTool(sample_data_1to9, datapackcommons::dim_item_sets,
-                                                                    data_element_map, 4)
-  
   disagg_input <- rbind(sample_data_1to9, sample_data_18to24, sample_data_25_plus)
   # I can dput the binded rows but creating them separately is more explanatory.
   
