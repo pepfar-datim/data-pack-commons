@@ -259,9 +259,9 @@ testthat::test_that("TransformAnalyticsOutput_SiteTool", {
 
 # Test the ou hierarchy is dropped and psnu level id is pulled out
   
-testthat::expect_false("ou_hierarchy" %in% names(agg_output$processed))
+  testthat::expect_false("ou_hierarchy" %in% names(agg_output$processed))
 
-agg_output$processed$psnuid %>% unique() %>% 
-  testthat::expect_equal("OrgU1111111")
+  agg_output$processed$psnuid %>% unique() %>% 
+    testthat::expect_equal("OrgU1111111")
 
 })
