@@ -209,7 +209,7 @@ testthat::test_that("TransformAnalyticsOutput_SiteTool", {
   
   sample_data_18to24 <- structure(list(`Age: Cascade Age bands` = "N0PwGN3UKWx", `Disaggregation Type` = "Qbz6SrpmJ1y", 
                                        `Cascade sex` = "hDBPKTjUPDm", `Numerator / Denominator` = "Som9NRMQqV7", 
-                                       `Technical Area` = "RxyNwEV3oQf", `Organisation unit` = "Ou111111111", 
+                                       `Technical Area` = "RxyNwEV3oQf", `Organisation unit` = "OrgU1111111", 
                                        `Funding Mechanism` = "Mech1111111", Value = 333, ou_hierarchy = list(
                                          c("Global11111", "Region11111", "Country1111", "OrgU1111111"
                                          ))), class = c("tbl_df", "tbl", "data.frame"), row.names = c(NA, -1L))
@@ -248,16 +248,16 @@ testthat::test_that("TransformAnalyticsOutput_SiteTool", {
   # Test the ou hierarchy is dropped and psnu level id is pulled out
   # Using grep for the test as it sends the location of a string and hence can help detect ou hierarchy in any object
   # and returns "integer(0)" if an element is not present
-  # ou_hierarchy is as follows: c("Test3", "Test4", "Test5", "Test1"), with Test1 being the PSNU level UID
-  testthat::expect_equal(grep("Test3", disagg_input), 9)
-  testthat::expect_equal(grep("Test3", agg_output), integer(0))
+  # ou_hierarchy is as follows: c("Global11111", "Region11111", "Country1111", "OrgU1111111"), with Test1 being the PSNU level UID
+  testthat::expect_equal(grep("Global11111", disagg_input), 9)
+  testthat::expect_equal(grep("Global11111", agg_output), integer(0))
   
-  testthat::expect_equal(grep("Test4", disagg_input), 9)
-  testthat::expect_equal(grep("Test4", agg_output), integer(0))
+  testthat::expect_equal(grep("Region11111", disagg_input), 9)
+  testthat::expect_equal(grep("Region11111", agg_output), integer(0))
   
-  testthat::expect_equal(grep("Test5", disagg_input), 9)
-  testthat::expect_equal(grep("Test5", agg_output), integer(0))
+  testthat::expect_equal(grep("Country1111", disagg_input), 9)
+  testthat::expect_equal(grep("Country1111", agg_output), integer(0))
   
-  testthat::expect_equal(grep("Test1", disagg_input), c(6, 9))
-  testthat::expect_equal(grep("Test1", agg_output), c(1, 3))
+  testthat::expect_equal(grep("OrgU1111111", disagg_input), c(6, 9))
+  testthat::expect_equal(grep("OrgU1111111", agg_output), c(1, 3))
 })
