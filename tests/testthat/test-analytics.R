@@ -229,9 +229,11 @@ testthat::test_that("TransformAnalyticsOutput_SiteTool", {
   agg_output <- TransformAnalyticsOutput_SiteTool(disagg_input, datapackcommons::dim_item_sets,
                                                   data_element_map, 4)
   
-  # Test to check that the value is being aggregated
-  testthat::expect_equal(agg_output[["aggregations"]]$Value, disagg_input$Value[2]*2)
-  
+  # Test to check that the value for 18-24 and 25+ is being aggregated
+  testthat::expect_equal(agg_output[["aggregations"]]$Value, 666)
+  agg_output[["processed"]] %>% dplyr::filter(age_option_name == "18+") %>% .[["Value"]] %>% 
+    testthat::expect_equal(666)
+
   # Test to check that the right age option is being aggregated
   testthat::expect_equal("Q6xWcyHDq6e", agg_output[["aggregations"]]$age_option_uid)
   
