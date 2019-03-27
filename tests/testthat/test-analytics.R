@@ -236,11 +236,15 @@ testthat::test_that("TransformAnalyticsOutput_SiteTool", {
     testthat::expect_equal(666)
 
   # Asserts that 1-9 unknown sex gets evenly divided into 1-4, F; 5-9, F; 1-4, M; 5-9, M  
-  non_agg_data <- agg_output[["processed"]] %>% dplyr::filter(age_option_name %in% c("1-4", "5-9"))
-  testthat::expect_equal(non_agg_data$Value, c(83.25, 83.25, 83.25, 83.25))
+  agg_output[["processed"]] %>% dplyr::filter(age_option_name == "1-4" & sex_option_name == "Female") %>% 
+    .$Value %>% testthat::expect_equal(83.25)
+  agg_output[["processed"]] %>% dplyr::filter(age_option_name == "1-4" & sex_option_name == "Male") %>% 
+    .$Value %>% testthat::expect_equal(83.25)
+  agg_output[["processed"]] %>% dplyr::filter(age_option_name == "5-9" & sex_option_name == "Female") %>% 
+    .$Value %>% testthat::expect_equal(83.25)
+  agg_output[["processed"]] %>% dplyr::filter(age_option_name == "5-9" & sex_option_name == "Male") %>% 
+    .$Value %>% testthat::expect_equal(83.25)
   
-  # Making sure the age disaggs happen for input ages 1-9
-  testthat::expect_equal(non_agg_data$age_option_name, rep(c("5-9","1-4"), times = (2)))
   
   # Test the ou hierarchy is dropped and psnu level id is pulled out
   # Using grep for the test as it sends the location of a string and hence can help detect ou hierarchy in any object
