@@ -141,3 +141,12 @@ test_that("MapDimToOptions", {
   
   testthat::expect_equal(sample_data, joined_no_items_to_options)
 })
+
+test_that("MapMechToMech", {
+  
+  # mechanism_map <- 
+  # Not using dput here before discussing what data can be added to github
+  
+  MapMechToMech(density[["PMTCT_STAT.D.Age/Sex.20T"]], mechanism_map)
+  
+})
