@@ -1,3 +1,9 @@
+### 2019.03.28
+Site Tool_Vietnam_20190328123847.xlsx
+- DataPack_Vietnam 20190322_P (submitted).xlsx
+- Vietnam_site_density_20190320_194159.rds
+- SiteList_Vietnam_20190318235328_AID&CDC_DoD.csv
+
 ### 2019.03.27
 Site Tool_Rwanda_20190327203101
 - 41_JHHDataPack_Rwanda_20190326_submissionv4.xlsx
