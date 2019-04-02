@@ -1,3 +1,13 @@
+### 2019.04.02 built using datapackr branch/commit 
+https://github.com/pepfar-datim/datapackr/commit/3a69e6d11d2b9239a7aef7894a72261122f2095b
+
+Site Tool_Nigeria_20190402083609
+- DataPack_Nigeria_20190314162221_State_Final_27Mar19_1.xlsx
+- Nigeria_site_density_20190327_134354.rds
+- Mechanism Map_Nigeria_20190323020615_v2.xlsx
+- SiteList_Nigeria_20190323025454_v2.csv
+
+
 ### 2019.03.30 built using datapackr branch/commit https://github.com/pepfar-datim/datapackr/commit/0190e779d0ecdf4d87a9c248ae4b42223c6d08fe
 Site Tool_Ukraine_20190330110208.xlsx
 - DataPack_Ukraine_20190327-clean.xlsx
