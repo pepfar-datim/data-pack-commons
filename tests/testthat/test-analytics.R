@@ -185,4 +185,83 @@ testthat::expect_error(
 httptest::stop_mocking()
 })
 
+# This method is not yet exported
+testthat::test_that("TransformAnalyticsOutput_SiteTool", {
+  
+  # Data element map row for OVC SERV
+  data_element_map = structure(list(indicatorCode_fy20_cop = "OVC_SERV.N.Age/Sex/ProgramStatus.20T.Active",
+                                   `Technical Area_fy20_cop` = "OVC_SERV", `Numerator / Denominator_fy20_cop` = "N",
+                                   `Disagregation Type_fy20_cop` = "Age/Sex/ProgramStatus",
+                                   Other_fy20_cop = "Active", dx = "DE_GROUP-zhdJiWlPvCz", technical_area = "OVC_SERV",
+                                   technical_area_uid = "RxyNwEV3oQf", num_or_den = "Numerator",
+                                   num_or_den_uid = "Som9NRMQqV7", disagg_type = "Age/Sex",
+                                   disagg_type_uid = "Qbz6SrpmJ1y", pe = "2018Oct", age_set = "<1-18+",
+                                   sex_set = "F/M/U", kp_set = NA_character_, other_disagg = NA_character_,
+                                   allocate = "distribute"), class = c("tbl_df", "tbl", "data.frame"
+                                   ), row.names = c(NA, -1L))
+                                                                                                                                                                                                                                                                                                                                                                                                                    
+  sample_data_1to9 <- structure(list(`Age: Cascade Age bands` = "egW0hBcZeD2", `Disaggregation Type` = "Qbz6SrpmJ1y", 
+                                     `Cascade sex` = "Gxcf2DK8vNc", `Numerator / Denominator` = "Som9NRMQqV7", 
+                                     `Technical Area` = "RxyNwEV3oQf", `Organisation unit` = "OrgU1111111", 
+                                     `Funding Mechanism` = "Mech1111111", Value = 333, ou_hierarchy = list(
+                                       c("Global11111", "Region11111", "Country1111", "OrgU1111111"
+                                       ))), class = c("tbl_df", "tbl", "data.frame"), row.names = c(NA, -1L))
+  
+  sample_data_18to24 <- structure(list(`Age: Cascade Age bands` = "N0PwGN3UKWx", `Disaggregation Type` = "Qbz6SrpmJ1y", 
+                                       `Cascade sex` = "hDBPKTjUPDm", `Numerator / Denominator` = "Som9NRMQqV7", 
+                                       `Technical Area` = "RxyNwEV3oQf", `Organisation unit` = "OrgU1111111", 
+                                       `Funding Mechanism` = "Mech1111111", Value = 333, ou_hierarchy = list(
+                                         c("Global11111", "Region11111", "Country1111", "OrgU1111111"
+                                         ))), class = c("tbl_df", "tbl", "data.frame"), row.names = c(NA, -1L))
+  
+  sample_data_25_plus <- structure(list(`Age: Cascade Age bands` = "pk98FEsOJcz", `Disaggregation Type` = "Qbz6SrpmJ1y", 
+                                        `Cascade sex` = "hDBPKTjUPDm", `Numerator / Denominator` = "Som9NRMQqV7", 
+                                        `Technical Area` = "RxyNwEV3oQf", `Organisation unit` = "OrgU1111111", 
+                                        `Funding Mechanism` = "Mech1111111", Value = 333, ou_hierarchy = list(
+                                          c("Global11111", "Region11111", "Country1111", "OrgU1111111"
+                                          ))), class = c("tbl_df", "tbl", "data.frame"), row.names = c(NA, -1L))
+  
+  sample_data_just_mapped <- structure(list(`Age: Cascade Age bands` = "tIZRQs0FK5P", `Disaggregation Type` = "Qbz6SrpmJ1y", 
+                                        `Cascade sex` = "hDBPKTjUPDm", `Numerator / Denominator` = "Som9NRMQqV7", 
+                                        `Technical Area` = "RxyNwEV3oQf", `Organisation unit` = "OrgU1111111", 
+                                        `Funding Mechanism` = "Mech1111111", Value = 333, ou_hierarchy = list(
+                                          c("Global11111", "Region11111", "Country1111", "OrgU1111111"
+                                          ))), class = c("tbl_df", "tbl", "data.frame"), row.names = c(NA, -1L))
+#TODO this references the dim_item_sets data set, but if this changes next year it may break the unit test.
+# need sample data for this too
 
+  disagg_input <- rbind(sample_data_1to9, sample_data_18to24, sample_data_25_plus,   sample_data_just_mapped)
+  # I can dput the binded rows but creating them separately is more explanatory.
+  
+  agg_output <- TransformAnalyticsOutput_SiteTool(disagg_input, datapackcommons::dim_item_sets,
+                                                  data_element_map, 4)
+  
+  # Test to check that the value for 18-24 and 25+ is being aggregated,
+  # the initial values are both 333
+  testthat::expect_equal(agg_output[["aggregations"]]$Value, 666)
+  agg_output[["processed"]] %>% dplyr::filter(age_option_name == "18+") %>% .[["Value"]] %>% 
+    testthat::expect_equal(666)
+
+  # Asserts that 1-9 unknown sex gets evenly divided into 1-4, F; 5-9, F; 1-4, M; 5-9, M  
+  agg_output[["processed"]] %>% dplyr::filter(age_option_name == "1-4" & sex_option_name == "Female") %>% 
+    .$Value %>% testthat::expect_equal(83.25)
+  agg_output[["processed"]] %>% dplyr::filter(age_option_name == "1-4" & sex_option_name == "Male") %>% 
+    .$Value %>% testthat::expect_equal(83.25)
+  agg_output[["processed"]] %>% dplyr::filter(age_option_name == "5-9" & sex_option_name == "Female") %>% 
+    .$Value %>% testthat::expect_equal(83.25)
+  agg_output[["processed"]] %>% dplyr::filter(age_option_name == "5-9" & sex_option_name == "Male") %>% 
+    .$Value %>% testthat::expect_equal(83.25)
+  
+# Check that the number of rows in processed reflects splitting and aggregating 
+# 1-9, unspecified sex becomes 4 rows
+# 18-24 and 25+ becomes 1 row 
+  testthat::expect_equal(NROW(agg_output[["processed"]]), 6)
+
+# Test the ou hierarchy is dropped and psnu level id is pulled out
+  
+  testthat::expect_false("ou_hierarchy" %in% names(agg_output$processed))
+
+  agg_output$processed$psnuid %>% unique() %>% 
+    testthat::expect_equal("OrgU1111111")
+
+})

@@ -50,7 +50,19 @@ DistributeToSites <-
 # cache age option reverts to original after calling datim validation
   cache_in = getOption("maxCacheAge")
   options(maxCacheAge = 0)
-  mechanisms_full_country <- datimvalidation::getMechanismsMap(country_details$id)
+
+# if regional country need to use region/operating unit 
+  if(country_details$country_level == 3){
+    mechanisms_full_country <- datimvalidation::getMechanismsMap(country_details$id)
+  } else if (country_details$country_level == 4) {
+    region_uid <- datapackcommons::getMetadata(base_url, "organisationUnits", 
+                                 filters = paste0("children.id:eq:", country_details$id),
+                                 fields = "id")
+    assertthat::assert_that(NROW(region_uid) == 1)
+    mechanisms_full_country <- datimvalidation::getMechanismsMap(region_uid$id)
+  } else{
+    stop("Country level not equal to 3 or 4 in DitributeToSites")
+    }
   options(maxCacheAge = cache_in)
   
 # filter to just those mechanisms with data for the relevant time period
@@ -486,7 +498,7 @@ TransformAnalyticsOutput_SiteTool <- function(analytics_results, dim_item_sets,
                               model_sets == data_element_map_item[[1, .]]))
   
   purrr::reduce(disagg_sets, 
-                MapDimToOptions, 
+                datapackcommons::MapDimToOptions, 
                 allocate = "distribute", 
                 .init = analytics_results) %>%  
     dplyr::mutate(psnuid = purrr::map_chr(.$ou_hierarchy, planning_level)) %>% 
