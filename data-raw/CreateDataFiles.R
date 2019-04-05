@@ -133,10 +133,17 @@ Map19Tto20T <-
 
 ValidateMap19Tto20T(Map19Tto20T, dim_item_sets, base_url)
 
+
+
+regional_to_national_mechs_cop19 <- readr::read_csv("./data-raw/NextGen Split Regional Mechanisms.csv",
+                                 col_types = readr::cols(.default = "c"))
+
+
 usethis::use_data(dim_item_sets, overwrite = TRUE, compress = "gzip")
 usethis::use_data(dim_item_sets_test, overwrite = TRUE, compress = "gzip")
 usethis::use_data(data_required, overwrite = TRUE, compress = "gzip")
 usethis::use_data(data_required_test, overwrite = TRUE, compress = "gzip")
 usethis::use_data(Map19Tto20T, overwrite = TRUE, compress = "gzip")
+usethis::use_data(regional_to_national_mechs_cop19, overwrite = TRUE, compress = "gzip")
 
 setwd(wd)
