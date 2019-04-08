@@ -147,12 +147,9 @@ test_that("MapMechToMech", {
   mechanism_map <- tibble::tribble(~psnuid, ~`Technical Area`, ~`Numerator / Denominator`,
                                    ~`Support Type`, ~oldMech, ~newMech, ~weight,
                                    "aaaaaaaaaaa", "PMTCT_STAT", "D", "DSD", "10020", "10270", .7,
-                                   "aaaaaaaaaaa", "PMTCT_STAT", "D", "DSD", "12345", "54321", .7,
+                                   "aaaaaaaaaaa", "PMTCT_STAT", "D", "DSD", "12345", "10271", .7,
                                    "aaaaaaaaaaa", "PMTCT_STAT", "D", "DSD", "10020", "10271", .3,
-                                   "aaaaaaaaaaa", "PMTCT_STAT", "D", "DSD", "10020", "10270", .5,
-                                   "aaaaaaaaaaa", "PMTCT_STAT", "D", "DSD", "10020", "10271", .5,
-                                   "aaaaaaaaaaa", "OVC_SERV", "N", "DSD", "10020", "10271", 1,
-                                   "aaaaaaaaaaa", "(ALL)", NA_character_, "DSD", "10020", "10271", 1)
+                                   "aaaaaaaaaaa", "(ALL)", NA_character_, "DSD", "10030", "10271", 1)
   
   density_test <- structure(list(`Age: Cascade Age bands` = "QOawCj9oLNS", `Disaggregation Type` = "Qbz6SrpmJ1y", 
                                        `Cascade sex` = "ZOYVg7Hosni", `Numerator / Denominator` = "QpNj0nSuEhD", 
@@ -167,31 +164,32 @@ test_that("MapMechToMech", {
                                        sex_option_name = "Female", sex_option_uid = "Z1EnpTPaUfq", 
                                        sex_sort_order = 201, sex_weight = 1, sex_model_sets = "F", 
                                        psnuid = "aaaaaaaaaaa", psnuValueH = 2290, mechanismCode = "10020", 
-                                       percent = 0.0331877729257642, indicatorCode = "PMTCT_STAT.D.Age/Sex.20T", 
+                                       percent = 0.033, indicatorCode = "PMTCT_STAT.D.Age/Sex.20T", 
                                        psnuValueH_after_site_drop = NA), row.names = c(NA, -1L), class = c("tbl_df", "tbl", "data.frame"))                                                                                                                                                   
 
-  # Tests for one to two mapping
+  # Tests for one to two mapping (Mech A -> B,C)
   
   mapped_output <- MapMechToMech(density_test, mechanism_map)
   
   testthat::expect_equal(nrow(mapped_output), 2)
   testthat::expect_equal(mapped_output$mechanismCode, c("10270","10271"))
   
-  # Tests for one to one mapping
+  # Tests for one to one mapping (Mech A -> B)
   
   mechanism_map_one <- mechanism_map[1,]
   mapped_output_one <- MapMechToMech(density_test, mechanism_map_one)
   testthat::expect_equal(nrow(mapped_output_one), 1)
   testthat::expect_equal(mapped_output_one$mechanismCode, "10270")
   
-  # Two to multi mapping
+  # Two to two mapping (Mech A -> C,D; Mech B -> D)
   
   second_row <- density_test
   second_row$mechanismCode = "12345"
   density_test_two <- rbind(density_test, second_row)
   mapped_output_two <- MapMechToMech(density_test_two, mechanism_map)
   
-  testthat::expect_equal(mapped_output_two$mechanismCode, c("10270","10271","54321"))
+  testthat::expect_equal(mapped_output_two$mechanismCode, c("10270","10271"))
+  testthat::expect_equal(mapped_output_two$siteValueH_adjusted, c(53.2,76))
   
   # Test that if no mech to mech map dataframe is passed, only the density is returned
   testthat::expect_equal(MapMechToMech(density_test), density_test)
