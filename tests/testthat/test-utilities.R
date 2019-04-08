@@ -144,9 +144,60 @@ test_that("MapDimToOptions", {
 
 test_that("MapMechToMech", {
   
-  # mechanism_map <- 
-  # Not using dput here before discussing what data can be added to github
+  mechanism_map <- tibble::tribble(~psnuid, ~`Technical Area`, ~`Numerator / Denominator`,
+                                   ~`Support Type`, ~oldMech, ~newMech, ~weight,
+                                   "aaaaaaaaaaa", "PMTCT_STAT", "D", "DSD", "10020", "10270", .7,
+                                   "aaaaaaaaaaa", "PMTCT_STAT", "D", "DSD", "12345", "54321", .7,
+                                   "aaaaaaaaaaa", "PMTCT_STAT", "D", "DSD", "10020", "10271", .3,
+                                   "aaaaaaaaaaa", "PMTCT_STAT", "D", "DSD", "10020", "10270", .5,
+                                   "aaaaaaaaaaa", "PMTCT_STAT", "D", "DSD", "10020", "10271", .5,
+                                   "aaaaaaaaaaa", "OVC_SERV", "N", "DSD", "10020", "10271", 1,
+                                   "aaaaaaaaaaa", "(ALL)", NA_character_, "DSD", "10020", "10271", 1)
   
-  MapMechToMech(density[["PMTCT_STAT.D.Age/Sex.20T"]], mechanism_map)
+  density_test <- structure(list(`Age: Cascade Age bands` = "QOawCj9oLNS", `Disaggregation Type` = "Qbz6SrpmJ1y", 
+                                       `Cascade sex` = "ZOYVg7Hosni", `Numerator / Denominator` = "QpNj0nSuEhD", 
+                                       `Technical Area` = "BTIqHnjeG7l", `Type of organisational unit` = "POHZmzofoVx", 
+                                       `Organisation unit` = "bbbbbbbbbbb", `Funding Mechanism` = "ccccccccccc", 
+                                       `Support Type` = "iM13vdNLWKb", siteValueH = 76, age_dim_uid = "e485zBiR7vG", 
+                                       age_dim_name = "Age: Cascade Age bands", age_dim_cop_type = "age", 
+                                       age_dim_item_name = "15-19 (Specific)", age_option_name = "15-19", 
+                                       age_option_uid = "ttf9eZCHsTU", age_sort_order = 60, age_weight = 1, 
+                                       age_model_sets = "10-50+", sex_dim_uid = "jyUTj5YC3OK", sex_dim_name = "Cascade sex", 
+                                       sex_dim_cop_type = "sex", sex_dim_item_name = "Females", 
+                                       sex_option_name = "Female", sex_option_uid = "Z1EnpTPaUfq", 
+                                       sex_sort_order = 201, sex_weight = 1, sex_model_sets = "F", 
+                                       psnuid = "aaaaaaaaaaa", psnuValueH = 2290, mechanismCode = "10020", 
+                                       percent = 0.0331877729257642, indicatorCode = "PMTCT_STAT.D.Age/Sex.20T", 
+                                       psnuValueH_after_site_drop = NA), row.names = c(NA, -1L), class = c("tbl_df", "tbl", "data.frame"))                                                                                                                                                   
+
+  # Tests for one to two mapping
+  
+  mapped_output <- MapMechToMech(density_test, mechanism_map)
+  
+  testthat::expect_equal(nrow(mapped_output), 2)
+  testthat::expect_equal(mapped_output$mechanismCode, c("10270","10271"))
+  
+  # Tests for one to one mapping
+  
+  mechanism_map_one <- mechanism_map[1,]
+  mapped_output_one <- MapMechToMech(density_test, mechanism_map_one)
+  testthat::expect_equal(nrow(mapped_output_one), 1)
+  testthat::expect_equal(mapped_output_one$mechanismCode, "10270")
+  
+  # Two to multi mapping
+  
+  second_row <- density_test
+  second_row$mechanismCode = "12345"
+  density_test_two <- rbind(density_test, second_row)
+  mapped_output_two <- MapMechToMech(density_test_two, mechanism_map)
+  
+  testthat::expect_equal(mapped_output_two$mechanismCode, c("10270","10271","54321"))
+  
+  # Test that if no mech to mech map dataframe is passed, only the density is returned
+  testthat::expect_equal(MapMechToMech(density_test), density_test)
+  
+  # Test that if inout site density has no rows, the empty site density df will be passed back
+  density_test_no_rows <- density_test[0, ]
+  testthat::expect_equal(MapMechToMech(density_test_no_rows, mechanism_map), density_test_no_rows)
   
 })
