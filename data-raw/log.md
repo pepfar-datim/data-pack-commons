@@ -1,3 +1,10 @@
+### 2019.04.10 built using datapackr branch/commit 
+https://github.com/pepfar-datim/datapackr/commit/0f56af7feed791c16773354b83ca7fefd3591fd9
+Site Tool_West-Central Africa Region_20190410085106
+- DataPack WCA Region.02Apr2019.0600pm.xlsx
+- Ghana_site_density_20190320_194432.rds
+# Ghana is the only country in the region with historical data in DATIM
+
 ### 2019.04.09 built using datapackr branch/commit 
 https://github.com/pepfar-datim/datapackr/commit/0f56af7feed791c16773354b83ca7fefd3591fd9
 Site Tool_West-Central Africa Region_20190409092257
