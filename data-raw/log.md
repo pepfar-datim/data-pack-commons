@@ -3,6 +3,12 @@
 Kazakhstan_site_density_20190411_104919
 Kyrgyzstan_site_density_20190411_105244
 Tajikistan_site_density_20190411_105502
+Burma_site_density_20190411_181345.
+Cambodia_site_density_20190411_181728.
+India_site_density_20190411_182100
+Indonesia_site_density_20190411_182609
+Nepal_site_density_20190411_182742
+Thailand_site_density_20190411_182940
 
 ### 2019.04.10
 
