@@ -1,5 +1,13 @@
 ### 2019.04.10 built using datapackr branch/commit 
 https://github.com/pepfar-datim/datapackr/commit/0f56af7feed791c16773354b83ca7fefd3591fd9
+Site Tool_Asia Region_Central Asia_20190411072726
+- Tajikistan_site_density_20190411_105502
+- Kyrgyzstan_site_density_20190411_105244
+- Kazakhstan_site_density_20190411_104919
+- DataPack_Asia Region_Central Asia - 04.10.2019_without_rows
+
+### 2019.04.10 built using datapackr branch/commit 
+https://github.com/pepfar-datim/datapackr/commit/0f56af7feed791c16773354b83ca7fefd3591fd9
 
 Papua New Guinea_site_density_20190410_191547
 Site Tool_Asia Region_Papua New Guinea_20190410153158
