@@ -1,3 +1,19 @@
+### 2019.04.15
+
+Densities
+Barbados_site_density_20190415_192112
+Guyana_site_density_20190415_193145
+Jamaica_site_density_20190415_193644
+Suriname_site_density_20190415_193927
+Trinidad & Tobago_site_density_20190415_194951
+El Salvador_site_density_20190415_195324
+Guatemala_site_density_20190415_195524
+Honduras_site_density_20190415_200111
+Nicaragua_site_density_20190415_200503
+Panama_site_density_20190415_200851
+Costa Rica_site_density_20190415_202506
+Brazil_site_density_20190415_202625
+
 ### 2019.04.11
 ### done in branch pull request 21
 
