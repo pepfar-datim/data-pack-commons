@@ -143,7 +143,7 @@ if(!(is.null(mech_to_mech_map) && is.null(sites))){
   columns <- c(names_in, "org_unit", "type", "percent", "siteValue", "siteValueH", "psnuValueH")
   site_tool_data <- site_tool_data %>% 
     dplyr::rename("type" = "Support Type", "org_unit" = "Organisation unit") %>% 
-    dplyr::select(dplyr::one_of(columns))
+    {suppressWarnings(dplyr::select(., dplyr::one_of(columns)))}
   d[["data"]][["site"]][["distributed"]] <- site_tool_data
 
   return(d)
@@ -239,9 +239,9 @@ CalculateSiteDensity <- function(data_element_map_item, country_details,
   check_sum_2s = site_data$siteValueH %>% sum()
   assertthat::assert_that(check_sum_1p == check_sum_2s)
 
-  check_sum_3p  <- joined_data %>% dplyr::select(-dplyr::one_of("percent", "siteValueH", 
+  check_sum_3p  <- joined_data %>% {suppressWarnings(dplyr::select(., -dplyr::one_of("percent", "siteValueH", 
                                           "Organisation unit", "Support Type",
-                                          "Type of organisational unit")) %>% 
+                                          "Type of organisational unit")))} %>% 
                                             unique() %>% 
                                             .[["psnuValueH"]] %>% 
                                             sum()
@@ -266,13 +266,13 @@ CalculateSiteDensity <- function(data_element_map_item, country_details,
 #' @return  Aggregated data for the input with summarized Value
 AggByAgeSexKpOuMechSt <- function(data) {
   #to do add assertions must include value and org unit columns
-  aggregated_data <- data %>%
-    dplyr::select(dplyr::one_of(c("sex_option_uid", "sex_option_name",
+  aggregated_data <- 
+    suppressWarnings(dplyr::select(data, dplyr::one_of(c("sex_option_uid", "sex_option_name",
                               "age_option_uid", "age_option_name",
                               "kp_option_uid", "kp_option_name",
                               "Organisation unit", 
                               "Funding Mechanism", "Support Type",
-                              "psnuid", "Value"))) %>%
+                              "psnuid", "Value")))) %>%
     dplyr::group_by_at(dplyr::vars(-Value)) %>% 
     dplyr::summarise(count = dplyr::n(), minimum = min(Value), 
               maximum = max(Value), Value = sum(Value)) %>% 
@@ -538,9 +538,8 @@ DropSitesFromDensity <- function(site_density, sites = NULL) {
   
   # get the IM x PSNU adjustment, group by excludes all columns that are
   # site specific since we want a sum of siteValueH for dropped sites by psnu x im
-  psnu_reductions =  site_data_to_drop %>%
-    dplyr::select(-dplyr::one_of("Organisation unit","Type of organisational unit",
-                                 "Support Type", "psnuValueH")) %>% 
+  psnu_reductions <- suppressWarnings(dplyr::select(site_data_to_drop, -dplyr::one_of("Organisation unit","Type of organisational unit",
+                                 "Support Type", "psnuValueH"))) %>% 
     dplyr::group_by_at(dplyr::vars(-siteValueH)) %>%
     dplyr::summarise(dropped_site_reduction = sum(siteValueH)) %>%
     dplyr::ungroup()
