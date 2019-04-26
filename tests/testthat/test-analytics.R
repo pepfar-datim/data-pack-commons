@@ -186,6 +186,26 @@ httptest::stop_mocking()
 })
 
 # This method is not yet exported
+testthat::test_that("GetSqlView", {
+  datapackcommons::DHISLogin_Play("2.29")
+  
+  result <- GetSqlView("qMYMT0iUGkG", "valueType", "TEXT", base_url = "https://play.dhis2.org/2.29/") %>% 
+    dplyr::select(valuetype) %>% 
+    dplyr::distinct()
+  
+  testthat::expect_equal(length(result), 1)
+  testthat::expect_equal(result[[1]], "TEXT")
+  testthat::expect_error(
+    GetSqlView("qMYMT0iUGkG", "valueType", base_url = "https://play.dhis2.org/2.29/") 
+    )
+  
+  result <- GetSqlView("GCZ01m3pIRd",  base_url = "https://play.dhis2.org/2.29/")
+  testthat::expect_gt(NROW(result), 0)
+  }
+  )
+  
+
+# This method is not yet exported
 testthat::test_that("TransformAnalyticsOutput_SiteTool", {
   
   # Data element map row for OVC SERV
