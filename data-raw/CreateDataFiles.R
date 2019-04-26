@@ -131,6 +131,20 @@ Map19Tto20T <-
                   col_types = readr::cols(.default = "c"),
                   na = c("NA")) 
 
+community_indicators_19T <- datapackcommons::GetSqlView("DotdxKrNZxG", "dataSets", "l796jk9SW7q") %>% 
+  dplyr::select(dataelement) %>% dplyr::distinct() %>% 
+  dplyr::filter(stringr::str_detect(.$dataelement, " DSD,")) %>% .[["dataelement"]]
+
+facility_indicators_19T <- datapackcommons::GetSqlView("DotdxKrNZxG", "dataSets", "eyI0UOWJnDk") %>% 
+  dplyr::select(dataelement) %>% dplyr::distinct() %>% 
+  dplyr::filter(stringr::str_detect(.$dataelement, " DSD,")) %>% .[["dataelement"]]
+
+dplyr::transmute(Map19Tto20T, reg_exp = paste0(technical_area, ".*", 
+                                     stringr::str_sub(num_or_den,1,1), ".* ", 
+                                     disagg_type, ")")) %>% .[["reg_exp"]] %>%
+  purrr::map_int(~sum(grepl(., facility_indicators_19T)))
+
+
 ValidateMap19Tto20T(Map19Tto20T, dim_item_sets, base_url)
 
 usethis::use_data(dim_item_sets, overwrite = TRUE, compress = "gzip")
