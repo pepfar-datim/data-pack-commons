@@ -131,18 +131,50 @@ Map19Tto20T <-
                   col_types = readr::cols(.default = "c"),
                   na = c("NA")) 
 
+# community indicator names from the "Data sets, elements and combos paramaterized" view using the
+# MER Targets: Community Based FY2019 dataset
 community_indicators_19T <- datapackcommons::GetSqlView("DotdxKrNZxG", "dataSets", "l796jk9SW7q") %>% 
   dplyr::select(dataelement) %>% dplyr::distinct() %>% 
-  dplyr::filter(stringr::str_detect(.$dataelement, " DSD,")) %>% .[["dataelement"]]
+  dplyr::filter(stringr::str_detect(.$dataelement, ", DSD")) %>% .[["dataelement"]]
 
+# check if historic indicator is community indicator 
+is_community_indicator <- 
+  dplyr::transmute(Map19Tto20T, 
+                   reg_exp = dplyr::if_else(disagg_type == "No Disagg",
+                                            paste0(technical_area, " \\(",
+                                                   stringr::str_sub(num_or_den,1,1), ", DSD\\)"),
+                                            paste0(technical_area, " \\(",
+                                                   stringr::str_sub(num_or_den,1,1), ", DSD, ", 
+                                                   disagg_type, "\\)")
+                                            )
+                   ) %>% 
+  .[["reg_exp"]] %>% 
+  purrr::map_int(~sum(grepl(., community_indicators_19T)))
+
+if(any(is_community_indicator > 1)){
+  stop("Getting more than one match between community data set indicators and mapped historic indicator")
+}
+
+# facility indicator names from the "Data sets, elements and combos paramaterized" view using the
+# MER Targets: Facility Based FY2019 dataset
 facility_indicators_19T <- datapackcommons::GetSqlView("DotdxKrNZxG", "dataSets", "eyI0UOWJnDk") %>% 
   dplyr::select(dataelement) %>% dplyr::distinct() %>% 
-  dplyr::filter(stringr::str_detect(.$dataelement, " DSD,")) %>% .[["dataelement"]]
+  dplyr::filter(stringr::str_detect(.$dataelement, ", DSD")) %>% .[["dataelement"]]
 
-dplyr::transmute(Map19Tto20T, reg_exp = paste0(technical_area, ".*", 
-                                     stringr::str_sub(num_or_den,1,1), ".* ", 
-                                     disagg_type, ")")) %>% .[["reg_exp"]] %>%
+is_facility_indicator <- dplyr::transmute(Map19Tto20T, reg_exp = paste0(technical_area, " \\(", 
+                                                                         stringr::str_sub(num_or_den,1,1), ", DSD, ", 
+                                                                         disagg_type, "\\)")) %>% 
+  .[["reg_exp"]] %>% 
   purrr::map_int(~sum(grepl(., facility_indicators_19T)))
+
+if(any(is_facility_indicator > 1)){
+  stop("Getting more than one match between facility data set indicators and mapped historic indicator")
+}
+
+Map19Tto20T <- mutate(Map19Tto20T, 
+                      community_valid = as.logical(is_community_indicator),
+                      facility_valid = as.logical(is_facility_indicator)
+                      )
 
 
 ValidateMap19Tto20T(Map19Tto20T, dim_item_sets, base_url)
