@@ -1,3 +1,11 @@
+### 2019.05.02 built using datapackr branch/commit
+https://github.com/pepfar-datim/datapackr/commit/0f56af7feed791c16773354b83ca7fefd3591fd9
+
+Site Tool_Tanzania_20190502223325
+  - Tanzania COP 19 Data Pack 20190502.xlsx 
+  - Tanzania_site_density_20190308_085254.rds 
+  - Mechanism Map_Tanzania_2May2019_Merged.xlsx 
+
 ### 2019.27.04 built using datapackr branch/commit
 https://github.com/pepfar-datim/datapackr/commit/0f56af7feed791c16773354b83ca7fefd3591fd9
 
