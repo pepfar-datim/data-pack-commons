@@ -1,6 +1,11 @@
 ### 2019.05.03 built using datapackr branch/commit
 https://github.com/pepfar-datim/datapackr/commit/0f56af7feed791c16773354b83ca7fefd3591fd9  
 
+Site Tool_Tanzania_20190503210304
+  - Tanzania COP 19 Data Pack 20190502.xlsx 
+  - Tanzania_site_density_20190308_085254.rds 
+  - Mechanism Map_Tanzania_3May2019_Merged_v2_sam.xlsx 
+
 Site Tool_Asia Region_Laos_20190503084707
 - 4.19.2019_Laos_Single Country DataPack_updated 5.03.2019.xlsx 
 - Laos_site_density_20190410_182919.rds 
