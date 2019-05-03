@@ -4,12 +4,10 @@
 \alias{CheckSiteToolData}
 \title{CheckSiteToolData(d, d_old)}
 \usage{
-CheckSiteToolData(d, d_old = NULL, issue_error = FALSE)
+CheckSiteToolData(d)
 }
 \arguments{
-\item{d}{list - the output of DistributeToSites}
-
-\item{d_old}{list - a prior output of DistributeToSites
+\item{d}{list - the output of DistributeToSites
 if present check includes comparison
 all_equal(d_new$data$site$distributed, d_old$data$site$distributed)}
 

@@ -143,7 +143,7 @@ if(!(is.null(mech_to_mech_map) && is.null(sites))){
   columns <- c(names_in, "org_unit", "type", "percent", "siteValue", "siteValueH", "psnuValueH")
   site_tool_data <- site_tool_data %>% 
     dplyr::rename("type" = "Support Type", "org_unit" = "Organisation unit") %>% 
-    dplyr::select(dplyr::one_of(columns))
+    {suppressWarnings(dplyr::select(., dplyr::one_of(columns)))}
   d[["data"]][["site"]][["distributed"]] <- site_tool_data
 
   return(d)
@@ -239,9 +239,9 @@ CalculateSiteDensity <- function(data_element_map_item, country_details,
   check_sum_2s = site_data$siteValueH %>% sum()
   assertthat::assert_that(check_sum_1p == check_sum_2s)
 
-  check_sum_3p  <- joined_data %>% dplyr::select(-dplyr::one_of("percent", "siteValueH", 
+  check_sum_3p  <- joined_data %>% {suppressWarnings(dplyr::select(., -dplyr::one_of("percent", "siteValueH", 
                                           "Organisation unit", "Support Type",
-                                          "Type of organisational unit")) %>% 
+                                          "Type of organisational unit")))} %>% 
                                             unique() %>% 
                                             .[["psnuValueH"]] %>% 
                                             sum()
@@ -266,13 +266,13 @@ CalculateSiteDensity <- function(data_element_map_item, country_details,
 #' @return  Aggregated data for the input with summarized Value
 AggByAgeSexKpOuMechSt <- function(data) {
   #to do add assertions must include value and org unit columns
-  aggregated_data <- data %>%
-    dplyr::select(dplyr::one_of(c("sex_option_uid", "sex_option_name",
+  aggregated_data <- 
+    suppressWarnings(dplyr::select(data, dplyr::one_of(c("sex_option_uid", "sex_option_name",
                               "age_option_uid", "age_option_name",
                               "kp_option_uid", "kp_option_name",
                               "Organisation unit", 
                               "Funding Mechanism", "Support Type",
-                              "psnuid", "Value"))) %>%
+                              "psnuid", "Value")))) %>%
     dplyr::group_by_at(dplyr::vars(-Value)) %>% 
     dplyr::summarise(count = dplyr::n(), minimum = min(Value), 
               maximum = max(Value), Value = sum(Value)) %>% 
@@ -355,19 +355,25 @@ BuildDimensionLists <- function(data_element_map_item, dim_item_sets,
        community = dimensions_community)
 }
 
-## Draft perhaps temporary Function
+#' @export
 #' @title CheckSiteToolData(d, d_old)
 #' 
 #' @description Performs some checks on the results of distributing data to sites
 #' @param d list - the output of DistributeToSites
-#' @param d_old list - a prior output of DistributeToSites
+
 #' if present check includes comparison
 #' all_equal(d_new$data$site$distributed, d_old$data$site$distributed) 
 #' @param issue_error boolean - if true failing one or more tests 
 #' will return an error
 #' @return  list with various check outcomes
-CheckSiteToolData <- function(d, d_old = NULL, issue_error = FALSE){
+CheckSiteToolData <- function(d #, d_old = NULL, issue_error = FALSE
+                              ){
+  # Most of these checks were used in COP19 for development and debugging
+  # The only check run consistently in maitenance mode was that the site tool totals 
+  # matched (with small rounding error) the data pack totals by indicator
+  # The other checks are commented out 
   
+  # @param d_old list - a prior output of DistributeToSites  
   datapack_data  <-  d[["data"]][["distributedMER"]]
   site_tool_data  <-  d[["data"]][["site"]][["distributed"]]
   site_tool_data_site <- dplyr::filter(site_tool_data, !is.na(siteValue))
@@ -383,89 +389,46 @@ CheckSiteToolData <- function(d, d_old = NULL, issue_error = FALSE){
     dplyr::summarise(psnu = sum(value, na.rm=TRUE)) %>% 
     dplyr::ungroup()
   
-  totals <-  
+  reconciled_totals <-  
     site_tool_data %>% 
     dplyr::group_by(indicatorCode) %>% 
     dplyr::summarise(site = sum(siteValue, na.rm=TRUE)) %>% 
     dplyr::ungroup() %>% dplyr::full_join(sum_site_psnu_only) %>% 
     dplyr::full_join(sum_dp) %>% dplyr::group_by(indicatorCode) %>% 
-    dplyr::summarise(input_total = sum(input = sum(original, na.rm=TRUE)), 
+    dplyr::summarise(datapack_total = sum(input = sum(original, na.rm=TRUE)), 
                      site_tool_total = sum(site, na.rm=TRUE) + sum(psnu, na.rm=TRUE),
-                     difference = input_total - site_tool_total) %>% 
+                     difference = datapack_total - site_tool_total) %>% 
     dplyr::ungroup()
-  print(totals)
-  mechanisms_not_distributed <- dplyr::setdiff(datapack_data$mechanismCode, 
-                                             site_tool_data_site$mechanismCode)
-  print(mechanisms_not_distributed)
-  psnus_not_distributed <- dplyr::setdiff(datapack_data$psnuid, 
-                                               site_tool_data_site$psnuid)
-  print(psnus_not_distributed)
-  targets_not_distributed <- dplyr::setdiff(datapack_data$indicatorCode, 
-                                          site_tool_data_site$indicatorCode)    
-  print(targets_not_distributed)
   
-  indicators_ages_dp <- datapack_data %>% dplyr::select(indicatorCode, Age) %>% unique()
-  indicators_ages_site <- site_tool_data_site %>% dplyr::select(indicatorCode, Age) %>% unique()
-  indicator_age_combos_not_distributed = dplyr::anti_join(indicators_ages_dp, indicators_ages_site)
-  
-  indicators_sexes_dp <- datapack_data %>% dplyr::select(indicatorCode, Sex) %>% unique()
-  indicators_sexes_site <- site_tool_data_site %>% dplyr::select(indicatorCode, Sex) %>% unique()
-  indicator_sexes_combos_not_distributed = dplyr::anti_join(indicators_sexes_dp, indicators_sexes_site)
-  
-  indicators_kps_dp <- datapack_data %>% dplyr::select(indicatorCode, KeyPop) %>% unique()
-  indicators_kps_site <- site_tool_data_site %>% dplyr::select(indicatorCode, KeyPop) %>% unique()
-  indicator_kps_combos_not_distributed = dplyr::anti_join(indicators_kps_dp, indicators_kps_site)
-  
+  # mechanisms_not_distributed <- dplyr::setdiff(datapack_data$mechanismCode, 
+  #                                            site_tool_data_site$mechanismCode)
+  # print(mechanisms_not_distributed)
+  # psnus_not_distributed <- dplyr::setdiff(datapack_data$psnuid, 
+  #                                              site_tool_data_site$psnuid)
+  # print(psnus_not_distributed)
+  # targets_not_distributed <- dplyr::setdiff(datapack_data$indicatorCode, 
+  #                                         site_tool_data_site$indicatorCode)    
+  # print(targets_not_distributed)
+  # 
+  # indicators_ages_dp <- datapack_data %>% dplyr::select(indicatorCode, Age) %>% unique()
+  # indicators_ages_site <- site_tool_data_site %>% dplyr::select(indicatorCode, Age) %>% unique()
+  # indicator_age_combos_not_distributed = dplyr::anti_join(indicators_ages_dp, indicators_ages_site)
+  # 
+  # indicators_sexes_dp <- datapack_data %>% dplyr::select(indicatorCode, Sex) %>% unique()
+  # indicators_sexes_site <- site_tool_data_site %>% dplyr::select(indicatorCode, Sex) %>% unique()
+  # indicator_sexes_combos_not_distributed = dplyr::anti_join(indicators_sexes_dp, indicators_sexes_site)
+  # 
+  # indicators_kps_dp <- datapack_data %>% dplyr::select(indicatorCode, KeyPop) %>% unique()
+  # indicators_kps_site <- site_tool_data_site %>% dplyr::select(indicatorCode, KeyPop) %>% unique()
+  # indicator_kps_combos_not_distributed = dplyr::anti_join(indicators_kps_dp, indicators_kps_site)
+  # 
   # make sure all the historic disaggs map to a disagg in the datapack data
   # ages_density_data <- purrr::map(site_densities, "age_option_name") %>% purrr::reduce(dplyr::union)
   # sexes_density_data <- purrr::map(site_densities, "sex_option_name") %>% purrr::reduce(dplyr::union)
   # kps_density_data <- purrr::map(site_densities, "kp_option_name") %>% purrr::reduce(dplyr::union)
-  # print( unique(datapack_data$kp_option_name))
-  # assertthat::assert_that(setequal(ages_density_data, datapack_data$age_option_name),
-  #                         setequal(sexes_density_data, datapack_data$sex_option_name),
-  #                         setequal(kps_density_data, datapack_data$kp_option_name)
-  #                         )
-   
 
-  # save the original total by indicator of incoming targets for checking later
-
-  # sanity check that the sum of targets in the input 
-  #    equals the sum of targets in the output file
-  
-
-  
-  #assertthat::assert_that(sum_in == sum_out_psnu + sum_out_site)
-  
-  d[["data"]][["site"]][["other"]] <- sum_reconcile
-  
-  
-  
-  # left <<- dplyr::left_join(site_tool_data, matched_data)
-  # inner <<- dplyr::inner_join(site_tool_data, matched_data)
-  # anti_dp <<- dplyr::anti_join(site_tool_data, matched_data)
-  # anti_h <<- dplyr::anti_join(matched_data, site_tool_data)
-  
-  
-  # setdiff(site_tool_data$psnuid, matched_data$psnuid)
-  # setdiff(site_tool_data$mechanismCode, matched_data$mechanismCode)
-  # setdiff(site_tool_data$indicatorCode, matched_data$indicatorCode)
-  # setdiff(site_tool_data$age_option_name, matched_data$age_option_name)
-  
-  # eswitani reconciliation
-  #     HTS_INDEX_COM.N.Age/Sex/Result.20T.NewPos
-  # reconcile <- anti_dp %>% 
-  #   filter(psnuid != "WtniIbuJk7k",
-  #          !(indicatorCode %in% setdiff(datapack_data$indicatorCode, historic_data$indicatorCode)),
-  #          (indicatorCode != "HTS_INDEX_COM.N.Age/Sex/Result.20T.NewNeg"), #eswatini
-  #          (indicatorCode != "HTS_INDEX_COM.N.Age/Sex/Result.20T.NewPos"),#eswatini
-  #          Age != "<15", Age != "15+",
-  #          !(mechanismCode %in% setdiff(datapack_data$mechanismCode, historic_data$mechanismCode)) )
-  # 
-  # drill <- matched_data %>% filter(#psnuid=="nxGb6sd7p7D", 
-  #                                   indicatorCode == "PMTCT_STAT.D.Age/Sex.20T")#,
-  #                                   #mechanismCode=="18599")
-  
   # dplyr::all_equal(d_new$data$site$distributed, d_old$data$site$distributed) 
+  return(list(reconciled_totals = reconciled_totals))
 }
 
 #' @title TransformAnalyticsOutput_SiteTool()
@@ -575,9 +538,8 @@ DropSitesFromDensity <- function(site_density, sites = NULL) {
   
   # get the IM x PSNU adjustment, group by excludes all columns that are
   # site specific since we want a sum of siteValueH for dropped sites by psnu x im
-  psnu_reductions =  site_data_to_drop %>%
-    dplyr::select(-dplyr::one_of("Organisation unit","Type of organisational unit",
-                                 "Support Type", "psnuValueH")) %>% 
+  psnu_reductions <- suppressWarnings(dplyr::select(site_data_to_drop, -dplyr::one_of("Organisation unit","Type of organisational unit",
+                                 "Support Type", "psnuValueH"))) %>% 
     dplyr::group_by_at(dplyr::vars(-siteValueH)) %>%
     dplyr::summarise(dropped_site_reduction = sum(siteValueH)) %>%
     dplyr::ungroup()
