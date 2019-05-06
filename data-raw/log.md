@@ -1,3 +1,19 @@
+### 2019.05.06 built using datapackr branch/commit
+https://github.com/pepfar-datim/datapackr/commit/0f56af7feed791c16773354b83ca7fefd3591fd9  
+
+Site Tool_South Africa_20190506194458.xlsx
+- DUIT Approved MASTER_DataPack_South Africa_v19.4.xlsx
+
+No distribution applied.
+
+d$data$site$distributed = d$data$distributedMER
+d$data$site$distributed <- d$data$site$distributed %>% dplyr::mutate(org_unit = NA_character_,
+                                                                     siteValue = NA_real_,
+                                                                     type = NA_character_)
+
+datapackr::packSiteTool(d,
+                        output_path = paste0(support_dir_path, "site_tools/"))
+
 ### 2019.05.03 built using datapackr branch/commit
 https://github.com/pepfar-datim/datapackr/commit/0f56af7feed791c16773354b83ca7fefd3591fd9  
 
