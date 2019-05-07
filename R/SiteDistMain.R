@@ -205,6 +205,7 @@ CalculateSiteDensity <- function(data_element_map_item, country_details,
   # Do I need to be concerned about rounding error
   
   check_sum_1p = (sum(analytics_output_list$planning$results$Value))
+# if facility or community is null sum should return 0
   check_sum_1s = (sum(analytics_output_list$facility$results$Value) +
                     sum(analytics_output_list$community$results$Value))
   
@@ -217,7 +218,8 @@ CalculateSiteDensity <- function(data_element_map_item, country_details,
     .[["processed"]] %>% 
     dplyr::select(-dplyr::one_of("Organisation unit", "count", "maximum", "minimum")) %>% 
     dplyr::rename("psnuValueH" = "Value")
-  
+
+# If community or facility is NULL bind_rows will just return the non empty data set  
   site_data <- dplyr::bind_rows(analytics_output_list$community$results,
                                 analytics_output_list$facility$results) %>% 
     TransformAnalyticsOutput_SiteTool(dim_item_sets, data_element_map_item,
@@ -328,31 +330,43 @@ BuildDimensionLists <- function(data_element_map_item, dim_item_sets,
   
   dimensions_planning <- #filter on community and facility gets rid of military PSNU
     tibble::tribble(~type, ~dim_item_uid, ~dim_uid,
-                    "dimension", paste0("LEVEL-", country_details$planning_level), "ou",
-                    "filter", "POHZmzofoVx", "mINJi7rR1a6", # facility type of organization unit
-                    "filter", "PvuaP6YALSA","mINJi7rR1a6" # community type of organization unit
+                    "dimension", paste0("LEVEL-", country_details$planning_level), "ou"#,
+       #             "filter", "POHZmzofoVx", "mINJi7rR1a6", # facility type of organization unit
+      #              "filter", "PvuaP6YALSA","mINJi7rR1a6" # community type of organization unit
     ) %>% 
     dplyr::bind_rows(dimensions_common)
   
-  dimensions_facility <- 
-    tibble::tribble(~type, ~dim_item_uid, ~dim_uid,
-                    "dimension", paste0("LEVEL-", country_details$facility_level), "ou",
-                    "dimension", "POHZmzofoVx", "mINJi7rR1a6", # facility org type
-                    "dimension", "iM13vdNLWKb", "TWXpUVE2MqL", #dsd and ta support types
-                    "dimension", "cRAGKdWIDn4", "TWXpUVE2MqL") %>% 
-    dplyr::bind_rows(dimensions_common)
+  out <- list(planning = dimensions_planning)
+
+  if(data_element_map_item$facility_valid == TRUE){
+    dimensions_facility <- 
+      tibble::tribble(~type, ~dim_item_uid, ~dim_uid,
+                      "dimension", paste0("LEVEL-", country_details$facility_level), "ou",
+                      "dimension", "POHZmzofoVx", "mINJi7rR1a6", # facility org type
+                      "dimension", "iM13vdNLWKb", "TWXpUVE2MqL", #dsd and ta support types
+                      "dimension", "cRAGKdWIDn4", "TWXpUVE2MqL") %>% 
+      dplyr::bind_rows(dimensions_common)
+    
+    out$planning <- rbind(out$planning, 
+                                 c("filter", "POHZmzofoVx", "mINJi7rR1a6"))
+    out$facility <-  dimensions_facility
+  }
   
-  dimensions_community <- 
-    tibble::tribble(~type, ~dim_item_uid, ~dim_uid,
-                    "dimension", paste0("LEVEL-", country_details$community_level), "ou",
-                    "dimension", "PvuaP6YALSA","mINJi7rR1a6", # community org type
-                    "dimension", "iM13vdNLWKb", "TWXpUVE2MqL", #dsd and ta support types
-                    "dimension", "cRAGKdWIDn4", "TWXpUVE2MqL") %>% 
-    dplyr::bind_rows(dimensions_common)
+  if(data_element_map_item$community_valid == TRUE){
+    dimensions_community <- 
+      tibble::tribble(~type, ~dim_item_uid, ~dim_uid,
+                      "dimension", paste0("LEVEL-", country_details$community_level), "ou",
+                      "dimension", "PvuaP6YALSA","mINJi7rR1a6", # community org type
+                      "dimension", "iM13vdNLWKb", "TWXpUVE2MqL", #dsd and ta support types
+                      "dimension", "cRAGKdWIDn4", "TWXpUVE2MqL") %>% 
+      dplyr::bind_rows(dimensions_common)
+    
+    out$planning <- rbind(out$planning, 
+                          c("filter", "PvuaP6YALSA", "mINJi7rR1a6"))
+    out$community = dimensions_community
+  }
   
-  list(planning = dimensions_planning,
-       facility = dimensions_facility,
-       community = dimensions_community)
+return(out)
 }
 
 #' @export
