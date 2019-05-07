@@ -14,6 +14,12 @@ d$data$site$distributed <- d$data$site$distributed %>% dplyr::mutate(org_unit = 
 datapackr::packSiteTool(d,
                         output_path = paste0(support_dir_path, "site_tools/"))
 
+Central_Asia_region__distributed_20190506_204235
+- DataPack_Central_Asia_05 06 2019.xlsx
+- Tajikistan_site_density_20190411_105502
+- Kyrgyzstan_site_density_20190411_105244
+- Kazakhstan_site_density_20190411_104919
+
 ### 2019.05.03 built using datapackr branch/commit
 https://github.com/pepfar-datim/datapackr/commit/0f56af7feed791c16773354b83ca7fefd3591fd9  
 
