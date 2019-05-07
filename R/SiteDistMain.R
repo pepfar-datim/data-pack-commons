@@ -330,10 +330,7 @@ BuildDimensionLists <- function(data_element_map_item, dim_item_sets,
   
   dimensions_planning <- #filter on community and facility gets rid of military PSNU
     tibble::tribble(~type, ~dim_item_uid, ~dim_uid,
-                    "dimension", paste0("LEVEL-", country_details$planning_level), "ou"#,
-       #             "filter", "POHZmzofoVx", "mINJi7rR1a6", # facility type of organization unit
-      #              "filter", "PvuaP6YALSA","mINJi7rR1a6" # community type of organization unit
-    ) %>% 
+                    "dimension", paste0("LEVEL-", country_details$planning_level), "ou") %>% 
     dplyr::bind_rows(dimensions_common)
   
   out <- list(planning = dimensions_planning)
