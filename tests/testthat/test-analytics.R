@@ -186,6 +186,26 @@ httptest::stop_mocking()
 })
 
 # This method is not yet exported
+testthat::test_that("GetSqlView", {
+  datapackcommons::DHISLogin_Play("2.29")
+  
+  result <- GetSqlView("qMYMT0iUGkG", "valueType", "TEXT", base_url = "https://play.dhis2.org/2.29/") %>% 
+    dplyr::select(valuetype) %>% 
+    dplyr::distinct()
+  
+  testthat::expect_equal(length(result), 1)
+  testthat::expect_equal(result[[1]], "TEXT")
+  testthat::expect_error(
+    GetSqlView("qMYMT0iUGkG", "valueType", base_url = "https://play.dhis2.org/2.29/") 
+    )
+  
+  result <- GetSqlView("GCZ01m3pIRd",  base_url = "https://play.dhis2.org/2.29/")
+  testthat::expect_gt(NROW(result), 0)
+  }
+  )
+  
+
+# This method is not yet exported
 testthat::test_that("TransformAnalyticsOutput_SiteTool", {
   
   # Data element map row for OVC SERV
@@ -264,4 +284,36 @@ testthat::test_that("TransformAnalyticsOutput_SiteTool", {
   agg_output$processed$psnuid %>% unique() %>% 
     testthat::expect_equal("OrgU1111111")
 
+})
+
+testthat::test_that("BuildDimensionsLists",{
+  mechanisms <- structure(list(code = c("MECH1", "MECH2"), 
+                               name = c("MECH1", "MECH2"), 
+                               categoryOptionComboId = c("Coc11111111", "Coc22222222"), 
+                               categoryOptionId = c("Co111111111", "Co222222222")), 
+                          row.names = c(NA, -2L), class = c("tbl_df", "tbl", "data.frame")
+  )
+  
+  country_details <- structure(list(country_level = 3L, planning_level = 4L, prioritization_level = 4L, 
+                                    facility_level = 7L, community_level = 6L, country_name = "Country 1", 
+                                    id = "Country1111"), row.names = c(NA, -1L), class = "data.frame")
+  
+  result <- BuildDimensionLists(dplyr::slice(datapackcommons::Map19Tto20T, 4),
+                      datapackcommons::dim_item_sets,
+                      mechanisms,
+                      country_details)
+  testthat::expect_named(result, c("planning", "community"))
+  
+  
+  result <- BuildDimensionLists(dplyr::slice(datapackcommons::Map19Tto20T, 5),
+                      datapackcommons::dim_item_sets,
+                      mechanisms,
+                      country_details)
+  testthat::expect_named(result, c("planning", "facility"))
+  
+  result <- BuildDimensionLists(dplyr::slice(datapackcommons::Map19Tto20T, 36),
+                      datapackcommons::dim_item_sets,
+                      mechanisms,
+                      country_details)
+  testthat::expect_named(result, c("planning", "facility", "community"))  
 })

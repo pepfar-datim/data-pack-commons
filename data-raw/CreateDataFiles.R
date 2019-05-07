@@ -131,6 +131,69 @@ Map19Tto20T <-
                   col_types = readr::cols(.default = "c"),
                   na = c("NA")) 
 
+# MER Targets: Community Based FY2019 data set = l796jk9SW7q
+# Get character vector of indicator names
+community_indicators_19T <-  datapackcommons::getMetadata(base_url, end_point = "dataSets", 
+                             filters = "id:eq:l796jk9SW7q", 
+                             fields = "dataSetElements[dataElement[name]]") %>% 
+  .[["dataSetElements"]] %>% 
+  .[[1]] %>% 
+  .[["dataElement"]] %>% 
+  .[["name"]] 
+
+# check if historic indicator in the map is a community indicator 
+# handle the no disagg case seperately
+is_community_indicator <- 
+  dplyr::transmute(Map19Tto20T, 
+                   reg_exp = dplyr::if_else(disagg_type == "No Disagg",
+                                            paste0(technical_area, " \\(",
+                                                   stringr::str_sub(num_or_den,1,1), ", DSD\\)"),
+                                            paste0(technical_area, " \\(",
+                                                   stringr::str_sub(num_or_den,1,1), ", DSD, ", 
+                                                   disagg_type, "\\)")
+                                            )
+                   ) %>% 
+  .[["reg_exp"]] %>% 
+  purrr::map_int(~sum(grepl(., community_indicators_19T)))
+
+if(any(is_community_indicator > 1)){
+  stop("Getting more than one match between community data set indicators and mapped historic indicator")
+}
+
+# MER Targets: Facility Based FY2019 data set = eyI0UOWJnDk
+# Get character vector of indicator names
+facility_indicators_19T <-  datapackcommons::getMetadata(base_url, end_point = "dataSets", 
+                                                          filters = "id:eq:eyI0UOWJnDk",
+                                                          fields = "dataSetElements[dataElement[name]]") %>% 
+  .[["dataSetElements"]] %>% 
+  .[[1]] %>% 
+  .[["dataElement"]] %>% 
+  .[["name"]] 
+
+# check if historic indicator is facility indicator 
+# handle the no disagg case seperatly
+is_facility_indicator <- 
+  dplyr::transmute(Map19Tto20T, 
+                   reg_exp = dplyr::if_else(disagg_type == "No Disagg",
+                                            paste0(technical_area, " \\(",
+                                                   stringr::str_sub(num_or_den,1,1), ", DSD\\)"),
+                                            paste0(technical_area, " \\(",
+                                                   stringr::str_sub(num_or_den,1,1), ", DSD, ", 
+                                                   disagg_type, "\\)")
+                   )
+  ) %>% 
+  .[["reg_exp"]] %>% 
+  purrr::map_int(~sum(grepl(., facility_indicators_19T)))
+
+if(any(is_facility_indicator > 1)){
+  stop("Getting more than one match between facility data set indicators and mapped historic indicator")
+}
+
+Map19Tto20T <- mutate(Map19Tto20T, 
+                      community_valid = as.logical(is_community_indicator),
+                      facility_valid = as.logical(is_facility_indicator)
+                      )
+
 ValidateMap19Tto20T(Map19Tto20T, dim_item_sets, base_url)
 
 
