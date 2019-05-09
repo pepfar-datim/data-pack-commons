@@ -1,3 +1,15 @@
+### 2019.05.08 built using datapackr branch/commit
+https://github.com/pepfar-datim/datapackr/commit/0f56af7feed791c16773354b83ca7fefd3591fd9  
+
+Site Tool_Asia Region_Central_Asia_20190509094828
+- DataPack_Central_Asia_05 06 2019.xlsx
+- Tajikistan_site_density_20190411_105502
+- Kyrgyzstan_site_density_20190411_105244
+- Kazakhstan_site_density_20190411_104919
+
+- I used a manually prepped mechanism map for this in order to distribute TX data
+Mechanism_Map_Central_Asia_Manual.csv
+
 ### 2019.05.06 built using datapackr branch/commit
 https://github.com/pepfar-datim/datapackr/commit/0f56af7feed791c16773354b83ca7fefd3591fd9  
 
