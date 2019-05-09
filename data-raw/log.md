@@ -1,6 +1,13 @@
 ### 2019.05.08 built using datapackr branch/commit
 https://github.com/pepfar-datim/datapackr/commit/0f56af7feed791c16773354b83ca7fefd3591fd9  
 
+Cameroon_site_density_v2_20190509_143234 - version in which distribution to sites restricted by facility type
+
+Site Tool_Cameroon_20190509170913.xlsx
+Generated with: 
+  - PEPFAR Cameroon COP19 Datapack  May 9 2019_V01.xlsx 
+  - Cameroon_site_density_v2_20190509_143234.rds 
+
 Site Tool_Asia Region_Central_Asia_20190509094828
 - DataPack_Central_Asia_05 06 2019.xlsx
 - Tajikistan_site_density_20190411_105502
