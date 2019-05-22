@@ -1,3 +1,26 @@
+### 2019.05.21
+
+Site Tool_Haiti_20190521094211.xlsx
+  - DataPack_Haiti_Vn1_MS2_NC_051619.xlsx 
+  - Haiti_site_density_v2_20190517_211528.rds 
+  - Mechanism Map_Haiti_20190513114709.xlsx (Sam added dsd to a copuls of blank support types)
+  
+  
+Site Tool_Botswana_20190521223319
+
+ - DataPack_Botswana_20190521V38 Non-Citizens.xlsx 
+ - Botswana_site_density_v2_20190520_074558.rds 
+ - 20190521EDITED-COP19SiteList_Botswana_20190314144636_Version2.csv 
+
+### 2019.05.20
+
+Botswana_site_density_v2_20190520_074558
+
+### 2019.05.17
+
+Haiti_site_density_v2_20190517_211528
+
+
 ### 2019.05.08 built using datapackr branch/commit
 https://github.com/pepfar-datim/datapackr/commit/0f56af7feed791c16773354b83ca7fefd3591fd9  
 
