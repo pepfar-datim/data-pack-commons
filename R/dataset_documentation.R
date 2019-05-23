@@ -112,7 +112,7 @@
 #'   \item{A.add_dim_1_uid}{additonal dimensions uid}
 #'   \item{A.add_dim_1_items}{name of additional dimension item to filter on - only one supported}
 #'   \item{A.add_dim_1_items_uid}{name of additional dimension item to filter on - only one supported}
-#'   \item{B.ind_code}{see A.dx_code}
+#'   \item{B.dx_code}{see A.dx_code}
 #'   \item{B.ind_uid}{see A.ind_uid}
 #'   \item{B.periods}{see A.periods}
 #'   \item{B.age_set}{see A.age_set}
@@ -167,7 +167,7 @@
 #'   \item{A.add_dim_1_uid}{additonal dimensions uid}
 #'   \item{A.add_dim_1_items}{name of additional dimension item to filter on - only one supported}
 #'   \item{A.add_dim_1_items_uid}{name of additional dimension item to filter on - only one supported}
-#'   \item{B.ind_code}{see A.dx_code}
+#'   \item{B.dx_code}{see A.dx_code}
 #'   \item{B.ind_uid}{see A.ind_uid}
 #'   \item{B.periods}{see A.periods}
 #'   \item{B.age_set}{see A.age_set}
