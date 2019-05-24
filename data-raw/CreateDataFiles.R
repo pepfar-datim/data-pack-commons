@@ -54,10 +54,10 @@ ValidateDimItemSets <- function(dim_item_sets, base_url){
   }
 
 ValidateDataRequired <- function(data_required, base_url){
-  data_required %>% dplyr::filter(!is.na(A.ind_uid)) %>%
-  {ValidateCodeIdPairs(base_url, .[["A.dx_code"]], .[["A.ind_uid"]], "indicators")}
-  data_required %>% dplyr::filter(!is.na(B.ind_uid)) %>%
-  {ValidateCodeIdPairs(base_url, .[["B.dx_code"]], .[["B.ind_uid"]], "indicators")}
+  data_required %>% dplyr::filter(!is.na(A.dx_id)) %>%
+  {ValidateCodeIdPairs(base_url, .[["A.dx_code"]], .[["A.dx_id"]], "indicators")}
+  data_required %>% dplyr::filter(!is.na(B.dx_id)) %>%
+  {ValidateCodeIdPairs(base_url, .[["B.dx_code"]], .[["B.dx_id"]], "indicators")}
   
   data_required %>% dplyr::filter(!is.na(A.add_dim_1_uid)) %>%
   {ValidateNameIdPairs(base_url, .[["A.add_dim_1"]], .[["A.add_dim_1_uid"]], "dimensions")}
