@@ -101,7 +101,7 @@
 #'   options result from the indicator call.}
 #'   \item{A.dx_code}{indicator code}
 #'   \item{A.dx_id}{indicator uid}
-#'   \item{A.periods}{period (ISO/DHIS2 format) - currently only one supported}
+#'   \item{A.pe_iso}{period (ISO/DHIS2 format) - currently only one supported}
 #'   \item{A.age_set}{age set from dim_item_sets}
 #'   \item{A.sex_set}{sex set from dim_item_sets}
 #'   \item{A.kp_set}{key population set from dim_item_sets}
@@ -114,7 +114,7 @@
 #'   \item{A.add_dim_1_items_uid}{name of additional dimension item to filter on - only one supported}
 #'   \item{B.dx_code}{see A.dx_code}
 #'   \item{B.dx_id}{see A.dx_id}
-#'   \item{B.periods}{see A.periods}
+#'   \item{B.pe_iso}{see A.pe_iso}
 #'   \item{B.age_set}{see A.age_set}
 #'   \item{B.sex_set}{see A.sex_set}
 #'   \item{B.kp_set}{see A.kp_set}
@@ -156,7 +156,7 @@
 #'   options result from the indicator call.}
 #'   \item{A.dx_code}{indicator code}
 #'   \item{A.dx_id}{indicator uid}
-#'   \item{A.periods}{period (ISO/DHIS2 format) - currently only one supported}
+#'   \item{A.pe_iso}{period (ISO/DHIS2 format) - currently only one supported}
 #'   \item{A.age_set}{age set from dim_item_sets}
 #'   \item{A.sex_set}{sex set from dim_item_sets}
 #'   \item{A.kp_set}{key population set from dim_item_sets}
@@ -169,7 +169,7 @@
 #'   \item{A.add_dim_1_items_uid}{name of additional dimension item to filter on - only one supported}
 #'   \item{B.dx_code}{see A.dx_code}
 #'   \item{B.dx_id}{see A.dx_id}
-#'   \item{B.periods}{see A.periods}
+#'   \item{B.pe_iso}{see A.pe_iso}
 #'   \item{B.age_set}{see A.age_set}
 #'   \item{B.sex_set}{see A.sex_set}
 #'   \item{B.kp_set}{see A.kp_set}
