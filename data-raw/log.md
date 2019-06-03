@@ -1,3 +1,10 @@
+### 2019.05.29 built using datapackr branch/commit
+https://github.com/pepfar-datim/datapackr/commit/0f56af7feed791c16773354b83ca7fefd3591fd9 
+
+Site Tool_Cameroon_20190529114451
+  - PEPFAR Cameroon COP19 Datapack  May 29 2019 PRH-FixLockedMilTBunlocked.xlsx 
+  - Cameroon_site_density_v2_20190509_143234.rds 
+  
 ### 2019.05.21
 
 Site Tool_Haiti_20190521094211.xlsx
