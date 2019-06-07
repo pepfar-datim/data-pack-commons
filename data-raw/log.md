@@ -1,3 +1,13 @@
+### 2019.06.06
+Site Tool_Mozambique_20190606093359.xlsx
+ - DataPack_Mozambique 2019 DATIM Submit 6.1.2019 Removed Hidden TabsTesting Mil Update9.xlsx 
+  - Mozambique_site_density_v2_20190605_064959.rds 
+  - Mechanism Map_Mozambique_20190605 Allocated data from a single old mechanism.xlsx 
+  - SiteList_Mozambique_20190314144658 DSD 1364 sites only.csv 
+  
+  
+
+
 ### 2019.06.05
 Site Tool_Central America Region_20190605005726
 - DataPack_Central America Region_Brazil_2019012221855_06_4_19.xlsx
