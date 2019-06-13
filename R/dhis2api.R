@@ -338,7 +338,8 @@ ValidateNameIdPairs <- function(names, ids, type, exact = TRUE, base_url = getOp
              dplyr::mutate(match = stringr::str_detect(name.y, name.x)) %>% 
              dplyr::filter(match == FALSE | is.na(match))
     if (NROW(mismatched) > 0){
-      return(mismatched)
+      return(mismatched %>% 
+               dplyr::rename("name" = "name.x", "name_datim"= "name.y"))
     }
     }
   TRUE
