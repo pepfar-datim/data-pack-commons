@@ -1,4 +1,4 @@
-# require(httptest)
+#require(httptest)
 # httptest::.mockPaths("/Users/sam/Documents/GitHub/data-pack-commons/tests/testthat")
 # datapackcommons::DHISLogin("/users/sam/.secrets/play.json")
 # httptest::start_capturing()
@@ -182,6 +182,19 @@ testthat::expect_error(
                                        c("Uvn6LCg7dVU","OdiHJayrsKo"), 
                                        "indicators",
                                        base_url = "play.dhis2.org/2.29/"))
+
+datapackcommons::ValidateNameIdPairs(c("PNC 1","PNC 2"), 
+                                     c("Uvn6LCg7dVU","OdiHJayrsKo"), 
+                                     "indicators", exact = FALSE,
+                                     base_url = "https://play.dhis2.org/2.29/") %>% 
+  NROW() %>% 
+  testthat::expect_equal(2)
+
+
+testthat::expect_true(datapackcommons::ValidateNameIdPairs(c("ANC 1","Coverage"), 
+                                                           c("Uvn6LCg7dVU","OdiHJayrsKo"), 
+                                                           "indicators", exact = FALSE,
+                                                           base_url = "https://play.dhis2.org/2.29/"))
 httptest::stop_mocking()
 })
 
