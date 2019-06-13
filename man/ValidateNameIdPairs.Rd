@@ -4,19 +4,23 @@
 \alias{ValidateNameIdPairs}
 \title{ValidateNameIdPairs(names, ids, type)}
 \usage{
-ValidateNameIdPairs(base_url, names, ids, type)
+ValidateNameIdPairs(names, ids, type, exact = TRUE,
+  base_url = getOption("baseurl"))
 }
 \arguments{
-\item{base_url}{string - base address of instance (text before api/ in URL)}
-
 \item{names}{string vector - names of spcific class of metadata - category option, indicator etc}
 
 \item{ids}{string vector - ids of specific class of metadata - category option, indicator etc}
 
 \item{type}{string - metadata endpoint - cataegoryOptions, indicators, etc}
+
+\item{exact}{boolean - exact = true matches the full name in datim with the name provided
+exact = false is a case sensitive serch that the name provided is part of the name in datim}
+
+\item{base_url}{string - base address of instance (text before api/ in URL)}
 }
 \value{
-dplyr::all_equal response
+dplyr::all_equal response for exact = true or tibble of mismatches if exact = false
 }
 \description{
 Checks name list and paired id list (same length) and verifies they correspond to each other
