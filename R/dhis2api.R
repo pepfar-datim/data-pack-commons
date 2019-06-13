@@ -306,29 +306,43 @@ getMetadata <- function(base_url, end_point, filters = NULL, fields = NULL) {
 #' @title ValidateNameIdPairs(names, ids, type)
 #' 
 #' @description Checks name list and paired id list (same length) and verifies they correspond to each other
-#' @param base_url string - base address of instance (text before api/ in URL)
 #' @param names string vector - names of spcific class of metadata - category option, indicator etc
 #' @param ids string vector - ids of specific class of metadata - category option, indicator etc
 #' @param type string - metadata endpoint - cataegoryOptions, indicators, etc
-#' @return  dplyr::all_equal response
+#' @param exact boolean - exact = true matches the full name in datim with the name provided
+#' exact = false is a case sensitive serch that the name provided is part of the name in datim
+#' @param base_url string - base address of instance (text before api/ in URL)
+#' @return  dplyr::all_equal response for exact = true or tibble of mismatches if exact = false
 #'
-ValidateNameIdPairs <- function(base_url, names, ids, type){
+ValidateNameIdPairs <- function(names, ids, type, exact = TRUE, base_url = getOption("baseurl")){
+  # TODO the exact and inexact paths were written at different times for different purposes, 
+  # harmonize the return format
   assertthat::assert_that(is.character(names), assertthat::not_empty(names), NCOL(names) == 1,
                           is.character(ids),   assertthat::not_empty(ids),   NCOL(ids)   == 1,
                           assertthat::is.string(type),
                           length(names) == length(ids))
   original <- tibble::tibble(name = names, id = ids) %>% unique()
   ids_csv  <-  unique(ids) %>% paste0(collapse = ",")
-  response <- datapackcommons::getMetadata(base_url, type, filters = glue::glue("id:in:[{ids_csv}]"), fields = "id,name")
+  response <- datapackcommons::getMetadata(base_url, type, 
+                                           filters = glue::glue("id:in:[{ids_csv}]"), 
+                                           fields = "id,name")
   assertthat::has_name(response, "name")
   assertthat::has_name(response, "id")
-  result = dplyr::all_equal(original, response)
-  if(result != TRUE){
-    stop(list(result=result, dplyr::anti_join(original, response), dplyr::anti_join(response, original)))
-  } else{
-    TRUE
+  if (exact == TRUE){
+    result = dplyr::all_equal(original, response)
+    if(result != TRUE){
+      stop(list(result=result, dplyr::anti_join(original, response), dplyr::anti_join(response, original)))
+    } 
+  } else {
+    mismatched  <-  dplyr::left_join(original, response, by = c("id" = "id")) %>%
+             dplyr::mutate(match = stringr::str_detect(name.y, name.x)) %>% 
+             dplyr::filter(match == FALSE | is.na(match))
+    if (NROW(mismatched) > 0){
+      return(mismatched)
+    }
+    }
+  TRUE
   }
-}
 
 #' @export
 #' @title ValidateCodeIdPairs(base_url, codes, ids, type)
