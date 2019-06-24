@@ -1,4 +1,4 @@
-# require(httptest)
+#require(httptest)
 # httptest::.mockPaths("/Users/sam/Documents/GitHub/data-pack-commons/tests/testthat")
 # datapackcommons::DHISLogin("/users/sam/.secrets/play.json")
 # httptest::start_capturing()
@@ -153,35 +153,48 @@ test_that("ValidateCodeIdPairs", {
 
 test_that("ValidateNameIdPairs", {
   httptest::use_mock_api()
-testthat::expect_true(datapackcommons::ValidateNameIdPairs("play.dhis2.org/2.29/", 
-                                                           c("ANC 1 Coverage","ANC 2 Coverage"), 
+testthat::expect_true(datapackcommons::ValidateNameIdPairs(c("ANC 1 Coverage","ANC 2 Coverage"), 
                                                            c("Uvn6LCg7dVU","OdiHJayrsKo"), 
-                                                           "indicators"))
-testthat::expect_true(datapackcommons::ValidateNameIdPairs("play.dhis2.org/2.29/", 
-                                                             c("ANC 1 Coverage", "ANC 2 Coverage", "ANC 2 Coverage"), 
-                                                             c("Uvn6LCg7dVU", "OdiHJayrsKo", "OdiHJayrsKo"), 
-                                                             "indicators"))
+                                                           "indicators",
+                                                           base_url = "play.dhis2.org/2.29/"))
+testthat::expect_true(datapackcommons::ValidateNameIdPairs(c("ANC 1 Coverage", "ANC 2 Coverage", "ANC 2 Coverage"), 
+                                                           c("Uvn6LCg7dVU", "OdiHJayrsKo", "OdiHJayrsKo"), 
+                                                           "indicators",
+                                                           base_url = "play.dhis2.org/2.29/"))
 testthat::expect_error(
-  datapackcommons::ValidateNameIdPairs("play.dhis2.org/2.29/", 
-                                       c("ANC 1 Coverage","NONSENSE"), 
+  datapackcommons::ValidateNameIdPairs(c("ANC 1 Coverage","NONSENSE"), 
                                        c("Uvn6LCg7dVU","OdiHJayrsKo"), 
-                                       "indicators"))
+                                       "indicators",
+                                       base_url = "play.dhis2.org/2.29/"))
 testthat::expect_error(
-  datapackcommons::ValidateNameIdPairs("play.dhis2.org/2.29/", 
-                                       c("ANC 1 Coverage","ANC 2 Coverage"), 
+  datapackcommons::ValidateNameIdPairs(c("ANC 1 Coverage","ANC 2 Coverage"), 
                                        c("NONSENSE","OdiHJayrsKo"), 
-                                       "indicators"))
+                                       "indicators",
+                                       base_url = "play.dhis2.org/2.29/"))
 
 testthat::expect_error(
-  datapackcommons::ValidateNameIdPairs("play.dhis2.org/2.29/", 
-                                       c("ANC 1 Coverage","ANC 2 Coverage"), 
+  datapackcommons::ValidateNameIdPairs(c("ANC 1 Coverage","ANC 2 Coverage"), 
                                        c("Uvn6LCg7dVU"), 
-                                       "indicators"))
+                                       "indicators",
+                                       base_url = "play.dhis2.org/2.29/"))
 testthat::expect_error(
-  datapackcommons::ValidateNameIdPairs("play.dhis2.org/2.29/", 
-                                       c("ANC 1 Coverage"), 
+  datapackcommons::ValidateNameIdPairs(c("ANC 1 Coverage"), 
                                        c("Uvn6LCg7dVU","OdiHJayrsKo"), 
-                                       "indicators"))
+                                       "indicators",
+                                       base_url = "play.dhis2.org/2.29/"))
+
+datapackcommons::ValidateNameIdPairs(c("PNC 1","PNC 2"), 
+                                     c("Uvn6LCg7dVU","OdiHJayrsKo"), 
+                                     "indicators", exact = FALSE,
+                                     base_url = "https://play.dhis2.org/2.29/") %>% 
+  NROW() %>% 
+  testthat::expect_equal(2)
+
+
+testthat::expect_true(datapackcommons::ValidateNameIdPairs(c("ANC 1","Coverage"), 
+                                                           c("Uvn6LCg7dVU","OdiHJayrsKo"), 
+                                                           "indicators", exact = FALSE,
+                                                           base_url = "https://play.dhis2.org/2.29/"))
 httptest::stop_mocking()
 })
 

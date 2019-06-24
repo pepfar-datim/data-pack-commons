@@ -670,7 +670,7 @@ MapMechToMech <- function(site_density, mech_to_mech_map_full = NULL){
     dplyr::mutate(weight = tidyr::replace_na(weight, 1)) %>% 
     dplyr::mutate(siteValueH_adjusted = siteValueH * weight) %>% 
     dplyr::group_by_at(dplyr::vars(-`Funding Mechanism`, -siteValueH, -psnuValueH, -oldMech, -newMech, -psnuValueH_after_site_drop, 
-                                   -percent, -weight, -siteValueH_adjusted)) %>%
+                                   -percent, -weight, -siteValueH_adjusted, -dropped_site_reduction)) %>%
     dplyr::summarise(siteValueH_adjusted = sum(siteValueH_adjusted)) %>% dplyr::ungroup()
  
     #TODO figure out how to include kp_option_name

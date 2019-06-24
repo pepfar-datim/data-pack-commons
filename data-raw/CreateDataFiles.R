@@ -30,7 +30,7 @@ ValidateDimItemSets <- function(dim_item_sets, base_url){
   
 # validate dimension names and ids
   dim_item_sets %>% dplyr::filter(!is.na(dim_uid), dim_uid != "co") %>% 
-  {datapackcommons::ValidateNameIdPairs(base_url, .$dim_name, .$dim_uid, "dimensions")} %>% 
+  {datapackcommons::ValidateNameIdPairs(.$dim_name, .$dim_uid, "dimensions")} %>% 
     assertthat::assert_that()
 
 # validate dimension item names and ids
@@ -39,7 +39,7 @@ ValidateDimItemSets <- function(dim_item_sets, base_url){
   
 # validate category option names and ids
   dim_item_sets %>%  
-  {datapackcommons::ValidateNameIdPairs(base_url, .$option_name, .$option_uid, "categoryOptions")} %>% 
+  {datapackcommons::ValidateNameIdPairs(.$option_name, .$option_uid, "categoryOptions")} %>% 
     assertthat::assert_that()  
 
   # validate category option combination rows
@@ -48,7 +48,7 @@ ValidateDimItemSets <- function(dim_item_sets, base_url){
     assertthat::assert_that()  
   # category option combination names and ids
   dim_item_sets %>%  dplyr::filter(dim_uid == "co") %>%
-  {datapackcommons::ValidateNameIdPairs(base_url, .$dim_item_name, .$dim_item_uid, "categoryOptionCombos")} %>% 
+  {datapackcommons::ValidateNameIdPairs(.$dim_item_name, .$dim_item_uid, "categoryOptionCombos")} %>% 
     assertthat::assert_that()  
   
   }
@@ -60,9 +60,9 @@ ValidateDataRequired <- function(data_required, base_url){
   {ValidateCodeIdPairs(base_url, .[["B.dx_code"]], .[["B.dx_id"]], "indicators")}
   
   data_required %>% dplyr::filter(!is.na(A.add_dim_1_uid)) %>%
-  {ValidateNameIdPairs(base_url, .[["A.add_dim_1"]], .[["A.add_dim_1_uid"]], "dimensions")}
+  {ValidateNameIdPairs(.[["A.add_dim_1"]], .[["A.add_dim_1_uid"]], "dimensions")}
   data_required %>% dplyr::filter(!is.na(B.add_dim_1_uid)) %>%
-  {ValidateNameIdPairs(base_url, .[["B.add_dim_1"]], .[["B.add_dim_1_uid"]], "dimensions")}
+  {ValidateNameIdPairs(.[["B.add_dim_1"]], .[["B.add_dim_1_uid"]], "dimensions")}
   
   data_required %>% ValidateDimItems("A.add_dim_1_uid", "A.add_dim_1_items", "A.add_dim_1_items_uid", base_url)
   data_required %>% ValidateDimItems("B.add_dim_1_uid", "B.add_dim_1_items", "B.add_dim_1_items_uid", base_url)
