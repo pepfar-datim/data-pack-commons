@@ -38,7 +38,7 @@ ValidateDimItemSets <- function(dim_item_sets, base_url){
   ValidateDimItems("dim_uid", "dim_item_name", "dim_item_uid", base_url)
   
 # validate category option names and ids
-  dim_item_sets %>%  
+  dim_item_sets %>% dplyr::filter(!is.na(.$option_uid)) %>%  
   {datapackcommons::ValidateNameIdPairs(.$option_name, .$option_uid, "categoryOptions")} %>% 
     assertthat::assert_that()  
 
