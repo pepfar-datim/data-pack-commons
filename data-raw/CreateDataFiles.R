@@ -54,9 +54,9 @@ ValidateDimItemSets <- function(dim_item_sets, base_url){
   }
 
 ValidateDataRequired <- function(data_required, base_url){
-  data_required %>% dplyr::filter(!is.na(A.dx_id)) %>%
+  data_required %>% dplyr::filter(!is.na(A.dx_code)) %>%
   {ValidateCodeIdPairs(base_url, .[["A.dx_code"]], .[["A.dx_id"]], "indicators")}
-  data_required %>% dplyr::filter(!is.na(B.dx_id)) %>%
+  data_required %>% dplyr::filter(!is.na(B.dx_code)) %>%
   {ValidateCodeIdPairs(base_url, .[["B.dx_code"]], .[["B.dx_id"]], "indicators")}
   
   data_required %>% dplyr::filter(!is.na(A.add_dim_1_uid)) %>%
@@ -103,14 +103,14 @@ dim_item_sets <- readr::read_csv("./data-raw/model_calculations/dimension_item_s
 
 ValidateDimItemSets(dim_item_sets, base_url)
 
-dim_item_sets_test <- readr::read_csv("./data-raw/model_calculations_test/dimension_item_sets.csv",
-                                      col_types = readr::cols(.default = "c", sort_order = "d", weight = "d"),
-                                      na = c("NA")) %>%
-  dplyr::select(dim_uid, dim_name, dim_item_uid, dim_cop_type,
-                dim_item_name, option_name, option_uid, sort_order, weight, model_sets) %>%
-  dplyr::mutate(model_sets = stringr::str_split(model_sets,";")) %>%
-  tidyr::unnest(model_sets)
- 
+# dim_item_sets_test <- readr::read_csv("./data-raw/model_calculations_test/dimension_item_sets.csv",
+#                                       col_types = readr::cols(.default = "c", sort_order = "d", weight = "d"),
+#                                       na = c("NA")) %>%
+#   dplyr::select(dim_uid, dim_name, dim_item_uid, dim_cop_type,
+#                 dim_item_name, option_name, option_uid, sort_order, weight, model_sets) %>%
+#   dplyr::mutate(model_sets = stringr::str_split(model_sets,";")) %>%
+#   tidyr::unnest(model_sets)
+#  
 
 data_required <- 
   readr::read_csv("./data-raw/model_calculations/data_required.csv", 
@@ -120,11 +120,11 @@ data_required <-
 
 ValidateDataRequired(data_required, base_url)
 
-data_required_test <- 
-  readr::read_csv("./data-raw/model_calculations_test/data_required.csv",
-                  col_types = readr::cols(.default = "c"),
-                  na = c("NA")) %>%
-  dplyr::mutate(B.kp_set = NA_character_) %>% select(-data_pack_type)
+# data_required_test <- 
+#   readr::read_csv("./data-raw/model_calculations_test/data_required.csv",
+#                   col_types = readr::cols(.default = "c"),
+#                   na = c("NA")) %>%
+#   dplyr::mutate(B.kp_set = NA_character_) %>% select(-data_pack_type)
 
 Map19Tto20T <- 
   readr::read_csv("./data-raw/site_distribution_configuration/19Tto20TMap.csv", 
