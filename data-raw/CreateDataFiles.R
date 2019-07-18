@@ -115,8 +115,7 @@ ValidateDimItemSets(dim_item_sets, base_url)
 data_required <- 
   readr::read_csv("./data-raw/model_calculations/data_required.csv", 
                   col_types = readr::cols(.default = "c", A.value_na = "d", B.value_na = "d"),
-                  na = c("NA")) %>%
-  dplyr::mutate(B.kp_set = NA_character_) %>% select(-data_pack_type)
+                  na = c("NA")) %>% select(-data_pack_type)
 
 ValidateDataRequired(data_required, base_url)
 
