@@ -215,7 +215,7 @@ GetDataWithIndicator <- function(base_url, indicator, org_units, level, periods,
 #' @return dataframe with columns country_level, prioritization_level, country_name, id   
 
 GetCountryLevels <- function(base_url, countries_req = NULL){
-  response <-  paste0(base_url, "api/dataStore/dataSetAssignments/ous") %>%
+  response <-  paste0(base_url, "api/dataStore/dataSetAssignments/orgUnitLevels") %>%
     RetryAPI("application/json", 20)
   
 # get api response into a data frame a reduce to columns of interest  
