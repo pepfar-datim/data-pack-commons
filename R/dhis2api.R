@@ -509,6 +509,95 @@ GetData_Analytics <-  function(dimensions, base_url = getOption("baseurl")){
 }
 
 
+#' @export
+#' @title GetData_DataPack
+#' @return  A list with $time = time the function was called, 
+#' $api_call = api call used, and 
+#' $results = the data returnd by the analytics call
+#'
+# indicator_parameters <- datapackcommons::StackPrefixedCols(data_required, c("A.", "B.")) %>%
+#   unique() %>%
+#   filter(!is.na(dx_id))
+#  parameters = slice(indicator_parameters, 1)
+# # dim_item_sets = datapackcommons::dim_item_sets
+#  org_units= "XtxUYCsDWrR"
+# # org_unit_levels=NULL
+#  GetData_DataPack(parameters=parameters, org_units = org_units)
+
+GetData_DataPack <- function(parameters, 
+                             org_units,
+                             dim_item_sets = datapackcommons::dim_item_sets, 
+                             org_unit_groups = c("nwQbMeALRjL", # military
+                                                 "AVy8gJXym2D"  # COP Prioritization SNU
+                                                 ),
+                             org_unit_levels = NULL,
+                             base_url = getOption("baseurl")) {
+  
+#  assertthat::assert_that(assertthat::is.string(indicator), nchar(indicator) == 11,
+  #                        assertthat::is.string(periods))
+  
+  assertthat::assert_that(NROW(parameters) == 1)
+  
+  
+  dimensions <- tibble::tribble(~type, ~dim_item_uid, ~dim_uid,
+                                "dimension", parameters$dx_id[[1]], "dx",
+                                "dimension", parameters$pe_iso[[1]], "pe")
+  
+# add rows to dimensions for org units
+  if (!is.null(org_units)) {  
+    dimensions <- purrr::reduce(org_units, 
+                  ~ rbind(.x, 
+                          c("dimension", .y, "ou")), 
+                  .init = dimensions)
+    }    
+  
+# add rows to dimensions for org unit groups
+  if (!is.null(org_unit_groups)) {
+    dimensions <- purrr::reduce(org_unit_groups,
+                  ~ rbind(.x,
+                          c(
+                            "dimension", paste0("OU_GROUP-", .y), "ou"
+                          )),
+                  .init = dimensions)
+  }
+  
+  if (!is.null(org_unit_levels)) {
+    # add rows to dimensions for levels
+    dimensions <- purrr::reduce(levels,
+                  ~ rbind(.x,
+                          c("dimension", paste0("LEVEL-", .y), "ou")),
+                  .init = dimensions)
+  }
+  
+
+  
+  dimension_disaggs <- dim_item_sets %>% dplyr::mutate(type = "dimension") %>%  
+    dplyr::filter(model_sets %in% c(parameters$age_set,
+                                    parameters$sex_set,
+                                    parameters$kp_set,
+                                    parameters$other_disagg_set)) %>% 
+    dplyr::select(type, dim_item_uid, dim_uid) %>%
+    unique()  %>% 
+    stats::na.omit() # there are some items in dim item sets with no source dimension
+  
+  
+  dimensions <- dplyr::bind_rows(dimensions, dimension_disaggs)
+  
+  
+  results <- datapackcommons::GetData_Analytics(dimensions)
+  
+  if(!is.null(results$results)){
+    results$results <- dplyr::select(results$results, -ou_hierarchy)
+  }
+  
+  
+  return(list("api_call" = results$api_call,
+              "time" = lubridate::now("UTC"),
+              "results" = results$results))
+
+  }
+
+
 ## EARLY FUNCTION USED TO GET RAW DATA 
 
 #' #' export
