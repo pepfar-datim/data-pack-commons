@@ -83,6 +83,7 @@ DHISLogin_Play<-function(version) {
 #     any(status >= 300 & status < 400)
 #   }
 
+#' @export
 #' @title RetryAPI(api_url, content_type, max_attempts)
 #' 
 #' @description Submits specified api request up to specified maximum times
@@ -90,12 +91,13 @@ DHISLogin_Play<-function(version) {
 #' @param api_url string - full url for web request
 #' @param content_type string - expected type of content in reposne e.d 'application/json'
 #' @param max_attempts integer - maximum number of retries for succesful request
+#' @param timeout integer - maximum time to wait for API response
 #' @return  full api response
 #'
-RetryAPI <- function(api_url, content_type, max_attempts = 10){
+RetryAPI <- function(api_url, content_type, max_attempts = 3, timeout = 180){
   for(i in 1:max_attempts){
     try({
-      response <- httr::GET(api_url, httr::timeout(180))
+      response <- httr::GET(api_url, httr::timeout(timeout))
       if (response$status_code == 200L && 
           response$url == api_url && 
           httr::http_type(response) == content_type){
