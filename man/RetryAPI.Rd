@@ -4,7 +4,7 @@
 \alias{RetryAPI}
 \title{RetryAPI(api_url, content_type, max_attempts)}
 \usage{
-RetryAPI(api_url, content_type, max_attempts = 10)
+RetryAPI(api_url, content_type, max_attempts = 3, timeout = 180)
 }
 \arguments{
 \item{api_url}{string - full url for web request}
@@ -12,6 +12,8 @@ RetryAPI(api_url, content_type, max_attempts = 10)
 \item{content_type}{string - expected type of content in reposne e.d 'application/json'}
 
 \item{max_attempts}{integer - maximum number of retries for succesful request}
+
+\item{timeout}{integer - maximum time to wait for API response}
 }
 \value{
 full api response
