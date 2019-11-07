@@ -105,7 +105,8 @@ MapDimToOptions <- function(data, items_to_options, allocate){
   if(is.na(dimension_uid)){
     # We are in a scenario of distributing to category options in the absence of a source dimension
     # so we need cartesian product of data with item_to_dim entries
-    joined_data <- tidyr::crossing(data, items_to_options)
+    joined_data <- tidyr::crossing(data, 
+                                   dplyr::select(items_to_options, -dim_item_uid))
   } else {
     dim_name <-  items_to_options[[1,"dim_name"]]
     joined_data <- data %>%
