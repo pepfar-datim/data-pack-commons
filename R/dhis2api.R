@@ -111,105 +111,6 @@ RetryAPI <- function(api_url, content_type, max_attempts = 3, timeout = 180){
 }
 
 #' @export
-#' @title GetDataWithIndicator(indicator, org_units, level,
-#' period, additional_dimensions, additional_filters)
-#' 
-#' @description Gets data from DHIS2 using a single indicator
-#' @param base_url string - base address of instance (text before api/ in URL)
-#' @param indicator string - uid of indicator
-#' @param org_units list of strings - list of org unit uids, operate as boundry org units
-#' @param level string - org hierarchy level, only one allowed
-#' @param periods list of strings - periods specified as required by DHIS2 analytics endpoint, 
-#' currently only one period supported
-#' @param additional_dimensions 2 column dataframe, first column containing dimension item uids
-#' and second column the related dimension uid. Dimensions appear as columns in output with names
-#' based on dimension name in DHIS2.
-#' @param additional_filters 2 column dataframe, first column containing dimension item uids
-#' and second column the related dimension uid.filters do not appear explicitly in output.
-#' @return  A list with $time = time the function was called, 
-#' $api_call = api call used, and 
-#' $results = the data returnd by the analytics call
-#'
-
-GetDataWithIndicator <- function(base_url, indicator, org_units, level, periods,
-                                 additional_dimensions = NULL, additional_filters = NULL) {
-  
-  assertthat::assert_that(assertthat::is.string(indicator), nchar(indicator) == 11,
-                          assertthat::is.string(periods))
-  
-  org_units <- glue::glue_collapse(org_units, ";")
-  
-  # prep additional_dimensions for api call
-  
-  if (!is.null(additional_dimensions)) {
-    assertthat::assert_that(NCOL(additional_dimensions) == 2)
-    colnames(additional_dimensions)[1] <- "item"
-    colnames(additional_dimensions)[2] <- "dimension"
-    
-    additional_dimensions <-
-      additional_dimensions %>% dplyr::group_by(dimension) %>%
-      dplyr::summarize(items = paste0(item, collapse = ";")) %>%
-      dplyr::mutate(dimension_full = paste0("&dimension=", dimension, ":", items)) %>%
-      .[["dimension_full"]] %>% glue::glue_collapse()
-  }
-  
-  # prep additional_filters for api call
-  if (!is.null(additional_filters)) {
-    assertthat::assert_that(NCOL(additional_filters) == 2)
-    colnames(additional_filters)[1] <- "item"
-    colnames(additional_filters)[2] <- "filter"
-    
-    additional_filters <-
-      additional_filters %>% dplyr::group_by(filter) %>%
-      dplyr::summarize(items = paste0(item, collapse = ";")) %>%
-      dplyr::mutate(filter_full = paste0("&filter=", filter, ":", items)) %>%
-      .[["filter_full"]] %>% glue::glue_collapse()
-  }
-  
-  web_api_call <- paste0(
-    base_url,
-    "api/29/analytics.csv?outputIdScheme=UID",
-    "&dimension=dx:", indicator,
-    "&dimension=pe:", periods,
-    "&dimension=ou:LEVEL-", level, ";", org_units,
-    additional_dimensions, additional_filters
-  )
-  
-#  for(i in 1:3){
-#    try({
-      response <- web_api_call %>% 
-        utils::URLencode()  %>%
-        RetryAPI("application/csv", 20)
-      
-      my_data <- response %>% 
-        httr::content(., "text") %>% 
-        readr::read_csv(col_names = TRUE, col_types = readr::cols(.default = "c", Value = "d"))
-      
-      assertthat::has_name(my_data, "Value") 
-      # not sure I need preceeding line now that I verify content type in retry api
-      # this was here to catch recieving the "log in" screen which was html
-      
-      if(NROW(my_data) > 0 && !(indicator %in% my_data$Data)){
-        stop("response$url: ", response$url, " slice(my_data,1): ", dplyr::slice(my_data,1))
-        assertthat::assert_that(indicator %in% my_data$Data)
-      }
-#      break # if I am here then I got a valid result set
-#    })
-#    if(i == 3){stop("three attempts to obtain valid result set in GetDataWithIndicator failed")}
-#    }
-    #if ("Value" %in% names(my_data)) { # make sure we got a data table - we should always get one back even if empty
-      # if we got back an empty data set return it, 
-      # if we got back a set with data make sure it the indicator uid matches to validate we got back the data we requested
-  #    if(NROW(my_data) == 0 | (NROW(my_data) > 0 & indicator %in% my_data$Data)){
-      return(list("api_call" = web_api_call,
-                  "time" = lubridate::now("UTC"),
-                  "results" = my_data))
- #       }
-      #}
-#  stop("Call to GetDataWithIndicator failed")
-}
-
-#' @export
 #' @title GetCountryLevels(country_names)
 #' @description Gets country uid and prioritization level using dataSetAssignments/ous
 #' @param base_url string - base address of instance (text before api/ in URL)
@@ -509,6 +410,95 @@ GetData_Analytics <-  function(dimensions, base_url = getOption("baseurl")){
               api_call = response$url)
          )
 }
+
+
+#' @export
+#' @title GetData_DataPack
+#' @return  A list with $time = time the function was called, 
+#' $api_call = api call used, and 
+#' $results = the data returnd by the analytics call
+#'
+# indicator_parameters <- datapackcommons::StackPrefixedCols(data_required, c("A.", "B.")) %>%
+#   unique() %>%
+#   filter(!is.na(dx_id))
+#  parameters = slice(indicator_parameters, 1)
+# # dim_item_sets = datapackcommons::dim_item_sets
+#  org_units= "XtxUYCsDWrR"
+# # org_unit_levels=NULL
+#  GetData_DataPack(parameters=parameters, org_units = org_units)
+
+GetData_DataPack <- function(parameters, 
+                             org_units,
+                             dim_item_sets = datapackcommons::dim_item_sets, 
+                             org_unit_groups = c("nwQbMeALRjL", # military
+                                                 "AVy8gJXym2D"  # COP Prioritization SNU
+                                                 ),
+                             org_unit_levels = NULL,
+                             base_url = getOption("baseurl")) {
+  
+#  assertthat::assert_that(assertthat::is.string(indicator), nchar(indicator) == 11,
+  #                        assertthat::is.string(periods))
+  
+  assertthat::assert_that(NROW(parameters) == 1)
+  
+  
+  dimensions <- tibble::tribble(~type, ~dim_item_uid, ~dim_uid,
+                                "dimension", parameters$dx_id[[1]], "dx",
+                                "dimension", parameters$pe_iso[[1]], "pe")
+  
+# add rows to dimensions for org units
+  if (!is.null(org_units)) {  
+    dimensions <- purrr::reduce(org_units, 
+                  ~ rbind(.x, 
+                          c("dimension", .y, "ou")), 
+                  .init = dimensions)
+    }    
+  
+# add rows to dimensions for org unit groups
+  if (!is.null(org_unit_groups)) {
+    dimensions <- purrr::reduce(org_unit_groups,
+                  ~ rbind(.x,
+                          c(
+                            "dimension", paste0("OU_GROUP-", .y), "ou"
+                          )),
+                  .init = dimensions)
+  }
+  
+  if (!is.null(org_unit_levels)) {
+    # add rows to dimensions for levels
+    dimensions <- purrr::reduce(levels,
+                  ~ rbind(.x,
+                          c("dimension", paste0("LEVEL-", .y), "ou")),
+                  .init = dimensions)
+  }
+  
+
+  
+  dimension_disaggs <- dim_item_sets %>% dplyr::mutate(type = "dimension") %>%  
+    dplyr::filter(model_sets %in% c(parameters$age_set,
+                                    parameters$sex_set,
+                                    parameters$kp_set,
+                                    parameters$other_disagg_set)) %>% 
+    dplyr::select(type, dim_item_uid, dim_uid) %>%
+    unique()  %>% 
+    stats::na.omit() # there are some items in dim item sets with no source dimension
+  
+  
+  dimensions <- dplyr::bind_rows(dimensions, dimension_disaggs)
+  
+  
+  results <- datapackcommons::GetData_Analytics(dimensions)
+  
+  if(!is.null(results$results)){
+    results$results <- dplyr::select(results$results, -ou_hierarchy)
+  }
+  
+  
+  return(list("api_call" = results$api_call,
+              "time" = lubridate::now("UTC"),
+              "results" = results$results))
+
+  }
 
 
 ## EARLY FUNCTION USED TO GET RAW DATA 

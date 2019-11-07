@@ -24,9 +24,9 @@ dimension_items_sets for mapping to category options for output.}
   dimension <5 and 1-9): These “duplicates” are added together in the code. This should not 
   happen in the case of replicate and the program will throw an error if duplicate category 
   options result from the indicator call.}
-  \item{A.ind_code}{indicator code}
-  \item{A.ind_uid}{indicator uid}
-  \item{A.periods}{period (ISO/DHIS2 format) - currently only one supported}
+  \item{A.dx_code}{indicator code}
+  \item{A.dx_id}{indicator uid}
+  \item{A.pe_iso}{period (ISO/DHIS2 format) - currently only one supported}
   \item{A.age_set}{age set from dim_item_sets}
   \item{A.sex_set}{sex set from dim_item_sets}
   \item{A.kp_set}{key population set from dim_item_sets}
@@ -37,9 +37,9 @@ dimension_items_sets for mapping to category options for output.}
   \item{A.add_dim_1_uid}{additonal dimensions uid}
   \item{A.add_dim_1_items}{name of additional dimension item to filter on - only one supported}
   \item{A.add_dim_1_items_uid}{name of additional dimension item to filter on - only one supported}
-  \item{B.ind_code}{see A.ind_code}
-  \item{B.ind_uid}{see A.ind_uid}
-  \item{B.periods}{see A.periods}
+  \item{B.dx_code}{see A.dx_code}
+  \item{B.dx_id}{see A.dx_id}
+  \item{B.pe_iso}{see A.pe_iso}
   \item{B.age_set}{see A.age_set}
   \item{B.sex_set}{see A.sex_set}
   \item{B.kp_set}{see A.kp_set}
