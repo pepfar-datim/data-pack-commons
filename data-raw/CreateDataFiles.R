@@ -11,7 +11,7 @@ ValidateDimItems <-
       paste0(collapse = ",") %>% {paste0("id:in:[", ., "]")} %>%
       {datapackcommons::getMetadata(base_url, "dimensions", filters = .,
                                      fields = "items[name,id]")} %>%
-      unnest() 
+      unnest(c("items")) 
     
     # 2 - compare api items with items in data
     unmatched <- data %>% dplyr::select(item_uid_colname, item_name_colname) %>%
