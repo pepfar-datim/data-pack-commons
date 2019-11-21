@@ -59,13 +59,13 @@ ValidateDataRequired <- function(data_required, base_url){
   data_required %>% dplyr::filter(!is.na(B.dx_code)) %>%
   {ValidateCodeIdPairs(base_url, .[["B.dx_code"]], .[["B.dx_id"]], "indicators")}
   
-  data_required %>% dplyr::filter(!is.na(A.add_dim_1_uid)) %>%
-  {ValidateNameIdPairs(.[["A.add_dim_1"]], .[["A.add_dim_1_uid"]], "dimensions")}
-  data_required %>% dplyr::filter(!is.na(B.add_dim_1_uid)) %>%
-  {ValidateNameIdPairs(.[["B.add_dim_1"]], .[["B.add_dim_1_uid"]], "dimensions")}
-  
-  data_required %>% ValidateDimItems("A.add_dim_1_uid", "A.add_dim_1_items", "A.add_dim_1_items_uid", base_url)
-  data_required %>% ValidateDimItems("B.add_dim_1_uid", "B.add_dim_1_items", "B.add_dim_1_items_uid", base_url)
+  # data_required %>% dplyr::filter(!is.na(A.add_dim_1_uid)) %>%
+  # {ValidateNameIdPairs(.[["A.add_dim_1"]], .[["A.add_dim_1_uid"]], "dimensions")}
+  # data_required %>% dplyr::filter(!is.na(B.add_dim_1_uid)) %>%
+  # {ValidateNameIdPairs(.[["B.add_dim_1"]], .[["B.add_dim_1_uid"]], "dimensions")}
+  # 
+  # data_required %>% ValidateDimItems("A.add_dim_1_uid", "A.add_dim_1_items", "A.add_dim_1_items_uid", base_url)
+  # data_required %>% ValidateDimItems("B.add_dim_1_uid", "B.add_dim_1_items", "B.add_dim_1_items_uid", base_url)
 }
 
 ValidateMap19Tto20T <- function(Map19Tto20T, dim_item_sets, base_url){
@@ -88,7 +88,7 @@ ValidateMap19Tto20T <- function(Map19Tto20T, dim_item_sets, base_url){
 
   }
 
-datapackcommons::DHISLogin("/users/sam/.secrets/prod.json")
+datapackcommons::DHISLogin("/users/sam/.secrets/jason.json")
 base_url <- getOption("baseurl")
 wd <- getwd()
 setwd("/Users/sam/Documents/GitHub/data-pack-commons")
