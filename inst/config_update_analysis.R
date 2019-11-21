@@ -1,6 +1,8 @@
 library(tidyverse)
+require(foreach)
+doMC::registerDoMC(cores = 5)
 
-datapackcommons::DHISLogin("/users/sam/.secrets/triage.json")
+datapackcommons::DHISLogin("/users/sam/.secrets/jason.json")
 base_url <- getOption("baseurl")
 get_indicator_details <- function(uid){
   datapackcommons::getMetadata(base_url,
@@ -14,7 +16,10 @@ extract_formula_components <- function(formula){
     stringr::str_remove_all(" ") %>% 
     stringr::str_remove_all("\\#") %>% 
     stringr::str_remove_all("\\{") %>% 
-    stringr::str_remove_all("\\}") %>% tibble::enframe(name=NULL) %>% 
+    stringr::str_remove_all("\\}") %>%
+    stringr::str_remove_all("\\(") %>% 
+    stringr::str_remove_all("\\)") %>%
+    tibble::enframe(name=NULL) %>% 
     dplyr::mutate(data_element_uid = stringr::str_sub(value, 1,11)) %>% 
     dplyr::mutate(co_combination_uid = dplyr::if_else(stringr::str_length(value) > 11 ,
                                                       stringr::str_sub(value, 13,23),
@@ -82,6 +87,8 @@ fy_18_r <- datapackcommons::GetSqlView("DotdxKrNZxG",
                                                c("tz1bQ3ZwUKJ"))) %>% 
   distinct()
 
+
+
 elements_fy19r_fy20t <- dplyr::bind_rows(fy_19_r, fy_20_t) %>% dplyr::select(-dataset) %>% dplyr::distinct()
 data_required <- datapackcommons::data_required
 
@@ -133,12 +140,68 @@ combined_data_elements <- dplyr::bind_rows(numerator_data_elements,denominator_d
 dplyr::setdiff(combined_data_elements$displayName, elements_fy19r_fy20t$dataelement)
 }
 
-plyr::alply(data_required, 1, get_invalid_data_elements)
+
+compare_indicator_cocs <- function(data_required_spec, dataset_details){
+  print(data_required_spec)
+  indicators  <<-  c(data_required_spec$A.dx_id,
+                    data_required_spec$B.dx_id) %>% 
+    unique() %>% 
+    na.omit() %>% 
+    purrr::map(get_indicator_details) %>% 
+    purrr::compact() %>% 
+    dplyr::bind_rows()
+  stop()
+  if(length(indicators) == 0 ){
+    return(NULL)
+  }
+  
+  numerator_components <- indicators$numerator %>% 
+    purrr::map(extract_formula_components) %>%
+    dplyr::bind_rows() 
+  
+  numerator_data_elements <- numerator_components %>% .[["data_element_uid"]] %>% unique() %>%
+    purrr::map(~datapackcommons::getMetadata(base_url, 
+                                             "dataElements", 
+                                             glue::glue("id:eq:{.x}"))) %>% 
+    dplyr::bind_rows()
+  
+  
+  denominator_components <- indicators$denominator[indicators$denominator != 1] %>%  
+    purrr::map(extract_formula_components) %>%
+    dplyr::bind_rows() 
+  
+  denominator_data_elements <- denominator_components %>% 
+    .[["data_element_uid"]] %>% 
+    unique() %>%
+    purrr::map(~datapackcommons::getMetadata(base_url, 
+                                             "dataElements", 
+                                             glue::glue("id:eq:{.x}"))) %>% 
+    dplyr::bind_rows()
+  
+  
+  
+  combined_data_elements <- dplyr::bind_rows(numerator_data_elements,denominator_data_elements)
+  
+  dplyr::setdiff(combined_data_elements$displayName, elements_fy19r_fy20t$dataelement)
+}
+
+
+
+plyr::alply(data_required, 1, get_invalid_data_elements, .parallel = TRUE)
+
+compare_indicator_cocs(slice(data_required,7), elements_fy19r_fy20t)
 
 
 
 
 
+indicators  <-  c(data_required$A.dx_id,
+                  data_required$B.dx_id) %>% 
+  unique() %>% 
+  na.omit() %>% 
+  purrr::map(get_indicator_details) %>% 
+  purrr::compact() %>% 
+  dplyr::bind_rows()
 
 indicators_with_co_combos <- dplyr::filter(indicators,
                                            stringr::str_detect(numerator,"\\.") |
@@ -175,4 +238,46 @@ dplyr::setdiff(combined_componenets$id, de_19r_20t)
 
 
 
+# vmmc_circ yield
+fy_19_r %>% 
+  dplyr::select(-dataset) %>% distinct() %>% 
+  dplyr::filter(stringr::str_detect(dataelement, "VMMC_CIRC \\(N, ")) %>% 
+  dplyr::filter(stringr::str_detect(dataelement, "Age/Sex/HIVStatus")) %>% 
+  dplyr::filter(stringr::str_detect(categoryoptioncombo, "Positive") |
+                  stringr::str_detect(categoryoptioncombo, "Negative")) %>% 
+  dplyr::transmute(element = paste0("#{", dataelementuid, ".", categoryoptioncombouid, "}")) %>%
+  .[["element"]] %>% 
+  glue::glue_collapse(" + ")
+
+
+fy_19_r %>% 
+  dplyr::select(-dataset) %>% distinct() %>% 
+  dplyr::filter(stringr::str_detect(dataelement, "VMMC_CIRC \\(N, ")) %>% 
+  dplyr::filter(stringr::str_detect(dataelement, "Age/Sex/HIVStatus")) %>% 
+  dplyr::filter(stringr::str_detect(categoryoptioncombo, "Positive")) %>% 
+  dplyr::transmute(element = paste0("#{", dataelementuid, ".", categoryoptioncombouid, "}")) %>%
+  .[["element"]] %>% 
+  glue::glue_collapse(" + ")
+
+
+# vmmc_circ indeterminate
+
+fy_19_r %>% 
+  dplyr::select(-dataset) %>% distinct() %>% 
+  dplyr::filter(stringr::str_detect(dataelement, "VMMC_CIRC \\(N, ")) %>% 
+  dplyr::filter(stringr::str_detect(dataelement, "Age/Sex/HIVStatus")) %>% 
+  dplyr::filter(stringr::str_detect(categoryoptioncombo, "Unknown")) %>% 
+  dplyr::transmute(element = paste0("#{", dataelementuid, ".", categoryoptioncombouid, "}")) %>%
+  .[["element"]] %>% 
+  glue::glue_collapse(" + ")
+
+
+# ovc_serv target
+
+temp = fy_20_t %>% 
+  dplyr::select(-dataset) %>% distinct() %>% 
+  dplyr::filter(stringr::str_detect(dataelement, "OVC_SERV"))  %>% 
+  dplyr::transmute(element = paste0("#{", dataelementuid, ".", categoryoptioncombouid, "}")) %>%
+  .[["element"]] %>% 
+  glue::glue_collapse(" + ")
 
