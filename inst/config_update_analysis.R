@@ -281,3 +281,46 @@ temp = fy_20_t %>%
   .[["element"]] %>% 
   glue::glue_collapse(" + ")
 
+# tx_tb_d results already
+
+temp = fy_19_r %>% 
+  dplyr::select(-dataset) %>% distinct() %>% 
+  dplyr::filter(stringr::str_detect(dataelement, "TX_TB \\(D"))  %>% 
+  dplyr::filter(stringr::str_detect(dataelement, "Age/Sex/TBScreen/NewExistingART/"))%>% 
+  dplyr::filter(stringr::str_detect(categoryoptioncombo, "Already"))  %>% 
+  dplyr::transmute(element = paste0("#{", dataelementuid, ".", categoryoptioncombouid, "}")) %>%
+  .[["element"]] %>% 
+  glue::glue_collapse(" + ")
+
+temp = fy_19_r %>% 
+  dplyr::select(-dataset) %>% distinct() %>% 
+  dplyr::filter(stringr::str_detect(dataelement, "TX_TB \\(D"))  %>% 
+  dplyr::filter(stringr::str_detect(dataelement, "Age/Sex/TBScreen/NewExistingART/"))%>% 
+  dplyr::filter(stringr::str_detect(categoryoptioncombo, "Already"))  %>% 
+  dplyr::filter(stringr::str_detect(categoryoptioncombo, "TB Screen - Positive"))  %>% 
+  dplyr::transmute(element = paste0("#{", dataelementuid, ".", categoryoptioncombouid, "}")) %>%
+  .[["element"]] %>% 
+  glue::glue_collapse(" + ")
+
+
+# tx_tb_d results new
+
+temp = fy_19_r %>% 
+  dplyr::select(-dataset) %>% distinct() %>% 
+  dplyr::filter(stringr::str_detect(dataelement, "TX_TB \\(D"))  %>% 
+  dplyr::filter(stringr::str_detect(dataelement, "Age/Sex/TBScreen/NewExistingART/"))%>% 
+  dplyr::filter(stringr::str_detect(categoryoptioncombo, "New"))  %>% 
+  dplyr::transmute(element = paste0("#{", dataelementuid, ".", categoryoptioncombouid, "}")) %>%
+  .[["element"]] %>% 
+  glue::glue_collapse(" + ")
+
+temp = fy_19_r %>% 
+  dplyr::select(-dataset) %>% distinct() %>% 
+  dplyr::filter(stringr::str_detect(dataelement, "TX_TB \\(D"))  %>% 
+  dplyr::filter(stringr::str_detect(dataelement, "Age/Sex/TBScreen/NewExistingART/"))%>% 
+  dplyr::filter(stringr::str_detect(categoryoptioncombo, "New"))  %>% 
+  dplyr::filter(stringr::str_detect(categoryoptioncombo, "TB Screen - Positive"))  %>% 
+  dplyr::transmute(element = paste0("#{", dataelementuid, ".", categoryoptioncombouid, "}")) %>%
+  .[["element"]] %>% 
+  glue::glue_collapse(" + ")
+
