@@ -23,7 +23,7 @@ extract_formula_components <- function(formula){
     dplyr::mutate(data_element_uid = stringr::str_sub(value, 1,11)) %>% 
     dplyr::mutate(co_combination_uid = dplyr::if_else(stringr::str_length(value) > 11 ,
                                                       stringr::str_sub(value, 13,23),
-                                                      "")) %>% 
+                                                      NA_character_)) %>% 
     dplyr::select(- value)
   
 }
@@ -141,55 +141,13 @@ dplyr::setdiff(combined_data_elements$displayName, elements_fy19r_fy20t$dataelem
 }
 
 
-compare_indicator_cocs <- function(data_required_spec, dataset_details){
-  print(data_required_spec)
-  indicators  <<-  c(data_required_spec$A.dx_id,
-                    data_required_spec$B.dx_id) %>% 
-    unique() %>% 
-    na.omit() %>% 
-    purrr::map(get_indicator_details) %>% 
-    purrr::compact() %>% 
-    dplyr::bind_rows()
-  stop()
-  if(length(indicators) == 0 ){
-    return(NULL)
-  }
-  
-  numerator_components <- indicators$numerator %>% 
-    purrr::map(extract_formula_components) %>%
-    dplyr::bind_rows() 
-  
-  numerator_data_elements <- numerator_components %>% .[["data_element_uid"]] %>% unique() %>%
-    purrr::map(~datapackcommons::getMetadata(base_url, 
-                                             "dataElements", 
-                                             glue::glue("id:eq:{.x}"))) %>% 
-    dplyr::bind_rows()
-  
-  
-  denominator_components <- indicators$denominator[indicators$denominator != 1] %>%  
-    purrr::map(extract_formula_components) %>%
-    dplyr::bind_rows() 
-  
-  denominator_data_elements <- denominator_components %>% 
-    .[["data_element_uid"]] %>% 
-    unique() %>%
-    purrr::map(~datapackcommons::getMetadata(base_url, 
-                                             "dataElements", 
-                                             glue::glue("id:eq:{.x}"))) %>% 
-    dplyr::bind_rows()
-  
-  
-  
-  combined_data_elements <- dplyr::bind_rows(numerator_data_elements,denominator_data_elements)
-  
-  dplyr::setdiff(combined_data_elements$displayName, elements_fy19r_fy20t$dataelement)
-}
+
 
 
 
 plyr::alply(data_required, 1, get_invalid_data_elements, .parallel = TRUE)
 
-compare_indicator_cocs(slice(data_required,7), elements_fy19r_fy20t)
+
 
 
 
@@ -208,8 +166,33 @@ indicators_with_co_combos <- dplyr::filter(indicators,
                                              stringr::str_detect(denominator,"\\."))
 
 
+temp = plyr::alply(indicators_with_co_combos, 1, 
+                   compare_indicator_cocs, elements_fy19r_fy20t)
 
 
+compare_indicator_cocs <- function(indicator, dataset_details){
+
+  numerator_components <- indicator$numerator %>% 
+    extract_formula_components() %>%
+    dplyr::bind_rows() %>% na.omit() %>% dplyr::mutate(dataelementuid = data_element_uid,
+                                                       categoryoptioncombouid = co_combination_uid)
+
+  numerator_component_des <- numerator_components$data_element_uid %>% unique()
+  numerator_ind_to_dataset <- dataset_details %>% dplyr::filter(dataelementuid %in% numerator_component_des) %>% 
+    dplyr::full_join(numerator_components)
+  
+  denominator_components <<- indicator$denominator %>% 
+    extract_formula_components() %>%
+    dplyr::bind_rows() %>% na.omit() %>% dplyr::mutate(dataelementuid = data_element_uid,
+                                                       categoryoptioncombouid = co_combination_uid)
+  
+  denominator_component_des <- denominator_components$data_element_uid %>% unique()
+  denominator_ind_to_dataset <- dataset_details %>% dplyr::filter(dataelementuid %in% denominator_component_des) %>% 
+    dplyr::full_join(denominator_components)
+    
+  return(list(numerator_ind_to_dataset = numerator_ind_to_dataset, 
+            denominator_ind_to_dataset = denominator_ind_to_dataset))
+  }
 
 
 numerator_components <- indicators$numerator %>% 
