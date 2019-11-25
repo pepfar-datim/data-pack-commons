@@ -94,7 +94,29 @@ data_required <- datapackcommons::data_required
 
 
 # -------------------------------------------------------------------------
-
+compare_indicator_cocs <- function(indicator, dataset_details){
+  
+  numerator_components <- indicator$numerator %>% 
+    extract_formula_components() %>%
+    dplyr::bind_rows() %>% na.omit() %>% dplyr::mutate(dataelementuid = data_element_uid,
+                                                       categoryoptioncombouid = co_combination_uid)
+  
+  numerator_component_des <- numerator_components$data_element_uid %>% unique()
+  numerator_ind_to_dataset <- dataset_details %>% dplyr::filter(dataelementuid %in% numerator_component_des) %>% 
+    dplyr::full_join(numerator_components)
+  
+  denominator_components <<- indicator$denominator %>% 
+    extract_formula_components() %>%
+    dplyr::bind_rows() %>% na.omit() %>% dplyr::mutate(dataelementuid = data_element_uid,
+                                                       categoryoptioncombouid = co_combination_uid)
+  
+  denominator_component_des <- denominator_components$data_element_uid %>% unique()
+  denominator_ind_to_dataset <- dataset_details %>% dplyr::filter(dataelementuid %in% denominator_component_des) %>% 
+    dplyr::full_join(denominator_components)
+  
+  return(list(numerator_ind_to_dataset = numerator_ind_to_dataset, 
+              denominator_ind_to_dataset = denominator_ind_to_dataset))
+}
 
 get_invalid_data_elements <- function(data_required_spec){
   print(data_required_spec)
@@ -167,32 +189,10 @@ indicators_with_co_combos <- dplyr::filter(indicators,
 
 
 temp = plyr::alply(indicators_with_co_combos, 1, 
-                   compare_indicator_cocs, elements_fy19r_fy20t)
+                   compare_indicator_cocs, elements_fy19r_fy20t) %>% set_names(indicators_with_co_combos$name)
 
 
-compare_indicator_cocs <- function(indicator, dataset_details){
 
-  numerator_components <- indicator$numerator %>% 
-    extract_formula_components() %>%
-    dplyr::bind_rows() %>% na.omit() %>% dplyr::mutate(dataelementuid = data_element_uid,
-                                                       categoryoptioncombouid = co_combination_uid)
-
-  numerator_component_des <- numerator_components$data_element_uid %>% unique()
-  numerator_ind_to_dataset <- dataset_details %>% dplyr::filter(dataelementuid %in% numerator_component_des) %>% 
-    dplyr::full_join(numerator_components)
-  
-  denominator_components <<- indicator$denominator %>% 
-    extract_formula_components() %>%
-    dplyr::bind_rows() %>% na.omit() %>% dplyr::mutate(dataelementuid = data_element_uid,
-                                                       categoryoptioncombouid = co_combination_uid)
-  
-  denominator_component_des <- denominator_components$data_element_uid %>% unique()
-  denominator_ind_to_dataset <- dataset_details %>% dplyr::filter(dataelementuid %in% denominator_component_des) %>% 
-    dplyr::full_join(denominator_components)
-    
-  return(list(numerator_ind_to_dataset = numerator_ind_to_dataset, 
-            denominator_ind_to_dataset = denominator_ind_to_dataset))
-  }
 
 
 numerator_components <- indicators$numerator %>% 
@@ -307,3 +307,40 @@ temp = fy_19_r %>%
   .[["element"]] %>% 
   glue::glue_collapse(" + ")
 
+
+
+# pmtct_stat d Percentage at Entry Known Positive
+
+temp = fy_19_r %>% 
+  dplyr::select(-dataset) %>% distinct() %>% 
+  dplyr::filter(stringr::str_detect(dataelement, "PMTCT_STAT \\(N"))  %>% 
+  dplyr::filter(stringr::str_detect(dataelement, "Age/Sex/KnownNewResult")) %>% 
+  dplyr::filter(stringr::str_detect(categoryoptioncombo, "Known at Entry Positive"))  %>% 
+  dplyr::transmute(element = paste0("#{", dataelementuid, ".", categoryoptioncombouid, "}")) %>%
+  .[["element"]] %>% 
+  glue::glue_collapse(" + ")
+
+
+
+# PMTCT_STAT.N.newYield denominator
+
+temp = fy_19_r %>% 
+  dplyr::select(-dataset) %>% distinct() %>% 
+  dplyr::filter(stringr::str_detect(dataelement, "PMTCT_STAT \\(N"))  %>% 
+  dplyr::filter(stringr::str_detect(dataelement, "Age/Sex/KnownNewResult")) %>% 
+  dplyr::filter(stringr::str_detect(categoryoptioncombo, "Newly Identified Positive") |
+                  stringr::str_detect(categoryoptioncombo, "Newly Identified Negative"))  %>% 
+  dplyr::transmute(element = paste0("#{", dataelementuid, ".", categoryoptioncombouid, "}")) %>%
+  .[["element"]] %>% 
+  glue::glue_collapse(" + ")
+
+# PMTCT_STAT.N.newYield numerator
+
+temp = fy_19_r %>% 
+  dplyr::select(-dataset) %>% distinct() %>% 
+  dplyr::filter(stringr::str_detect(dataelement, "PMTCT_STAT \\(N"))  %>% 
+  dplyr::filter(stringr::str_detect(dataelement, "Age/Sex/KnownNewResult")) %>% 
+  dplyr::filter(stringr::str_detect(categoryoptioncombo, "Newly Identified Positive"))  %>% 
+  dplyr::transmute(element = paste0("#{", dataelementuid, ".", categoryoptioncombouid, "}")) %>%
+  .[["element"]] %>% 
+  glue::glue_collapse(" + ")
