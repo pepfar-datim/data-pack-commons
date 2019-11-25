@@ -123,15 +123,17 @@ co,Category option combo,cvAG22BILFC,ti,"<15, Male, Routine, Positive",Routine,r
 co,Category option combo,rtTEeMyntFT,ti,"15+, Male, Routine, Positive",Routine,rGptWqlhaVU,740,1.0000,ti_routine,,,,,,,,,,,,,,,,,,,,,,ti_routine,
 FokGv0LCTYj,Test Results,KM4dyooZHUP,tr,Positive,Newly Identified Positive,Vr59uUJBySG,10,1.0000,tr_pos2,,,,,,,,,,,,,,,tr_pos2,,,,,,,,
 FokGv0LCTYj,Test Results,Gb0GYkqotaO,tr,Negative,Newly Identified Negative,BiB1MtA7o4A,20,1.0000,tr_neg2,,,,,,,,,,,,,,,tr_neg2,,,,,,,,
-CKTkg8dLlr7,HTS Modality (USE ONLY for FY18 Results/FY19 Targets),y4f2Qs5jnv8,other_disagg,Community - Index FY18R/FY19T,NA,NA,100,1.0000,hts_mod_com_ndx,,,,,,,,,,,,,,,,,,,,,,,hts_mod_com_ndx
-CKTkg8dLlr7,HTS Modality (USE ONLY for FY18 Results/FY19 Targets),sk2aTYKnZNz,other_disagg,Facility - Index FY18R/FY19T,NA,NA,200,1.0000,hts_mod_fac_ndx,,,,,,,,,,,,,,,,,,,,,,,hts_mod_fac_ndx
-CKTkg8dLlr7,HTS Modality (USE ONLY for FY18 Results/FY19 Targets),mmef9WanhN1,other_disagg,Community - Mobile FY18R/FY19T,NA,NA,300,1.0000,hts_mod_com_mob,,,,,,,,,,,,,,,,,,,,,,,hts_mod_com_mob
-CKTkg8dLlr7,HTS Modality (USE ONLY for FY18 Results/FY19 Targets),N3ZPt01yI74,other_disagg,Community - VCT FY18R/FY19T,NA,NA,400,1.0000,hts_mod_com_vct,,,,,,,,,,,,,,,,,,,,,,,hts_mod_com_vct
-CKTkg8dLlr7,HTS Modality (USE ONLY for FY18 Results/FY19 Targets),jSX8elpqcD2,other_disagg,Community - Other Services FY18R/FY19T,NA,NA,500,1.0000,hts_mod_com_otr,,,,,,,,,,,,,,,,,,,,,,,hts_mod_com_otr
-CKTkg8dLlr7,HTS Modality (USE ONLY for FY18 Results/FY19 Targets),KFZG3Lc0XgW,other_disagg,Facility - Emergency Ward FY18R/FY19T,NA,NA,600,1.0000,hts_mod_fac_ew,,,,,,,,,,,,,,,,,,,,,,,hts_mod_fac_ew
-CKTkg8dLlr7,HTS Modality (USE ONLY for FY18 Results/FY19 Targets),fTuReSq9mrJ,other_disagg,Facility - Inpatient FY18R/FY19T,NA,NA,700,1.0000,hts_mod_fac_inpat,,,,,,,,,,,,,,,,,,,,,,,hts_mod_fac_inpat
-CKTkg8dLlr7,HTS Modality (USE ONLY for FY18 Results/FY19 Targets),QtnU6PoZwTj,other_disagg,Facility - Malnutrition FY18R/FY19T,NA,NA,800,1.0000,hts_mod_fac_nut,,,,,,,,,,,,,,,,,,,,,,,hts_mod_fac_nut
-CKTkg8dLlr7,HTS Modality (USE ONLY for FY18 Results/FY19 Targets),YvO0x3N8iPk,other_disagg,Facility - Pediatric FY18R/FY19T,NA,NA,900,1.0000,hts_mod_fac_ped,,,,,,,,,,,,,,,,,,,,,,,hts_mod_fac_ped
-CKTkg8dLlr7,HTS Modality (USE ONLY for FY18 Results/FY19 Targets),UQJZLPV5BcW,other_disagg,Facility - STI Clinic FY18R/FY19T,NA,NA,1000,1.0000,hts_mod_fac_sti,,,,,,,,,,,,,,,,,,,,,,,hts_mod_fac_sti
-CKTkg8dLlr7,HTS Modality (USE ONLY for FY18 Results/FY19 Targets),Q8GqLayzQHh,other_disagg,Facility - VCT FY18R/FY19T,NA,NA,1100,1.0000,hts_mod_fac_vct,,,,,,,,,,,,,,,,,,,,,,,hts_mod_fac_vct
-CKTkg8dLlr7,HTS Modality (USE ONLY for FY18 Results/FY19 Targets),OxLSARiuCa8,other_disagg,Facility - Other PITC FY18R/FY19T,NA,NA,1200,1.0000,hts_mod_fac_otr_pitc,,,,,,,,,,,,,,,,,,,,,,,hts_mod_fac_otr_pitc
+Jm6OwL9IqEa,HTS Modality (USE ONLY for FY19 Results/FY20 Targets),FVCb4OUYkiG,other_disagg,Community - Index FY19R/FY20T,NA,NA,100,1.0000,hts_mod_com_ndx,,,,,,,,,,,,,,,,,,,,,,,hts_mod_com_ndx
+Jm6OwL9IqEa,HTS Modality (USE ONLY for FY19 Results/FY20 Targets),H6bOQCcwrBV,other_disagg,Facility - Index FY19R/FY20T,NA,NA,200,1.0000,hts_mod_fac_ndx,,,,,,,,,,,,,,,,,,,,,,,hts_mod_fac_ndx
+Jm6OwL9IqEa,HTS Modality (USE ONLY for FY19 Results/FY20 Targets),NcerbGnPdIc,other_disagg,Community - Mobile FY19R/FY20T,NA,NA,300,1.0000,hts_mod_com_mob,,,,,,,,,,,,,,,,,,,,,,,hts_mod_com_mob
+Jm6OwL9IqEa,HTS Modality (USE ONLY for FY19 Results/FY20 Targets),xmYVJTekCtl,other_disagg,Community - VCT FY19R/FY20T,NA,NA,400,1.0000,hts_mod_com_vct,,,,,,,,,,,,,,,,,,,,,,,hts_mod_com_vct
+Jm6OwL9IqEa,HTS Modality (USE ONLY for FY19 Results/FY20 Targets),oQmZ3urcBbP,other_disagg,Community - Other Services FY19R/FY20T,NA,NA,500,1.0000,hts_mod_com_otr,,,,,,,,,,,,,,,,,,,,,,,hts_mod_com_otr
+Jm6OwL9IqEa,HTS Modality (USE ONLY for FY19 Results/FY20 Targets),NwSG4Qshiu1,other_disagg,Facility - Emergency Ward FY19R/FY20T,NA,NA,600,1.0000,hts_mod_fac_ew,,,,,,,,,,,,,,,,,,,,,,,hts_mod_fac_ew
+Jm6OwL9IqEa,HTS Modality (USE ONLY for FY19 Results/FY20 Targets),INrbTYREjOX,other_disagg,Facility - Inpatient FY19R/FY20T,NA,NA,700,1.0000,hts_mod_fac_inpat,,,,,,,,,,,,,,,,,,,,,,,hts_mod_fac_inpat
+Jm6OwL9IqEa,HTS Modality (USE ONLY for FY19 Results/FY20 Targets),d7vYERohPfS,other_disagg,Facility - Malnutrition FY19R/FY20T,NA,NA,800,1.0000,hts_mod_fac_nut,,,,,,,,,,,,,,,,,,,,,,,hts_mod_fac_nut
+Jm6OwL9IqEa,HTS Modality (USE ONLY for FY19 Results/FY20 Targets),OAwcN9zCmLM,other_disagg,Facility - Pediatric FY19R/FY20T,NA,NA,900,1.0000,hts_mod_fac_ped,,,,,,,,,,,,,,,,,,,,,,,hts_mod_fac_ped
+Jm6OwL9IqEa,HTS Modality (USE ONLY for FY19 Results/FY20 Targets),t7WRCjHNaEU,other_disagg,Facility - STI Clinic FY19R/FY20T,NA,NA,1000,1.0000,hts_mod_fac_sti,,,,,,,,,,,,,,,,,,,,,,,hts_mod_fac_sti
+Jm6OwL9IqEa,HTS Modality (USE ONLY for FY19 Results/FY20 Targets),ML7FROoRi6r,other_disagg,Facility - VCT FY19R/FY20T,NA,NA,1100,1.0000,hts_mod_fac_vct,,,,,,,,,,,,,,,,,,,,,,,hts_mod_fac_vct
+Jm6OwL9IqEa,HTS Modality (USE ONLY for FY19 Results/FY20 Targets),lRAOEGldPtj,other_disagg,Facility - Other PITC FY19R/FY20T,NA,NA,1200,1.0000,hts_mod_fac_otr_pitc,,,,,,,,,,,,,,,,,,,,,,,hts_mod_fac_otr_pitc
+Jm6OwL9IqEa,HTS Modality (USE ONLY for FY19 Results/FY20 Targets),v5AuS5Aw9Ks,other_disagg,Facility - VMMC FY19R/FY20T,NA,NA,1300,1.0000,hts_mod_fac_vmmc,,,,,,,,,,,,,,,,,,,,,,,hts_mod_fac_vmmc
+Jm6OwL9IqEa,HTS Modality (USE ONLY for FY19 Results/FY20 Targets),sZWARAOoyvZ,other_disagg,Facility - PMTCT ANC1 Only FY19R/FY20T,NA,NA,1400,1.0000,hts_mod_fac_anc_1,,,,,,,,,,,,,,,,,,,,,,,hts_mod_fac_anc_1
