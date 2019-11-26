@@ -344,3 +344,14 @@ temp = fy_19_r %>%
   dplyr::transmute(element = paste0("#{", dataelementuid, ".", categoryoptioncombouid, "}")) %>%
   .[["element"]] %>% 
   glue::glue_collapse(" + ")
+
+
+# TB_STAT.N.newYield denominator
+
+temp = fy_19_r %>% 
+  dplyr::select(-dataset) %>% distinct() %>% 
+  dplyr::filter(stringr::str_detect(dataelement, "TB_STAT \\(N"))  %>% 
+  dplyr::filter(stringr::str_detect(categoryoptioncombo, "Newly Identified Positive"))  %>% 
+  dplyr::transmute(element = paste0("#{", dataelementuid, ".", categoryoptioncombouid, "}")) %>%
+  .[["element"]] %>% 
+  glue::glue_collapse(" + ")
