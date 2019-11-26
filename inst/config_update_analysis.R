@@ -355,3 +355,13 @@ temp = fy_19_r %>%
   dplyr::transmute(element = paste0("#{", dataelementuid, ".", categoryoptioncombouid, "}")) %>%
   .[["element"]] %>% 
   glue::glue_collapse(" + ")
+
+# TB_STAT Percentage With already known status numerator
+
+temp = fy_19_r %>% 
+  dplyr::select(-dataset) %>% distinct() %>% 
+  dplyr::filter(stringr::str_detect(dataelement, "TB_STAT \\(N"))  %>% 
+  dplyr::filter(stringr::str_detect(categoryoptioncombo, "Known at Entry Positive"))  %>% 
+  dplyr::transmute(element = paste0("#{", dataelementuid, ".", categoryoptioncombouid, "}")) %>%
+  .[["element"]] %>% 
+  glue::glue_collapse(" + ")
