@@ -59,6 +59,21 @@ ValidateDataRequired <- function(data_required, base_url){
   data_required %>% dplyr::filter(!is.na(B.dx_code)) %>%
   {ValidateCodeIdPairs(base_url, .[["B.dx_code"]], .[["B.dx_id"]], "indicators")}
   
+  data_required %>% dplyr::filter(!is.na(A.dx_name)) %>%
+  {datapackcommons::ValidateNameIdPairs(.[["A.dx_name"]], 
+                                        .[["A.dx_id"]], 
+                                        "indicators", 
+                                        base_url = base_url)} %>% 
+    assertthat::assert_that()
+  
+  data_required %>% dplyr::filter(!is.na(B.dx_name)) %>%
+  {datapackcommons::ValidateNameIdPairs(.[["B.dx_name"]], 
+                                        .[["B.dx_id"]], 
+                                        "indicators", 
+                                        base_url = base_url)} %>% 
+    assertthat::assert_that()
+  
+  
   # data_required %>% dplyr::filter(!is.na(A.add_dim_1_uid)) %>%
   # {ValidateNameIdPairs(.[["A.add_dim_1"]], .[["A.add_dim_1_uid"]], "dimensions")}
   # data_required %>% dplyr::filter(!is.na(B.add_dim_1_uid)) %>%
