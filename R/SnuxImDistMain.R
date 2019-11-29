@@ -43,7 +43,7 @@ BuildDimensionLists_Mechanisms <- function(data_element_map_item, dim_item_sets,
     dplyr::bind_rows(dimensions_common)
   
   out <- list(planning = dimensions_planning)
-
+return(out)
   if(data_element_map_item$facility_valid == TRUE){
     dimensions_facility <- 
       tibble::tribble(~type, ~dim_item_uid, ~dim_uid,
@@ -81,12 +81,13 @@ devtools::install(pkg = "/Users/sam/Documents/GitHub/data-pack-commons",
                   upgrade = FALSE)
 library(datapackcommons)
 library(dplyr)
-country_details = datapackcommons::GetCountryLevels(base_url, "Rwanda")
 DHISLogin("/users/sam/.secrets/jason.json")
 base_url <- getOption("baseurl")
 # Get the mechanisms relevant for the specifc country being processed
 # cache options required for datimvalidation function to work.
 # cache age option reverts to original after calling datim validation
+country_details = datapackcommons::GetCountryLevels(base_url, "Rwanda")
+
 cache_in = getOption("maxCacheAge")
 options(maxCacheAge = 0)
 
@@ -117,7 +118,8 @@ mechanisms_historic_country <- mechanisms_historic_global %>%
 
 
 
-BuildDimensionLists_Mechanisms(datapackcommons::Map19Tto20T %>% slice(1), 
+temp=BuildDimensionLists_Mechanisms(datapackcommons::Map19Tto20T %>% slice(1), 
                                datapackcommons::dim_item_sets,
                                mechanisms_historic_country,
                                datapackcommons::GetCountryLevels(base_url, "Rwanda"))
+
