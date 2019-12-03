@@ -296,7 +296,7 @@ Get19TMechanisms <- function(base_url = getOption("baseurl")){
                                       filters = "id:eq:wUpfppgjEza", 
                                       "categoryOptionCombos[code,id~rename(categoryOptionComboId),name,categoryOptions[id~rename(categoryOptionId)]]")[[1,"categoryOptionCombos"]] %>% 
     dplyr::as_tibble() %>% 
-    tidyr::unnest() %>% 
+    tidyr::unnest(cols = c(categoryOptions)) %>% 
     dplyr::inner_join(mech_list_parsed, by = c("categoryOptionComboId" = "uid"))
   
   if(NROW(mech_cat_opt_combos) > 0){
