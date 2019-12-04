@@ -84,11 +84,27 @@ mechanisms_historic_country <- mechanisms_historic_global %>%
 # alply uses parallel processing here 
 
 
-
+data_element_map_item=datapackcommons::Map19Tto20T %>% slice(46)
 temp=BuildDimensionList_SnuByIm(datapackcommons::Map19Tto20T %>% slice(46), 
                                datapackcommons::dim_item_sets,
                                mechanisms_historic_country,
                                datapackcommons::GetCountryLevels(base_url, 
                                                                  "Malawi")[[1,"id"]])
 
-temp2=datapackcommons::GetData_Analytics(temp)
+analytics_results = datapackcommons::GetData_Analytics(temp)[["results"]]
+
+
+
+disagg_sets  <-  c("age_set", 
+                   "sex_set", 
+                   "kp_set", 
+                   "other_disagg") %>% 
+  purrr::map(~dplyr::filter(dim_item_sets,
+                            model_sets == data_element_map_item[[1, .]]))
+
+temp3=purrr::reduce(disagg_sets, 
+              datapackcommons::MapDimToOptions, 
+              allocate = "distribute", 
+              .init = analytics_results) %>%  
+  AggByAgeSexKpOuMechSt()
+
