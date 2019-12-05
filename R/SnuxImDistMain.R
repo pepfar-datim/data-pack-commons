@@ -1,6 +1,7 @@
-#' @title BuildDimensionList_SnuByIm(data_element_map_item, dim_item_sets, mechanisms, country_uid)
+#' @title BuildDimensionList_SnuByIm(data_element_map_item, dim_item_sets, 
+#' mechanisms, country_uid)
 #' 
-#' @description # get list of dimensions (parameters) for analytics call to get data for SNUxIM 
+#' @description get list of dimensions (parameters) for analytics call to get data for SNUxIM 
 #' distribution. Tightly coupled to DATIM as it contains some hard coded dimension uids 
 #' for Funding Mechanism, technical area, num or denom, disagg type, support type, 
 #' and type of organization unit. Also some hard coded dimension items for support type
