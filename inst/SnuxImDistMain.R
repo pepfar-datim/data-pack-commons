@@ -1,5 +1,5 @@
-#' @title BuildDimensionList_SnuByIm(data_element_map_item, dim_item_sets, 
-#' mechanisms, country_uid)
+#' @title BuildDimensionList(data_element_map_item, dim_item_sets, 
+#' country_uid, mechanisms = NULL)
 #' 
 #' @description get list of dimensions (parameters) for analytics call to get data for SNUxIM 
 #' distribution. Tightly coupled to DATIM as it contains some hard coded dimension uids 
@@ -7,11 +7,25 @@
 #' and type of organization unit. Also some hard coded dimension items for support type
 #' @param data_element_map_item Single row of data_element_map being sliced and passed
 #' @param dim_item_sets Dataframe containing all the dimension item sets e.g. datapackcommons::dim_item_sets
-#' @param mechanisms All historic mechanisms for the country filtered by id
 #' @param country_uid Country uid
+#' @param mechanisms All historic mechanisms for the country filtered by id.
+#' When included thee dimensions include psnu, mechanism, AND DSD/TA disaggregation.
+#' When null psnu, mechanism and DSD/TA disaggregation are excluded giving country level totals.
 #' @return  List of dimensions for the analytics call GetData_Analytics
-BuildDimensionList_SnuByIm <- function(data_element_map_item, dim_item_sets, 
-                                       mechanisms, country_uid){
+BuildDimensionList_DataPack <- function(data_element_map_item, dim_item_sets, 
+                                       country_uid, mechanisms = NULL){
+  
+# prepare df of common dimensions and filters as expected by GetData_analytics  
+  dimension_common <- 
+    tibble::tribble(~type, ~dim_item_uid, ~dim_uid,
+                    "filter", data_element_map_item[[1,"dx"]],"dx", 
+                    "filter", data_element_map_item[[1,"pe"]], "pe",
+                    "dimension", country_uid, "ou",
+                    "dimension", data_element_map_item[[1,"technical_area_uid"]], "LxhLO68FcXm",
+                    "dimension", data_element_map_item[[1,"num_or_den_uid"]],"lD2x0c8kywj",
+                    "dimension", data_element_map_item[[1,"disagg_type_uid"]],"HWPJnUTMjEq"
+    )
+  
   # prepare df of dimensions and filters as expected by GetData_analytics  
   dimension_disaggs <- dim_item_sets %>% dplyr::mutate(type = "dimension") %>%  
     dplyr::filter(model_sets %in% c(data_element_map_item$age_set,
@@ -22,6 +36,11 @@ BuildDimensionList_SnuByIm <- function(data_element_map_item, dim_item_sets,
     unique()  %>% 
     stats::na.omit() # there are some items in dim item sets with no source dimension
   
+  if (is.null(mechanisms)){
+    return(dplyr::bind_rows(dimension_common, dimension_disaggs))
+  }
+
+  
   dimension_mechanisms <- mechanisms["categoryOptionId"] %>% 
     dplyr::transmute(type = "dimension",
                      dim_item_uid = categoryOptionId,
@@ -30,17 +49,11 @@ BuildDimensionList_SnuByIm <- function(data_element_map_item, dim_item_sets,
   # remaining dimensions
   
   tibble::tribble(~type, ~dim_item_uid, ~dim_uid,
-                  "filter", data_element_map_item[[1,"dx"]],"dx", 
-                  "filter", data_element_map_item[[1,"pe"]], "pe",
-                  "dimension", country_uid, "ou",
                   "dimension", "OU_GROUP-nwQbMeALRjL", "ou", # military
                   "dimension", "OU_GROUP-AVy8gJXym2D", "ou", # COP Prioritization SNU
-                  "dimension", data_element_map_item[[1,"technical_area_uid"]], "LxhLO68FcXm",
-                  "dimension", data_element_map_item[[1,"num_or_den_uid"]],"lD2x0c8kywj",
-                  "dimension", data_element_map_item[[1,"disagg_type_uid"]],"HWPJnUTMjEq",
                   "dimension", "iM13vdNLWKb", "TWXpUVE2MqL", #dsd and ta support types
                   "dimension", "cRAGKdWIDn4", "TWXpUVE2MqL") %>% 
-    dplyr::bind_rows(dimension_mechanisms, dimension_disaggs)
+    dplyr::bind_rows(dimension_mechanisms, dimension_disaggs, dimension_common)
 }
 
 
@@ -86,14 +99,20 @@ mechanisms_historic_country <- mechanisms_historic_global %>%
 
 
 data_element_map_item=datapackcommons::Map19Tto20T %>% slice(46)
-temp=BuildDimensionList_SnuByIm(datapackcommons::Map19Tto20T %>% slice(46), 
+temp = BuildDimensionList_DataPack(datapackcommons::Map19Tto20T %>% slice(46), 
                                datapackcommons::dim_item_sets,
-                               mechanisms_historic_country,
                                datapackcommons::GetCountryLevels(base_url, 
-                                                                 "Malawi")[[1,"id"]])
+                                                                 "Malawi")[[1,"id"]],
+                               mechanisms_historic_country)
 
-analytics_results = datapackcommons::GetData_Analytics(temp)[["results"]]
+analytics_results_snu_by_im = datapackcommons::GetData_Analytics(temp)[["results"]]
 
+temp = BuildDimensionList_DataPack(datapackcommons::Map19Tto20T %>% slice(46), 
+                                   datapackcommons::dim_item_sets,
+                                   datapackcommons::GetCountryLevels(base_url, 
+                                                                     "Malawi")[[1,"id"]])
+
+analytics_results_country = datapackcommons::GetData_Analytics(temp)[["results"]]
 
 
 disagg_sets  <-  c("age_set", 
