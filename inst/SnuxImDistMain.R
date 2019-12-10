@@ -1,4 +1,4 @@
-#' @title BuildDimensionList(data_element_map_item, dim_item_sets, 
+#' @title BuildDimensionList_DataPack(data_element_map_item, dim_item_sets, 
 #' country_uid, mechanisms = NULL)
 #' 
 #' @description get list of dimensions (parameters) for analytics call to get data for SNUxIM 
@@ -56,12 +56,40 @@ BuildDimensionList_DataPack <- function(data_element_map_item, dim_item_sets,
     dplyr::bind_rows(dimension_mechanisms, dimension_disaggs, dimension_common)
 }
 
+GetFy20tMechs <- function(base_url = getOption("baseurl")){
+  # SQL view will retrieve list of mechanisms for which there is FY2019 data - 2018Oct period
+  mech_list_parsed <- datapackcommons::GetSqlView("Lh6bMZyyFhd", base_url = base_url)
+  
+  mech_cat_opt_combos <-  datapackcommons::getMetadata(
+    base_url, 
+    "categoryCombos", 
+    filters = "id:eq:wUpfppgjEza", 
+    "categoryOptionCombos[code,id~rename(categoryOptionComboId),name,categoryOptions[id~rename(categoryOptionId)]]")[[1,"categoryOptionCombos"]] %>% 
+    dplyr::as_tibble() %>% 
+    tidyr::unnest(cols = c(categoryOptions)) %>% 
+    dplyr::inner_join(mech_list_parsed, by = c("categoryOptionComboId" = "uid"))
+  
+  if(NROW(mech_cat_opt_combos) > 0){
+    return(mech_cat_opt_combos)
+  }
+  # If I got here critical error
+  stop("Unable to get 19T mechanisms")
+}
+
+#todo make sure view has the right columns
+mech_list_ready <- datapackcommons::GetSqlView("X6HqWMvcRv0", base_url = base_url)
+
+
+
 
 devtools::install(pkg = "/Users/sam/Documents/GitHub/data-pack-commons",
                   build = TRUE,
                   upgrade = FALSE)
+
 library(datapackcommons)
+
 library(dplyr)
+
 DHISLogin("/users/sam/.secrets/jason.json")
 base_url <- getOption("baseurl")
 # Get the mechanisms relevant for the specifc country being processed
