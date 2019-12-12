@@ -209,3 +209,63 @@ usethis::use_data(Map19Tto20T, overwrite = TRUE, compress = "gzip")
 usethis::use_data(regional_to_national_mechs_cop19, overwrite = TRUE, compress = "gzip")
 
 setwd(wd)
+
+
+# SQL query for mechanisms
+
+# select
+# mechs.name mechanism_name,
+# mechs.uid mechanism_co_uid,
+# mechs.code mechanism_code,
+# country_name country,
+# country_uid
+# from
+# (
+#   select
+#   distinct dv.attributeoptioncomboid,
+#   dv.sourceid,
+#   co.name,
+#   co.uid,
+#   co.code
+#   from
+#   datavalue dv
+#   inner join _periodstructure pe on
+#   dv.periodid = pe.periodid
+#   inner join categoryoptioncombos_categoryoptions coc_co on
+#   dv.attributeoptioncomboid = coc_co.categoryoptioncomboid
+#   inner join dataelementcategoryoption co on
+#   co.categoryoptionid = coc_co.categoryoptionid
+#   where
+#   dv.deleted = false
+#   and (pe.iso = '${period}')
+#   and co.code != '00000'
+#   and co.code != '00001'
+#   and co.uid != 'xYerKDKCefk') mechs
+# inner join (
+#   select
+#   ou.organisationunitid,
+#   ou.uid,
+#   country_uid,
+#   country_name
+#   from
+#   organisationunit ou
+#   inner join (
+#     select
+#     organisationunit.uid country_uid,
+#     organisationunit.name country_name
+#     from
+#     orgunitgroup
+#     inner join orgunitgroupmembers on
+#     orgunitgroup.orgunitgroupid = orgunitgroupmembers.orgunitgroupid
+#     inner join organisationunit on
+#     organisationunit.organisationunitid = orgunitgroupmembers.organisationunitid
+#     where
+#     orgunitgroup.uid = 'cNzfcPWEGSH') countries on
+#   ou."path" like concat('%', countries.country_uid, '%')) orgunits on
+# mechs.sourceid = orgunits.organisationunitid
+# group by
+# mechs.name,
+# mechs.uid,
+# mechs.code,
+# country_uid,
+# country_name
