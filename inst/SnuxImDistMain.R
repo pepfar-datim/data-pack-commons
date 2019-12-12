@@ -69,7 +69,8 @@ GetFy20tMechs <- function(base_url = getOption("baseurl")){
   #   dplyr::as_tibble() %>% 
   #   tidyr::unnest(cols = c(categoryOptions)) %>% 
   #   dplyr::inner_join(mech_list_parsed, by = c("categoryOptionComboId" = "uid"))
-  mechs <- datapackcommons::GetSqlView("X6HqWMvcRv0", base_url = base_url)
+  # TODO  change the year to 2019
+  mechs <- datapackcommons::GetSqlView("X6HqWMvcRv0", c("period"), c("2018Oct"),base_url = base_url)
   if(NROW(mechs) > 0){
     return(mechs)
   }
@@ -85,7 +86,7 @@ devtools::install(pkg = "/Users/sam/Documents/GitHub/data-pack-commons",
 library(datapackcommons)
 
 library(dplyr)
-country_name = "Malawi"
+country_name = "Rwanda"
 DHISLogin("/users/sam/.secrets/jason.json")
 base_url <- getOption("baseurl")
 # Get the mechanisms relevant for the specifc country being processed
@@ -188,5 +189,11 @@ data = plyr::adply(datapackcommons::Map19Tto20T,
                    country_details$id, country_details$planning_level,
                    GetFy20tMechs() %>% 
                      dplyr::filter(country == !!country_name), 
-                   .parallel = TRUE, .expand = FALSE, .id = NULL)
-
+                   .parallel = TRUE, .expand = FALSE, .id = NULL) %>% 
+  dplyr::group_by(indicator_code, 
+                  psnu_uid, 
+                  age_option_uid, 
+                  sex_option_uid, 
+                  kp_option_uid) %>%
+  dplyr::mutate(percent = value/sum(value)) %>% 
+  dplyr::ungroup()
