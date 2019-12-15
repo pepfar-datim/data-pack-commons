@@ -9,7 +9,7 @@
 #' @param dim_item_sets Dataframe containing all the dimension item sets e.g. datapackcommons::dim_item_sets
 #' @param country_uid Country uid
 #' @param mechanisms All historic mechanisms for the country filtered by id.
-#' When included thee dimensions include psnu, mechanism, AND DSD/TA disaggregation.
+#' When included the dimensions include psnu, mechanism, AND DSD/TA disaggregation.
 #' When null psnu, mechanism and DSD/TA disaggregation are excluded giving country level totals.
 #' @return  List of dimensions for the analytics call GetData_Analytics
 BuildDimensionList_DataPack <- function(data_element_map_item, dim_item_sets, 
@@ -125,7 +125,7 @@ mechs = GetFy20tMechs() %>%
 
 getSnuxIm_density <- function(data_element_map_item, 
                               dim_item_sets = datapackcommons::dim_item_sets, 
-                              country_uid, planning_level,
+                              country_uid,
                               mechanisms){ 
   
   data <-  BuildDimensionList_DataPack(data_element_map_item, 
@@ -186,7 +186,7 @@ doMC::registerDoMC(cores = 5)
 data = plyr::adply(datapackcommons::Map19Tto20T,
                    1, getSnuxIm_density,
                    datapackcommons::dim_item_sets,
-                   country_details$id, country_details$planning_level,
+                   country_details$id,
                    GetFy20tMechs() %>% 
                      dplyr::filter(country == !!country_name), 
                    .parallel = TRUE, .expand = FALSE, .id = NULL) %>% 
