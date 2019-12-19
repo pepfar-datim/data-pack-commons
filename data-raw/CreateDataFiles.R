@@ -229,6 +229,7 @@ usethis::use_data(dim_item_sets_test, overwrite = TRUE, compress = "gzip")
 usethis::use_data(data_required, overwrite = TRUE, compress = "gzip")
 usethis::use_data(data_required_test, overwrite = TRUE, compress = "gzip")
 usethis::use_data(Map19Tto20T, overwrite = TRUE, compress = "gzip")
+usethis::use_data(Map20Tto21T, overwrite = TRUE, compress = "gzip")
 usethis::use_data(regional_to_national_mechs_cop19, overwrite = TRUE, compress = "gzip")
 
 setwd(wd)
