@@ -69,8 +69,8 @@ GetFy20tMechs <- function(base_url = getOption("baseurl")){
   #   dplyr::as_tibble() %>% 
   #   tidyr::unnest(cols = c(categoryOptions)) %>% 
   #   dplyr::inner_join(mech_list_parsed, by = c("categoryOptionComboId" = "uid"))
-  # TODO  change the year to 2019
-  mechs <- datapackcommons::GetSqlView("X6HqWMvcRv0", c("period"), c("2018Oct"),base_url = base_url)
+  
+  mechs <- datapackcommons::GetSqlView("X6HqWMvcRv0", c("period"), c("2019Oct"),base_url = base_url)
   if(NROW(mechs) > 0){
     return(mechs)
   }
@@ -86,7 +86,7 @@ devtools::install(pkg = "/Users/sam/Documents/GitHub/data-pack-commons",
 library(datapackcommons)
 
 library(dplyr)
-country_name = "Rwanda"
+country_name = "South Africa"
 DHISLogin("/users/sam/.secrets/jason.json")
 base_url <- getOption("baseurl")
 # Get the mechanisms relevant for the specifc country being processed
@@ -183,7 +183,7 @@ getSnuxIm_density <- function(data_element_map_item,
 }
 
 doMC::registerDoMC(cores = 5)
-data = plyr::adply(datapackcommons::Map19Tto20T,
+data = plyr::adply(datapackcommons::Map20Tto21T,
                    1, getSnuxIm_density,
                    datapackcommons::dim_item_sets,
                    country_details$id,
