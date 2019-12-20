@@ -336,7 +336,7 @@ GetSqlView <- function(sql_view_uid, variable_keys = NULL, variable_values = NUL
   api_call <- paste0(base_url, "api/sqlViews/", sql_view_uid, "/data.csv", 
                      variable_k_v_pairs) 
   
-  RetryAPI(api_call, "application/csv") %>% 
+  RetryAPI(api_call, "application/csv", max_attempts = 1, timeout = 600) %>% 
     httr::content(., "text") %>% 
     readr::read_csv(col_names = TRUE, col_types = col_types)
 }
