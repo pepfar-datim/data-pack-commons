@@ -1,6 +1,6 @@
 ﻿indicatorCode_fy20_cop,Technical Area_fy20_cop,Numerator / Denominator_fy20_cop,Disagregation Type_fy20_cop,Other_fy20_cop,dx,technical_area,technical_area_uid,num_or_den,num_or_den_uid,disagg_type,disagg_type_uid,pe,age_set,sex_set,kp_set,other_disagg,allocate
 GEND_GBV.N.ViolenceServiceType.T.physEmot,GEND_GBV,N,ViolenceServiceType,physEmot,DE_GROUP-XUA8pDYjPsw,GEND_GBV,vw3VoiA4D0s,Numerator,Som9NRMQqV7,ViolenceServiceType,QEpxdKlM3zh,2019Oct,NA,NA,NA,vt_pe,distribute
-GEND_GBV.N.ViolenceServiceType.T.postRape,GEND_GBV,N,ViolenceServiceType,postRape,DE_GROUP-XUA8pDYjPsw,GEND_GBV,vw3VoiA4D0s,Numerator,Som9NRMQqV7,ViolenceServiceType,QEpxdKlM3zh,2019Oct,NA,NA,NA,vt_sv,distribute
+GEND_GBV.N.ViolenceServiceType.T.Sexual,GEND_GBV,N,ViolenceServiceType,postRape,DE_GROUP-XUA8pDYjPsw,GEND_GBV,vw3VoiA4D0s,Numerator,Som9NRMQqV7,ViolenceServiceType,QEpxdKlM3zh,2019Oct,NA,NA,NA,vt_sv,distribute
 HTS_INDEX_COM.N.Age_Sex_Result.T.NewNeg,HTS_INDEX_COM,N,Age/Sex/Result,NewNeg,DE_GROUP-XUA8pDYjPsw,HTS_TST,f5IPTM7mieH,Numerator,Som9NRMQqV7,IndexMod/Age/Sex/Result,xds87opkbem,2019Oct,1-50+,F/M/U,NA,tr_neg2,distribute
 HTS_INDEX_COM.N.Age_Sex_Result.T.NewPos,HTS_INDEX_COM,N,Age/Sex/Result,NewPos,DE_GROUP-XUA8pDYjPsw,HTS_TST,f5IPTM7mieH,Numerator,Som9NRMQqV7,IndexMod/Age/Sex/Result,xds87opkbem,2019Oct,1-50+,F/M/U,NA,tr_pos2,distribute
 HTS_INDEX_FAC.N.Age_Sex_Result.T.NewNeg,HTS_INDEX_FAC,N,Age/Sex/Result,NewNeg,DE_GROUP-XUA8pDYjPsw,HTS_TST,f5IPTM7mieH,Numerator,Som9NRMQqV7,Index/Age/Sex/Result,zzNslrLngKi,2019Oct,1-50+,F/M/U,NA,tr_neg2,distribute
