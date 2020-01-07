@@ -4,8 +4,13 @@
 \alias{CalculateSiteDensity}
 \title{CalculateSiteDensity(data_element_map_item, country_details, mechanisms, dim_item_sets, base_url)}
 \usage{
-CalculateSiteDensity(data_element_map_item, country_details, mechanisms,
-  dim_item_sets, base_url)
+CalculateSiteDensity(
+  data_element_map_item,
+  country_details,
+  mechanisms,
+  dim_item_sets,
+  base_url
+)
 }
 \arguments{
 \item{data_element_map_item}{Each row of data_element_map being sliced and passed}

@@ -4,9 +4,13 @@
 \alias{GetSqlView}
 \title{GetSqlView}
 \usage{
-GetSqlView(sql_view_uid, variable_keys = NULL, variable_values = NULL,
+GetSqlView(
+  sql_view_uid,
+  variable_keys = NULL,
+  variable_values = NULL,
   col_types = readr::cols(.default = "c"),
-  base_url = getOption("baseurl"))
+  base_url = getOption("baseurl")
+)
 }
 \arguments{
 \item{sql_view_uid}{chr - the uid of the sql view}

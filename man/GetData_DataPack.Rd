@@ -4,10 +4,14 @@
 \alias{GetData_DataPack}
 \title{GetData_DataPack}
 \usage{
-GetData_DataPack(parameters, org_units,
+GetData_DataPack(
+  parameters,
+  org_units,
   dim_item_sets = datapackcommons::dim_item_sets,
   org_unit_groups = c("nwQbMeALRjL", "AVy8gJXym2D"),
-  org_unit_levels = NULL, base_url = getOption("baseurl"))
+  org_unit_levels = NULL,
+  base_url = getOption("baseurl")
+)
 }
 \value{
 A list with $time = time the function was called, 

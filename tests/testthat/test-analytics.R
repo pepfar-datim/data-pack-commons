@@ -17,7 +17,7 @@ require(httptest)
 ------------
 test_that("We can get data with GetData_Analytics", {
 #httptest::use_mock_api()
-  datapackcommons::DHISLogin_Play("2.29")
+  datapackcommons::DHISLogin_Play("2.31.6")
   dimensions <- tibble::tribble(~type, ~dim_item_uid, ~dim_uid,
                                 "filter", "vihpFUg2WTy", "dx", #PMTCT positive test rate indicator
                                 "dimension", "ImspTQPwCqd", "ou", # sierra leone
@@ -30,8 +30,8 @@ test_that("We can get data with GetData_Analytics", {
   # veGzholzPQm = HIV age, UOqJW6HPvvL = 15-24y, WAl0OCcIYxr = 25-49y, 
   # J5jldMd8OHv = Facility Type, uYxK4wmcPqA = CHP, EYbopBOJWsW = MCHP
   
-  response <- GetData_Analytics(dimensions, base_url = "https://play.dhis2.org/2.29/")
-  testthat::expect_equal(response$api_call, paste0("https://play.dhis2.org/2.29/api/29/analytics.json?",
+  response <- GetData_Analytics(dimensions, base_url = "https://play.dhis2.org/2.31.6/")
+  testthat::expect_equal(response$api_call, paste0("https://play.dhis2.org/2.31.6/api/29/analytics.json?",
          "dimension=J5jldMd8OHv:uYxK4wmcPqA;EYbopBOJWsW&dimension=ou:ImspTQPwCqd;LEVEL-2",
          "&dimension=veGzholzPQm:UOqJW6HPvvL;WAl0OCcIYxr&filter=dx:vihpFUg2WTy",
          "&filter=pe:LAST_YEAR&outputIdScheme=UID&hierarchyMeta=true"))

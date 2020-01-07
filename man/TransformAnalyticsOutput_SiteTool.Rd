@@ -4,8 +4,12 @@
 \alias{TransformAnalyticsOutput_SiteTool}
 \title{TransformAnalyticsOutput_SiteTool()}
 \usage{
-TransformAnalyticsOutput_SiteTool(analytics_results, dim_item_sets,
-  data_element_map_item, planning_level)
+TransformAnalyticsOutput_SiteTool(
+  analytics_results,
+  dim_item_sets,
+  data_element_map_item,
+  planning_level
+)
 }
 \arguments{
 \item{analytics_results}{- data frame - this is a results list item returned from

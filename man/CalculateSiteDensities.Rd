@@ -4,8 +4,14 @@
 \alias{CalculateSiteDensities}
 \title{CalculateSiteDensities(data_element_map, country_details, mechanisms, dim_item_sets, base_url, cores)}
 \usage{
-CalculateSiteDensities(data_element_map, country_details, mechanisms,
-  dim_item_sets, base_url, cores = 1)
+CalculateSiteDensities(
+  data_element_map,
+  country_details,
+  mechanisms,
+  dim_item_sets,
+  base_url,
+  cores = 1
+)
 }
 \arguments{
 \item{data_element_map}{Dataframe to be processed with CalculateSiteDensity}
