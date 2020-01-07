@@ -4,12 +4,18 @@
 \alias{DistributeToSites}
 \title{DistributeToSites()}
 \usage{
-DistributeToSites(d, data_element_map = datapackcommons::Map19Tto20T,
+DistributeToSites(
+  d,
+  data_element_map = datapackcommons::Map19Tto20T,
   mechanisms_historic_global = datapackcommons::Get19TMechanisms(getOption("baseurl")),
   dim_item_sets = datapackcommons::dim_item_sets,
-  site_densities = NULL, country_name = NULL,
-  base_url = getOption("baseurl"), verbose = FALSE,
-  mech_to_mech_map = NULL, sites = NULL)
+  site_densities = NULL,
+  country_name = NULL,
+  base_url = getOption("baseurl"),
+  verbose = FALSE,
+  mech_to_mech_map = NULL,
+  sites = NULL
+)
 }
 \arguments{
 \item{d}{Object from data pack export (TargetxPSNUxIM)}

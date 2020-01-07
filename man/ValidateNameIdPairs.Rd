@@ -4,8 +4,13 @@
 \alias{ValidateNameIdPairs}
 \title{ValidateNameIdPairs(names, ids, type)}
 \usage{
-ValidateNameIdPairs(names, ids, type, exact = TRUE,
-  base_url = getOption("baseurl"))
+ValidateNameIdPairs(
+  names,
+  ids,
+  type,
+  exact = TRUE,
+  base_url = getOption("baseurl")
+)
 }
 \arguments{
 \item{names}{string vector - names of spcific class of metadata - category option, indicator etc}

@@ -103,7 +103,7 @@ ValidateMapT_1toT <- function(t_1_to_t, dim_item_sets, base_url){
 
   }
 
-datapackcommons::DHISLogin("/users/sam/.secrets/jason.json")
+datapackcommons::DHISLogin("/users/sam/.secrets/datim.json")
 base_url <- getOption("baseurl")
 wd <- getwd()
 setwd("/Users/sam/Documents/GitHub/data-pack-commons")

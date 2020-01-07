@@ -4,8 +4,12 @@
 \alias{BuildDimensionLists}
 \title{BuildDimensionLists(data_element_map_item, dim_item_sets, mechanisms, country_details)}
 \usage{
-BuildDimensionLists(data_element_map_item, dim_item_sets, mechanisms,
-  country_details)
+BuildDimensionLists(
+  data_element_map_item,
+  dim_item_sets,
+  mechanisms,
+  country_details
+)
 }
 \arguments{
 \item{data_element_map_item}{Single row of data_element_map being sliced and passed}

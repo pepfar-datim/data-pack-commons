@@ -3,7 +3,6 @@
 \docType{package}
 \name{datapackcommons}
 \alias{datapackcommons}
-\alias{datapackcommons-package}
 \title{\code{datapackcommons} package}
 \description{
 Parsing and import functions for the ICPI Data Pack
