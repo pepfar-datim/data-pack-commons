@@ -2,7 +2,7 @@ library(tidyverse)
 require(foreach)
 doMC::registerDoMC(cores = 5)
 
-datapackcommons::DHISLogin("/users/sam/.secrets/jason.json")
+datapackcommons::DHISLogin("/users/sam/.secrets/datim.json")
 base_url <- getOption("baseurl")
 get_indicator_details <- function(uid){
   datapackcommons::getMetadata(base_url,
@@ -27,6 +27,14 @@ extract_formula_components <- function(formula){
     dplyr::select(- value)
   
 }
+
+fy_21_t <- datapackcommons::GetSqlView("DotdxKrNZxG", 
+                                       c("dataSets"), 
+                                       c("Pmc0yYAIi1t")) %>% 
+  dplyr::bind_rows(datapackcommons::GetSqlView("DotdxKrNZxG", 
+                                               c("dataSets"), 
+                                               c("s1sxJuqXsvV"))) %>%
+  distinct()
 
 
 
