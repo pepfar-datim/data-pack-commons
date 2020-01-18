@@ -34,6 +34,7 @@ fy_21_t <- datapackcommons::GetSqlView("DotdxKrNZxG",
   dplyr::bind_rows(datapackcommons::GetSqlView("DotdxKrNZxG", 
                                                c("dataSets"), 
                                                c("s1sxJuqXsvV"))) %>%
+  dplyr::select(-dataset) %>% 
   distinct()
 
 
@@ -50,6 +51,7 @@ fy_20_t <- datapackcommons::GetSqlView("DotdxKrNZxG",
   dplyr::bind_rows(datapackcommons::GetSqlView("DotdxKrNZxG", 
                                                c("dataSets"), 
                                                c("HiJieecLXxN"))) %>% 
+  dplyr::select(-dataset) %>% 
   distinct()
 
 fy_19_t <- datapackcommons::GetSqlView("DotdxKrNZxG", 
@@ -64,7 +66,7 @@ fy_19_t <- datapackcommons::GetSqlView("DotdxKrNZxG",
   dplyr::bind_rows(datapackcommons::GetSqlView("DotdxKrNZxG", 
                                                c("dataSets"), 
                                                c("eyI0UOWJnDk"))) %>% 
-  distinct()
+  dplyr::select(-dataset) %>% distinct()
             
 
 fy_19_r <- datapackcommons::GetSqlView("DotdxKrNZxG", 
@@ -79,7 +81,7 @@ fy_19_r <- datapackcommons::GetSqlView("DotdxKrNZxG",
   dplyr::bind_rows(datapackcommons::GetSqlView("DotdxKrNZxG", 
                                                c("dataSets"), 
                                                c("PyD4x9oFwxJ"))) %>% 
-  distinct()
+  dplyr::select(-dataset) %>%   distinct()
 
 fy_18_r <- datapackcommons::GetSqlView("DotdxKrNZxG", 
                                        c("dataSets"), 
@@ -93,11 +95,11 @@ fy_18_r <- datapackcommons::GetSqlView("DotdxKrNZxG",
   dplyr::bind_rows(datapackcommons::GetSqlView("DotdxKrNZxG", 
                                                c("dataSets"), 
                                                c("tz1bQ3ZwUKJ"))) %>% 
-  distinct()
+  dplyr::select(-dataset) %>%   distinct()
 
 
 
-elements_fy19r_fy20t <- dplyr::bind_rows(fy_19_r, fy_20_t) %>% dplyr::select(-dataset) %>% dplyr::distinct()
+elements_fy19r_fy20t <- dplyr::bind_rows(fy_19_r, fy_20_t)  %>% dplyr::distinct()
 data_required <- datapackcommons::data_required
 
 

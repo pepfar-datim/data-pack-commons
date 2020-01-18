@@ -70,7 +70,7 @@ GetFy20tMechs <- function(base_url = getOption("baseurl")){
   #   tidyr::unnest(cols = c(categoryOptions)) %>% 
   #   dplyr::inner_join(mech_list_parsed, by = c("categoryOptionComboId" = "uid"))
   
-  mechs <- datapackcommons::GetSqlView("X6HqWMvcRv0", c("period"), c("2019Oct"),base_url = base_url)
+  mechs <- datapackcommons::GetSqlView("h1qIu5SS3SQ", c("period"), c("2019Oct"),base_url = base_url)
   if(NROW(mechs) > 0){
     return(mechs)
   }
@@ -187,8 +187,7 @@ data = plyr::adply(datapackcommons::Map20Tto21T,
                    1, getSnuxIm_density,
                    datapackcommons::dim_item_sets,
                    country_details$id,
-                   GetFy20tMechs() %>% 
-                     dplyr::filter(country == !!country_name), 
+                   mechs, 
                    .parallel = TRUE, .expand = FALSE, .id = NULL) %>% 
   dplyr::group_by(indicator_code, 
                   psnu_uid, 
