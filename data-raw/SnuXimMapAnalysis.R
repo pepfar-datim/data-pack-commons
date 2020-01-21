@@ -1,12 +1,54 @@
 library(datapackr)
 library(tidyverse)
 
-secrets <- "/Users/sam/.secrets/testmer2.json"
+getDataElementGroups <- function(base_url = getOption("baseurl")){
+  datapackcommons::GetSqlView("m7qxbPHsikm") %>% 
+  
+}
+
+secrets <- "/Users/sam/.secrets/jason.json"
 datapackr::loginToDATIM(secrets)
 base_url = options("baseurl")
 
+
+
+
+fy_21_t <- datapackcommons::GetSqlView("DotdxKrNZxG", 
+                                       c("dataSets"), 
+                                       c("Pmc0yYAIi1t")) %>% 
+  dplyr::bind_rows(datapackcommons::GetSqlView("DotdxKrNZxG", 
+                                               c("dataSets"), 
+                                               c("s1sxJuqXsvV"))) %>%
+  dplyr::select(-dataset) %>% 
+  distinct()
+
+
+
+fy_20_t <- datapackcommons::GetSqlView("DotdxKrNZxG", 
+                                       c("dataSets"), 
+                                       c("sBv1dj90IX6")) %>% 
+  dplyr::bind_rows(datapackcommons::GetSqlView("DotdxKrNZxG", 
+                                               c("dataSets"), 
+                                               c("nIHNMxuPUOR"))) %>%
+  dplyr::bind_rows(datapackcommons::GetSqlView("DotdxKrNZxG", 
+                                               c("dataSets"), 
+                                               c("C2G7IyPPrvD"))) %>%
+  dplyr::bind_rows(datapackcommons::GetSqlView("DotdxKrNZxG", 
+                                               c("dataSets"), 
+                                               c("HiJieecLXxN"))) %>% 
+  dplyr::select(-dataset) %>% 
+  distinct()
+
+
+schema <- datapackr::cop20_data_pack_schema %>% dplyr::filter(col_type == "target"
+                                                                        & dataset == "mer")
+
+dplyr::setdiff(c(schema$dataelement_dsd, schema$dataelement_ta), fy_21_t$dataelementuid)
+dplyr::setdiff(fy_21_t$dataelementuid, c(schema$dataelement_dsd, schema$dataelement_ta))
+
+
 ##standard_de_groups <- datapackcommons::GetSqlView("vqetpxYlX1c") ## jason.datim
-standard_de_groups <- datapackcommons::GetSqlView("wJno1xqHAeB") ## test mer 2
+ ## test mer 2
 
 fy_20_t <- datapackcommons::GetSqlView("DotdxKrNZxG", 
                                        c("dataSets"), 
