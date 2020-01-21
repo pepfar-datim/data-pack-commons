@@ -262,8 +262,6 @@ setwd(wd)
 #   where
 #   dv.deleted = false
 #   and (pe.iso = '${period}')
-#   and co.code != '00000'
-#   and co.code != '00001'
 #   and co.uid != 'xYerKDKCefk') mechs
 # inner join (
 #   select

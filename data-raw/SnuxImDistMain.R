@@ -21,7 +21,6 @@ BuildDimensionList_DataPack <- function(data_element_map_item, dim_item_sets,
                     "filter", data_element_map_item[[1,"dx"]],"dx", 
                     "filter", data_element_map_item[[1,"pe"]], "pe",
                     "dimension", country_uid, "ou",
-                    "filter", "UwIZeT7Ciz3","sdoDQv2EDjp", # include all mechs without deduplication
                     "dimension", data_element_map_item[[1,"technical_area_uid"]], "LxhLO68FcXm",
                     "dimension", data_element_map_item[[1,"num_or_den_uid"]],"lD2x0c8kywj",
                     "dimension", data_element_map_item[[1,"disagg_type_uid"]],"HWPJnUTMjEq"
