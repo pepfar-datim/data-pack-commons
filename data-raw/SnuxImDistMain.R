@@ -86,7 +86,7 @@ library(datapackcommons)
 
 library(dplyr)
 country_name = "South Africa"
-DHISLogin("/users/sam/.secrets/jason.json")
+DHISLogin("/users/sam/.secrets/testmer2.json")
 base_url <- getOption("baseurl")
 # Get the mechanisms relevant for the specifc country being processed
 # cache options required for datimvalidation function to work.

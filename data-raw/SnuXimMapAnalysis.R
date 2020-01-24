@@ -1,43 +1,84 @@
 library(datapackr)
 library(tidyverse)
 
-getDataElementGroups <- function(base_url = getOption("baseurl")){
+getStandardDataElementGroups <- function(base_url = getOption("baseurl")){
   datapackcommons::GetSqlView("m7qxbPHsikm") %>% 
-  
+    dplyr::select(data_element = dataelementname,
+                  data_element_uid = uid,  
+                  data_element_code = code,
+                  technical_area  = `Technical Area`,
+                  technical_area_uid = LxhLO68FcXm,
+                  targets_results = `Targets / Results`,
+                  targets_results_uid = IeMmjHyBUpi,
+                  support_type = `Support Type`,
+                  support_type_uid = `TWXpUVE2MqL`,                                   
+                  numerator_denominator = `Numerator / Denominator`,
+                  numerator_denominator_uid = `lD2x0c8kywj`,
+                  disaggregation_type = `Disaggregation Type`,
+                  disaggregation_type_uid = HWPJnUTMjEq
+                  )
 }
+
+getDataSets_Detailed <- function(dataset_uids) {
+  purrr::map(dataset_uids, ~ datapackcommons::GetSqlView("DotdxKrNZxG", 
+                                                         c("dataSets"), 
+                                                         c(.x))) %>% 
+    dplyr::bind_rows() %>% 
+    dplyr::select(-dataelementdesc, -shortname) %>%   
+    dplyr::rename(data_element = "dataelement",
+                  data_element_code = "code",
+                  data_element_uid = "dataelementuid",
+                  category_option_combo = "categoryoptioncombo",
+                  category_option_combo_code = "categoryoptioncombocode",
+                  category_option_combo_uid = "categoryoptioncombouid" ) %>% 
+    dplyr::left_join(getStandardDataElementGroups())
+}
+
+getDatasetUids <-  function(fiscal_year, type){
+  if(fiscal_year == "21" & type == "targets") {
+    c("Pmc0yYAIi1t",
+      "s1sxJuqXsvV")
+    } else if( fiscal_year == "20" & type == "targets") {
+      c("sBv1dj90IX6",
+        "nIHNMxuPUOR",
+        "C2G7IyPPrvD",
+        "HiJieecLXxN")
+    } else if( fiscal_year == "19" & type == "targets") {
+      c("BWBS39fydnX",
+        "l796jk9SW7q",
+        "X8sn5HE5inC",
+        "eyI0UOWJnDk")
+    } 
+  else{
+      stop("input not supported by dataset_uids")
+    }
+  }
 
 secrets <- "/Users/sam/.secrets/jason.json"
 datapackr::loginToDATIM(secrets)
 base_url = options("baseurl")
 
+fy_21_t <- getDatasetUids("21", "targets") %>% 
+  getDataSets_Detailed() %>%
+  dplyr::select(-dataset) %>% 
+  distinct() 
+  
+fy_20_t <- getDatasetUids("20", "targets") %>% 
+  getDataSets_Detailed() %>% 
+  dplyr::select(-dataset) %>% 
+  distinct()
 
-
-
-fy_21_t <- datapackcommons::GetSqlView("DotdxKrNZxG", 
-                                       c("dataSets"), 
-                                       c("Pmc0yYAIi1t")) %>% 
-  dplyr::bind_rows(datapackcommons::GetSqlView("DotdxKrNZxG", 
-                                               c("dataSets"), 
-                                               c("s1sxJuqXsvV"))) %>%
+fy_19_t <- getDatasetUids("19", "targets") %>% 
+  getDataSets_Detailed() %>% 
   dplyr::select(-dataset) %>% 
   distinct()
 
 
+dif_19T_21T <- dplyr::setdiff(fy_21_t, fy_19_t)
+dif_20T_21T <- dplyr::setdiff(fy_21_t, fy_20_t)
 
-fy_20_t <- datapackcommons::GetSqlView("DotdxKrNZxG", 
-                                       c("dataSets"), 
-                                       c("sBv1dj90IX6")) %>% 
-  dplyr::bind_rows(datapackcommons::GetSqlView("DotdxKrNZxG", 
-                                               c("dataSets"), 
-                                               c("nIHNMxuPUOR"))) %>%
-  dplyr::bind_rows(datapackcommons::GetSqlView("DotdxKrNZxG", 
-                                               c("dataSets"), 
-                                               c("C2G7IyPPrvD"))) %>%
-  dplyr::bind_rows(datapackcommons::GetSqlView("DotdxKrNZxG", 
-                                               c("dataSets"), 
-                                               c("HiJieecLXxN"))) %>% 
-  dplyr::select(-dataset) %>% 
-  distinct()
+match_19T_21T <- dplyr::intersect(fy_21_t, fy_19_t)
+match_20T_21T <- dplyr::intersect(fy_21_t, fy_20_t)
 
 
 schema <- datapackr::cop20_data_pack_schema %>% dplyr::filter(col_type == "target"
@@ -231,3 +272,7 @@ temp2 = dplyr::select(temp, indicator_code,
 #   where
 #   tr.uid = 'IeMmjHyBUpi' ) tr on
 # tr.tr_dataelementuid = ta.dataelementuid;
+
+
+# select dataelement.code, dataelement.uid, _dataelementgroupsetstructure.* from _dataelementgroupsetstructure inner join dataelement on
+# _dataelementgroupsetstructure.dataelementid = dataelement.dataelementid 
