@@ -54,7 +54,7 @@ getDatasetUids <-  function(fiscal_year, type){
     }
   }
 
-secrets <- "/Users/sam/.secrets/jason.json"
+secrets <- "/Users/sam/.secrets/testmer2.json"
 datapackr::loginToDATIM(secrets)
 base_url = options("baseurl")
 
@@ -272,7 +272,3 @@ temp2 = dplyr::select(temp, indicator_code,
 #   where
 #   tr.uid = 'IeMmjHyBUpi' ) tr on
 # tr.tr_dataelementuid = ta.dataelementuid;
-
-
-# select dataelement.code, dataelement.uid, _dataelementgroupsetstructure.* from _dataelementgroupsetstructure inner join dataelement on
-# _dataelementgroupsetstructure.dataelementid = dataelement.dataelementid 
