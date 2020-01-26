@@ -70,3 +70,4 @@ TX_TB.D.Age_Sex_TBScreen_NewExistingART_HIVStatus.T.ScreenPosNew,TX_TB,D,Age/Sex
 VMMC_CIRC.N.Age_Sex_HIVStatus.T.Negative,VMMC_CIRC,N,Age/Sex/HIVStatus,Negative,DE_GROUP-XUA8pDYjPsw,VMMC_CIRC,wdoUps1qb3V,Numerator,Som9NRMQqV7,Age/Sex/HIVStatus,pxz2gGSIQhG,2019Oct,15-50+,M,NA,tss_Neg,distribute
 VMMC_CIRC.N.Age_Sex_HIVStatus.T.Positive,VMMC_CIRC,N,Age/Sex/HIVStatus,Positive,DE_GROUP-XUA8pDYjPsw,VMMC_CIRC,wdoUps1qb3V,Numerator,Som9NRMQqV7,Age/Sex/HIVStatus,pxz2gGSIQhG,2019Oct,15-50+,M,NA,tss_Pos,distribute
 VMMC_CIRC.N.Age_Sex_HIVStatus.T.Unknown,VMMC_CIRC,N,Age/Sex/HIVStatus,Unknown,DE_GROUP-XUA8pDYjPsw,VMMC_CIRC,wdoUps1qb3V,Numerator,Som9NRMQqV7,Age/Sex/HIVStatus,pxz2gGSIQhG,2019Oct,15-50+,M,NA,tss_Unknown,distribute
+CXCA_SCRN.N.Age_Sex_HIVStatus.T,CXCA_SCRN,N,Age/Sex/HIVStatus,NA,DE_GROUP-XUA8pDYjPsw,CXCA_SCRN,qOgXk080fJH,Numerator,Som9NRMQqV7,Age/Sex/HIVStatus,pxz2gGSIQhG,2019Oct,15-50+,F,NA,NA,distribute
