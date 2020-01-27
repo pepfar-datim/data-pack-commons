@@ -123,3 +123,43 @@ MapDimToOptions <- function(data, items_to_options, allocate){
   }
 }
 
+
+#' @export
+#' @title getDatasetUids
+#' 
+#' @description returns character verctor of dataset uids for a given FY {"19", "20", "21"}
+#' and type {"targets", "results"}
+#' @param fiscal_year character - one of {"19", "20", "21"} 
+#' @param type character - one of {"targets", "results"}
+#' @return returns a character verstor of the related dataset uids
+#'
+getDatasetUids <-  function(fiscal_year, type){
+  if(fiscal_year == "21" & type == "targets") {
+    c("Pmc0yYAIi1t", # MER Target Setting: PSNU (Facility and Community Combined)
+      "s1sxJuqXsvV")  # MER Target Setting: PSNU (Facility and Community Combined) - DoD ONLY)
+  } else if( fiscal_year == "20" & type == "targets") {
+    c("sBv1dj90IX6", # MER Targets: Facility Based FY2020
+      "nIHNMxuPUOR", # MER Targets: Community Based FY2020
+      "C2G7IyPPrvD", # MER Targets: Community Based - DoD ONLY FY2020
+      "HiJieecLXxN") # MER Targets: Facility Based - DoD ONLY FY2020
+  } else if( fiscal_year == "19" & type == "targets") {
+    c("BWBS39fydnX", # MER Targets: Community Based - DoD ONLY FY2019
+      "l796jk9SW7q", # MER Targets: Community Based FY2019
+      "X8sn5HE5inC", # MER Targets: Facility Based - DoD ONLY FY2019
+      "eyI0UOWJnDk") # MER Targets: Facility Based FY2019)
+  } else if( fiscal_year == "19" & type == "results") {
+    c("KWRj80vEfHU", # MER Results: Facility Based FY2019Q4
+      "fi9yMqWLWVy", # MER Results: Facility Based - DoD ONLY FY2019Q4
+      "zUoy5hk8r0q", # MER Results: Community Based FY2019Q4
+      "PyD4x9oFwxJ") # MER Results: Community Based - DoD ONLY FY2019Q4
+  } 
+  else if( fiscal_year == "18" & type == "results") {
+    c("uN01TT331OP", # MER Results: Community Based - DoD ONLY FY2018Q4
+      "WbszaIdCi92", # MER Results: Community Based FY2018Q4
+      "BxIx51zpAjh", # MER Results: Facility Based - DoD ONLY FY2018Q4
+      "tz1bQ3ZwUKJ") # MER Results: Facility Based FY2018Q4
+  } 
+  else{
+    stop("input not supported by getDatasetUids")
+  }
+}

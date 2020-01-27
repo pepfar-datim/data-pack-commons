@@ -2,7 +2,7 @@
 <sqlViews>
  <sqlView name="Get _dataelementgroupsetstructure resource table" id="m7qxbPHsikm">
 <sqlQuery>
-select dataelement.code, dataelement.uid, _dataelementgroupsetstructure.* from _dataelementgroupsetstructure inner join dataelement on _dataelementgroupsetstructure.dataelementid = dataelement.dataelementid
+select dataelement.code dataelementcode, dataelement.uid dataelementuid, _dataelementgroupsetstructure.* from _dataelementgroupsetstructure inner join dataelement on _dataelementgroupsetstructure.dataelementid = dataelement.dataelementid
 </sqlQuery>
 <displayName>Get _dataelementgroupsetstructure resource table</displayName>
 <publicAccess>rw------</publicAccess>

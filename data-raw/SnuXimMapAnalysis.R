@@ -4,8 +4,8 @@ library(tidyverse)
 getStandardDataElementGroups <- function(base_url = getOption("baseurl")){
   datapackcommons::GetSqlView("m7qxbPHsikm") %>% 
     dplyr::select(data_element = dataelementname,
-                  data_element_uid = uid,  
-                  data_element_code = code,
+                  data_element_uid = dataelementuid,  
+                  data_element_code = dataelementcode,
                   technical_area  = `Technical Area`,
                   technical_area_uid = LxhLO68FcXm,
                   targets_results = `Targets / Results`,
@@ -33,26 +33,6 @@ getDataSets_Detailed <- function(dataset_uids) {
                   category_option_combo_uid = "categoryoptioncombouid" ) %>% 
     dplyr::left_join(getStandardDataElementGroups())
 }
-
-getDatasetUids <-  function(fiscal_year, type){
-  if(fiscal_year == "21" & type == "targets") {
-    c("Pmc0yYAIi1t",
-      "s1sxJuqXsvV")
-    } else if( fiscal_year == "20" & type == "targets") {
-      c("sBv1dj90IX6",
-        "nIHNMxuPUOR",
-        "C2G7IyPPrvD",
-        "HiJieecLXxN")
-    } else if( fiscal_year == "19" & type == "targets") {
-      c("BWBS39fydnX",
-        "l796jk9SW7q",
-        "X8sn5HE5inC",
-        "eyI0UOWJnDk")
-    } 
-  else{
-      stop("input not supported by dataset_uids")
-    }
-  }
 
 secrets <- "/Users/sam/.secrets/testmer2.json"
 datapackr::loginToDATIM(secrets)
