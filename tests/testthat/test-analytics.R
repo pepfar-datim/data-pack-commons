@@ -17,7 +17,7 @@ require(httptest)
 ------------
 test_that("We can get data with GetData_Analytics", {
 #httptest::use_mock_api()
-  datapackcommons::DHISLogin_Play("2.31.6")
+  datapackcommons::DHISLogin_Play("2.30")
   dimensions <- tibble::tribble(~type, ~dim_item_uid, ~dim_uid,
                                 "filter", "vihpFUg2WTy", "dx", #PMTCT positive test rate indicator
                                 "dimension", "ImspTQPwCqd", "ou", # sierra leone
@@ -30,8 +30,8 @@ test_that("We can get data with GetData_Analytics", {
   # veGzholzPQm = HIV age, UOqJW6HPvvL = 15-24y, WAl0OCcIYxr = 25-49y, 
   # J5jldMd8OHv = Facility Type, uYxK4wmcPqA = CHP, EYbopBOJWsW = MCHP
   
-  response <- GetData_Analytics(dimensions, base_url = "https://play.dhis2.org/2.31.6/")
-  testthat::expect_equal(response$api_call, paste0("https://play.dhis2.org/2.31.6/api/29/analytics.json?",
+  response <- GetData_Analytics(dimensions, base_url = "https://play.dhis2.org/2.30/")
+  testthat::expect_equal(response$api_call, paste0("https://play.dhis2.org/2.30/api/29/analytics.json?",
          "dimension=J5jldMd8OHv:uYxK4wmcPqA;EYbopBOJWsW&dimension=ou:ImspTQPwCqd;LEVEL-2",
          "&dimension=veGzholzPQm:UOqJW6HPvvL;WAl0OCcIYxr&filter=dx:vihpFUg2WTy",
          "&filter=pe:LAST_YEAR&outputIdScheme=UID&hierarchyMeta=true"))
@@ -177,10 +177,8 @@ testthat::test_that("GetSqlView", {
 testthat::test_that("TransformAnalyticsOutput_SiteTool", {
   
   # Data element map row for OVC SERV
-  data_element_map = structure(list(indicatorCode_fy20_cop = "OVC_SERV.N.Age/Sex/ProgramStatus.20T.Active",
-                                   `Technical Area_fy20_cop` = "OVC_SERV", `Numerator / Denominator_fy20_cop` = "N",
-                                   `Disagregation Type_fy20_cop` = "Age/Sex/ProgramStatus",
-                                   Other_fy20_cop = "Active", dx = "DE_GROUP-zhdJiWlPvCz", technical_area = "OVC_SERV",
+  data_element_map = structure(list(indicatorCode_fy20_cop = "OVC_SERV.N.Age/Sex/ProgramStatus.20T.Active", 
+                                    dx = "DE_GROUP-zhdJiWlPvCz", technical_area = "OVC_SERV",
                                    technical_area_uid = "RxyNwEV3oQf", num_or_den = "Numerator",
                                    num_or_den_uid = "Som9NRMQqV7", disagg_type = "Age/Sex",
                                    disagg_type_uid = "Qbz6SrpmJ1y", pe = "2018Oct", age_set = "<1-18+",
