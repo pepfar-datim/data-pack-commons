@@ -157,7 +157,7 @@ getSnuxIm_density <- function(data_element_map_item,
                         allocate = "distribute",
                         .init = data) %>% 
     dplyr::left_join(mechanisms, by = c("Funding Mechanism" = "mechanism_co_uid")) %>% 
-    dplyr::mutate(indicator_code = data_element_map_item$indicatorCode_fy20_cop) %>%
+    dplyr::mutate(indicator_code = data_element_map_item$indicator_code) %>%
     dplyr::rename("value" = "Value",
                   "psnu_uid" = "Organisation unit",
                   "type" = "Support Type") %>% 

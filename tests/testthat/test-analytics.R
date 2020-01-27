@@ -177,7 +177,7 @@ testthat::test_that("GetSqlView", {
 testthat::test_that("TransformAnalyticsOutput_SiteTool", {
   
   # Data element map row for OVC SERV
-  data_element_map = structure(list(indicatorCode_fy20_cop = "OVC_SERV.N.Age/Sex/ProgramStatus.20T.Active", 
+  data_element_map = structure(list(indicator_code = "OVC_SERV.N.Age/Sex/ProgramStatus.20T.Active", 
                                     dx = "DE_GROUP-zhdJiWlPvCz", technical_area = "OVC_SERV",
                                    technical_area_uid = "RxyNwEV3oQf", num_or_den = "Numerator",
                                    num_or_den_uid = "Som9NRMQqV7", disagg_type = "Age/Sex",

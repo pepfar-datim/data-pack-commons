@@ -135,11 +135,11 @@ fy_20_t <- datapackcommons::GetSqlView("DotdxKrNZxG",
 
 #any indidacotrs in map no longer relevant?
 
-dplyr::setdiff(map$indicatorCode_fy20_cop, schema$indicator_code)
+dplyr::setdiff(map$indicator_code, schema$indicator_code)
 
 
 temp = dplyr::left_join(schema, standard_de_groups, by = c("dataelement_dsd" = "data_element_uid")) %>% 
-  dplyr::full_join(datapackcommons::Map20Tto21T, by = c("indicator_code" = "indicatorCode_fy20_cop")) %>% 
+  dplyr::full_join(datapackcommons::Map20Tto21T, by = c("indicator_code" = "indicator_code")) %>% 
   dplyr::full_join(fy_20_t, by = c("dataelement_dsd" = "dataelementuid"))
 
 
