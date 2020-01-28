@@ -38,17 +38,17 @@ secrets <- "/Users/sam/.secrets/testmer2.json"
 datapackr::loginToDATIM(secrets)
 base_url = options("baseurl")
 
-fy_21_t <- getDatasetUids("21", "targets") %>% 
+fy_21_t <- datapackcommons::getDatasetUids("21", "targets") %>% 
   getDataSets_Detailed() %>%
   dplyr::select(-dataset) %>% 
   distinct() 
   
-fy_20_t <- getDatasetUids("20", "targets") %>% 
+fy_20_t <- datapackcommons::getDatasetUids("20", "targets") %>% 
   getDataSets_Detailed() %>% 
   dplyr::select(-dataset) %>% 
   distinct()
 
-fy_19_t <- getDatasetUids("19", "targets") %>% 
+fy_19_t <- datapackcommons::getDatasetUids("19", "targets") %>% 
   getDataSets_Detailed() %>% 
   dplyr::select(-dataset) %>% 
   distinct()
