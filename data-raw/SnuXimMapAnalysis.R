@@ -36,7 +36,7 @@ getDataSets_Detailed <- function(dataset_uids) {
 
 secrets <- "/Users/sam/.secrets/testmer2.json"
 datapackr::loginToDATIM(secrets)
-base_url = options("baseurl")
+base_url <- getOption("baseurl")
 
 fy_21_t <- datapackcommons::getDatasetUids("21", "targets") %>% 
   getDataSets_Detailed() %>%

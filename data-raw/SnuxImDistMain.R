@@ -85,7 +85,7 @@ devtools::install(pkg = "/Users/sam/Documents/GitHub/data-pack-commons",
 library(datapackcommons)
 
 library(dplyr)
-country_name = "Zimbabwe"
+country_name = "South Africa"
 DHISLogin("/users/sam/.secrets/testmer2.json")
 base_url <- getOption("baseurl")
 # Get the mechanisms relevant for the specifc country being processed
