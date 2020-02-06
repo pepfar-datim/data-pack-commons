@@ -174,6 +174,9 @@ data = plyr::adply(datapackcommons::Map20Tto21T,
                    country_details$id,
                    mechs, 
                    .parallel = TRUE, .expand = FALSE, .id = NULL) %>% 
+  dplyr::group_by_at(dplyr::vars(-value)) %>% 
+  dplyr::summarise(value = sum(value, na.rm = TRUE)) %>% 
+  dplyr::ungroup() %>% 
   dplyr::group_by(indicator_code, 
                   psnu_uid, 
                   age_option_uid, 
