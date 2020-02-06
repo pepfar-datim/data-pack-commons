@@ -57,19 +57,26 @@ BuildDimensionList_DataPack <- function(data_element_map_item, dim_item_sets,
 }
 
 GetFy20tMechs <- function(base_url = getOption("baseurl")){
-  # # SQL view will retrieve list of mechanisms for which there is FY2019 data - 2018Oct period
-  # mech_list_parsed <- datapackcommons::GetSqlView("Lh6bMZyyFhd", base_url = base_url)
-  # 
-  # mech_cat_opt_combos <-  datapackcommons::getMetadata(
-  #   base_url, 
-  #   "categoryCombos", 
-  #   filters = "id:eq:wUpfppgjEza", 
-  #   "categoryOptionCombos[code,id~rename(categoryOptionComboId),name,categoryOptions[id~rename(categoryOptionId)]]")[[1,"categoryOptionCombos"]] %>% 
-  #   dplyr::as_tibble() %>% 
-  #   tidyr::unnest(cols = c(categoryOptions)) %>% 
-  #   dplyr::inner_join(mech_list_parsed, by = c("categoryOptionComboId" = "uid"))
+
   
-  mechs <- datapackcommons::GetSqlView("h1qIu5SS3SQ", c("period"), c("2019Oct"),base_url = base_url)
+  #TODO modify format data for api function so I can make this call with getData_Analytics
+  
+  mech_codes <- datapackcommons::getMetadata(base_url, 
+                                            "categories",
+                                            "id:eq:SH885jaRe0o",
+                                            "categoryOptions[id,code]") %>% 
+    .[["categoryOptions"]] %>% 
+    .[[1]] %>% 
+    dplyr::rename(mechanism_co_uid = "id", mechanism_code = "code")
+  
+  mechs <- paste0(base_url, "api/29/analytics.csv?dimension=SH885jaRe0o&dimension=ou:OU_GROUP-cNzfcPWEGSH;ybg3MO3hcf4&filter=pe:THIS_FINANCIAL_YEAR&filter=dx:DE_GROUP-XUA8pDYjPsw&displayProperty=SHORTNAME&outputIdScheme=UID") %>% 
+    datapackcommons::RetryAPI("application/csv") %>% 
+    httr::content() %>% 
+    readr::read_csv() %>%
+    dplyr::select(-Value) %>% 
+    setNames(c("mechanism_co_uid", "country_uid")) %>% 
+    dplyr::left_join(mech_codes)
+  
   if(NROW(mechs) > 0){
     return(mechs)
   }
@@ -85,38 +92,17 @@ devtools::install(pkg = "/Users/sam/Documents/GitHub/data-pack-commons",
 library(datapackcommons)
 
 library(dplyr)
-country_name = "South Africa"
-DHISLogin("/users/sam/.secrets/testmer2.json")
+country_name = "Zambia"
+DHISLogin("/users/sam/.secrets/datim.json")
 base_url <- getOption("baseurl")
 # Get the mechanisms relevant for the specifc country being processed
 # cache options required for datimvalidation function to work.
 # cache age option reverts to original after calling datim validation
-country_details = datapackcommons::GetCountryLevels(base_url, country_name)
+country_details <-  datapackcommons::GetCountryLevels(base_url, country_name) 
+country_uid  <-  country_details$id
+
 mechs = GetFy20tMechs() %>% 
-  dplyr::filter(country == !!country_name)
-# cache_in = getOption("maxCacheAge")
-# options(maxCacheAge = 0)
-# 
-# # if regional country need to use region/operating unit 
-# if(country_details$country_level == 3){
-#   mechanisms_full_country <- datimvalidation::getMechanismsMap(country_details$id)
-# } else if (country_details$country_level == 4) {
-#   region_uid <- datapackcommons::getMetadata(base_url, "organisationUnits", 
-#                                              filters = paste0("children.id:eq:", country_details$id),
-#                                              fields = "id")
-#   assertthat::assert_that(NROW(region_uid) == 1)
-#   mechanisms_full_country <- datimvalidation::getMechanismsMap(region_uid$id)
-# } else{
-#   stop("Country level not equal to 3 or 4 in DitributeToSites")
-# }
-# options(maxCacheAge = cache_in)
-# mechanisms_historic_global <- datapackcommons::Get19TMechanisms(getOption("baseurl"))
-# # filter to just those mechanisms with data for the relevant time period
-# assertthat::assert_that(assertthat::has_name(mechanisms_historic_global, 
-#                                              "categoryOptionComboId"),
-#                         assertthat::has_name(mechanisms_full_country, "id"))
-# mechanisms_historic_country <- mechanisms_historic_global %>%   
-#   dplyr::filter(categoryOptionComboId %in% mechanisms_full_country$id)
+  dplyr::filter(country_uid == !!country_uid)
 
 # alply to call SiteDensity for each row of data_element_map (each target data element)
 # will have a historic distribution for each target, DSD/TA, and site given psnu/IM
