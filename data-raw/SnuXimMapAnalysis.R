@@ -1,12 +1,75 @@
 library(datapackr)
 library(tidyverse)
 
+getStandardDataElementGroups <- function(base_url = getOption("baseurl")){
+  datapackcommons::GetSqlView("m7qxbPHsikm") %>% 
+    dplyr::select(data_element = dataelementname,
+                  data_element_uid = dataelementuid,  
+                  data_element_code = dataelementcode,
+                  technical_area  = `Technical Area`,
+                  technical_area_uid = LxhLO68FcXm,
+                  targets_results = `Targets / Results`,
+                  targets_results_uid = IeMmjHyBUpi,
+                  support_type = `Support Type`,
+                  support_type_uid = `TWXpUVE2MqL`,                                   
+                  numerator_denominator = `Numerator / Denominator`,
+                  numerator_denominator_uid = `lD2x0c8kywj`,
+                  disaggregation_type = `Disaggregation Type`,
+                  disaggregation_type_uid = HWPJnUTMjEq
+                  )
+}
+
+getDataSets_Detailed <- function(dataset_uids) {
+  purrr::map(dataset_uids, ~ datapackcommons::GetSqlView("DotdxKrNZxG", 
+                                                         c("dataSets"), 
+                                                         c(.x))) %>% 
+    dplyr::bind_rows() %>% 
+    dplyr::select(-dataelementdesc, -shortname) %>%   
+    dplyr::rename(data_element = "dataelement",
+                  data_element_code = "code",
+                  data_element_uid = "dataelementuid",
+                  category_option_combo = "categoryoptioncombo",
+                  category_option_combo_code = "categoryoptioncombocode",
+                  category_option_combo_uid = "categoryoptioncombouid" ) %>% 
+    dplyr::left_join(getStandardDataElementGroups())
+}
+
 secrets <- "/Users/sam/.secrets/testmer2.json"
 datapackr::loginToDATIM(secrets)
-base_url = options("baseurl")
+base_url <- getOption("baseurl")
+
+fy_21_t <- datapackcommons::getDatasetUids("21", "targets") %>% 
+  getDataSets_Detailed() %>%
+  dplyr::select(-dataset) %>% 
+  distinct() 
+  
+fy_20_t <- datapackcommons::getDatasetUids("20", "targets") %>% 
+  getDataSets_Detailed() %>% 
+  dplyr::select(-dataset) %>% 
+  distinct()
+
+fy_19_t <- datapackcommons::getDatasetUids("19", "targets") %>% 
+  getDataSets_Detailed() %>% 
+  dplyr::select(-dataset) %>% 
+  distinct()
+
+
+dif_19T_21T <- dplyr::setdiff(fy_21_t, fy_19_t)
+dif_20T_21T <- dplyr::setdiff(fy_21_t, fy_20_t)
+
+match_19T_21T <- dplyr::intersect(fy_21_t, fy_19_t)
+match_20T_21T <- dplyr::intersect(fy_21_t, fy_20_t)
+
+
+schema <- datapackr::cop20_data_pack_schema %>% dplyr::filter(col_type == "target"
+                                                                        & dataset == "mer")
+
+dplyr::setdiff(c(schema$dataelement_dsd, schema$dataelement_ta), fy_21_t$dataelementuid)
+dplyr::setdiff(fy_21_t$dataelementuid, c(schema$dataelement_dsd, schema$dataelement_ta))
+
 
 ##standard_de_groups <- datapackcommons::GetSqlView("vqetpxYlX1c") ## jason.datim
-standard_de_groups <- datapackcommons::GetSqlView("wJno1xqHAeB") ## test mer 2
+ ## test mer 2
 
 fy_20_t <- datapackcommons::GetSqlView("DotdxKrNZxG", 
                                        c("dataSets"), 
@@ -52,11 +115,11 @@ fy_20_t <- datapackcommons::GetSqlView("DotdxKrNZxG",
 
 #any indidacotrs in map no longer relevant?
 
-dplyr::setdiff(map$indicatorCode_fy20_cop, schema$indicator_code)
+dplyr::setdiff(map$indicator_code, schema$indicator_code)
 
 
 temp = dplyr::left_join(schema, standard_de_groups, by = c("dataelement_dsd" = "data_element_uid")) %>% 
-  dplyr::full_join(datapackcommons::Map20Tto21T, by = c("indicator_code" = "indicatorCode_fy20_cop")) %>% 
+  dplyr::full_join(datapackcommons::Map20Tto21T, by = c("indicator_code" = "indicator_code")) %>% 
   dplyr::full_join(fy_20_t, by = c("dataelement_dsd" = "dataelementuid"))
 
 

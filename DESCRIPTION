@@ -28,4 +28,4 @@ Imports: assertthat,
 Suggests: 
     httptest,
     testthat
-RoxygenNote: 7.0.1
+RoxygenNote: 7.0.2

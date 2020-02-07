@@ -1,0 +1,25 @@
+<metadata xmlns="http://dhis2.org/schema/dxf/2.0">
+<sqlViews>
+ <sqlView name="Get _dataelementgroupsetstructure resource table" id="m7qxbPHsikm">
+<sqlQuery>
+select dataelement.code dataelementcode, dataelement.uid dataelementuid, _dataelementgroupsetstructure.* from _dataelementgroupsetstructure inner join dataelement on _dataelementgroupsetstructure.dataelementid = dataelement.dataelementid
+</sqlQuery>
+<displayName>Get _dataelementgroupsetstructure resource table</displayName>
+<publicAccess>rw------</publicAccess>
+<type>QUERY</type>
+<externalAccess>false</externalAccess>
+<cacheStrategy>NO_CACHE</cacheStrategy>
+<favorite>false</favorite>
+<lastUpdatedBy id="tsplFKJMOD8"/>
+<access>
+<read>true</read>
+<update>true</update>
+<externalize>true</externalize>
+<delete>true</delete>
+<write>true</write>
+<manage>true</manage>
+</access>
+<user id="tsplFKJMOD8"/>
+</sqlView>
+  </sqlViews>
+</metadata>

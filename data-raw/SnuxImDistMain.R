@@ -9,11 +9,14 @@
 #' @param dim_item_sets Dataframe containing all the dimension item sets e.g. datapackcommons::dim_item_sets
 #' @param country_uid Country uid
 #' @param mechanisms All historic mechanisms for the country filtered by id.
+#' @param mil Set to True to pull the military data, false excludes military data when pulling PSNU
+#' level data
 #' When included the dimensions include psnu, mechanism, AND DSD/TA disaggregation.
 #' When null psnu, mechanism and DSD/TA disaggregation are excluded giving country level totals.
 #' @return  List of dimensions for the analytics call GetData_Analytics
 BuildDimensionList_DataPack <- function(data_element_map_item, dim_item_sets, 
-                                        country_uid, mechanisms = NULL){
+                                        country_uid, mechanisms = NULL,
+                                        mil = FALSE){
   
   # prepare df of common dimensions and filters as expected by GetData_analytics  
   dimension_common <- 
@@ -21,7 +24,6 @@ BuildDimensionList_DataPack <- function(data_element_map_item, dim_item_sets,
                     "filter", data_element_map_item[[1,"dx"]],"dx", 
                     "filter", data_element_map_item[[1,"pe"]], "pe",
                     "dimension", country_uid, "ou",
-                    "filter", "UwIZeT7Ciz3","sdoDQv2EDjp", # include all mechs without deduplication
                     "dimension", data_element_map_item[[1,"technical_area_uid"]], "LxhLO68FcXm",
                     "dimension", data_element_map_item[[1,"num_or_den_uid"]],"lD2x0c8kywj",
                     "dimension", data_element_map_item[[1,"disagg_type_uid"]],"HWPJnUTMjEq"
@@ -48,29 +50,48 @@ BuildDimensionList_DataPack <- function(data_element_map_item, dim_item_sets,
                      dim_uid = "SH885jaRe0o")
   
   # remaining dimensions
-  
-  tibble::tribble(~type, ~dim_item_uid, ~dim_uid,
-                  "dimension", "OU_GROUP-nwQbMeALRjL", "ou", # military
+  if (mil == FALSE) {  
+    # need to select all org unit types EXCEPT military because it is 
+    # possible for military to be below general PSNU level in org hierarchy   
+    tibble::tribble(~type, ~dim_item_uid, ~dim_uid, 
+                  "filter", "PvuaP6YALSA", "mINJi7rR1a6", # community org unit type
+                  "filter", "POHZmzofoVx", "mINJi7rR1a6", # facility org unit type
+                  "filter", "AookYR4ECPH", "mINJi7rR1a6", # other org unit type
+                  "filter", "cNzfcPWEGSH", "mINJi7rR1a6", # country org unit type
                   "dimension", "OU_GROUP-AVy8gJXym2D", "ou", # COP Prioritization SNU
                   "dimension", "iM13vdNLWKb", "TWXpUVE2MqL", #dsd and ta support types
                   "dimension", "cRAGKdWIDn4", "TWXpUVE2MqL") %>% 
     dplyr::bind_rows(dimension_mechanisms, dimension_disaggs, dimension_common)
+    } else {
+  tibble::tribble(~type, ~dim_item_uid, ~dim_uid,
+                  "dimension", "OU_GROUP-nwQbMeALRjL", "ou", # military
+                  "dimension", "iM13vdNLWKb", "TWXpUVE2MqL", #dsd and ta support types
+                  "dimension", "cRAGKdWIDn4", "TWXpUVE2MqL") %>% 
+        dplyr::bind_rows(dimension_mechanisms, dimension_disaggs, dimension_common)
+    }
 }
 
 GetFy20tMechs <- function(base_url = getOption("baseurl")){
-  # # SQL view will retrieve list of mechanisms for which there is FY2019 data - 2018Oct period
-  # mech_list_parsed <- datapackcommons::GetSqlView("Lh6bMZyyFhd", base_url = base_url)
-  # 
-  # mech_cat_opt_combos <-  datapackcommons::getMetadata(
-  #   base_url, 
-  #   "categoryCombos", 
-  #   filters = "id:eq:wUpfppgjEza", 
-  #   "categoryOptionCombos[code,id~rename(categoryOptionComboId),name,categoryOptions[id~rename(categoryOptionId)]]")[[1,"categoryOptionCombos"]] %>% 
-  #   dplyr::as_tibble() %>% 
-  #   tidyr::unnest(cols = c(categoryOptions)) %>% 
-  #   dplyr::inner_join(mech_list_parsed, by = c("categoryOptionComboId" = "uid"))
+
   
-  mechs <- datapackcommons::GetSqlView("X6HqWMvcRv0", c("period"), c("2019Oct"),base_url = base_url)
+  #TODO modify format data for api function so I can make this call with getData_Analytics
+  
+  mech_codes <- datapackcommons::getMetadata(base_url, 
+                                            "categories",
+                                            "id:eq:SH885jaRe0o",
+                                            "categoryOptions[id,code]") %>% 
+    .[["categoryOptions"]] %>% 
+    .[[1]] %>% 
+    dplyr::rename(mechanism_co_uid = "id", mechanism_code = "code")
+  
+  mechs <- paste0(base_url, "api/29/analytics.csv?dimension=SH885jaRe0o&dimension=ou:OU_GROUP-cNzfcPWEGSH;ybg3MO3hcf4&filter=pe:THIS_FINANCIAL_YEAR&filter=dx:DE_GROUP-XUA8pDYjPsw&displayProperty=SHORTNAME&outputIdScheme=UID") %>% 
+    datapackcommons::RetryAPI("application/csv") %>% 
+    httr::content() %>% 
+    readr::read_csv() %>%
+    dplyr::select(-Value) %>% 
+    setNames(c("mechanism_co_uid", "country_uid")) %>% 
+    dplyr::left_join(mech_codes)
+  
   if(NROW(mechs) > 0){
     return(mechs)
   }
@@ -78,70 +99,35 @@ GetFy20tMechs <- function(base_url = getOption("baseurl")){
   stop("Unable to get 20T mechanisms")
 }
 
-
-devtools::install(pkg = "/Users/sam/Documents/GitHub/data-pack-commons",
-                  build = TRUE,
-                  upgrade = FALSE)
-
-library(datapackcommons)
-
-library(dplyr)
-country_name = "South Africa"
-DHISLogin("/users/sam/.secrets/jason.json")
-base_url <- getOption("baseurl")
-# Get the mechanisms relevant for the specifc country being processed
-# cache options required for datimvalidation function to work.
-# cache age option reverts to original after calling datim validation
-country_details = datapackcommons::GetCountryLevels(base_url, country_name)
-mechs = GetFy20tMechs() %>% 
-  dplyr::filter(country == !!country_name)
-# cache_in = getOption("maxCacheAge")
-# options(maxCacheAge = 0)
-# 
-# # if regional country need to use region/operating unit 
-# if(country_details$country_level == 3){
-#   mechanisms_full_country <- datimvalidation::getMechanismsMap(country_details$id)
-# } else if (country_details$country_level == 4) {
-#   region_uid <- datapackcommons::getMetadata(base_url, "organisationUnits", 
-#                                              filters = paste0("children.id:eq:", country_details$id),
-#                                              fields = "id")
-#   assertthat::assert_that(NROW(region_uid) == 1)
-#   mechanisms_full_country <- datimvalidation::getMechanismsMap(region_uid$id)
-# } else{
-#   stop("Country level not equal to 3 or 4 in DitributeToSites")
-# }
-# options(maxCacheAge = cache_in)
-# mechanisms_historic_global <- datapackcommons::Get19TMechanisms(getOption("baseurl"))
-# # filter to just those mechanisms with data for the relevant time period
-# assertthat::assert_that(assertthat::has_name(mechanisms_historic_global, 
-#                                              "categoryOptionComboId"),
-#                         assertthat::has_name(mechanisms_full_country, "id"))
-# mechanisms_historic_country <- mechanisms_historic_global %>%   
-#   dplyr::filter(categoryOptionComboId %in% mechanisms_full_country$id)
-
-# alply to call SiteDensity for each row of data_element_map (each target data element)
-# will have a historic distribution for each target, DSD/TA, and site given psnu/IM
-# alply uses parallel processing here 
-
 getSnuxIm_density <- function(data_element_map_item, 
                               dim_item_sets = datapackcommons::dim_item_sets, 
                               country_uid,
                               mechanisms){ 
   
+  
   data <-  BuildDimensionList_DataPack(data_element_map_item, 
                                        dim_item_sets,
                                        country_uid,
-                                       mechanisms["mechanism_co_uid"]) %>% 
+                                       mechanisms["mechanism_co_uid"],
+                                       mil = FALSE) %>% 
     datapackcommons::GetData_Analytics() %>% .[["results"]]
+
+  data <-  BuildDimensionList_DataPack(data_element_map_item, 
+                                       dim_item_sets,
+                                       country_uid,
+                                       mechanisms["mechanism_co_uid"],
+                                       mil = TRUE) %>% 
+    datapackcommons::GetData_Analytics() %>% .[["results"]] %>% 
+    dplyr::bind_rows(data)
   
   if (NROW(data) == 0) return(NULL)
-
-# quick check that data disaggregated by psnu, mechanism, and support type sum to country total    
+  
+  # quick check that data disaggregated by psnu, mechanism, and support type sum to country total    
   checksum <- BuildDimensionList_DataPack(data_element_map_item,
                                           dim_item_sets,
                                           country_uid) %>%
     datapackcommons::GetData_Analytics() %>% .[["results"]] %>% .[["Value"]] %>% sum()
-
+  
   if(sum(data$Value) != checksum){
     stop(paste("Internal Error: Disaggregated data not summing up to aggregated data in getSnuxIm_density function", sum(data$Value), checksum))
   }
@@ -158,11 +144,11 @@ getSnuxIm_density <- function(data_element_map_item,
                         allocate = "distribute",
                         .init = data) %>% 
     dplyr::left_join(mechanisms, by = c("Funding Mechanism" = "mechanism_co_uid")) %>% 
-    dplyr::mutate(indicator_code = data_element_map_item$indicatorCode_fy20_cop) %>%
+    dplyr::mutate(indicator_code = data_element_map_item$indicator_code) %>%
     dplyr::rename("value" = "Value",
                   "psnu_uid" = "Organisation unit",
                   "type" = "Support Type") %>% 
-  dplyr::select(dplyr::one_of("indicator_code", "psnu_uid",
+    dplyr::select(dplyr::one_of("indicator_code", "psnu_uid",
                                 "mechanism_code", "type",
                                 "age_option_name", "age_option_uid",
                                 "sex_option_name", "sex_option_uid",
@@ -182,18 +168,63 @@ getSnuxIm_density <- function(data_element_map_item,
   return(data)
 }
 
-doMC::registerDoMC(cores = 5)
-data = plyr::adply(datapackcommons::Map20Tto21T,
-                   1, getSnuxIm_density,
-                   datapackcommons::dim_item_sets,
-                   country_details$id,
-                   GetFy20tMechs() %>% 
-                     dplyr::filter(country == !!country_name), 
-                   .parallel = TRUE, .expand = FALSE, .id = NULL) %>% 
-  dplyr::group_by(indicator_code, 
-                  psnu_uid, 
-                  age_option_uid, 
-                  sex_option_uid, 
-                  kp_option_uid) %>%
-  dplyr::mutate(percent = value/sum(value)) %>% 
-  dplyr::ungroup()
+process_country <- function(country_uid, mechs){
+
+  print(country_uid)
+  # Get the mechanisms relevant for the specifc country being processed
+  # cache options required for datimvalidation function to work.
+  # cache age option reverts to original after calling datim validation
+  
+  mechs <-   dplyr::filter(mechs, country_uid == !!country_uid)
+  if(NROW(mechs) == 0){return(NULL)}
+  
+  # alply to call SiteDensity for each row of data_element_map (each target data element)
+  # will have a historic distribution for each target, DSD/TA, and site given psnu/IM
+  # alply uses parallel processing here 
+  
+  doMC::registerDoMC(cores = 5)
+  data <-  plyr::adply(datapackcommons::Map20Tto21T,
+                     1, getSnuxIm_density,
+                     datapackcommons::dim_item_sets,
+                     country_uid,
+                     mechs, 
+                     .parallel = TRUE, .expand = FALSE, .id = NULL) 
+  if(NROW(data) == 0){return(NULL)}
+  
+  data <-  data %>% 
+    dplyr::group_by_at(dplyr::vars(-value)) %>% 
+    dplyr::summarise(value = sum(value, na.rm = TRUE)) %>% 
+    dplyr::ungroup()
+
+  if(!("kp_option_uid" %in% names(data))){
+    data <- dplyr::mutate(data,
+                  "kp_option_uid" = NA_character_,
+                  "kp_option_name" = NA_character_)
+    }
+    
+    dplyr::group_by(data,
+                    indicator_code, 
+                    psnu_uid, 
+                    age_option_uid, 
+                    sex_option_uid, 
+                    kp_option_uid) %>%
+    dplyr::mutate(percent = value/sum(value)) %>% 
+    dplyr::ungroup()
+}
+
+devtools::install(pkg = "/Users/sam/Documents/GitHub/data-pack-commons",
+                  build = TRUE,
+                  upgrade = FALSE)
+
+library(datapackcommons)
+
+library(dplyr)
+DHISLogin("/users/sam/.secrets/datim.json")
+base_url <- getOption("baseurl")
+mechs = GetFy20tMechs()
+country_details <-  datapackcommons::GetCountryLevels(base_url) 
+
+data <-  country_details[["id"]] %>% 
+  purrr::map(process_country, mechs)
+data <- setNames(data,country_details$id)
+readr::write_rds(data,"/Users/sam/COP data/PSNUxIM_20200207.rds", compress = c("gz"))
