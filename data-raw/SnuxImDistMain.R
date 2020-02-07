@@ -219,10 +219,12 @@ devtools::install(pkg = "/Users/sam/Documents/GitHub/data-pack-commons",
 library(datapackcommons)
 
 library(dplyr)
-DHISLogin("/users/sam/.secrets/testmer2.json")
+DHISLogin("/users/sam/.secrets/datim.json")
 base_url <- getOption("baseurl")
 mechs = GetFy20tMechs()
 country_details <-  datapackcommons::GetCountryLevels(base_url) 
 
 data <-  country_details[["id"]] %>% 
   purrr::map(process_country, mechs)
+data <- setNames(data,country_details$id)
+readr::write_rds(data,"/Users/sam/COP data/PSNUxIM_20200207.rds", compress = c("gz"))
