@@ -9,11 +9,14 @@
 #' @param dim_item_sets Dataframe containing all the dimension item sets e.g. datapackcommons::dim_item_sets
 #' @param country_uid Country uid
 #' @param mechanisms All historic mechanisms for the country filtered by id.
+#' @param mil Set to True to pull the military data, false excludes military data when pulling PSNU
+#' level data
 #' When included the dimensions include psnu, mechanism, AND DSD/TA disaggregation.
 #' When null psnu, mechanism and DSD/TA disaggregation are excluded giving country level totals.
 #' @return  List of dimensions for the analytics call GetData_Analytics
 BuildDimensionList_DataPack <- function(data_element_map_item, dim_item_sets, 
-                                        country_uid, mechanisms = NULL){
+                                        country_uid, mechanisms = NULL,
+                                        mil = FALSE){
   
   # prepare df of common dimensions and filters as expected by GetData_analytics  
   dimension_common <- 
@@ -47,13 +50,25 @@ BuildDimensionList_DataPack <- function(data_element_map_item, dim_item_sets,
                      dim_uid = "SH885jaRe0o")
   
   # remaining dimensions
-  
-  tibble::tribble(~type, ~dim_item_uid, ~dim_uid,
-                  "dimension", "OU_GROUP-nwQbMeALRjL", "ou", # military
+  if (mil == FALSE) {  
+    # need to select all org unit types EXCEPT military because it is 
+    # possible for military to be below general PSNU level in org hierarchy   
+    tibble::tribble(~type, ~dim_item_uid, ~dim_uid, 
+                  "filter", "PvuaP6YALSA", "mINJi7rR1a6", # community org unit type
+                  "filter", "POHZmzofoVx", "mINJi7rR1a6", # facility org unit type
+                  "filter", "AookYR4ECPH", "mINJi7rR1a6", # other org unit type
+                  "filter", "cNzfcPWEGSH", "mINJi7rR1a6", # country org unit type
                   "dimension", "OU_GROUP-AVy8gJXym2D", "ou", # COP Prioritization SNU
                   "dimension", "iM13vdNLWKb", "TWXpUVE2MqL", #dsd and ta support types
                   "dimension", "cRAGKdWIDn4", "TWXpUVE2MqL") %>% 
     dplyr::bind_rows(dimension_mechanisms, dimension_disaggs, dimension_common)
+    } else {
+  tibble::tribble(~type, ~dim_item_uid, ~dim_uid,
+                  "dimension", "OU_GROUP-nwQbMeALRjL", "ou", # military
+                  "dimension", "iM13vdNLWKb", "TWXpUVE2MqL", #dsd and ta support types
+                  "dimension", "cRAGKdWIDn4", "TWXpUVE2MqL") %>% 
+        dplyr::bind_rows(dimension_mechanisms, dimension_disaggs, dimension_common)
+    }
 }
 
 GetFy20tMechs <- function(base_url = getOption("baseurl")){
@@ -89,11 +104,21 @@ getSnuxIm_density <- function(data_element_map_item,
                               country_uid,
                               mechanisms){ 
   
+  
   data <-  BuildDimensionList_DataPack(data_element_map_item, 
                                        dim_item_sets,
                                        country_uid,
-                                       mechanisms["mechanism_co_uid"]) %>% 
+                                       mechanisms["mechanism_co_uid"],
+                                       mil = FALSE) %>% 
     datapackcommons::GetData_Analytics() %>% .[["results"]]
+
+  data <-  BuildDimensionList_DataPack(data_element_map_item, 
+                                       dim_item_sets,
+                                       country_uid,
+                                       mechanisms["mechanism_co_uid"],
+                                       mil = TRUE) %>% 
+    datapackcommons::GetData_Analytics() %>% .[["results"]] %>% 
+    dplyr::bind_rows(data)
   
   if (NROW(data) == 0) return(NULL)
   
@@ -144,17 +169,18 @@ getSnuxIm_density <- function(data_element_map_item,
 }
 
 process_country <- function(country_uid, mechs){
-  
+
+  print(country_uid)
   # Get the mechanisms relevant for the specifc country being processed
   # cache options required for datimvalidation function to work.
   # cache age option reverts to original after calling datim validation
   
   mechs <-   dplyr::filter(mechs, country_uid == !!country_uid)
+  if(NROW(mechs) == 0){return(NULL)}
   
   # alply to call SiteDensity for each row of data_element_map (each target data element)
   # will have a historic distribution for each target, DSD/TA, and site given psnu/IM
   # alply uses parallel processing here 
-  
   
   doMC::registerDoMC(cores = 5)
   data <-  plyr::adply(datapackcommons::Map20Tto21T,
@@ -198,6 +224,5 @@ base_url <- getOption("baseurl")
 mechs = GetFy20tMechs()
 country_details <-  datapackcommons::GetCountryLevels(base_url) 
 
-temp <-  country_details[["id"]] %>% 
+data <-  country_details[["id"]] %>% 
   purrr::map(process_country, mechs)
-
