@@ -137,7 +137,10 @@ getDatasetUids <-  function(fiscal_year, type){
   if(fiscal_year == "21" & type == "targets") {
     c("Pmc0yYAIi1t", # MER Target Setting: PSNU (Facility and Community Combined)
       "s1sxJuqXsvV")  # MER Target Setting: PSNU (Facility and Community Combined) - DoD ONLY)
-  } else if( fiscal_year == "20" & type == "targets") {
+  } else if( fiscal_year == "21" & type == "subnat_impatt") {
+    c("jxnjnBAb1VD", # Planning Attributes: COP Prioritization SNU 
+      "j7jzezIhgPj") # Host Country Targets: COP Prioritization SNU (USG)
+    } else if( fiscal_year == "20" & type == "targets") {
     c("sBv1dj90IX6", # MER Targets: Facility Based FY2020
       "nIHNMxuPUOR", # MER Targets: Community Based FY2020
       "C2G7IyPPrvD", # MER Targets: Community Based - DoD ONLY FY2020
