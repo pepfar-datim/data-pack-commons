@@ -277,36 +277,6 @@ ValidateCodeIdPairs <- function(base_url, codes, ids, type){
 }
 
 #' @export
-#' @title Get19TMechanisms(base_url)
-#' 
-#' @description gets data from SQL view vtNAsZcMZiU - mechanisms with 2018Oct data
-#' @param base_url string - base address of instance (text before api/ in URL)
-Get19TMechanisms <- function(base_url = getOption("baseurl")){
-  # SQL view will retrieve list of mechanisms for which there is FY2019 data - 2018Oct period
-  api_call <- paste0(base_url, "api/sqlViews/vtNAsZcMZiU/data.csv") 
-  # limit calls to this SQL view on prod
-  # it locks data value table
-  mech_list_r <-  RetryAPI(api_call, "application/csv")
-  mech_list_parsed <- mech_list_r %>% 
-    httr::content(., "text") %>% 
-    readr::read_csv(col_names = TRUE, col_types = readr::cols(.default = "c"))
-  
-  mech_cat_opt_combos <-  datapackcommons::getMetadata(base_url, 
-                                      "categoryCombos", 
-                                      filters = "id:eq:wUpfppgjEza", 
-                                      "categoryOptionCombos[code,id~rename(categoryOptionComboId),name,categoryOptions[id~rename(categoryOptionId)]]")[[1,"categoryOptionCombos"]] %>% 
-    dplyr::as_tibble() %>% 
-    tidyr::unnest(cols = c(categoryOptions)) %>% 
-    dplyr::inner_join(mech_list_parsed, by = c("categoryOptionComboId" = "uid"))
-  
-  if(NROW(mech_cat_opt_combos) > 0){
-    return(mech_cat_opt_combos)
-  }
-  # If I got here critical error
-  stop("Unable to get 19T mechanisms")
-}
-
-#' @export
 #' @title GetSqlView
 #' 
 #' @description Runs specified sql view with specified sql view variables and returns
@@ -391,12 +361,6 @@ GetData_Analytics <-  function(dimensions, base_url = getOption("baseurl")){
   } 
   colnames(my_data) <- content$headers$column
   my_data <- tibble::as_tibble(my_data)
-
-  ##TODO Sid add some code to validate what we got back from api matches what we requestd
-  ## Perhaps make sure there are columns where we specified the actual uid for a dimension and that 
-  ##the items in these columns were requested.
-  ## If there is a mismatch stop()
-  ## is there other useful metadata we want to return?
 
   # list column(vector) of the org hiearchy including the org unit itself
   # added to the data in a mutate below
@@ -499,57 +463,3 @@ GetData_DataPack <- function(parameters,
               "results" = results$results))
 
   }
-
-
-## EARLY FUNCTION USED TO GET RAW DATA 
-
-#' #' export
-#' #' importFrom readr col_character
-#' #' importFrom readr col_number
-#' #' importFrom readr cols_only
-#' #' title GetDataValueSet(org_unit,data_set,start_date,end_date,children)
-#' #' param org_unit UID of the organisation unit of interest
-#' #' param data_set UID of the dataset of interest
-#' #' param start_date Start date in YYYY-MM-DD format
-#' #' param end_date End date in YYYY-MM-DD format
-#' #' param children Boolean flag to indicate whether data of the Orgunits c
-#' #' children should be returned.
-#' #' description Gets a data value set for the provided paramaters
-#' #' return Only errors out if the file is not readable, does not exist or the
-#' #' user cannot login to the server
-#' #' 
-#' GetDataValueSet <-
-#'   function(org_unit,
-#'            data_set,
-#'            start_date,
-#'            end_date,
-#'            children = "true") {
-#'     #TODO add error handling
-#'     web_api_call <- paste0(
-#'       getOption("baseurl"),
-#'       "api/dataValueSets.csv?dataSet=",
-#'       data_set,
-#'       "&orgUnit=",
-#'       org_unit,
-#'       "&children=",
-#'       children,
-#'       "&startDate=",
-#'       start_date,
-#'       "&endDate=",
-#'       end_date
-#'     )
-#'     #print(web_api_call)
-#'     data <- web_api_call  %>%
-#'       httr::GET() %>%
-#'       httr::content(., "text")
-#'     
-#'     data <- data %>% stringr::str_replace(",deleted","") %>%
-#'       readr::read_csv(col_names=TRUE, cols_only(dataelement = col_character(),
-#'                                                 period = col_character(),
-#'                                                 orgunit = col_character(),
-#'                                                 categoryoptioncombo = col_character(),
-#'                                                 attributeoptioncombo = col_character(),
-#'                                                 value = col_number()
-#'       ))
-#'     return(data)
-#'   }

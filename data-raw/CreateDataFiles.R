@@ -118,15 +118,6 @@ dim_item_sets <- readr::read_csv("./data-raw/model_calculations/dimension_item_s
 
 ValidateDimItemSets(dim_item_sets, base_url)
 
-# dim_item_sets_test <- readr::read_csv("./data-raw/model_calculations_test/dimension_item_sets.csv",
-#                                       col_types = readr::cols(.default = "c", sort_order = "d", weight = "d"),
-#                                       na = c("NA")) %>%
-#   dplyr::select(dim_uid, dim_name, dim_item_uid, dim_cop_type,
-#                 dim_item_name, option_name, option_uid, sort_order, weight, model_sets) %>%
-#   dplyr::mutate(model_sets = stringr::str_split(model_sets,";")) %>%
-#   tidyr::unnest(model_sets)
-#  
-
 data_required <- 
   readr::read_csv("./data-raw/model_calculations/data_required.csv", 
                   col_types = readr::cols(.default = "c", A.value_na = "d", B.value_na = "d"),
@@ -134,103 +125,16 @@ data_required <-
 
 ValidateDataRequired(data_required, base_url)
 
-# data_required_test <- 
-#   readr::read_csv("./data-raw/model_calculations_test/data_required.csv",
-#                   col_types = readr::cols(.default = "c"),
-#                   na = c("NA")) %>%
-#   dplyr::mutate(B.kp_set = NA_character_) %>% select(-data_pack_type)
-
-Map19Tto20T <- 
-  readr::read_csv("./data-raw/site_distribution_configuration/19Tto20TMap.csv", 
-                  col_types = readr::cols(.default = "c"),
-                  na = c("NA")) 
-
-
 Map20Tto21T <- 
   readr::read_csv("./data-raw/snu_x_im_distribution_configuration/20Tto21TMap.csv", 
                   col_types = readr::cols(.default = "c"),
                   na = c("NA")) 
 
-# MER Targets: Community Based FY2019 data set = l796jk9SW7q
-# Get character vector of indicator names
-community_indicators_19T <-  datapackcommons::getMetadata(base_url, end_point = "dataSets", 
-                             filters = "id:eq:l796jk9SW7q", 
-                             fields = "dataSetElements[dataElement[name]]") %>% 
-  .[["dataSetElements"]] %>% 
-  .[[1]] %>% 
-  .[["dataElement"]] %>% 
-  .[["name"]] 
-
-# check if historic indicator in the map is a community indicator 
-# handle the no disagg case seperately
-is_community_indicator <- 
-  dplyr::transmute(Map19Tto20T, 
-                   reg_exp = dplyr::if_else(disagg_type == "No Disagg",
-                                            paste0(technical_area, " \\(",
-                                                   stringr::str_sub(num_or_den,1,1), ", DSD\\)"),
-                                            paste0(technical_area, " \\(",
-                                                   stringr::str_sub(num_or_den,1,1), ", DSD, ", 
-                                                   disagg_type, "\\)")
-                                            )
-                   ) %>% 
-  .[["reg_exp"]] %>% 
-  purrr::map_int(~sum(grepl(., community_indicators_19T)))
-
-if(any(is_community_indicator > 1)){
-  stop("Getting more than one match between community data set indicators and mapped historic indicator")
-}
-
-# MER Targets: Facility Based FY2019 data set = eyI0UOWJnDk
-# Get character vector of indicator names
-facility_indicators_19T <-  datapackcommons::getMetadata(base_url, end_point = "dataSets", 
-                                                          filters = "id:eq:eyI0UOWJnDk",
-                                                          fields = "dataSetElements[dataElement[name]]") %>% 
-  .[["dataSetElements"]] %>% 
-  .[[1]] %>% 
-  .[["dataElement"]] %>% 
-  .[["name"]] 
-
-# check if historic indicator is facility indicator 
-# handle the no disagg case seperatly
-is_facility_indicator <- 
-  dplyr::transmute(Map19Tto20T, 
-                   reg_exp = dplyr::if_else(disagg_type == "No Disagg",
-                                            paste0(technical_area, " \\(",
-                                                   stringr::str_sub(num_or_den,1,1), ", DSD\\)"),
-                                            paste0(technical_area, " \\(",
-                                                   stringr::str_sub(num_or_den,1,1), ", DSD, ", 
-                                                   disagg_type, "\\)")
-                   )
-  ) %>% 
-  .[["reg_exp"]] %>% 
-  purrr::map_int(~sum(grepl(., facility_indicators_19T)))
-
-if(any(is_facility_indicator > 1)){
-  stop("Getting more than one match between facility data set indicators and mapped historic indicator")
-}
-
-Map19Tto20T <- mutate(Map19Tto20T, 
-                      community_valid = as.logical(is_community_indicator),
-                      facility_valid = as.logical(is_facility_indicator)
-                      )
-
-ValidateMapT_1toT(Map19Tto20T, dim_item_sets, base_url)
-
 ValidateMapT_1toT(Map20Tto21T, dim_item_sets, base_url)
 
-
-
-regional_to_national_mechs_cop19 <- readr::read_csv("./data-raw/NextGen Split Regional Mechanisms.csv",
-                                 col_types = readr::cols(.default = "c"))
-
-
 usethis::use_data(dim_item_sets, overwrite = TRUE, compress = "gzip")
-usethis::use_data(dim_item_sets_test, overwrite = TRUE, compress = "gzip")
 usethis::use_data(data_required, overwrite = TRUE, compress = "gzip")
-usethis::use_data(data_required_test, overwrite = TRUE, compress = "gzip")
-usethis::use_data(Map19Tto20T, overwrite = TRUE, compress = "gzip")
 usethis::use_data(Map20Tto21T, overwrite = TRUE, compress = "gzip")
-usethis::use_data(regional_to_national_mechs_cop19, overwrite = TRUE, compress = "gzip")
 
 setwd(wd)
 
