@@ -102,7 +102,11 @@ RetryAPI <- function(api_url, content_type, max_attempts = 3, timeout = 180){
           response$url == api_url && 
           httr::http_type(response) == content_type){
         return(response)
-        }
+      }
+      if (response$status_code >= 300 && 
+          response$status_code < 500){ #client error or redirect
+        break
+      }
       })
     Sys.sleep(i/2 + 1)
   }
@@ -381,6 +385,8 @@ GetData_Analytics <-  function(dimensions, base_url = getOption("baseurl")){
 #' @param parameters paramemters for calling an indicator 
 #' from datapackcommons::data_required
 #' @param  country uid
+#' @param include_military Should be TRUE if country has a military org unit,
+#' or FALSE if no military org_unit (FALSE for Philippines in COP20)
 #' @param dim_item_sets datapackcommons::dim_item_sets or a subset
 #' @param base_url string - base address of instance (text before api/ in URL)
 #' @return  A list with $time = time the function was called, 
@@ -398,6 +404,7 @@ GetData_Analytics <-  function(dimensions, base_url = getOption("baseurl")){
 
 GetData_DataPack <- function(parameters, 
                              org_units,
+                             include_military,
                              dim_item_sets = datapackcommons::dim_item_sets,
                              base_url = getOption("baseurl")) {
   
@@ -464,15 +471,17 @@ GetData_DataPack <- function(parameters,
     rbind(dimensions) %>% 
     datapackcommons::GetData_Analytics() %>% 
     .[["results"]]
-
-  results_mil <- tibble::tribble(~type, ~dim_item_uid, ~dim_uid,
-                                 "dimension", "OU_GROUP-nwQbMeALRjL", "ou") %>%  # military
+  
+  results_mil <- NULL
+  if(include_military){    
+    results_mil <- tibble::tribble(~type, ~dim_item_uid, ~dim_uid,
+                                   "dimension", "OU_GROUP-nwQbMeALRjL", "ou") %>%  # military
     rbind(dimensions) %>% 
     datapackcommons::GetData_Analytics() %>% 
     .[["results"]]
-                                       
+}                                       
   
-  if(is.null(results_psnu)){ # nothing to return
+  if(is.null(results_psnu) && is.null(results_mil)){ # nothing to return
     results <- NULL
   } else if (is.null(results_mil)) { # psnu but no mil data
     results <- dplyr::select(results_psnu, -ou_hierarchy)
