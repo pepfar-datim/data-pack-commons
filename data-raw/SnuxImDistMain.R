@@ -53,14 +53,22 @@ BuildDimensionList_DataPack <- function(data_element_map_item, dim_item_sets,
   if (mil == FALSE) {  
     # need to select all org unit types EXCEPT military because it is 
     # possible for military to be below general PSNU level in org hierarchy   
-    tibble::tribble(~type, ~dim_item_uid, ~dim_uid, 
-                  "filter", "PvuaP6YALSA", "mINJi7rR1a6", # community org unit type
-                  "filter", "POHZmzofoVx", "mINJi7rR1a6", # facility org unit type
-                  "filter", "AookYR4ECPH", "mINJi7rR1a6", # other org unit type
-                  "filter", "cNzfcPWEGSH", "mINJi7rR1a6", # country org unit type
+    non_mil_types_of_org_units <- 
+      datapackcommons::getMetadata(base_url = base_url, 
+                                   "dimensions", 
+                                   "id:eq:mINJi7rR1a6", 
+                                   "items[name,id]") %>% 
+      tidyr::unnest(c("items")) %>% 
+      dplyr::filter(name != "Military") %>% 
+      .[["id"]]
+    
+    tibble::tibble(type = "filter",
+                   dim_item_uid = non_mil_types_of_org_units,
+                   dim_uid = "mINJi7rR1a6") %>% 
+    dplyr::bind_rows(tibble::tribble(~type, ~dim_item_uid, ~dim_uid, 
                   "dimension", "OU_GROUP-AVy8gJXym2D", "ou", # COP Prioritization SNU
                   "dimension", "iM13vdNLWKb", "TWXpUVE2MqL", #dsd and ta support types
-                  "dimension", "cRAGKdWIDn4", "TWXpUVE2MqL") %>% 
+                  "dimension", "cRAGKdWIDn4", "TWXpUVE2MqL")) %>% 
     dplyr::bind_rows(dimension_mechanisms, dimension_disaggs, dimension_common)
     } else {
   tibble::tribble(~type, ~dim_item_uid, ~dim_uid,
@@ -228,5 +236,6 @@ data <-  country_details[["id"]] %>%
   purrr::map(process_country, mechs)
 data <- setNames(data,country_details$id)
 #readr::write_rds(data,"/Users/sam/COP data/PSNUxIM_20200207.rds", compress = c("gz"))
-data_old=readr::read_rds("/Users/sam/COP data/PSNUxIM_20200207.rds")
-purrr::map(names(data), ~dplyr::all_equal(data[[.x]],data_old[[.x]]))
+data_old=readr::read_rds("/Users/sam/COP data/PSNUxIM_20200228.rds")
+purrr::map(names(data), ~dplyr::all_equal(data[[.x]],data_old[[.x]])) %>% 
+  setNames(country_details$country_name)

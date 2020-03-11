@@ -102,7 +102,11 @@ RetryAPI <- function(api_url, content_type, max_attempts = 3, timeout = 180){
           response$url == api_url && 
           httr::http_type(response) == content_type){
         return(response)
-        }
+      }
+      if (response$status_code >= 300 && 
+          response$status_code < 500){ #client error or redirect
+        break
+      }
       })
     Sys.sleep(i/2 + 1)
   }
@@ -378,6 +382,13 @@ GetData_Analytics <-  function(dimensions, base_url = getOption("baseurl")){
 
 #' @export
 #' @title GetData_DataPack
+#' @param parameters paramemters for calling an indicator 
+#' from datapackcommons::data_required
+#' @param  country uid
+#' @param include_military Should be TRUE if country has a military org unit,
+#' or FALSE if no military org_unit (FALSE for Philippines in COP20)
+#' @param dim_item_sets datapackcommons::dim_item_sets or a subset
+#' @param base_url string - base address of instance (text before api/ in URL)
 #' @return  A list with $time = time the function was called, 
 #' $api_call = api call used, and 
 #' $results = the data returnd by the analytics call
@@ -393,11 +404,8 @@ GetData_Analytics <-  function(dimensions, base_url = getOption("baseurl")){
 
 GetData_DataPack <- function(parameters, 
                              org_units,
-                             dim_item_sets = datapackcommons::dim_item_sets, 
-                             org_unit_groups = c("nwQbMeALRjL", # military
-                                                 "AVy8gJXym2D"  # COP Prioritization SNU
-                                                 ),
-                             org_unit_levels = NULL,
+                             include_military,
+                             dim_item_sets = datapackcommons::dim_item_sets,
                              base_url = getOption("baseurl")) {
   
 #  assertthat::assert_that(assertthat::is.string(indicator), nchar(indicator) == 11,
@@ -419,22 +427,22 @@ GetData_DataPack <- function(parameters,
     }    
   
 # add rows to dimensions for org unit groups
-  if (!is.null(org_unit_groups)) {
-    dimensions <- purrr::reduce(org_unit_groups,
-                  ~ rbind(.x,
-                          c(
-                            "dimension", paste0("OU_GROUP-", .y), "ou"
-                          )),
-                  .init = dimensions)
-  }
+  # if (!is.null(org_unit_groups)) {
+  #   dimensions <- purrr::reduce(org_unit_groups,
+  #                 ~ rbind(.x,
+  #                         c(
+  #                           "dimension", paste0("OU_GROUP-", .y), "ou"
+  #                         )),
+  #                 .init = dimensions)
+  # }
   
-  if (!is.null(org_unit_levels)) {
-    # add rows to dimensions for levels
-    dimensions <- purrr::reduce(levels,
-                  ~ rbind(.x,
-                          c("dimension", paste0("LEVEL-", .y), "ou")),
-                  .init = dimensions)
-  }
+  # if (!is.null(org_unit_levels)) {
+  #   # add rows to dimensions for levels
+  #   dimensions <- purrr::reduce(levels,
+  #                 ~ rbind(.x,
+  #                         c("dimension", paste0("LEVEL-", .y), "ou")),
+  #                 .init = dimensions)
+  # }
   
 
   
@@ -449,17 +457,42 @@ GetData_DataPack <- function(parameters,
   
   
   dimensions <- dplyr::bind_rows(dimensions, dimension_disaggs)
+
+  non_mil_types_of_org_units <- 
+    datapackcommons::getMetadata(base_url = base_url, "dimensions", "id:eq:mINJi7rR1a6", "items[name,id]") %>% 
+    tidyr::unnest(c("items")) %>% 
+    dplyr::filter(name != "Military") %>% 
+    .[["id"]]
+
+  results_psnu <-  tibble::tibble(type = "filter",
+                                  dim_item_uid = non_mil_types_of_org_units,
+                                  dim_uid = "mINJi7rR1a6") %>%
+    rbind(c("dimension", "OU_GROUP-AVy8gJXym2D", "ou")) %>%  # COP Prioritization SNU) dimensions
+    rbind(dimensions) %>% 
+    datapackcommons::GetData_Analytics() %>% 
+    .[["results"]]
   
+  results_mil <- NULL
+  if(include_military){    
+    results_mil <- tibble::tribble(~type, ~dim_item_uid, ~dim_uid,
+                                   "dimension", "OU_GROUP-nwQbMeALRjL", "ou") %>%  # military
+    rbind(dimensions) %>% 
+    datapackcommons::GetData_Analytics() %>% 
+    .[["results"]]
+}                                       
   
-  results <- datapackcommons::GetData_Analytics(dimensions)
-  
-  if(!is.null(results$results)){
-    results$results <- dplyr::select(results$results, -ou_hierarchy)
+  if(is.null(results_psnu) && is.null(results_mil)){ # nothing to return
+    results <- NULL
+  } else if (is.null(results_mil)) { # psnu but no mil data
+    results <- dplyr::select(results_psnu, -ou_hierarchy)
+  } else {
+    results <- dplyr::bind_rows(results_psnu, results_mil) %>% 
+      dplyr::select(-ou_hierarchy)
   }
   
   
   return(list("api_call" = results$api_call,
               "time" = lubridate::now("UTC"),
-              "results" = results$results))
+              "results" = results))
 
   }
