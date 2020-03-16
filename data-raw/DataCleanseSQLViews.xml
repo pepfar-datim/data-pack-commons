@@ -1,0 +1,376 @@
+<metadata xmlns="http://dhis2.org/schema/dxf/2.0">
+  <sqlViews>
+    <sqlView name="COP 19 Check Data Value Audits" id="qADMzH1Hcuq">
+      <sqlQuery>
+      SELECT de.uid as dataelement, &#xd;
+        ou.path as path,&#xd;
+        p.iso as period,&#xd;
+        ou.uid as orgunit,&#xd;
+        coc.uid as categoryoptioncombo,&#xd;
+        acoc.uid as attributeoptioncombo,&#xd;
+        dva.*&#xd;
+      FROM datavalueaudit dva&#xd;
+        INNER JOIN _periodstructure p on dva.periodid = p.periodid&#xd;
+        INNER JOIN dataelement de on dva.dataelementid = de.dataelementid&#xd;
+        INNER JOIN organisationunit ou on ou.organisationunitid = dva.organisationunitid&#xd;
+        INNER JOIN categoryoptioncombo coc on dva.categoryoptioncomboid = coc.categoryoptioncomboid&#xd;
+        INNER JOIN categoryoptioncombo acoc on dva.attributeoptioncomboid = acoc.categoryoptioncomboid &#xd;
+      WHERE de.uid in ('zoKiMGRucOY',  -- VL_SUPPRESSION_SUBNAT (N, SUBNAT, Age Aggregated/Sex/HIVStatus) TARGET: Suppressed Viral Load&#xd;
+                   'nF19GOjcnoD',  -- DIAGNOSED_SUBNAT (N, SUBNAT, Age Aggregated/Sex/HIVStatus) TARGET: HIV Known Status&#xd;
+                   'VNjZAOFstOs',  -- TB_ART (N, TA, Age Aggregated/Sex/HIVStatus) TARGET: Registered TB/HIV&#xd;
+                   'FLq9skcuN0k')  -- TB_ART (N, DSD, Age Aggregated/Sex/HIVStatus) TARGET: Registered TB/HIV               &#xd;
+        AND p.iso = '2019Oct' -- FY20 &#xd;
+        AND dva.modifiedby NOT IN ('jpickering',              -- Data modified by these three accounts are expected, we are checking to see if any other accounts modified data&#xd;
+                          'sgarman@baosystems.com', &#xd;
+                          'system_ug_import'         -- Uganda datim for u imports&#xd;
+                       )&#xd;
+        AND dva.audittype not like 'DELET_' -- if the audit is for a delet_ then we don't need to worry about the record&#xd;
+        AND acoc.uid NOT IN ('YGT1o7UxfFu',  -- 00001 De-duplication adjustment (DSD-TA) &#xd;
+                       'X8hrDf6bLDC')  --  00000 De-duplication adjustment&#xd;
+      </sqlQuery>
+      <publicAccess>--------</publicAccess>
+      <description>Run to see if anyone modified the data.t&#xd;
+        &#xd;
+        An empty recordset demonstrates that all updated data was related to dedup mechanisms, or was modified by &#xd;
+        -- Jason, Sam, or Uganda DATIM4U&#xd;
+        -- Or it was a delete modification in which case there is nothing to modify</description><type>QUERY</type><externalAccess>false</externalAccess><cacheStrategy>NO_CACHE</cacheStrategy>
+  </sqlView>
+    <sqlView name="COP 19 Check Data Value Creation" id="GZaBRVIhpGV">
+      <sqlQuery>SELECT de.uid as dataelement, &#xd;
+      dv.storedby as storedby, ou.path as path,&#xd;
+      p.iso as period,&#xd;
+      ou.uid as orgunit,&#xd;
+      coc.uid as categoryoptioncombo,&#xd;
+      acoc.uid as attributeoptioncombo,&#xd;
+      dv.value as value&#xd;
+      FROM datavalue dv                                        &#xd;
+        INNER JOIN _periodstructure p on dv.periodid = p.periodid&#xd;
+        INNER JOIN dataelement de on dv.dataelementid = de.dataelementid&#xd;
+        INNER JOIN organisationunit ou on ou.organisationunitid = dv.sourceid&#xd;
+        INNER JOIN categoryoptioncombo coc on dv.categoryoptioncomboid = coc.categoryoptioncomboid&#xd;
+        INNER JOIN categoryoptioncombo acoc on dv.attributeoptioncomboid = acoc.categoryoptioncomboid &#xd;
+      WHERE de.uid in ('zoKiMGRucOY',  -- VL_SUPPRESSION_SUBNAT (N, SUBNAT, Age Aggregated/Sex/HIVStatus) TARGET: Suppressed Viral Load&#xd;
+                     'nF19GOjcnoD',  -- DIAGNOSED_SUBNAT (N, SUBNAT, Age Aggregated/Sex/HIVStatus) TARGET: HIV Known Status&#xd;
+                     'VNjZAOFstOs',  -- TB_ART (N, TA, Age Aggregated/Sex/HIVStatus) TARGET: Registered TB/HIV&#xd;
+                     'FLq9skcuN0k')  -- TB_ART (N, DSD, Age Aggregated/Sex/HIVStatus) TARGET: Registered TB/HIV               &#xd;
+        AND p.iso = '2019Oct'  -- FY20&#xd;
+        AND dv.deleted = FALSE  -- If the data are deleted we aren't concerned with them&#xd;
+        and dv.storedby NOT IN ('jpickering',              -- Data stored by these three accounts are expected, we are checking to see if any other accounts stored data&#xd;
+                            'sgarman@baosystems.com', &#xd;
+                            'system_ug_import'         -- Uganda datim for u imports&#xd;
+                         )&#xd;
+        and dv.value &lt;&gt; '0'  -- if the current value is 0 we will remove it without concern&#xd;
+        and acoc.uid NOT IN ('YGT1o7UxfFu',  -- 00001 De-duplication adjustment (DSD-TA) &#xd;
+                         'X8hrDf6bLDC')  --  00000 De-duplication adjustment
+      </sqlQuery>
+      <publicAccess>--------</publicAccess>
+      <description>This query demonstrates that all the data other than de-dup data) for the four data elements with errors were introduced by the data pack support team or the Uganda Datim 4 U instance.&#xd;
+        &#xd;
+        An empty result set confirms there were no completely new records created by any other users/process, however another user could have CHANGED the value introduced by us. We will check data value audits in a separate query.</description><type>QUERY</type><externalAccess>false</externalAccess><cacheStrategy>NO_CACHE</cacheStrategy>
+    </sqlView>
+    <sqlView name="COP 19 Data Cleanse Purge" id="SC3cZbI5Oqx">
+    <sqlQuery>SELECT de.uid as dataelement, &#xd;
+      p.iso as period,&#xd;
+      ou.uid as orgunit,&#xd;
+      coc.uid as categoryoptioncombo,&#xd;
+      acoc.uid as attributeoptioncombo,&#xd;
+      dv.value&#xd;
+      FROM datavalue dv                                        &#xd;
+        INNER JOIN _periodstructure p on dv.periodid = p.periodid&#xd;
+        INNER JOIN dataelement de on dv.dataelementid = de.dataelementid&#xd;
+        INNER JOIN organisationunit ou on ou.organisationunitid = dv.sourceid&#xd;
+        INNER JOIN categoryoptioncombo coc on dv.categoryoptioncomboid = coc.categoryoptioncomboid                                                                          &#xd;
+        INNER JOIN categoryoptioncombo acoc on dv.attributeoptioncomboid = acoc.categoryoptioncomboid &#xd;
+      WHERE de.uid in ('zoKiMGRucOY',  -- VL_SUPPRESSION_SUBNAT (N, SUBNAT, Age Aggregated/Sex/HIVStatus) TARGET: Suppressed Viral Load&#xd;
+                   'nF19GOjcnoD',  -- DIAGNOSED_SUBNAT (N, SUBNAT, Age Aggregated/Sex/HIVStatus) TARGET: HIV Known Status&#xd;
+                   'VNjZAOFstOs',  -- TB_ART (N, TA, Age Aggregated/Sex/HIVStatus) TARGET: Registered TB/HIV&#xd;
+                   'FLq9skcuN0k')  -- TB_ART (N, DSD, Age Aggregated/Sex/HIVStatus) TARGET: Registered TB/HIV              &#xd;
+        AND p.iso = '2019Oct'&#xd;
+        AND dv.deleted = FALSE&#xd;
+        AND ou.path NOT like '%FETQ6OmnsKB%' -- We leave the Uganda data where it lies in PROD&#xd;
+    </sqlQuery>
+    <publicAccess>--------</publicAccess>
+    <description>TB_ART, VL_SUPPRESION, DIAGNOSED_SUBNAT data deletion</description>
+    <type>QUERY</type>
+    <externalAccess>false</externalAccess>
+    <cacheStrategy>NO_CACHE</cacheStrategy>
+  </sqlView>
+      <sqlView name="COP 19 Data Cleanse Purge Uganda">
+    <sqlQuery>SELECT de.uid as dataelement, &#xd;
+      p.iso as period,&#xd;
+      ou.uid as orgunit,&#xd;
+      coc.uid as categoryoptioncombo,&#xd;
+      acoc.uid as attributeoptioncombo,&#xd;
+      dv.value&#xd;
+      FROM datavalue dv                                        &#xd;
+        INNER JOIN _periodstructure p on dv.periodid = p.periodid&#xd;
+        INNER JOIN dataelement de on dv.dataelementid = de.dataelementid&#xd;
+        INNER JOIN organisationunit ou on ou.organisationunitid = dv.sourceid&#xd;
+        INNER JOIN categoryoptioncombo coc on dv.categoryoptioncomboid = coc.categoryoptioncomboid                                                                          &#xd;
+        INNER JOIN categoryoptioncombo acoc on dv.attributeoptioncomboid = acoc.categoryoptioncomboid &#xd;
+      WHERE de.uid in ('zoKiMGRucOY',  -- VL_SUPPRESSION_SUBNAT (N, SUBNAT, Age Aggregated/Sex/HIVStatus) TARGET: Suppressed Viral Load&#xd;
+                   'nF19GOjcnoD',  -- DIAGNOSED_SUBNAT (N, SUBNAT, Age Aggregated/Sex/HIVStatus) TARGET: HIV Known Status&#xd;
+                   'VNjZAOFstOs',  -- TB_ART (N, TA, Age Aggregated/Sex/HIVStatus) TARGET: Registered TB/HIV&#xd;
+                   'FLq9skcuN0k')  -- TB_ART (N, DSD, Age Aggregated/Sex/HIVStatus) TARGET: Registered TB/HIV              &#xd;
+        AND p.iso = '2019Oct'&#xd;
+        AND dv.deleted = FALSE&#xd;
+        AND ou.path like '%FETQ6OmnsKB%' -- Uganda data&#xd;
+    </sqlQuery>
+    <publicAccess>--------</publicAccess>
+    <description>TB_ART, VL_SUPPRESION, DIAGNOSED_SUBNAT data deletion</description>
+    <type>QUERY</type>
+    <externalAccess>false</externalAccess>
+    <cacheStrategy>NO_CACHE</cacheStrategy>
+  </sqlView>
+    <sqlView name="COP 19 SUBNAT Recode" id="EW2W7HUhOWp">
+    <sqlQuery>WITH de_switch as (SELECT 'zoKiMGRucOY' as original_dataelement, 'nF19GOjcnoD' as dataelement &#xd;
+                        UNION&#xd;
+                 SELECT 'nF19GOjcnoD' as original_dataelement, 'zoKiMGRucOY' as dataelement)&#xd;
+      SELECT de_switch.dataelement as dataelement,&#xd;
+        p.iso as period,&#xd;
+        ou.uid as orgunit,&#xd;
+        coc.uid as categoryoptioncombo,&#xd;
+        acoc.uid as attributeoptioncombo,&#xd;
+        dv.value&#xd;
+      FROM datavalue dv                                        &#xd;
+        INNER JOIN _periodstructure p on dv.periodid = p.periodid&#xd;
+        INNER JOIN dataelement de on dv.dataelementid = de.dataelementid&#xd;
+        INNER JOIN organisationunit ou on ou.organisationunitid = dv.sourceid&#xd;
+        INNER JOIN categoryoptioncombo coc on dv.categoryoptioncomboid = coc.categoryoptioncomboid                                                                          &#xd;
+        INNER JOIN categoryoptioncombo acoc on dv.attributeoptioncomboid = acoc.categoryoptioncomboid &#xd;
+        INNER JOIN de_switch on de_switch.original_dataelement = de.uid&#xd;
+      WHERE de.uid in ('zoKiMGRucOY',  -- VL_SUPPRESSION_SUBNAT (N, SUBNAT, Age Aggregated/Sex/HIVStatus) TARGET: Suppressed Viral Load&#xd;
+                         'nF19GOjcnoD')  -- DIAGNOSED_SUBNAT (N, SUBNAT, Age Aggregated/Sex/HIVStatus) TARGET: HIV Known Status&#xd;
+        AND  p.iso = '2019Oct'&#xd;
+        AND  dv.deleted = FALSE&#xd;
+        AND  dv.value &lt;&gt; '0' -- we will del&#xd;
+        AND  ou.path NOT like '%FETQ6OmnsKB%' -- We leave the Uganda data where it lies in PROD&#xd;
+        AND  acoc.uid NOT IN ('YGT1o7UxfFu',  -- 00001 De-duplication adjustment (DSD-TA) &#xd;
+                       'X8hrDf6bLDC')  --  00000 De-duplication adjustment&#xd;
+  </sqlQuery>
+    <publicAccess>--------</publicAccess>
+    <description>Pull Subnat data to recode/import, the WITH statement creates a soft temporary table for the recoding&#xd;
+      &#xd;
+      We won't recode dedups, Uganda data, deleted data, or 0 value data&#xd;</description>
+    <type>QUERY</type>
+    <externalAccess>false</externalAccess>
+    <cacheStrategy>NO_CACHE</cacheStrategy>
+  </sqlView>
+   <sqlView name="COP 19 SUBNAT Recode Uganda">
+    <sqlQuery>WITH de_switch as (SELECT 'zoKiMGRucOY' as original_dataelement, 'nF19GOjcnoD' as dataelement &#xd;
+                        UNION&#xd;
+                 SELECT 'nF19GOjcnoD' as original_dataelement, 'zoKiMGRucOY' as dataelement)&#xd;
+      SELECT de_switch.dataelement as dataelement,&#xd;
+        p.iso as period,&#xd;
+        ou.uid as orgunit,&#xd;
+        coc.uid as categoryoptioncombo,&#xd;
+        acoc.uid as attributeoptioncombo,&#xd;
+        dv.value&#xd;
+      FROM datavalue dv                                        &#xd;
+        INNER JOIN _periodstructure p on dv.periodid = p.periodid&#xd;
+        INNER JOIN dataelement de on dv.dataelementid = de.dataelementid&#xd;
+        INNER JOIN organisationunit ou on ou.organisationunitid = dv.sourceid&#xd;
+        INNER JOIN categoryoptioncombo coc on dv.categoryoptioncomboid = coc.categoryoptioncomboid                                                                          &#xd;
+        INNER JOIN categoryoptioncombo acoc on dv.attributeoptioncomboid = acoc.categoryoptioncomboid &#xd;
+        INNER JOIN de_switch on de_switch.original_dataelement = de.uid&#xd;
+      WHERE de.uid in ('zoKiMGRucOY',  -- VL_SUPPRESSION_SUBNAT (N, SUBNAT, Age Aggregated/Sex/HIVStatus) TARGET: Suppressed Viral Load&#xd;
+                         'nF19GOjcnoD')  -- DIAGNOSED_SUBNAT (N, SUBNAT, Age Aggregated/Sex/HIVStatus) TARGET: HIV Known Status&#xd;
+        AND  p.iso = '2019Oct'&#xd;
+        AND  dv.deleted = FALSE&#xd;
+        AND  dv.value &lt;&gt; '0' -- we will del&#xd;
+        AND  ou.path like '%FETQ6OmnsKB%' -- We leave the Uganda data where it lies in PROD&#xd;
+        AND  acoc.uid NOT IN ('YGT1o7UxfFu',  -- 00001 De-duplication adjustment (DSD-TA) &#xd;
+                       'X8hrDf6bLDC')  --  00000 De-duplication adjustment&#xd;
+  </sqlQuery>
+    <publicAccess>--------</publicAccess>
+    <description>Pull Subnat data to recode/import, the WITH statement creates a soft temporary table for the recoding&#xd;
+      &#xd;
+      We won't recode dedups, Uganda data, deleted data, or 0 value data&#xd;</description>
+    <type>QUERY</type>
+    <externalAccess>false</externalAccess>
+    <cacheStrategy>NO_CACHE</cacheStrategy>
+  </sqlView>
+    <sqlView name="COP 19 TB_ART Recode" id="b2Sw9rbDYTM">
+  <sqlQuery>WITH coc_switch as (&#xd;
+    SELECT 'OMVFa98P0Yg' as original_categoryoptioncombo, 'OMVFa98P0Yg' as categoryoptioncombo UNION&#xd;
+    SELECT 'dRjezxQktoz' as original_categoryoptioncombo, 'dRjezxQktoz' as categoryoptioncombo UNION&#xd;
+    SELECT 'AG0milXShQM' as original_categoryoptioncombo, 'zLbjm4E1NsG' as categoryoptioncombo UNION&#xd;
+    SELECT 'QqlHrg6f0Sm' as original_categoryoptioncombo, 'AG0milXShQM' as categoryoptioncombo UNION&#xd;
+    SELECT 'LyXZybq6Sjf' as original_categoryoptioncombo, 'QqlHrg6f0Sm' as categoryoptioncombo UNION&#xd;
+    SELECT 'zqARzn2wVj5' as original_categoryoptioncombo, 'LyXZybq6Sjf' as categoryoptioncombo UNION&#xd;
+    SELECT 'Vi8sd7mvZW4' as original_categoryoptioncombo, 'zqARzn2wVj5' as categoryoptioncombo UNION&#xd;
+    SELECT 'hRq4baaUamW' as original_categoryoptioncombo, 'Vi8sd7mvZW4' as categoryoptioncombo UNION&#xd;
+    SELECT 'PEXIFVXGP9S' as original_categoryoptioncombo, 'hRq4baaUamW' as categoryoptioncombo UNION&#xd;
+    SELECT 'J8fGj3Iefbc' as original_categoryoptioncombo, 'PEXIFVXGP9S' as categoryoptioncombo UNION&#xd;
+    SELECT 'zLbjm4E1NsG' as original_categoryoptioncombo, 'J8fGj3Iefbc' as categoryoptioncombo UNION&#xd;
+    SELECT 'lR2zeQ9VfB8' as original_categoryoptioncombo, 'lR2zeQ9VfB8' as categoryoptioncombo UNION&#xd;
+    SELECT 'GnpJeq2XENE' as original_categoryoptioncombo, 'GnpJeq2XENE' as categoryoptioncombo UNION&#xd;
+    SELECT 'jjUGfPF0ObP' as original_categoryoptioncombo, 'jjUGfPF0ObP' as categoryoptioncombo UNION&#xd;
+    SELECT 'tEMe0224zlP' as original_categoryoptioncombo, 'p1HABZs9ydt' as categoryoptioncombo UNION&#xd;
+    SELECT 'LpnJL4zZxRH' as original_categoryoptioncombo, 'tEMe0224zlP' as categoryoptioncombo UNION&#xd;
+    SELECT 'NCnIv37EwU1' as original_categoryoptioncombo, 'LpnJL4zZxRH' as categoryoptioncombo UNION&#xd;
+    SELECT 'y9LP85d8t4b' as original_categoryoptioncombo, 'NCnIv37EwU1' as categoryoptioncombo UNION&#xd;
+    SELECT 'YDzeLL6xf5o' as original_categoryoptioncombo, 'y9LP85d8t4b' as categoryoptioncombo UNION&#xd;
+    SELECT 'XcW5HWccYYZ' as original_categoryoptioncombo, 'YDzeLL6xf5o' as categoryoptioncombo UNION&#xd;
+    SELECT 'zouTxRQ0kXP' as original_categoryoptioncombo, 'XcW5HWccYYZ' as categoryoptioncombo UNION&#xd;
+    SELECT 'zUjkTTlva36' as original_categoryoptioncombo, 'zouTxRQ0kXP' as categoryoptioncombo UNION&#xd;
+    SELECT 'p1HABZs9ydt' as original_categoryoptioncombo, 'zUjkTTlva36' as categoryoptioncombo UNION&#xd;
+    SELECT 'QwUdNwRA8Uc' as original_categoryoptioncombo, 'QwUdNwRA8Uc' as categoryoptioncombo&#xd;
+)&#xd;
+SELECT de.uid as dataelement, &#xd;
+  p.iso as period,&#xd;
+  ou.uid as orgunit,&#xd;
+  coc_switch.categoryoptioncombo as categoryoptioncombo,&#xd;
+  acoc.uid as attributeoptioncombo,&#xd;
+  dv.value&#xd;
+  from datavalue dv                                        &#xd;
+  INNER JOIN _periodstructure p on dv.periodid = p.periodid&#xd;
+  INNER JOIN dataelement de on dv.dataelementid = de.dataelementid&#xd;
+  INNER JOIN organisationunit ou on ou.organisationunitid = dv.sourceid&#xd;
+  INNER JOIN categoryoptioncombo coc on dv.categoryoptioncomboid = coc.categoryoptioncomboid                                                                          &#xd;
+  INNER JOIN categoryoptioncombo acoc on dv.attributeoptioncomboid = acoc.categoryoptioncomboid &#xd;
+  INNER JOIN coc_switch on coc_switch.original_categoryoptioncombo = coc.uid&#xd;
+  WHERE de.uid in ('VNjZAOFstOs',  -- TB_ART (N, TA, Age Aggregated/Sex/HIVStatus) TARGET: Registered TB/HIV&#xd;
+                   'FLq9skcuN0k')  -- TB_ART (N, DSD, Age Aggregated/Sex/HIVStatus) TARGET: Registered TB/HIV&#xd;
+  and  p.iso = '2019Oct'&#xd;
+  and dv.deleted = FALSE&#xd;
+  and dv.value &lt;&gt; '0'&#xd;
+  and ou.path NOT like '%FETQ6OmnsKB%' -- We leave the Uganda data where it lies in PROD&#xd;
+  and acoc.uid NOT IN ('YGT1o7UxfFu',  -- 00001 De-duplication adjustment (DSD-TA) &#xd;
+                       'X8hrDf6bLDC')  --  00000 De-duplication adjustment</sqlQuery>
+  <publicAccess>--------</publicAccess>
+  <description>Pull TB_ART data to recode/import, the WITH statement creates a soft temporary table for the recoding&#xd;
+&#xd;
+We won't recode dedups (which will be deleted), Uganda data, deleted data, or 0 value data</description>
+  <type>QUERY</type>
+  <externalAccess>false</externalAccess>
+  <cacheStrategy>NO_CACHE</cacheStrategy>
+</sqlView>
+  <sqlView name="COP 19 TB_ART Recode Uganda" >
+  <sqlQuery>WITH coc_switch as (&#xd;
+    SELECT 'OMVFa98P0Yg' as original_categoryoptioncombo, 'OMVFa98P0Yg' as categoryoptioncombo UNION&#xd;
+    SELECT 'dRjezxQktoz' as original_categoryoptioncombo, 'dRjezxQktoz' as categoryoptioncombo UNION&#xd;
+    SELECT 'AG0milXShQM' as original_categoryoptioncombo, 'zLbjm4E1NsG' as categoryoptioncombo UNION&#xd;
+    SELECT 'QqlHrg6f0Sm' as original_categoryoptioncombo, 'AG0milXShQM' as categoryoptioncombo UNION&#xd;
+    SELECT 'LyXZybq6Sjf' as original_categoryoptioncombo, 'QqlHrg6f0Sm' as categoryoptioncombo UNION&#xd;
+    SELECT 'zqARzn2wVj5' as original_categoryoptioncombo, 'LyXZybq6Sjf' as categoryoptioncombo UNION&#xd;
+    SELECT 'Vi8sd7mvZW4' as original_categoryoptioncombo, 'zqARzn2wVj5' as categoryoptioncombo UNION&#xd;
+    SELECT 'hRq4baaUamW' as original_categoryoptioncombo, 'Vi8sd7mvZW4' as categoryoptioncombo UNION&#xd;
+    SELECT 'PEXIFVXGP9S' as original_categoryoptioncombo, 'hRq4baaUamW' as categoryoptioncombo UNION&#xd;
+    SELECT 'J8fGj3Iefbc' as original_categoryoptioncombo, 'PEXIFVXGP9S' as categoryoptioncombo UNION&#xd;
+    SELECT 'zLbjm4E1NsG' as original_categoryoptioncombo, 'J8fGj3Iefbc' as categoryoptioncombo UNION&#xd;
+    SELECT 'lR2zeQ9VfB8' as original_categoryoptioncombo, 'lR2zeQ9VfB8' as categoryoptioncombo UNION&#xd;
+    SELECT 'GnpJeq2XENE' as original_categoryoptioncombo, 'GnpJeq2XENE' as categoryoptioncombo UNION&#xd;
+    SELECT 'jjUGfPF0ObP' as original_categoryoptioncombo, 'jjUGfPF0ObP' as categoryoptioncombo UNION&#xd;
+    SELECT 'tEMe0224zlP' as original_categoryoptioncombo, 'p1HABZs9ydt' as categoryoptioncombo UNION&#xd;
+    SELECT 'LpnJL4zZxRH' as original_categoryoptioncombo, 'tEMe0224zlP' as categoryoptioncombo UNION&#xd;
+    SELECT 'NCnIv37EwU1' as original_categoryoptioncombo, 'LpnJL4zZxRH' as categoryoptioncombo UNION&#xd;
+    SELECT 'y9LP85d8t4b' as original_categoryoptioncombo, 'NCnIv37EwU1' as categoryoptioncombo UNION&#xd;
+    SELECT 'YDzeLL6xf5o' as original_categoryoptioncombo, 'y9LP85d8t4b' as categoryoptioncombo UNION&#xd;
+    SELECT 'XcW5HWccYYZ' as original_categoryoptioncombo, 'YDzeLL6xf5o' as categoryoptioncombo UNION&#xd;
+    SELECT 'zouTxRQ0kXP' as original_categoryoptioncombo, 'XcW5HWccYYZ' as categoryoptioncombo UNION&#xd;
+    SELECT 'zUjkTTlva36' as original_categoryoptioncombo, 'zouTxRQ0kXP' as categoryoptioncombo UNION&#xd;
+    SELECT 'p1HABZs9ydt' as original_categoryoptioncombo, 'zUjkTTlva36' as categoryoptioncombo UNION&#xd;
+    SELECT 'QwUdNwRA8Uc' as original_categoryoptioncombo, 'QwUdNwRA8Uc' as categoryoptioncombo&#xd;
+)&#xd;
+SELECT de.uid as dataelement, &#xd;
+  p.iso as period,&#xd;
+  ou.uid as orgunit,&#xd;
+  coc_switch.categoryoptioncombo as categoryoptioncombo,&#xd;
+  acoc.uid as attributeoptioncombo,&#xd;
+  dv.value&#xd;
+  from datavalue dv                                        &#xd;
+  INNER JOIN _periodstructure p on dv.periodid = p.periodid&#xd;
+  INNER JOIN dataelement de on dv.dataelementid = de.dataelementid&#xd;
+  INNER JOIN organisationunit ou on ou.organisationunitid = dv.sourceid&#xd;
+  INNER JOIN categoryoptioncombo coc on dv.categoryoptioncomboid = coc.categoryoptioncomboid                                                                          &#xd;
+  INNER JOIN categoryoptioncombo acoc on dv.attributeoptioncomboid = acoc.categoryoptioncomboid &#xd;
+  INNER JOIN coc_switch on coc_switch.original_categoryoptioncombo = coc.uid&#xd;
+  WHERE de.uid in ('VNjZAOFstOs',  -- TB_ART (N, TA, Age Aggregated/Sex/HIVStatus) TARGET: Registered TB/HIV&#xd;
+                   'FLq9skcuN0k')  -- TB_ART (N, DSD, Age Aggregated/Sex/HIVStatus) TARGET: Registered TB/HIV&#xd;
+  and  p.iso = '2019Oct'&#xd;
+  and dv.deleted = FALSE&#xd;
+  and dv.value &lt;&gt; '0'&#xd;
+  and ou.path like '%FETQ6OmnsKB%' -- We leave the Uganda data where it lies in PROD&#xd;
+  and acoc.uid NOT IN ('YGT1o7UxfFu',  -- 00001 De-duplication adjustment (DSD-TA) &#xd;
+                       'X8hrDf6bLDC')  --  00000 De-duplication adjustment</sqlQuery>
+  <publicAccess>--------</publicAccess>
+  <description>Pull TB_ART data to recode/import, the WITH statement creates a soft temporary table for the recoding&#xd;
+&#xd;
+We won't recode dedups (which will be deleted), Uganda data, deleted data, or 0 value data</description>
+  <type>QUERY</type>
+  <externalAccess>false</externalAccess>
+  <cacheStrategy>NO_CACHE</cacheStrategy>
+</sqlView>
+<sqlView name="COP 19 Military subnat impat delete" id="LHLXdsiJDVg">
+      <sqlQuery>
+      SELECT de.uid as dataelement,&#xd;
+  p.iso as period,&#xd;
+  ou.uid as orgunit,&#xd;
+  coc.uid as categoryoptioncombo,&#xd;
+  acoc.uid as attributeoptioncombo,&#xd;
+  dv.value&#xd;
+  from datavalue dv&#xd;                                        
+  INNER JOIN _periodstructure p on dv.periodid = p.periodid&#xd;
+  INNER JOIN dataelement de on dv.dataelementid = de.dataelementid&#xd;
+  INNER JOIN organisationunit ou on ou.organisationunitid = dv.sourceid&#xd;
+  INNER JOIN orgunitgroupmembers ougm on ou.organisationunitid = ougm.organisationunitid&#xd;
+  INNER JOIN orgunitgroup oug on ougm.orgunitgroupid = oug.orgunitgroupid&#xd;   
+  INNER JOIN categoryoptioncombo coc on dv.categoryoptioncomboid = coc.categoryoptioncomboid&#xd;                                                                          
+  INNER JOIN categoryoptioncombo acoc on dv.attributeoptioncomboid = acoc.categoryoptioncomboid&#xd;
+  WHERE oug.uid = 'nwQbMeALRjL'  -- military org unit group&#xd;
+  AND dv.dataelementid in (&#xd;
+    SELECT DISTINCT dataelementid from datasetelement&#xd;
+    WHERE datasetid in (&#xd;
+      SELECT datasetid from dataset where uid IN (&#xd;
+        'N4X89PgW01w', -- Host Country Targets: COP Prioritization SNU (USG)&#xd;
+        'pTuDWXzkAkJ'  -- Planning Attributes: COP Prioritization SNU&#xd;
+      )&#xd;
+    )&#xd;
+  )&#xd;                
+  and dv.periodid =&#xd;                                              
+    (SELECT periodid from _periodstructure where iso = '2019Oct')&#xd;
+  and dv.deleted = FALSE&#xd;
+  and ou.path NOT like '%FETQ6OmnsKB%' ;&#xd;
+      </sqlQuery>
+      <publicAccess>--------</publicAccess>
+      <description>
+      </description><type>QUERY</type><externalAccess>false</externalAccess><cacheStrategy>NO_CACHE</cacheStrategy>
+  </sqlView>
+  <sqlView name="COP 19 Military subnat impat delete Uganda">
+      <sqlQuery>
+      SELECT de.uid as dataelement,&#xd;
+  p.iso as period,&#xd;
+  ou.uid as orgunit,&#xd;
+  coc.uid as categoryoptioncombo,&#xd;
+  acoc.uid as attributeoptioncombo,&#xd;
+  dv.value&#xd;
+  from datavalue dv&#xd;                                        
+  INNER JOIN _periodstructure p on dv.periodid = p.periodid&#xd;
+  INNER JOIN dataelement de on dv.dataelementid = de.dataelementid&#xd;
+  INNER JOIN organisationunit ou on ou.organisationunitid = dv.sourceid&#xd;
+  INNER JOIN orgunitgroupmembers ougm on ou.organisationunitid = ougm.organisationunitid&#xd;
+  INNER JOIN orgunitgroup oug on ougm.orgunitgroupid = oug.orgunitgroupid&#xd;   
+  INNER JOIN categoryoptioncombo coc on dv.categoryoptioncomboid = coc.categoryoptioncomboid&#xd;                                                                          
+  INNER JOIN categoryoptioncombo acoc on dv.attributeoptioncomboid = acoc.categoryoptioncomboid&#xd;
+  WHERE oug.uid = 'nwQbMeALRjL'  -- military org unit group&#xd;
+  AND dv.dataelementid in (&#xd;
+    SELECT DISTINCT dataelementid from datasetelement&#xd;
+    WHERE datasetid in (&#xd;
+      SELECT datasetid from dataset where uid IN (&#xd;
+        'N4X89PgW01w', -- Host Country Targets: COP Prioritization SNU (USG)&#xd;
+        'pTuDWXzkAkJ'  -- Planning Attributes: COP Prioritization SNU&#xd;
+      )&#xd;
+    )&#xd;
+  )&#xd;                
+  and dv.periodid =&#xd;                                              
+    (SELECT periodid from _periodstructure where iso = '2019Oct')&#xd;
+  and dv.deleted = FALSE&#xd;
+  and ou.path like '%FETQ6OmnsKB%' ;&#xd;
+      </sqlQuery>
+      <publicAccess>--------</publicAccess>
+      <description>
+      </description><type>QUERY</type><externalAccess>false</externalAccess><cacheStrategy>NO_CACHE</cacheStrategy>
+  </sqlView>
+  </sqlViews>
+</metadata>
