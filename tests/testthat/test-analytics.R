@@ -54,7 +54,7 @@ test_that("RetryAPI", {
   httptest::stop_mocking()
 })
 
-test_that("GetCountryLevels", {
+test_that("ntryLevels", {
   httptest::use_mock_api()
 #  DHISLogin("/users/sam/.secrets/prod.json")
   data <- GetCountryLevels(base_url = "https://www.datim.org/")

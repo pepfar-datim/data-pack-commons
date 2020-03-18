@@ -5,8 +5,7 @@ doMC::registerDoMC(cores = 5)
 datapackcommons::DHISLogin("/users/sam/.secrets/datim.json")
 base_url <- getOption("baseurl")
 get_indicator_details <- function(uid){
-  datapackcommons::getMetadata(base_url,
-                               "indicators",
+  datapackcommons::getMetadata("indicators",
                                glue::glue("id:eq:{uid}"),
                                "name, id, numerator, denominator") 
 }
@@ -147,8 +146,7 @@ numerator_components <- indicators$numerator %>%
   dplyr::bind_rows() 
 
 numerator_data_elements <- numerator_components %>% .[["data_element_uid"]] %>% unique() %>%
-  purrr::map(~datapackcommons::getMetadata(base_url, 
-                                           "dataElements", 
+  purrr::map(~datapackcommons::getMetadata("dataElements", 
                                            glue::glue("id:eq:{.x}"))) %>% 
   dplyr::bind_rows()
 
@@ -160,8 +158,7 @@ denominator_components <- indicators$denominator[indicators$denominator != 1] %>
 denominator_data_elements <- denominator_components %>% 
   .[["data_element_uid"]] %>% 
   unique() %>%
-  purrr::map(~datapackcommons::getMetadata(base_url, 
-                                           "dataElements", 
+  purrr::map(~datapackcommons::getMetadata("dataElements", 
                                            glue::glue("id:eq:{.x}"))) %>% 
   dplyr::bind_rows()
 
@@ -208,16 +205,14 @@ temp = plyr::alply(indicators_with_co_combos, 1,
 numerator_components <- indicators$numerator %>% 
   purrr::map(extract_formula_components) %>%
   dplyr::bind_rows() %>% .[["data_element_uid"]] %>% unique() %>%
-  purrr::map(~datapackcommons::getMetadata(base_url, 
-                                           "dataElements", 
+  purrr::map(~datapackcommons::getMetadata("dataElements", 
                                            glue::glue("id:eq:{.x}")))
 
 
 denominator_components <- indicators$denominator[indicators$denominator != 1] %>% 
   purrr::map(extract_formula_components) %>%
   dplyr::bind_rows() %>% .[["data_element_uid"]] %>% unique() %>%
-  purrr::map(~datapackcommons::getMetadata(base_url, 
-                                           "dataElements", 
+  purrr::map(~datapackcommons::getMetadata("dataElements", 
                                            glue::glue("id:eq:{.x}")))
 
 combined_componenets <- dplyr::bind_rows(numerator_components, denominator_components) %>% 

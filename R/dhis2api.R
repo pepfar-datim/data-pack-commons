@@ -154,13 +154,13 @@ GetCountryLevels <- function(base_url, countries_req = NULL){
     plyr::laply(utils::URLencode, reserved = TRUE) %>% 
     paste0(collapse = ",") %>% 
     paste0("name:in:[", .,"]") %>%  c("level:eq:3") %>% 
-    getMetadata(base_url, "organisationUnits", .)
+    getMetadata("organisationUnits", ., base_url = base_url)
   
   level_4_countries <- countries %>% dplyr::filter(country_level == "4") %>% .$country_name %>%
     plyr::laply(utils::URLencode, reserved = TRUE) %>% 
     paste0(collapse = ",") %>% 
     paste0("name:in:[", .,"]") %>%  c("level:eq:4") %>% 
-    getMetadata(base_url, "organisationUnits", .)
+    getMetadata("organisationUnits", ., base_url = base_url)
   
   assertthat::assert_that(NROW(level_3_countries) + NROW(level_4_countries) == NROW(countries))
 
@@ -171,18 +171,21 @@ GetCountryLevels <- function(base_url, countries_req = NULL){
 }
 
 #' @export
-#' @title getMetadata(base_url, end_point, filters, fields)
+#' @title getMetadata(end_point, filters, fields)
 #' 
 #' @description General utility to get metadata details from DATIM
-#' @param base_url string - base address of instance (text before api/ in URL)
 #' @param end_point string - api endpoint for the metadata of interest e.g. dataElements, 
 #' organisationUnits
 #' @param filters - list of strings - the parameters for  the DHIS2 metadata filter, 
 #' e.g. c("id:eq:1234","name:in:Kenya,Rwanda")
 #' @param fields - string for the fields to return structured as DHIS 2 expects,
 #' e.g. "name,id,items[name,id]"
+#' @param base_url string - base address of instance (text before api/ in URL)
 #' @return list of metadata details
-getMetadata <- function(base_url, end_point, filters = NULL, fields = NULL) {
+getMetadata <- function(end_point, 
+                        filters = NULL, 
+                        fields = NULL,
+                        base_url = getOption("baseurl")) {
   
   url_filters=""
   url_fields=""
@@ -230,9 +233,10 @@ ValidateNameIdPairs <- function(names, ids, type, exact = TRUE, base_url = getOp
                           length(names) == length(ids))
   original <- tibble::tibble(name = names, id = ids) %>% unique()
   ids_csv  <-  unique(ids) %>% paste0(collapse = ",")
-  response <- datapackcommons::getMetadata(base_url, type, 
+  response <- datapackcommons::getMetadata(type, 
                                            filters = glue::glue("id:in:[{ids_csv}]"), 
-                                           fields = "id,name")
+                                           fields = "id,name",
+                                           base_url = base_url)
   assertthat::has_name(response, "name")
   assertthat::has_name(response, "id")
   if (exact == TRUE){
@@ -269,7 +273,7 @@ ValidateCodeIdPairs <- function(base_url, codes, ids, type){
                           length(codes) == length(ids))
   original <- tibble::tibble(code = codes, id = ids) %>% unique()
   ids_csv <-  ids %>% unique() %>% paste0(collapse = ",")
-  response <- datapackcommons::getMetadata(base_url, type, filters = glue::glue("id:in:[{ids_csv}]"), fields = "id,code")
+  response <- datapackcommons::getMetadata(type, filters = glue::glue("id:in:[{ids_csv}]"), fields = "id,code", base_url)
   assertthat::has_name(response, "code")
   assertthat::has_name(response, "id")
   result <-  dplyr::all_equal(original, response)
@@ -459,7 +463,7 @@ GetData_DataPack <- function(parameters,
   dimensions <- dplyr::bind_rows(dimensions, dimension_disaggs)
 
   non_mil_types_of_org_units <- 
-    datapackcommons::getMetadata(base_url = base_url, "dimensions", "id:eq:mINJi7rR1a6", "items[name,id]") %>% 
+    datapackcommons::getMetadata("dimensions", "id:eq:mINJi7rR1a6", "items[name,id]") %>% 
     tidyr::unnest(c("items")) %>% 
     dplyr::filter(name != "Military") %>% 
     .[["id"]]

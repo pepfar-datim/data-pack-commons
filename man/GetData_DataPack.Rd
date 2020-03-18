@@ -7,11 +7,23 @@
 GetData_DataPack(
   parameters,
   org_units,
+  include_military,
   dim_item_sets = datapackcommons::dim_item_sets,
-  org_unit_groups = c("nwQbMeALRjL", "AVy8gJXym2D"),
-  org_unit_levels = NULL,
   base_url = getOption("baseurl")
 )
+}
+\arguments{
+\item{parameters}{paramemters for calling an indicator 
+from datapackcommons::data_required}
+
+\item{include_military}{Should be TRUE if country has a military org unit,
+or FALSE if no military org_unit (FALSE for Philippines in COP20)}
+
+\item{dim_item_sets}{datapackcommons::dim_item_sets or a subset}
+
+\item{base_url}{string - base address of instance (text before api/ in URL)}
+
+\item{country}{uid}
 }
 \value{
 A list with $time = time the function was called, 
