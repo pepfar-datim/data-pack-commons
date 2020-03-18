@@ -469,8 +469,10 @@ GetData_DataPack <- function(parameters,
                                   dim_uid = "mINJi7rR1a6") %>%
     rbind(c("dimension", "OU_GROUP-AVy8gJXym2D", "ou")) %>%  # COP Prioritization SNU) dimensions
     rbind(dimensions) %>% 
-    datapackcommons::GetData_Analytics() %>% 
-    .[["results"]]
+    datapackcommons::GetData_Analytics() 
+  
+  api_call <- results_psnu[["api_call"]]
+  results_psnu <-  results_psnu[["results"]]
   
   results_mil <- NULL
   if(include_military){    
@@ -491,7 +493,7 @@ GetData_DataPack <- function(parameters,
   }
   
   
-  return(list("api_call" = results$api_call,
+  return(list("api_call" = api_call,
               "time" = lubridate::now("UTC"),
               "results" = results))
 
