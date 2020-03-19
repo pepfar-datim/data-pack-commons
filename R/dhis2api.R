@@ -154,7 +154,8 @@ GetCountryLevels <- function(base_url, countries_req = NULL){
     plyr::laply(utils::URLencode, reserved = TRUE) %>% 
     paste0(collapse = ",") %>% 
     paste0("name:in:[", .,"]") %>%  c("level:eq:3") %>% 
-    getMetadata("organisationUnits", ., base_url = base_url)
+    getMetadata("organisationUnits", ., 
+                base_url = base_url)
   
   level_4_countries <- countries %>% dplyr::filter(country_level == "4") %>% .$country_name %>%
     plyr::laply(utils::URLencode, reserved = TRUE) %>% 
@@ -273,7 +274,10 @@ ValidateCodeIdPairs <- function(base_url, codes, ids, type){
                           length(codes) == length(ids))
   original <- tibble::tibble(code = codes, id = ids) %>% unique()
   ids_csv <-  ids %>% unique() %>% paste0(collapse = ",")
-  response <- datapackcommons::getMetadata(type, filters = glue::glue("id:in:[{ids_csv}]"), fields = "id,code", base_url)
+  response <- datapackcommons::getMetadata(type, 
+                                           filters = glue::glue("id:in:[{ids_csv}]"), 
+                                           fields = "id,code", 
+                                           base_url = base_url)
   assertthat::has_name(response, "code")
   assertthat::has_name(response, "id")
   result <-  dplyr::all_equal(original, response)
@@ -463,7 +467,10 @@ GetData_DataPack <- function(parameters,
   dimensions <- dplyr::bind_rows(dimensions, dimension_disaggs)
 
   non_mil_types_of_org_units <- 
-    datapackcommons::getMetadata("dimensions", "id:eq:mINJi7rR1a6", "items[name,id]") %>% 
+    datapackcommons::getMetadata("dimensions", 
+                                 "id:eq:mINJi7rR1a6", 
+                                 "items[name,id]",
+                                 base_url = base_url) %>% 
     tidyr::unnest(c("items")) %>% 
     dplyr::filter(name != "Military") %>% 
     .[["id"]]
