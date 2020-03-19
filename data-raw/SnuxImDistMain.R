@@ -54,8 +54,7 @@ BuildDimensionList_DataPack <- function(data_element_map_item, dim_item_sets,
     # need to select all org unit types EXCEPT military because it is 
     # possible for military to be below general PSNU level in org hierarchy   
     non_mil_types_of_org_units <- 
-      datapackcommons::getMetadata(base_url = base_url, 
-                                   "dimensions", 
+      datapackcommons::getMetadata("dimensions", 
                                    "id:eq:mINJi7rR1a6", 
                                    "items[name,id]") %>% 
       tidyr::unnest(c("items")) %>% 
@@ -84,8 +83,7 @@ GetFy20tMechs <- function(base_url = getOption("baseurl")){
   
   #TODO modify format data for api function so I can make this call with getData_Analytics
   
-  mech_codes <- datapackcommons::getMetadata(base_url, 
-                                            "categories",
+  mech_codes <- datapackcommons::getMetadata("categories",
                                             "id:eq:SH885jaRe0o",
                                             "categoryOptions[id,code]") %>% 
     .[["categoryOptions"]] %>% 

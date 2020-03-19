@@ -9,7 +9,7 @@ ValidateDimItems <-
     api_names_ids <- data[[dim_uid_colname]] %>% 
       unique() %>% na.omit() %>%
       paste0(collapse = ",") %>% {paste0("id:in:[", ., "]")} %>%
-      {datapackcommons::getMetadata(base_url, "dimensions", filters = .,
+      {datapackcommons::getMetadata("dimensions", filters = .,
                                      fields = "items[name,id]")} %>%
       unnest(c("items")) 
     
