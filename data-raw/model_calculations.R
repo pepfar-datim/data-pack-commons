@@ -177,13 +177,13 @@ output_location <- "/Users/sam/COP data/"
 # get country and prioritization level
  operating_units <- datapackcommons::GetCountryLevels(base_url) %>%
    # filter(country_name >= "Nigeria") %>% 
-   dplyr::filter(planning_level != 0) # Turkmenistan has no planning/priortization level
+   dplyr::filter(prioritization_level != 0) # Turkmenistan has no planning/priortization level
  priority_snu_data <- datapackr::getDataValueSets(c("dataElementGroup","period", "orgUnitGroup"),
                                                         c("ofNbyQgD9xG","2019Oct","AVy8gJXym2D")) %>% 
    dplyr::select(org_unit_uid = org_unit, value)
  
 # operating_units <- tibble::tribble(
-# ~ country_name, ~ id, ~ planning_level,
+# ~ country_name, ~ id, ~ prioritization_level,
 # "Global", "ybg3MO3hcf4", "2")
 
 # get local copy of package config file
@@ -195,7 +195,7 @@ for (ou_index in 1:NROW(operating_units)) {
   data_required <-  datapackcommons::data_required
   operating_unit <-  dplyr::slice(operating_units, ou_index)
   cop_data[[operating_unit$id]] = list("ou_name" = operating_unit$country_name,
-                                       "ou_psnu_level" = operating_unit$planning_level)
+                                       "ou_psnu_level" = operating_unit$prioritization_level)
 
   print(operating_unit$country_name)
   print(lubridate::now())
@@ -209,7 +209,7 @@ for (ou_index in 1:NROW(operating_units)) {
                  FALSE,
                  TRUE)
   analytics_output <- plyr::adply(indicator_parameters, 1, GetData, operating_unit$id, 
-                                  operating_unit$planning_level,
+                                  operating_unit$prioritization_level,
                                   operating_unit$country_name, 
                                   dim_item_sets,
                                   include_military,

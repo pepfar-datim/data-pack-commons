@@ -17,7 +17,8 @@ require(httptest)
 ------------
 test_that("We can get data with GetData_Analytics", {
 #httptest::use_mock_api()
-  datapackcommons::DHISLogin_Play("2.30")
+  base_url <- datapackcommons::DHISLogin_Play("2.33") 
+   
   dimensions <- tibble::tribble(~type, ~dim_item_uid, ~dim_uid,
                                 "filter", "vihpFUg2WTy", "dx", #PMTCT positive test rate indicator
                                 "dimension", "ImspTQPwCqd", "ou", # sierra leone
@@ -30,8 +31,8 @@ test_that("We can get data with GetData_Analytics", {
   # veGzholzPQm = HIV age, UOqJW6HPvvL = 15-24y, WAl0OCcIYxr = 25-49y, 
   # J5jldMd8OHv = Facility Type, uYxK4wmcPqA = CHP, EYbopBOJWsW = MCHP
   
-  response <- GetData_Analytics(dimensions, base_url = "https://play.dhis2.org/2.30/")
-  testthat::expect_equal(response$api_call, paste0("https://play.dhis2.org/2.30/api/29/analytics.json?",
+  response <- GetData_Analytics(dimensions, base_url = base_url)
+  testthat::expect_equal(response$api_call, paste0(base_url, "api/29/analytics.json?",
          "dimension=J5jldMd8OHv:uYxK4wmcPqA;EYbopBOJWsW&dimension=ou:ImspTQPwCqd;LEVEL-2",
          "&dimension=veGzholzPQm:UOqJW6HPvvL;WAl0OCcIYxr&filter=dx:vihpFUg2WTy",
          "&filter=pe:LAST_YEAR&outputIdScheme=UID&hierarchyMeta=true"))
@@ -59,7 +60,7 @@ test_that("GetCountryLevels", {
 #  DHISLogin("/users/sam/.secrets/prod.json")
   data <- GetCountryLevels(base_url = "https://www.datim.org/")
   expect_gt(NROW(data), 0)
-  expect_named(data, c("country_level", "planning_level", "prioritization_level",
+  expect_named(data, c("country_level", "prioritization_level",
                        "facility_level", "community_level",
                        "country_name", "id"))
   
@@ -155,19 +156,19 @@ httptest::stop_mocking()
 
 # This method is not yet exported
 testthat::test_that("GetSqlView", {
-  datapackcommons::DHISLogin_Play("2.29")
+  base_url <-  datapackcommons::DHISLogin_Play("2.33")
   
-  result <- GetSqlView("qMYMT0iUGkG", "valueType", "TEXT", base_url = "https://play.dhis2.org/2.29/") %>% 
+  result <- GetSqlView("qMYMT0iUGkG", "valueType", "TEXT", base_url = base_url) %>% 
     dplyr::select(valuetype) %>% 
     dplyr::distinct()
   
   testthat::expect_equal(length(result), 1)
   testthat::expect_equal(result[[1]], "TEXT")
   testthat::expect_error(
-    GetSqlView("qMYMT0iUGkG", "valueType", base_url = "https://play.dhis2.org/2.29/") 
+    GetSqlView("qMYMT0iUGkG", "valueType", base_url = base_url) 
     )
   
-  result <- GetSqlView("GCZ01m3pIRd",  base_url = "https://play.dhis2.org/2.29/")
+  result <- GetSqlView("GCZ01m3pIRd",  base_url = base_url)
   testthat::expect_gt(NROW(result), 0)
   }
   )

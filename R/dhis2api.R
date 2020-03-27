@@ -53,8 +53,8 @@ DHISLogin_Play<-function(version) {
   if(r$status != 200L){
     stop("Could not authenticate you with the server!")
   } else {
-    me <- jsonlite::fromJSON(httr::content(r,as = "text"))
-    return(TRUE)
+    r$url %>% 
+      stringr::str_remove("api/me")
   }
 }
 
@@ -129,10 +129,10 @@ GetCountryLevels <- function(base_url, countries_req = NULL){
   countries <- response %>% httr::content(.,"text") %>%
     jsonlite::fromJSON() %>%
     do.call(rbind.data.frame,.) %>%
-    dplyr::mutate(country_name = rownames(.), planning_level = planning, 
+    dplyr::mutate(country_name = rownames(.),
                   prioritization_level = prioritization, country_level = country, 
                   community_level = community, facility_level = facility) %>% 
-    dplyr::select(country_level, planning_level, prioritization_level, 
+    dplyr::select(country_level, prioritization_level, 
                   facility_level, community_level, country_name) 
 
 # If specific counties were requested filter and assert we got the correct results  
