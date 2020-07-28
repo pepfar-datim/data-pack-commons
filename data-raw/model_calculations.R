@@ -8,6 +8,7 @@ devtools::install(pkg = "/Users/sam/Documents/GitHub/datapackr",
 
 require(datapackcommons)
 require(datapackr)
+require(magrittr)
 require(tidyverse)
 require(jsonlite)
 require(lubridate)
@@ -176,6 +177,7 @@ output_location <- "/Users/sam/COP data/"
  cop_data = list()
 # get country and prioritization level
  operating_units <- datapackcommons::GetCountryLevels(base_url) %>%
+   dplyr::arrange(country_name) %>% 
    # filter(country_name >= "Nigeria") %>% 
    dplyr::filter(prioritization_level != 0) # Turkmenistan has no planning/priortization level
  priority_snu_data <- datapackr::getDataValueSets(c("dataElementGroup","period", "orgUnitGroup"),
@@ -243,7 +245,7 @@ print(lubridate::now())
 # cop_data_new=cop_data
 
 ### COMPARISAON CODE FOR TWO DIFFERENT OUTPUT FILES
-  # cop_data_old <- readRDS(file = paste0(output_location,"model_data_pack_input_20_20200310_1.rds"))
+  # cop_data_old <- readRDS(file = paste0(output_location,"model_data_pack_input_20_20200727_2.rds"))
  #   operating_units <- datapackcommons::GetCountryLevels(base_url)  # %>% filter(country_name >= "Rwanda")
 # operating_units <- tibble::tribble(~id, ~country_name,
 #                                    "Asia_Regional_Data_Pack","Asia_Regional_Data_Pack",
