@@ -75,9 +75,9 @@ ProcessDataRequiredRow <- function(data_spec, dim_item_sets){
     prefix <- paste0(component, ".")
 
     component_data <- SelectAndStripPrefix(prefix, data_spec)
-    analytics_results <- component_data[[1,"analytics_output"]][[1]]$results
-    analytics_api_call <- component_data[[1,"analytics_output"]][[1]]$api_call
-    analytics_time <- lubridate::as_datetime(component_data[[1,"analytics_output"]][[1]]$time)
+    analytics_results <- component_data[[1,"analytics_output"]]$results
+    analytics_api_call <- component_data[[1,"analytics_output"]]$api_call
+    analytics_time <- lubridate::as_datetime(component_data[[1,"analytics_output"]]$time)
 
     
     if(is.null(analytics_results)){
@@ -176,8 +176,7 @@ output_location <- "/Users/sam/COP data/"
  cop_data = list()
 # get country and prioritization level
  operating_units <- datapackcommons::GetCountryLevels(base_url) %>%
-   dplyr::arrange(country_name) %>% 
-  # filter(country_name >= "Tr") %>% 
+   # filter(country_name >= "Nigeria") %>% 
    dplyr::filter(prioritization_level != 0) # Turkmenistan has no planning/priortization level
  priority_snu_data <- datapackr::getDataValueSets(c("dataElementGroup","period", "orgUnitGroup"),
                                                         c("ofNbyQgD9xG","2019Oct","AVy8gJXym2D")) %>% 
@@ -239,12 +238,12 @@ for (ou_index in 1:NROW(operating_units)) {
   }
 
 print(lubridate::now())
-# saveRDS(datapackr::flattenDataPackModel_19(cop_data), file = paste0(output_location,"model_data_pack_input_20_20200727_2_flat.rds"))
-# saveRDS(cop_data, file = paste0(output_location,"model_data_pack_input_20_20200727_2.rds"))
+# saveRDS(datapackr::flattenDataPackModel_19(cop_data), file = paste0(output_location,"model_data_pack_input_20_20200311_1_flat.rds"))
+# saveRDS(cop_data, file = paste0(output_location,"model_data_pack_input_20_20200311_1.rds"))
 # cop_data_new=cop_data
 
 ### COMPARISAON CODE FOR TWO DIFFERENT OUTPUT FILES
-  # cop_data_old <- readRDS(file = paste0(output_location,"model_data_pack_input_20_20200319_1.rds"))
+  # cop_data_old <- readRDS(file = paste0(output_location,"model_data_pack_input_20_20200310_1.rds"))
  #   operating_units <- datapackcommons::GetCountryLevels(base_url)  # %>% filter(country_name >= "Rwanda")
 # operating_units <- tibble::tribble(~id, ~country_name,
 #                                    "Asia_Regional_Data_Pack","Asia_Regional_Data_Pack",
@@ -330,5 +329,5 @@ print(lubridate::now())
 #     }
 #   }
 # }
-    #deltas <- deltas %>% dplyr::mutate(org_unit_name =
-    #                                 datimvalidation::remapOUs(deltas$org_unit_uid,"ybg3MO3hcf4",mode_in = "id",mode_out = "name"))
+#     #deltas <- deltas %>% dplyr::mutate(org_unit_name = 
+#     #                                 datimvalidation::remapOUs(deltas$org_unit_uid,"ybg3MO3hcf4",mode_in = "id",mode_out = "name"))
