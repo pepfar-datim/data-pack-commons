@@ -1,8 +1,12 @@
-devtools::install(pkg = "/Users/sam/Documents/GitHub/data-pack-commons",
+devtools::install(pkg = "~/Documents/GitHub/data-pack-commons",
                   build = TRUE,
                   upgrade = FALSE)
 
-devtools::install(pkg = "/Users/sam/Documents/GitHub/datapackr",
+devtools::install(pkg = "~/Documents/GitHub/datapackr",
+                  build = TRUE,
+                  upgrade = FALSE)
+
+devtools::install(pkg = "~/Documents/GitHub/datimutils",
                   build = TRUE,
                   upgrade = FALSE)
 
