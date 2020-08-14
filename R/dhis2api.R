@@ -236,7 +236,7 @@ ValidateNameIdPairs <- function(names, ids, type, exact = TRUE, base_url = getOp
                           length(names) == length(ids))
   original <- tibble::tibble(name = names, id = ids) %>% unique()
   ids_csv  <-  unique(ids) %>% paste0(collapse = ",")
-  response <- datimutils::getMetadata(type,
+  response <- datimutils::getMetadata(!!type,
                                            filters = id %.in% ids_csv,
                                            fields = "id,name",
                                            base_url = base_url)
