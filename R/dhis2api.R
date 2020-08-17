@@ -154,16 +154,12 @@ GetCountryLevels <- function(base_url, countries_req = NULL){
   level_3_countries <- datimutils::getMetadata(organisationUnits,
                         name %.in% countries$country_name,
                         level %.in% "3",
-                        fields = "name,id",
-                        as_vector = T,
-                        base_url = "https://datim.org/")
+                        fields = "name,id")
   
   level_4_countries <- datimutils::getMetadata(organisationUnits,
                           name %.in% countries$country_name,
                           level %.in% "4",
-                          fields = "name,id",
-                          as_vector = T,
-                          base_url = "https://datim.org/")
+                          fields = "name,id")
   
   assertthat::assert_that(NROW(level_3_countries) + NROW(level_4_countries) == NROW(countries))
 
@@ -276,7 +272,7 @@ ValidateCodeIdPairs <- function(base_url, codes, ids, type){
                           length(codes) == length(ids))
   original <- tibble::tibble(code = codes, id = ids) %>% unique()
   ids_csv <-  ids %>% unique() %>% paste0(collapse = ",")
-  response <- datimutils::getMetadata(type,
+  response <- datimutils::getMetadata(!!type,
                                            filters = id %.in% ids_csv,
                                            fields = "id,code",
                                            base_url = base_url)
@@ -469,8 +465,7 @@ GetData_DataPack <- function(parameters,
   dimensions <- dplyr::bind_rows(dimensions, dimension_disaggs)
 
   non_mil_types_of_org_units <- 
-    datimutils::getMetadata("dimensions",
-                                 filters = id %.eq% "mINJi7rR1a6",
+    datimutils::getDimensions("mINJi7rR1a6",
                                  fields = "items[name,id]",
                                  base_url = base_url) %>%
     dplyr::filter(name != "Military") %>% 
