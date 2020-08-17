@@ -55,8 +55,7 @@ BuildDimensionList_DataPack <- function(data_element_map_item, dim_item_sets,
     # possible for military to be below general PSNU level in org hierarchy
 
     non_mil_types_of_org_units <-
-    datimutils::getMetadata("dimensions",
-                                 filters = id %.eq% "mINJi7rR1a6",
+    datimutils::getDimensions("mINJi7rR1a6",
                                  fields = "items[name,id]",
                                  base_url = base_url) %>%
     dplyr::filter(name != "Military") %>%
@@ -85,8 +84,7 @@ GetFy20tMechs <- function(base_url = getOption("baseurl")){
   #TODO modify format data for api function so I can make this call with getData_Analytics
 
     mech_codes <-
-    datimutils::getMetadata(categories,
-                                 filters = id %.eq% "SH885jaRe0o",
+    datimutils::getCategories("SH885jaRe0o",
                                  fields = "categoryOptions[id,code]",
                                  base_url = base_url) %>%
     dplyr::rename(mechanism_co_uid = "id", mechanism_code = "code")
