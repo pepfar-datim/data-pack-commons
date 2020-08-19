@@ -165,7 +165,7 @@ GetCountryLevels <- function(base_url, countries_req = NULL){
 
 # stack level 3 and l;evel 4 countries and join the uid to the main list of countries  
   rbind(level_3_countries, level_4_countries) %>% 
-    dplyr::left_join(countries, ., by = c("country_name" = "displayName")) %>% 
+    dplyr::left_join(countries, ., by = c("country_name" = "name")) %>% 
     dplyr::select(-country_name_url)
 }
 
