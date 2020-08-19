@@ -12,6 +12,7 @@ devtools::install(pkg = "~/Documents/GitHub/datimutils",
 
 require(datapackcommons)
 require(datapackr)
+require(datimutils)
 require(magrittr)
 require(tidyverse)
 require(jsonlite)
