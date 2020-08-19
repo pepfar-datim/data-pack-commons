@@ -23,6 +23,7 @@ LoadConfigFile <- function(config_path = NA) {
 }
 
 #' @export
+#'
 #' @description Login to DATIM
 #' @param config_path Path to the DHIS2 credentials
 #' @return boolean TRUE if log in succesful 
@@ -150,24 +151,21 @@ GetCountryLevels <- function(base_url, countries_req = NULL){
   assertthat::assert_that(min(countries$country_level) > 2, max(countries$country_level) < 5)
   countries$country_name_url = plyr::laply(countries$country_name, utils::URLencode, reserved = TRUE)
 
-  level_3_countries <- countries %>% dplyr::filter(country_level == "3") %>% .$country_name %>%
-    plyr::laply(utils::URLencode, reserved = TRUE) %>% 
-    paste0(collapse = ",") %>% 
-    paste0("name:in:[", .,"]") %>%  c("level:eq:3") %>% 
-    getMetadata("organisationUnits", ., 
-                base_url = base_url)
+  level_3_countries <- datimutils::getMetadata(organisationUnits,
+                        name %.in% countries$country_name,
+                        level %.in% "3",
+                        fields = "name,id")
   
-  level_4_countries <- countries %>% dplyr::filter(country_level == "4") %>% .$country_name %>%
-    plyr::laply(utils::URLencode, reserved = TRUE) %>% 
-    paste0(collapse = ",") %>% 
-    paste0("name:in:[", .,"]") %>%  c("level:eq:4") %>% 
-    getMetadata("organisationUnits", ., base_url = base_url)
+  level_4_countries <- datimutils::getMetadata(organisationUnits,
+                          name %.in% countries$country_name,
+                          level %.in% "4",
+                          fields = "name,id")
   
   assertthat::assert_that(NROW(level_3_countries) + NROW(level_4_countries) == NROW(countries))
 
 # stack level 3 and l;evel 4 countries and join the uid to the main list of countries  
   rbind(level_3_countries, level_4_countries) %>% 
-    dplyr::left_join(countries, ., by = c("country_name" = "displayName")) %>% 
+    dplyr::left_join(countries, ., by = c("country_name" = "name")) %>% 
     dplyr::select(-country_name_url)
 }
 
@@ -234,8 +232,8 @@ ValidateNameIdPairs <- function(names, ids, type, exact = TRUE, base_url = getOp
                           length(names) == length(ids))
   original <- tibble::tibble(name = names, id = ids) %>% unique()
   ids_csv  <-  unique(ids) %>% paste0(collapse = ",")
-  response <- datapackcommons::getMetadata(type, 
-                                           filters = glue::glue("id:in:[{ids_csv}]"), 
+  response <- datimutils::getMetadata(!!type,
+                                           filters = id %.in% ids_csv,
                                            fields = "id,name",
                                            base_url = base_url)
   assertthat::has_name(response, "name")
@@ -274,9 +272,9 @@ ValidateCodeIdPairs <- function(base_url, codes, ids, type){
                           length(codes) == length(ids))
   original <- tibble::tibble(code = codes, id = ids) %>% unique()
   ids_csv <-  ids %>% unique() %>% paste0(collapse = ",")
-  response <- datapackcommons::getMetadata(type, 
-                                           filters = glue::glue("id:in:[{ids_csv}]"), 
-                                           fields = "id,code", 
+  response <- datimutils::getMetadata(!!type,
+                                           filters = id %.in% ids_csv,
+                                           fields = "id,code",
                                            base_url = base_url)
   assertthat::has_name(response, "code")
   assertthat::has_name(response, "id")
@@ -306,7 +304,7 @@ GetSqlView <- function(sql_view_uid, variable_keys = NULL, variable_values = NUL
                        base_url = getOption("baseurl")){
   assertthat::assert_that(length(variable_keys) == length(variable_values))
   
-  variable_k_v_pairs = NULL
+  variable_k_v_pairs <- NULL
 # format sql variable key value pairs for api call  
   if(length(variable_keys) > 0){
     variable_k_v_pairs <- 
@@ -354,7 +352,7 @@ GetSqlView <- function(sql_view_uid, variable_keys = NULL, variable_values = NUL
 GetData_Analytics <-  function(dimensions, base_url = getOption("baseurl")){
   api_call <- paste0(base_url,  
                      "api/29/analytics.json?",
-                     datapackcommons::FormatForApi_Dimensions(dimensions, "type", 
+                     datapackcommons::FormatForApi_Dimensions(dimensions, "type",
                                                               "dim_uid", "dim_item_uid"),
                      "&outputIdScheme=UID&hierarchyMeta=true") # gives us UIDs in response                  
   response <- api_call %>% 
@@ -467,11 +465,9 @@ GetData_DataPack <- function(parameters,
   dimensions <- dplyr::bind_rows(dimensions, dimension_disaggs)
 
   non_mil_types_of_org_units <- 
-    datapackcommons::getMetadata("dimensions", 
-                                 "id:eq:mINJi7rR1a6", 
-                                 "items[name,id]",
-                                 base_url = base_url) %>% 
-    tidyr::unnest(c("items")) %>% 
+    datimutils::getDimensions("mINJi7rR1a6",
+                                 fields = "items[name,id]",
+                                 base_url = base_url) %>%
     dplyr::filter(name != "Military") %>% 
     .[["id"]]
 
