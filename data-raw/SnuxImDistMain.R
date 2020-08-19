@@ -52,14 +52,14 @@ BuildDimensionList_DataPack <- function(data_element_map_item, dim_item_sets,
   # remaining dimensions
   if (mil == FALSE) {  
     # need to select all org unit types EXCEPT military because it is 
-    # possible for military to be below general PSNU level in org hierarchy   
-    non_mil_types_of_org_units <- 
-      datapackcommons::getMetadata("dimensions", 
-                                   "id:eq:mINJi7rR1a6", 
-                                   "items[name,id]") %>% 
-      tidyr::unnest(c("items")) %>% 
-      dplyr::filter(name != "Military") %>% 
-      .[["id"]]
+    # possible for military to be below general PSNU level in org hierarchy
+
+    non_mil_types_of_org_units <-
+    datimutils::getDimensions("mINJi7rR1a6",
+                                 fields = "items[name,id]",
+                                 base_url = base_url) %>%
+    dplyr::filter(name != "Military") %>%
+    .[["id"]]
     
     tibble::tibble(type = "filter",
                    dim_item_uid = non_mil_types_of_org_units,
@@ -82,12 +82,11 @@ GetFy20tMechs <- function(base_url = getOption("baseurl")){
 
   
   #TODO modify format data for api function so I can make this call with getData_Analytics
-  
-  mech_codes <- datapackcommons::getMetadata("categories",
-                                            "id:eq:SH885jaRe0o",
-                                            "categoryOptions[id,code]") %>% 
-    .[["categoryOptions"]] %>% 
-    .[[1]] %>% 
+
+    mech_codes <-
+    datimutils::getCategories("SH885jaRe0o",
+                                 fields = "categoryOptions[id,code]",
+                                 base_url = base_url) %>%
     dplyr::rename(mechanism_co_uid = "id", mechanism_code = "code")
   
   mechs <- paste0(base_url, "api/29/analytics.csv?dimension=SH885jaRe0o&dimension=ou:OU_GROUP-cNzfcPWEGSH;ybg3MO3hcf4&filter=pe:THIS_FINANCIAL_YEAR&filter=dx:DE_GROUP-XUA8pDYjPsw&displayProperty=SHORTNAME&outputIdScheme=UID") %>% 
@@ -233,7 +232,7 @@ country_details <-  datapackcommons::GetCountryLevels(base_url)
 data <-  country_details[["id"]] %>% 
   purrr::map(process_country, mechs)
 data <- setNames(data,country_details$id)
-# readr::write_rds(data,"/Users/sam/COP data/PSNUxIM_20200819.rds", compress = c("gz"))
-data_old=readr::read_rds("/Users/sam/COP data/PSNUxIM_20200729.rds")
+#readr::write_rds(data,"/Users/sam/COP data/PSNUxIM_20200819.rds", compress = c("gz"))
+data_old=readr::read_rds("/Users/sam/COP data/PSNUxIM_20200819.rds")
 purrr::map(names(data), ~dplyr::all_equal(data[[.x]],data_old[[.x]])) %>% 
   setNames(country_details$country_name)
