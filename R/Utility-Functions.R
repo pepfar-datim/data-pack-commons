@@ -130,11 +130,16 @@ MapDimToOptions <- function(data, items_to_options, allocate){
 #' @description returns character verctor of dataset uids for a given FY {"19", "20", "21"}
 #' and type {"targets", "results"}
 #' @param fiscal_year character - one of {"19", "20", "21"} 
-#' @param type character - one of {"targets", "results"}
-#' @return returns a character verstor of the related dataset uids
+#' @param type character - one of {"targets", "results", "subnat_impatt"}
+#' @return returns a character vector of the related dataset uids
 #'
 getDatasetUids <-  function(fiscal_year, type){
-  if(fiscal_year == "21" & type == "targets") {
+  if(fiscal_year == "20" & type == "results") {
+    c("qzVASYuaIey", # MER Results: Community Based
+      "BPEyzcDb8fT", # MER Results: Community Based - DoD ONLY
+      "jKdHXpBfWop", # MER Results: Facility Based
+      "em1U5x9hhXh")  # MER Results: Facility Based - DoD ONLY
+  } else if(fiscal_year == "21" & type == "targets") {
     c("Pmc0yYAIi1t", # MER Target Setting: PSNU (Facility and Community Combined)
       "s1sxJuqXsvV")  # MER Target Setting: PSNU (Facility and Community Combined) - DoD ONLY)
   } else if( fiscal_year == "21" & type == "subnat_impatt") {
