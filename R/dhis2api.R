@@ -420,17 +420,17 @@ GetData_DataPack <- function(parameters,
   assertthat::assert_that(NROW(parameters) == 1)
   
   
-  dimensions <- tibble::tribble(~type, ~dim_item_uid, ~dim_uid,
-                                "dimension", parameters$dx_id[[1]], "dx",
-                                "dimension", parameters$pe_iso[[1]], "pe")
+  # dimensions <- tibble::tribble(~type, ~dim_item_uid, ~dim_uid,
+  #                               "dimension", parameters$dx_id[[1]], "dx",
+  #                               "dimension", parameters$pe_iso[[1]], "pe")
   
 # add rows to dimensions for org units
-  if (!is.null(org_units)) {  
-    dimensions <- purrr::reduce(org_units, 
-                  ~ rbind(.x, 
-                          c("dimension", .y, "ou")), 
-                  .init = dimensions)
-    }    
+  # if (!is.null(org_units)) {  
+  #   dimensions <- purrr::reduce(org_units, 
+  #                 ~ rbind(.x, 
+  #                         c("dimension", .y, "ou")), 
+  #                 .init = dimensions)
+    # }    
   
 # add rows to dimensions for org unit groups
   # if (!is.null(org_unit_groups)) {
@@ -450,55 +450,82 @@ GetData_DataPack <- function(parameters,
   #                 .init = dimensions)
   # }
   
+disaggs <- dim_item_sets %>% 
+  dplyr::filter(model_sets %in% c(parameters$age_set,
+                                  parameters$sex_set,
+                                  parameters$kp_set,
+                                  parameters$other_disagg_set)) %>%
+  dplyr::select(dim_item_uid, dim_uid) %>%
+  unique()  %>%
+  stats::na.omit() %>%  # there are some items in dim item sets with no source dimension
+  dplyr::group_by(dim_uid) %>% 
+  dplyr::summarise(dim_item_uids = list(dim_item_uid)) %>% 
+  dplyr::ungroup()
 
-  
-  dimension_disaggs <- dim_item_sets %>% dplyr::mutate(type = "dimension") %>%  
-    dplyr::filter(model_sets %in% c(parameters$age_set,
-                                    parameters$sex_set,
-                                    parameters$kp_set,
-                                    parameters$other_disagg_set)) %>% 
-    dplyr::select(type, dim_item_uid, dim_uid) %>%
-    unique()  %>% 
-    stats::na.omit() # there are some items in dim item sets with no source dimension
+disaggs <-   purrr::map2_chr(disaggs$dim_uid, .y = disaggs$dim_item_uids,
+                  ~ (!!.x) %.d% .y)
   
   
-  dimensions <- dplyr::bind_rows(dimensions, dimension_disaggs)
+  
+# dimension_disaggs <- dim_item_sets %>% dplyr::mutate(type = "dimension") %>%  
+#   dplyr::filter(model_sets %in% c(parameters$age_set,
+#                                   parameters$sex_set,
+#                                   parameters$kp_set,
+#                                   parameters$other_disagg_set)) %>% 
+#   dplyr::select(type, dim_item_uid, dim_uid) %>%
+#   unique()  %>% 
+#   stats::na.omit() # there are some items in dim item sets with no source dimension
 
-  non_mil_types_of_org_units <- 
-    datimutils::getDimensions("mINJi7rR1a6",
-                                 fields = "items[name,id]",
-                                 base_url = base_url) %>%
-    dplyr::filter(name != "Military") %>% 
+types_of_org_units <- datimutils::getDimensions("mINJi7rR1a6",
+                                                fields = "items[name,id]",
+                                                base_url = base_url)
+
+  non_mil_types_of_org_units <- dplyr::filter(types_of_org_units, name != "Military") %>% 
+    .[["id"]]
+  
+  mil_type_of_org_units <- dplyr::filter(types_of_org_units, name == "Military") %>% 
     .[["id"]]
 
-  results_psnu <-  tibble::tibble(type = "filter",
-                                  dim_item_uid = non_mil_types_of_org_units,
-                                  dim_uid = "mINJi7rR1a6") %>%
-    rbind(c("dimension", "OU_GROUP-AVy8gJXym2D", "ou")) %>%  # COP Prioritization SNU) dimensions
-    rbind(dimensions) %>% 
-    datapackcommons::GetData_Analytics() 
+  results_psnu <- datimutils::getAnalytics(dx = parameters$dx_id[[1]],
+                             pe = parameters$pe_iso[[1]],
+                             ou = c(org_units, "OU_GROUP-AVy8gJXym2D"),
+                             "mINJi7rR1a6" %.f% non_mil_types_of_org_units,
+                             disaggs)
   
-  api_call <- results_psnu[["api_call"]]
-  results_psnu <-  results_psnu[["results"]]
+    # results_psnu <-  
+    # datapackcommons::GetData_Analytics(dx = parameters$dx_id[[1]],
+    #                                    pe = parameters$pe_iso[[1]],
+    #                                    ou = c(org_units, OU_GROUP-AVy8gJXym2D),
+    #                                    fForm("mINJi7rR1a6", non_mil_types_of_org_units),
+    #                                    disaggs
+    #                                    )
+    # 
+  api_call <- NULL #results_psnu[["api_call"]]
+#  results_psnu <-  results_psnu[["results"]]
   
   results_mil <- NULL
   if(include_military){    
-    results_mil <- tibble::tribble(~type, ~dim_item_uid, ~dim_uid,
-                                   "dimension", "OU_GROUP-nwQbMeALRjL", "ou") %>%  # military
-    rbind(dimensions) %>% 
-    datapackcommons::GetData_Analytics() %>% 
-    .[["results"]]
-}                                       
+    results_mil <- 
+      datimutils::getAnalytics(dx = parameters$dx_id[[1]],
+                               pe = parameters$pe_iso[[1]],
+                               ou = c(org_units, "OU_GROUP-nwQbMeALRjL"),
+                               disaggs)
+  }                                       
+#   if(include_military){    
+#     results_mil <- tibble::tribble(~type, ~dim_item_uid, ~dim_uid,
+#                                    "dimension", "OU_GROUP-nwQbMeALRjL", "ou") %>%  # military
+#     rbind(dimensions) %>% 
+#     datapackcommons::GetData_Analytics() %>% 
+#     .[["results"]]
+# }                                       
   
   if(is.null(results_psnu) && is.null(results_mil)){ # nothing to return
     results <- NULL
   } else if (is.null(results_mil)) { # psnu but no mil data
-    results <- dplyr::select(results_psnu, -ou_hierarchy)
+    results <- results_psnu
   } else {
-    results <- dplyr::bind_rows(results_psnu, results_mil) %>% 
-      dplyr::select(-ou_hierarchy)
+    results <- dplyr::bind_rows(results_psnu, results_mil)
   }
-  
   
   return(list("api_call" = api_call,
               "time" = lubridate::now("UTC"),
