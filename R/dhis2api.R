@@ -490,7 +490,8 @@ types_of_org_units <- datimutils::getDimensions("mINJi7rR1a6",
                              pe = parameters$pe_iso[[1]],
                              ou = c(org_units, "OU_GROUP-AVy8gJXym2D"),
                              "mINJi7rR1a6" %.f% non_mil_types_of_org_units,
-                             disaggs)
+                             disaggs,
+                             retry = 10)
   
     # results_psnu <-  
     # datapackcommons::GetData_Analytics(dx = parameters$dx_id[[1]],
@@ -509,7 +510,8 @@ types_of_org_units <- datimutils::getDimensions("mINJi7rR1a6",
       datimutils::getAnalytics(dx = parameters$dx_id[[1]],
                                pe = parameters$pe_iso[[1]],
                                ou = c(org_units, "OU_GROUP-nwQbMeALRjL"),
-                               disaggs)
+                               disaggs,
+                               retry = 5)
   }                                       
 #   if(include_military){    
 #     results_mil <- tibble::tribble(~type, ~dim_item_uid, ~dim_uid,
