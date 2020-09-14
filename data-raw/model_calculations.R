@@ -88,13 +88,14 @@ ProcessDataRequiredRow <- function(data_spec, dim_item_sets){
     
     if(is.null(analytics_results)){
       # adding empty version of minimum output columns to cop_data
-      return_list[[component]][["processed"]] <-      tibble::tibble(indicator_uid = character(), 
-                                                                     org_unit_uid = character(),
-                                                                     period = character(),
-                                                                     age_option_uid = character(), 
-                                                                     sex_option_uid = character(), 
-                                                                     kp_option_uid = character(),
-                                                                     value = double())
+      return_list[[component]][["processed"]] <-      
+        tibble::tibble(indicator_uid = character(), 
+                       org_unit_uid = character(),
+                       period = character(),
+                       age_option_uid = character(), 
+                       sex_option_uid = character(), 
+                       kp_option_uid = character(),
+                       value = double())
       next
     }
     
@@ -174,7 +175,7 @@ ProcessDataRequiredRow <- function(data_spec, dim_item_sets){
   }
 }
 
-DHISLogin("/users/sam/.secrets/datim.json")
+datimutils::loginToDATIM("~/.secrets/triage.json")
 base_url <- getOption("baseurl")
 repo_path <- "/users/sam/Documents/GitHub/COP-19-Target-Setting/"
 output_location <- "/Users/sam/COP data/"
@@ -250,7 +251,7 @@ print(lubridate::now())
 # cop_data_new=cop_data
 
 ### COMPARISAON CODE FOR TWO DIFFERENT OUTPUT FILES
-  # cop_data_old <- readRDS(file = paste0(output_location,"model_data_pack_input_20_20200819_1.rds"))
+  # cop_data_old <- readRDS(file = paste0(output_location,"model_data_pack_input_20_20200909_1.rds"))
  #   operating_units <- datapackcommons::GetCountryLevels(base_url)  # %>% filter(country_name >= "Rwanda")
 # operating_units <- tibble::tribble(~id, ~country_name,
 #                                    "Asia_Regional_Data_Pack","Asia_Regional_Data_Pack",

@@ -9,10 +9,10 @@ getDatasetUids(fiscal_year, type)
 \arguments{
 \item{fiscal_year}{character - one of {"19", "20", "21"}}
 
-\item{type}{character - one of {"targets", "results"}}
+\item{type}{character - one of {"targets", "results", "subnat_impatt"}}
 }
 \value{
-returns a character verstor of the related dataset uids
+returns a character vector of the related dataset uids
 }
 \description{
 returns character verctor of dataset uids for a given FY {"19", "20", "21"}

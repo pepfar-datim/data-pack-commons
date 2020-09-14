@@ -6,7 +6,8 @@
 \title{Input to model calculation. One row per required data pack column (from DATIM).
 Includes parameters (dimensions, items) for calling the indicators, and the key to 
 dimension_items_sets for mapping to category options for output.}
-\format{A data frame with these variables:
+\format{
+A data frame with these variables:
 \describe{
   \item{data_pack_sheet}{Datapack Excel sheet label - from datapack schems}
   \item{data_pack_code}{given identifier to map output to a specific column in datapack - from
@@ -48,7 +49,8 @@ dimension_items_sets for mapping to category options for output.}
   \item{B.add_dim_1_items}{see A.add_dim_1_items}
   \item{B.add_dim_1_items_uid}{see A.add_dim_1_items_uid}
   \item{calculation}{the formula for combiingthe A and B indicator values}
-}}
+}
+}
 \source{
 COP19 systems team
 }

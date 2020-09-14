@@ -1,49 +1,3 @@
-# devtools::check("/Users/sam/Documents/GitHub/data-pack-commons")
-# model_data_pack_input_20190201_2
-
-#' @title LoadConfig(config_path)
-#'
-#' @description Loads a JSON configuration file to access a DHIS2 instance
-#' @param config_path Path to the DHIS2 credentials file
-#' @return A parsed list of the configuration file. 
-#'
-LoadConfigFile <- function(config_path = NA) {
-  #Load from a file
-  if (!is.na(config_path)) {
-    if (file.access(config_path, mode = 4) == -1) {
-      stop(paste("Cannot read configuration located at",config_path))
-    }
-
-    dhis_config <- jsonlite::fromJSON(config_path)
-    options("baseurl" = dhis_config$dhis$baseurl)
-    options("config" = config_path)
-    return(dhis_config)
-    } else {
-      stop("You must specify a credentials file!") }
-}
-
-#' @export
-#'
-#' @description Login to DATIM
-#' @param config_path Path to the DHIS2 credentials
-#' @return boolean TRUE if log in succesful 
-DHISLogin<-function(config_path = NA) {
-  
-  dhis_config<-LoadConfigFile(config_path)
-  url <- URLencode(URL = paste0(getOption("baseurl"), "api/me"))
-  #Logging in here will give us a cookie to reuse
-  r <- httr::GET(url ,
-                 httr::authenticate(dhis_config$dhis$username, dhis_config$dhis$password),
-                 httr::timeout(60))
-  if(r$status != 200L){
-    stop("Could not authenticate you with the server!")
-  } else {
-    me <- jsonlite::fromJSON(httr::content(r,as = "text"))
-    options("organisationUnit" = me$organisationUnits$id)
-    return(TRUE)
-  }
-}
-
 #' @export
 DHISLogin_Play<-function(version) {
   url <- URLencode(URL = paste0("https://play.dhis2.org/", version, "/api/me"))
@@ -59,34 +13,9 @@ DHISLogin_Play<-function(version) {
   }
 }
 
-# #' http_was_redirected
-# #'
-# #' @param response an httr response object, e.g. from a call to httr::GET()
-# #'
-# #' @return logical of length 1 indicating whether or not any redirect happened 
-# #'   during the HTTP request
-# #'
-# #' @export
-# #'
-# http_was_redirected <- 
-#   function(response){
-#     str(response)
-#     # extract status 
-#     status <- 
-#       vapply(
-#         X         = response$all_headers, 
-#         FUN       = `[[`, 
-#         FUN.VALUE = integer(1),
-#         "status"
-#       )
-#     
-#     # check status and return
-#     any(status >= 300 & status < 400)
-#   }
-
 #' @export
 #' @title RetryAPI(api_url, content_type, max_attempts)
-#' 
+#'
 #' @description Submits specified api request up to specified maximum times
 #' stopping when expected content type is returned with 200 response
 #' @param api_url string - full url for web request
@@ -99,12 +28,12 @@ RetryAPI <- function(api_url, content_type, max_attempts = 3, timeout = 180){
   for(i in 1:max_attempts){
     try({
       response <- httr::GET(api_url, httr::timeout(timeout))
-      if (response$status_code == 200L && 
-          response$url == api_url && 
+      if (response$status_code == 200L &&
+          response$url == api_url &&
           httr::http_type(response) == content_type){
         return(response)
       }
-      if (response$status_code >= 300 && 
+      if (response$status_code >= 300 &&
           response$status_code < 500){ #client error or redirect
         break
       }
@@ -167,48 +96,6 @@ GetCountryLevels <- function(base_url, countries_req = NULL){
   rbind(level_3_countries, level_4_countries) %>% 
     dplyr::left_join(countries, ., by = c("country_name" = "name")) %>% 
     dplyr::select(-country_name_url)
-}
-
-#' @export
-#' @title getMetadata(end_point, filters, fields)
-#' 
-#' @description General utility to get metadata details from DATIM
-#' @param end_point string - api endpoint for the metadata of interest e.g. dataElements, 
-#' organisationUnits
-#' @param filters - list of strings - the parameters for  the DHIS2 metadata filter, 
-#' e.g. c("id:eq:1234","name:in:Kenya,Rwanda")
-#' @param fields - string for the fields to return structured as DHIS 2 expects,
-#' e.g. "name,id,items[name,id]"
-#' @param base_url string - base address of instance (text before api/ in URL)
-#' @return list of metadata details
-getMetadata <- function(end_point, 
-                        filters = NULL, 
-                        fields = NULL,
-                        base_url = getOption("baseurl")) {
-  
-  url_filters=""
-  url_fields=""
-  
-  if (!is.null(filters)) {
-    url_filters <- filters %>% paste0("&filter=", ., collapse = "") %>% URLencode()
-  }
-  
-  if (!is.null(fields)) {
-    url_fields <- paste0("&fields=", paste(fields,sep="",collapse=",")) %>% URLencode()
-  }
-  
-  web_api_call <- paste0(base_url, "api/", end_point, ".json?paging=false",
-                         url_filters,
-                         url_fields)
-    r <- web_api_call %>% RetryAPI("application/json", 20)
-    # httr::GET()
-    assertthat::are_equal(r$status_code, 200L)
-#    if (r$status_code == 200L) {
-    httr::content(r, "text")   %>%
-    jsonlite::fromJSON() %>%
-    rlist::list.extract(.,end_point) #} else {
-    #  stop("Could not retreive endpoint")
-    #}
 }
 
 #' @export
@@ -322,71 +209,6 @@ GetSqlView <- function(sql_view_uid, variable_keys = NULL, variable_values = NUL
 }
 
 #' @export
-#' @title GetData_Analytics <-  function(dimensions, base_url)
-#' 
-#' @description calls the analytics endpoint using the details in the dimensions parameter
-#' dataframe 
-#' @param dimensions data frame - must contain columns named "type", "dim_uid", 
-#' and "dim_item_uid". Type column contains "filter" or "dimension". dim_uid contains
-#' the uid of a dimension or one of the special dimension types e.g. dx, pe, ou, co. 
-#' Column dim_item_uid contains the uid of the dimension item to use which can also be
-#' a "special" uid such as DE_GROUP-zhdJiWlPvCz  
-#' @param base_url string - base address of instance (text before api/ in URL)
-#' @return data frame with the rows of the response
-#'
-#' @example
-#'  dimensions_sample <- tibble::tribble(~type, ~dim_item_uid, ~dim_uid,
-#' "filter", "vihpFUg2WTy", "dx", #PMTCT positive test rate indicator
-#' "dimension", "ImspTQPwCqd", "ou", # sierra leone
-#' "dimension", "LEVEL-2", "ou", 
-#' "filter", "LAST_YEAR", "pe",
-#' "dimension", "UOqJW6HPvvL", "veGzholzPQm",
-#' "dimension", "WAl0OCcIYxr", "veGzholzPQm",
-#' "dimension", "uYxK4wmcPqA", "J5jldMd8OHv",
-#' "dimension", "EYbopBOJWsW", "J5jldMd8OHv")
-#' # veGzholzPQm = HIV age, UOqJW6HPvvL = 15-24y, WAl0OCcIYxr = 25-49y, 
-#' # J5jldMd8OHv = Facility Type, uYxK4wmcPqA = CHP, EYbopBOJWsW = MCHP
-#'   datapackcommons::DHISLogin_Play("2.29")
-#'   GetData_Analytics(dimensions_sample, "https://play.dhis2.org/2.29/")
-
-GetData_Analytics <-  function(dimensions, base_url = getOption("baseurl")){
-  api_call <- paste0(base_url,  
-                     "api/29/analytics.json?",
-                     datapackcommons::FormatForApi_Dimensions(dimensions, "type",
-                                                              "dim_uid", "dim_item_uid"),
-                     "&outputIdScheme=UID&hierarchyMeta=true") # gives us UIDs in response                  
-  response <- api_call %>% 
-    utils::URLencode()  %>%
-    RetryAPI("application/json", 20)
-  
-  content <- response %>% 
-    httr::content(., "text") %>% 
-    jsonlite::fromJSON()
-  
-  my_data <- content$rows
-  if(length(dim(my_data)) != 2){ # empty table returned
-    return(list(results = NULL, 
-                api_call = response$url)
-           )
-  } 
-  colnames(my_data) <- content$headers$column
-  my_data <- tibble::as_tibble(my_data)
-
-  # list column(vector) of the org hiearchy including the org unit itself
-  # added to the data in a mutate below
-  ou_hierarchy <- purrr::map_chr(my_data[["Organisation unit"]], 
-                                 function(x) paste0(content$metaData$ouHierarchy[[x]], "/", x)) %>% 
-    stringr::str_split("/")
-  
-  my_data <-
-    dplyr::mutate(my_data, Value = as.numeric(Value), ou_hierarchy = ou_hierarchy)
-  return(list(results = my_data, 
-              api_call = response$url)
-         )
-}
-
-
-#' @export
 #' @title GetData_DataPack
 #' @param parameters paramemters for calling an indicator 
 #' from datapackcommons::data_required
@@ -398,16 +220,6 @@ GetData_Analytics <-  function(dimensions, base_url = getOption("baseurl")){
 #' @return  A list with $time = time the function was called, 
 #' $api_call = api call used, and 
 #' $results = the data returnd by the analytics call
-#'
-# indicator_parameters <- datapackcommons::StackPrefixedCols(data_required, c("A.", "B.")) %>%
-#   unique() %>%
-#   filter(!is.na(dx_id))
-#  parameters = slice(indicator_parameters, 1)
-# # dim_item_sets = datapackcommons::dim_item_sets
-#  org_units= "XtxUYCsDWrR"
-# # org_unit_levels=NULL
-#  GetData_DataPack(parameters=parameters, org_units = org_units)
-
 GetData_DataPack <- function(parameters, 
                              org_units,
                              include_military,
@@ -418,37 +230,6 @@ GetData_DataPack <- function(parameters,
   #                        assertthat::is.string(periods))
   
   assertthat::assert_that(NROW(parameters) == 1)
-  
-  
-  # dimensions <- tibble::tribble(~type, ~dim_item_uid, ~dim_uid,
-  #                               "dimension", parameters$dx_id[[1]], "dx",
-  #                               "dimension", parameters$pe_iso[[1]], "pe")
-  
-# add rows to dimensions for org units
-  # if (!is.null(org_units)) {  
-  #   dimensions <- purrr::reduce(org_units, 
-  #                 ~ rbind(.x, 
-  #                         c("dimension", .y, "ou")), 
-  #                 .init = dimensions)
-    # }    
-  
-# add rows to dimensions for org unit groups
-  # if (!is.null(org_unit_groups)) {
-  #   dimensions <- purrr::reduce(org_unit_groups,
-  #                 ~ rbind(.x,
-  #                         c(
-  #                           "dimension", paste0("OU_GROUP-", .y), "ou"
-  #                         )),
-  #                 .init = dimensions)
-  # }
-  
-  # if (!is.null(org_unit_levels)) {
-  #   # add rows to dimensions for levels
-  #   dimensions <- purrr::reduce(levels,
-  #                 ~ rbind(.x,
-  #                         c("dimension", paste0("LEVEL-", .y), "ou")),
-  #                 .init = dimensions)
-  # }
   
 disaggs <- dim_item_sets %>% 
   dplyr::filter(model_sets %in% c(parameters$age_set,
@@ -464,21 +245,11 @@ disaggs <- dim_item_sets %>%
 
 disaggs <-   purrr::map2_chr(disaggs$dim_uid, .y = disaggs$dim_item_uids,
                   ~ (!!.x) %.d% .y)
-  
-  
-  
-# dimension_disaggs <- dim_item_sets %>% dplyr::mutate(type = "dimension") %>%  
-#   dplyr::filter(model_sets %in% c(parameters$age_set,
-#                                   parameters$sex_set,
-#                                   parameters$kp_set,
-#                                   parameters$other_disagg_set)) %>% 
-#   dplyr::select(type, dim_item_uid, dim_uid) %>%
-#   unique()  %>% 
-#   stats::na.omit() # there are some items in dim item sets with no source dimension
-
+ 
 types_of_org_units <- datimutils::getDimensions("mINJi7rR1a6",
                                                 fields = "items[name,id]",
-                                                base_url = base_url)
+                                                base_url = base_url,
+                                                retry = 5)
 
   non_mil_types_of_org_units <- dplyr::filter(types_of_org_units, name != "Military") %>% 
     .[["id"]]
@@ -493,17 +264,6 @@ types_of_org_units <- datimutils::getDimensions("mINJi7rR1a6",
                              disaggs,
                              retry = 10)
   
-    # results_psnu <-  
-    # datapackcommons::GetData_Analytics(dx = parameters$dx_id[[1]],
-    #                                    pe = parameters$pe_iso[[1]],
-    #                                    ou = c(org_units, OU_GROUP-AVy8gJXym2D),
-    #                                    fForm("mINJi7rR1a6", non_mil_types_of_org_units),
-    #                                    disaggs
-    #                                    )
-    # 
-  api_call <- NULL #results_psnu[["api_call"]]
-#  results_psnu <-  results_psnu[["results"]]
-  
   results_mil <- NULL
   if(include_military){    
     results_mil <- 
@@ -513,14 +273,7 @@ types_of_org_units <- datimutils::getDimensions("mINJi7rR1a6",
                                disaggs,
                                retry = 5)
   }                                       
-#   if(include_military){    
-#     results_mil <- tibble::tribble(~type, ~dim_item_uid, ~dim_uid,
-#                                    "dimension", "OU_GROUP-nwQbMeALRjL", "ou") %>%  # military
-#     rbind(dimensions) %>% 
-#     datapackcommons::GetData_Analytics() %>% 
-#     .[["results"]]
-# }                                       
-  
+
   if(is.null(results_psnu) && is.null(results_mil)){ # nothing to return
     results <- NULL
   } else if (is.null(results_mil)) { # psnu but no mil data
@@ -529,8 +282,7 @@ types_of_org_units <- datimutils::getDimensions("mINJi7rR1a6",
     results <- dplyr::bind_rows(results_psnu, results_mil)
   }
   
-  return(list("api_call" = api_call,
+  return(list("api_call" = NULL,
               "time" = lubridate::now("UTC"),
               "results" = results))
-
   }

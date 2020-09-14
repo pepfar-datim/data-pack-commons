@@ -11,6 +11,7 @@ Encoding: UTF-8
 LazyData: true
 Imports: assertthat,
     datimvalidation,
+    datimutils,
     doMC,
     dplyr,
     glue,
@@ -28,4 +29,4 @@ Imports: assertthat,
 Suggests: 
     httptest,
     testthat
-RoxygenNote: 7.0.2
+RoxygenNote: 7.1.1
