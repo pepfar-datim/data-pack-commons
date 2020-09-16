@@ -1,6 +1,8 @@
+require(magrittr)
 require(tidyverse)
 require(datapackcommons)
 require(assertthat)
+require(datimutils)
 
 ValidateDimItems <-
   function(data, dim_uid_colname, item_name_colname, item_uid_colname, base_url) {
