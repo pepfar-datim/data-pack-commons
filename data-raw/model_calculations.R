@@ -174,7 +174,7 @@ ProcessDataRequiredRow <- function(data_spec, dim_item_sets){
   }
 }
 
-DHISLogin("/users/sam/.secrets/datim.json")
+DHISLogin("/users/sam/.secrets/cop.json")
 base_url <- getOption("baseurl")
 repo_path <- "/users/sam/Documents/GitHub/COP-19-Target-Setting/"
 output_location <- "/Users/sam/COP data/COP21 Update/"
@@ -237,8 +237,8 @@ for (ou_index in 1:NROW(operating_units)) {
   }
 
 # dropping any impatt.priority_snu data that isn't raw data 
-  cop_data[[operating_unit$id]][["Prioritization"]][["IMPATT.PRIORITY_SNU.T_1"]][["results"]] <-
-    cop_data[[operating_unit$id]][["Prioritization"]][["IMPATT.PRIORITY_SNU.T_1"]][["results"]] %>% 
+  cop_data[[operating_unit$id]][["Prioritization"]][["PRIORITY_SNU.T_1"]][["results"]] <-
+    cop_data[[operating_unit$id]][["Prioritization"]][["PRIORITY_SNU.T_1"]][["results"]] %>% 
     dplyr::inner_join(priority_snu_data)
   
 # TODO bind rows to create a flat file
@@ -246,7 +246,7 @@ for (ou_index in 1:NROW(operating_units)) {
 
 print(lubridate::now())
 # saveRDS(datapackr::flattenDataPackModel_19(cop_data), file = paste0(output_location,"model_data_pack_input_21_20200917_1_flat.rds"))
-# saveRDS(cop_data, file = paste0(output_location,"model_data_pack_input_21_20200917_1.rds"))
+# saveRDS(cop_data, file = paste0(output_location,"model_data_pack_input_21_20200928_1.rds"))
 # cop_data_new=cop_data
 
 ### COMPARISAON CODE FOR TWO DIFFERENT OUTPUT FILES
@@ -336,5 +336,5 @@ print(lubridate::now())
 #     }
 #   }
 # }
-#     #deltas <- deltas %>% dplyr::mutate(org_unit_name = 
+#     #deltas <- deltas %>% dplyr::mutate(org_unit_name =
 #     #                                 datimvalidation::remapOUs(deltas$org_unit_uid,"ybg3MO3hcf4",mode_in = "id",mode_out = "name"))
