@@ -183,7 +183,7 @@ output_location <- "/Users/sam/COP data/COP21 Update/"
 # get country and prioritization level
  operating_units <- datapackcommons::GetCountryLevels(base_url) %>%
    dplyr::arrange(country_name) %>% 
-   # filter(country_name >= "Nigeria") %>% 
+    #filter(country_name >= "Zim") %>% 
    dplyr::filter(prioritization_level != 0) # Turkmenistan has no planning/priortization level
  priority_snu_data <- datapackr::getDataValueSets(c("dataElementGroup","period", "orgUnitGroup"),
                                                         c("ofNbyQgD9xG","2019Oct","AVy8gJXym2D")) %>% 
@@ -237,20 +237,20 @@ for (ou_index in 1:NROW(operating_units)) {
   }
 
 # dropping any impatt.priority_snu data that isn't raw data 
-  cop_data[[operating_unit$id]][["Prioritization"]][["PRIORITY_SNU.T_1"]][["results"]] <-
-    cop_data[[operating_unit$id]][["Prioritization"]][["PRIORITY_SNU.T_1"]][["results"]] %>% 
+  cop_data[[operating_unit$id]][["Prioritization"]][["IMPATT.PRIORITY_SNU.T_1"]][["results"]] <-
+    cop_data[[operating_unit$id]][["Prioritization"]][["IMPATT.PRIORITY_SNU.T_1"]][["results"]] %>% 
     dplyr::inner_join(priority_snu_data)
   
 # TODO bind rows to create a flat file
   }
 
 print(lubridate::now())
-# saveRDS(datapackr::flattenDataPackModel_19(cop_data), file = paste0(output_location,"model_data_pack_input_21_20201116_1_flat.rds"))
-# saveRDS(cop_data, file = paste0(output_location,"model_data_pack_input_21_20201116_1.rds"))
+# saveRDS(datapackr::flattenDataPackModel_19(cop_data), file = paste0(output_location,"model_data_pack_input_21_20201118_1_flat.rds"))
+# saveRDS(cop_data, file = paste0(output_location,"model_data_pack_input_21_20201118_1.rds"))
 # cop_data_new=cop_data
 
 ### COMPARISAON CODE FOR TWO DIFFERENT OUTPUT FILES
-  # cop_data_old <- readRDS(file = paste0(output_location,"model_data_pack_input_21_20201116_1.rds"))
+  # cop_data_old <- readRDS(file = paste0(output_location,"model_data_pack_input_21_20201118_1.rds"))
  #   operating_units <- datapackcommons::GetCountryLevels(base_url)  # %>% filter(country_name >= "Rwanda")
 # operating_units <- tibble::tribble(~id, ~country_name,
 #                                    "Asia_Regional_Data_Pack","Asia_Regional_Data_Pack",
@@ -275,7 +275,7 @@ print(lubridate::now())
 #     if (is.null(cop_data_old[[operating_unit]][[data_spec$data_pack_sheet]][[data_spec$data_pack_code]][["results"]]) &
 #         !is.null(cop_data_new[[operating_unit]][[data_spec$data_pack_sheet]][[data_spec$data_pack_code]][["results"]])) {
 #       print("no old but new")
-#       print(data_spec)
+#       str(data_spec)
 #       print(cop_data_new[[operating_unit]][[data_spec$data_pack_sheet]][[data_spec$data_pack_code]][["results"]])
 #       next
 #     }
@@ -283,7 +283,7 @@ print(lubridate::now())
 #         is.null(cop_data_new[[operating_unit]][[data_spec$data_pack_sheet]][[data_spec$data_pack_code]][["results"]])) {
 #       print("no new but old")
 #       print(data_spec)
-#       print(cop_data_old[[operating_unit]][[data_spec$data_pack_sheet]][[data_spec$data_pack_code]][["results"]])
+#       str(cop_data_old[[operating_unit]][[data_spec$data_pack_sheet]][[data_spec$data_pack_code]][["results"]])
 #       next
 #     }
 #     old_results = cop_data_old[[operating_unit]][[data_spec$data_pack_sheet]][[data_spec$data_pack_code]][["results"]] %>%
@@ -327,7 +327,7 @@ print(lubridate::now())
 #     if (verdict != TRUE) {
 #       old_results <- old_results %>% rename(value.old = value)
 #       new_results <- new_results %>% rename(value.new = value)
-#       print(data_spec$data_pack_code)
+#       str(data_spec$data_pack_code)
 #       print(verdict)
 #       deltas = full_join(old_results, new_results) %>%
 #         filter(value.new != value.old |
