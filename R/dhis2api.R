@@ -234,8 +234,7 @@ ValidateNameIdPairs <- function(names, ids, type, exact = TRUE, base_url = getOp
   ids_csv  <-  unique(ids) %>% paste0(collapse = ",")
   response <- datimutils::getMetadata(!!type,
                                            filters = id %.in% ids_csv,
-                                           fields = "id,name",
-                                           base_url = base_url)
+                                           fields = "id,name")
   assertthat::has_name(response, "name")
   assertthat::has_name(response, "id")
   if (exact == TRUE){
@@ -274,8 +273,7 @@ ValidateCodeIdPairs <- function(base_url, codes, ids, type){
   ids_csv <-  ids %>% unique() %>% paste0(collapse = ",")
   response <- datimutils::getMetadata(!!type,
                                            filters = id %.in% ids_csv,
-                                           fields = "id,code",
-                                           base_url = base_url)
+                                           fields = "id,code")
   assertthat::has_name(response, "code")
   assertthat::has_name(response, "id")
   result <-  dplyr::all_equal(original, response)
@@ -466,8 +464,7 @@ GetData_DataPack <- function(parameters,
 
   non_mil_types_of_org_units <- 
     datimutils::getDimensions("mINJi7rR1a6",
-                                 fields = "items[name,id]",
-                                 base_url = base_url) %>%
+                                 fields = "items[name,id]") %>%
     dplyr::filter(name != "Military") %>% 
     .[["id"]]
 

@@ -174,7 +174,7 @@ ProcessDataRequiredRow <- function(data_spec, dim_item_sets){
   }
 }
 
-DHISLogin("/users/sam/.secrets/cop.json")
+datapackr::loginToDATIM("/users/sam/.secrets/cop.json")
 base_url <- getOption("baseurl")
 repo_path <- "/users/sam/Documents/GitHub/COP-19-Target-Setting/"
 output_location <- "/Users/sam/COP data/COP21 Update/"
@@ -183,7 +183,7 @@ output_location <- "/Users/sam/COP data/COP21 Update/"
 # get country and prioritization level
  operating_units <- datapackcommons::GetCountryLevels(base_url) %>%
    dplyr::arrange(country_name) %>% 
-    #filter(country_name >= "Zim") %>% 
+    #filter(country_name <= "E") %>% 
    dplyr::filter(prioritization_level != 0) # Turkmenistan has no planning/priortization level
  priority_snu_data <- datapackr::getDataValueSets(c("dataElementGroup","period", "orgUnitGroup"),
                                                         c("ofNbyQgD9xG","2019Oct","AVy8gJXym2D")) %>% 
