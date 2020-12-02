@@ -174,7 +174,7 @@ ProcessDataRequiredRow <- function(data_spec, dim_item_sets){
   }
 }
 
-DHISLogin("/users/sam/.secrets/cop.json")
+datapackr::loginToDATIM("/users/sam/.secrets/cop.json")
 base_url <- getOption("baseurl")
 repo_path <- "/users/sam/Documents/GitHub/COP-19-Target-Setting/"
 output_location <- "/Users/sam/COP data/COP21 Update/"
@@ -183,11 +183,15 @@ output_location <- "/Users/sam/COP data/COP21 Update/"
 # get country and prioritization level
  operating_units <- datapackcommons::GetCountryLevels(base_url) %>%
    dplyr::arrange(country_name) %>% 
-   # filter(country_name >= "Nigeria") %>% 
+  #  filter(country_name == "South Africa") %>% 
    dplyr::filter(prioritization_level != 0) # Turkmenistan has no planning/priortization level
  priority_snu_data <- datapackr::getDataValueSets(c("dataElementGroup","period", "orgUnitGroup"),
                                                         c("ofNbyQgD9xG","2019Oct","AVy8gJXym2D")) %>% 
    dplyr::select(org_unit_uid = org_unit, value)
+ 
+ dreams_snus <- datimutils::getOrgUnitGroups("mRRlkbZolDR", # Dreams SNUs
+                                             fields = "organisationUnits[id,path]") %>% 
+   dplyr::mutate(value = 1, org_unit_uid = id)
  
 # operating_units <- tibble::tribble(
 # ~ country_name, ~ id, ~ prioritization_level,
@@ -211,7 +215,8 @@ for (ou_index in 1:NROW(operating_units)) {
     unique() %>%
     filter(!is.na(dx_id))
 
-  doMC::registerDoMC(cores =3) # or however many cores you have access to
+  doMC::registerDoMC(cores = 2) # or however many cores you have access to
+  
   include_military <- dplyr::if_else(operating_unit$country_name == "Philippines",
                  FALSE,
                  TRUE)
@@ -237,20 +242,25 @@ for (ou_index in 1:NROW(operating_units)) {
   }
 
 # dropping any impatt.priority_snu data that isn't raw data 
-  cop_data[[operating_unit$id]][["Prioritization"]][["PRIORITY_SNU.T_1"]][["results"]] <-
-    cop_data[[operating_unit$id]][["Prioritization"]][["PRIORITY_SNU.T_1"]][["results"]] %>% 
+  cop_data[[operating_unit$id]][["Prioritization"]][["IMPATT.PRIORITY_SNU.T_1"]][["results"]] <-
+    cop_data[[operating_unit$id]][["Prioritization"]][["IMPATT.PRIORITY_SNU.T_1"]][["results"]] %>% 
     dplyr::inner_join(priority_snu_data)
+  
+  cop_data[[operating_unit$id]][["AGYW"]][["DREAMS_SNU.Flag"]][["results"]] <- 
+    dplyr::filter(dreams_snus, stringr::str_detect(path, operating_unit$id)) %>% 
+    dplyr::select(org_unit_uid, value)
+  
   
 # TODO bind rows to create a flat file
   }
 
 print(lubridate::now())
-# saveRDS(datapackr::flattenDataPackModel_19(cop_data), file = paste0(output_location,"model_data_pack_input_21_20201103_1_flat.rds"))
-# saveRDS(cop_data, file = paste0(output_location,"model_data_pack_input_21_20201103_1.rds"))
+# saveRDS(flattenDataPackModel_21(cop_data), file = paste0(output_location,"model_data_pack_input_21_20201202_1_flat.rds"))
+# saveRDS(cop_data, file = paste0(output_location,"model_data_pack_input_21_20201202_1.rds"))
 # cop_data_new=cop_data
 
 ### COMPARISAON CODE FOR TWO DIFFERENT OUTPUT FILES
-  # cop_data_old <- readRDS(file = paste0(output_location,"model_data_pack_input_21_20201006_1.rds"))
+  # cop_data_old <- readRDS(file = paste0(output_location,"model_data_pack_input_21_20201202_1.rds"))
  #   operating_units <- datapackcommons::GetCountryLevels(base_url)  # %>% filter(country_name >= "Rwanda")
 # operating_units <- tibble::tribble(~id, ~country_name,
 #                                    "Asia_Regional_Data_Pack","Asia_Regional_Data_Pack",
@@ -275,7 +285,7 @@ print(lubridate::now())
 #     if (is.null(cop_data_old[[operating_unit]][[data_spec$data_pack_sheet]][[data_spec$data_pack_code]][["results"]]) &
 #         !is.null(cop_data_new[[operating_unit]][[data_spec$data_pack_sheet]][[data_spec$data_pack_code]][["results"]])) {
 #       print("no old but new")
-#       print(data_spec)
+#       str(data_spec)
 #       print(cop_data_new[[operating_unit]][[data_spec$data_pack_sheet]][[data_spec$data_pack_code]][["results"]])
 #       next
 #     }
@@ -283,7 +293,7 @@ print(lubridate::now())
 #         is.null(cop_data_new[[operating_unit]][[data_spec$data_pack_sheet]][[data_spec$data_pack_code]][["results"]])) {
 #       print("no new but old")
 #       print(data_spec)
-#       print(cop_data_old[[operating_unit]][[data_spec$data_pack_sheet]][[data_spec$data_pack_code]][["results"]])
+#       str(cop_data_old[[operating_unit]][[data_spec$data_pack_sheet]][[data_spec$data_pack_code]][["results"]])
 #       next
 #     }
 #     old_results = cop_data_old[[operating_unit]][[data_spec$data_pack_sheet]][[data_spec$data_pack_code]][["results"]] %>%
@@ -327,7 +337,7 @@ print(lubridate::now())
 #     if (verdict != TRUE) {
 #       old_results <- old_results %>% rename(value.old = value)
 #       new_results <- new_results %>% rename(value.new = value)
-#       print(data_spec$data_pack_code)
+#       str(data_spec$data_pack_code)
 #       print(verdict)
 #       deltas = full_join(old_results, new_results) %>%
 #         filter(value.new != value.old |
