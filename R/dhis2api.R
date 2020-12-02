@@ -355,7 +355,7 @@ GetData_Analytics <-  function(dimensions, base_url = getOption("baseurl")){
                      "&outputIdScheme=UID&hierarchyMeta=true") # gives us UIDs in response                  
   response <- api_call %>% 
     utils::URLencode()  %>%
-    RetryAPI("application/json", 20)
+    RetryAPI("application/json", 3)
   
   content <- response %>% 
     httr::content(., "text") %>% 
@@ -461,6 +461,32 @@ GetData_DataPack <- function(parameters,
   
   
   dimensions <- dplyr::bind_rows(dimensions, dimension_disaggs)
+  
+# Implemented for dreams SNUs for AGYW_PREV   
+  if(!is.na(parameters$custom_ou)){
+    results_custom <-  
+      try({tibble::tibble(type = "dimension",
+                          dim_item_uid = parameters$custom_ou,
+                          dim_uid = "ou") %>%
+          rbind(dimensions) %>% 
+          datapackcommons::GetData_Analytics()}, 
+          silent = TRUE) 
+
+    if(is.error(results_custom) || 
+       is.null(results_custom[["results"]])){ # nothing to return
+      
+      api_call <- NULL
+      results <- NULL
+    } else {
+      api_call <- results_custom[["api_call"]]
+      results_custom <-  results_custom[["results"]]
+      results <- results_custom %>% 
+        dplyr::select(-ou_hierarchy)
+    }
+    return(list("api_call" = api_call,
+                "time" = lubridate::now("UTC"),
+                "results" = results))
+  }
 
   non_mil_types_of_org_units <- 
     datimutils::getDimensions("mINJi7rR1a6",
@@ -468,6 +494,7 @@ GetData_DataPack <- function(parameters,
     dplyr::filter(name != "Military") %>% 
     .[["id"]]
 
+  
   results_psnu <-  tibble::tibble(type = "filter",
                                   dim_item_uid = non_mil_types_of_org_units,
                                   dim_uid = "mINJi7rR1a6") %>%
