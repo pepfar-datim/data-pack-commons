@@ -95,7 +95,7 @@ DHISLogin_Play<-function(version) {
 #' @param timeout integer - maximum time to wait for API response
 #' @return  full api response
 #'
-RetryAPI <- function(api_url, content_type, max_attempts = 3, timeout = 180){
+RetryAPI <- function(api_url, content_type, max_attempts = 3, timeout = 300){
   for(i in 1:max_attempts){
     try({
       response <- httr::GET(api_url, httr::timeout(timeout))
@@ -200,7 +200,7 @@ getMetadata <- function(end_point,
   web_api_call <- paste0(base_url, "api/", end_point, ".json?paging=false",
                          url_filters,
                          url_fields)
-    r <- web_api_call %>% RetryAPI("application/json", 20)
+    r <- web_api_call %>% RetryAPI("application/json", 5)
     # httr::GET()
     assertthat::are_equal(r$status_code, 200L)
 #    if (r$status_code == 200L) {

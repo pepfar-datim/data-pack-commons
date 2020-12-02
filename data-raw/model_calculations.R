@@ -183,11 +183,15 @@ output_location <- "/Users/sam/COP data/COP21 Update/"
 # get country and prioritization level
  operating_units <- datapackcommons::GetCountryLevels(base_url) %>%
    dplyr::arrange(country_name) %>% 
-    #filter(country_name <= "E") %>% 
+  #  filter(country_name == "South Africa") %>% 
    dplyr::filter(prioritization_level != 0) # Turkmenistan has no planning/priortization level
  priority_snu_data <- datapackr::getDataValueSets(c("dataElementGroup","period", "orgUnitGroup"),
                                                         c("ofNbyQgD9xG","2019Oct","AVy8gJXym2D")) %>% 
    dplyr::select(org_unit_uid = org_unit, value)
+ 
+ dreams_snus <- datimutils::getOrgUnitGroups("mRRlkbZolDR", # Dreams SNUs
+                                             fields = "organisationUnits[id,path]") %>% 
+   dplyr::mutate(value = 1, org_unit_uid = id)
  
 # operating_units <- tibble::tribble(
 # ~ country_name, ~ id, ~ prioritization_level,
@@ -211,7 +215,8 @@ for (ou_index in 1:NROW(operating_units)) {
     unique() %>%
     filter(!is.na(dx_id))
 
-  doMC::registerDoMC(cores =3) # or however many cores you have access to
+  doMC::registerDoMC(cores = 2) # or however many cores you have access to
+  
   include_military <- dplyr::if_else(operating_unit$country_name == "Philippines",
                  FALSE,
                  TRUE)
@@ -241,16 +246,21 @@ for (ou_index in 1:NROW(operating_units)) {
     cop_data[[operating_unit$id]][["Prioritization"]][["IMPATT.PRIORITY_SNU.T_1"]][["results"]] %>% 
     dplyr::inner_join(priority_snu_data)
   
+  cop_data[[operating_unit$id]][["AGYW"]][["DREAMS_SNU.Flag"]][["results"]] <- 
+    dplyr::filter(dreams_snus, stringr::str_detect(path, operating_unit$id)) %>% 
+    dplyr::select(org_unit_uid, value)
+  
+  
 # TODO bind rows to create a flat file
   }
 
 print(lubridate::now())
-# saveRDS(datapackr::flattenDataPackModel_19(cop_data), file = paste0(output_location,"model_data_pack_input_21_20201130_1_flat.rds"))
-# saveRDS(cop_data, file = paste0(output_location,"model_data_pack_input_21_20201130_1.rds"))
+# saveRDS(flattenDataPackModel_21(cop_data), file = paste0(output_location,"model_data_pack_input_21_20201202_1_flat.rds"))
+# saveRDS(cop_data, file = paste0(output_location,"model_data_pack_input_21_20201202_1.rds"))
 # cop_data_new=cop_data
 
 ### COMPARISAON CODE FOR TWO DIFFERENT OUTPUT FILES
-  # cop_data_old <- readRDS(file = paste0(output_location,"model_data_pack_input_21_20201123_1.rds"))
+  # cop_data_old <- readRDS(file = paste0(output_location,"model_data_pack_input_21_20201202_1.rds"))
  #   operating_units <- datapackcommons::GetCountryLevels(base_url)  # %>% filter(country_name >= "Rwanda")
 # operating_units <- tibble::tribble(~id, ~country_name,
 #                                    "Asia_Regional_Data_Pack","Asia_Regional_Data_Pack",
