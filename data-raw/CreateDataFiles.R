@@ -129,16 +129,16 @@ data_required <-
 
 ValidateDataRequired(data_required, base_url)
 
-Map20Tto21T <- 
-  readr::read_csv("./data-raw/snu_x_im_distribution_configuration/20Tto21TMap.csv", 
+Map21Tto22T <- 
+  readr::read_csv("./data-raw/snu_x_im_distribution_configuration/21Tto22TMap.csv", 
                   col_types = readr::cols(.default = "c"),
                   na = c("NA")) 
 
-ValidateMapT_1toT(Map20Tto21T, dim_item_sets, base_url)
+ValidateMapT_1toT(Map21Tto22T, dim_item_sets, base_url)
 
 usethis::use_data(dim_item_sets, overwrite = TRUE, compress = "gzip")
 usethis::use_data(data_required, overwrite = TRUE, compress = "gzip")
-usethis::use_data(Map20Tto21T, overwrite = TRUE, compress = "gzip")
+usethis::use_data(Map21Tto22T, overwrite = TRUE, compress = "gzip")
 
 setwd(wd)
 
