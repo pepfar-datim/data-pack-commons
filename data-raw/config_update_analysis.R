@@ -57,7 +57,7 @@ parseIndicators <- function(indicator_uids){
 
 doMC::registerDoMC(cores = 5)
 
-datapackcommons::DHISLogin("~/.secrets/datim.json")
+datapackr::loginToDATIM("~/.secrets/cop.json")
 base_url <- getOption("baseurl")
 data_required <- datapackcommons::data_required
 
