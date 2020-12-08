@@ -36,8 +36,6 @@ HTS_RECENT.STI.T,DE_GROUP-WTq0quAW1mf,HTS_RECENT,twyHxdQVjMC,Numerator,Som9NRMQq
 HTS_TST.VCT.Neg.T,DE_GROUP-WTq0quAW1mf,HTS_TST,f5IPTM7mieH,Numerator,Som9NRMQqV7,VCT/Age/Sex/Result,dcaYk7TXk4E,2020Oct,1-50+,F/M,NA,tr_neg,distribute
 HTS_TST.VCT.Pos.T,DE_GROUP-WTq0quAW1mf,HTS_TST,f5IPTM7mieH,Numerator,Som9NRMQqV7,VCT/Age/Sex/Result,dcaYk7TXk4E,2020Oct,1-50+,F/M,NA,tr_pos,distribute
 HTS_RECENT.VCT.T,DE_GROUP-WTq0quAW1mf,HTS_RECENT,twyHxdQVjMC,Numerator,Som9NRMQqV7,VCT/Age/Sex/HIVStatus,vYZLPZAuv8A,2020Oct,15-50+,F/M,NA,NA,distribute
-HTS_TST.VCT.Neg.T,DE_GROUP-WTq0quAW1mf,HTS_TST,f5IPTM7mieH,Numerator,Som9NRMQqV7,VCTMod/Age/Sex/Result,HlEDNiLt5hq,2020Oct,1-50+,F/M,NA,tr_neg,distribute
-HTS_TST.VCT.Pos.T,DE_GROUP-WTq0quAW1mf,HTS_TST,f5IPTM7mieH,Numerator,Som9NRMQqV7,VCTMod/Age/Sex/Result,HlEDNiLt5hq,2020Oct,1-50+,F/M,NA,tr_pos,distribute
 HTS_TST.KP.Neg.T,DE_GROUP-WTq0quAW1mf,HTS_TST,f5IPTM7mieH,Numerator,Som9NRMQqV7,KeyPop/Result,UkvLXoUn0wG,2020Oct,NA,NA,kp1,tr_neg,distribute
 HTS_TST.KP.Pos.T,DE_GROUP-WTq0quAW1mf,HTS_TST,f5IPTM7mieH,Numerator,Som9NRMQqV7,KeyPop/Result,UkvLXoUn0wG,2020Oct,NA,NA,kp1,tr_pos,distribute
 HTS_SELF.KP.T,DE_GROUP-WTq0quAW1mf,HTS_SELF,hGUykTtC0Xm,Numerator,Som9NRMQqV7,KeyPop,OoC9KSMqBms,2020Oct,NA,NA,kp1,NA,distribute
