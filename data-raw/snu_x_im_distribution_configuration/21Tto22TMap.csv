@@ -73,11 +73,11 @@ HTS_RECENT.TB.T,DE_GROUP-WTq0quAW1mf,HTS_RECENT,twyHxdQVjMC,Numerator,Som9NRMQqV
 TX_CURR.T,DE_GROUP-WTq0quAW1mf,TX_CURR,MvszPTQrUhy,Numerator,Som9NRMQqV7,Age/Sex/HIVStatus,pxz2gGSIQhG,2020Oct,<1-50+,F/M,NA,NA,distribute
 TX_NEW.T,DE_GROUP-WTq0quAW1mf,TX_NEW,udCop657yzi,Numerator,Som9NRMQqV7,Age/Sex/HIVStatus,pxz2gGSIQhG,2020Oct,<1-50+,F/M,NA,NA,distribute
 TX_NEW.KP.T,DE_GROUP-WTq0quAW1mf,TX_NEW,udCop657yzi,Numerator,Som9NRMQqV7,KeyPop/HIVStatus,oLVJbdHt6ou,2020Oct,NA,NA,kp1,NA,distribute
-TX_CURR.KP.T,DE_GROUP-WTq0quAW1mf,TX_NEW,udCop657yzi,Numerator,Som9NRMQqV7,KeyPop/HIVStatus,oLVJbdHt6ou,2020Oct,NA,NA,kp1,NA,distribute
-TX_PVLS.D.KP.T,DE_GROUP-WTq0quAW1mf,TX_NEW,udCop657yzi,Numerator,Som9NRMQqV7,KeyPop/HIVStatus,oLVJbdHt6ou,2020Oct,NA,NA,kp1,NA,distribute
-TX_PVLS.N.KP.T,DE_GROUP-WTq0quAW1mf,TX_NEW,udCop657yzi,Numerator,Som9NRMQqV7,KeyPop/HIVStatus,oLVJbdHt6ou,2020Oct,NA,NA,kp1,NA,distribute
+TX_CURR.KP.T,DE_GROUP-WTq0quAW1mf,TX_CURR,MvszPTQrUhy,Numerator,Som9NRMQqV7,KeyPop/HIVStatus,oLVJbdHt6ou,2020Oct,NA,NA,kp1,NA,distribute
+TX_PVLS.D.KP.T,DE_GROUP-WTq0quAW1mf,TX_PVLS,bZOF8bon1dD,Denominator,QpNj0nSuEhD,KeyPop/HIVStatus,oLVJbdHt6ou,2020Oct,NA,NA,kp1,NA,distribute
+TX_PVLS.N.KP.T,DE_GROUP-WTq0quAW1mf,TX_PVLS,bZOF8bon1dD,Numerator,Som9NRMQqV7,KeyPop/HIVStatus,oLVJbdHt6ou,2020Oct,NA,NA,kp1,NA,distribute
 TX_PVLS.D.Routine.T,DE_GROUP-WTq0quAW1mf,TX_PVLS,bZOF8bon1dD,Denominator,QpNj0nSuEhD,Age/Sex/Indication/HIVStatus,PxGprLSHtqv,2020Oct,<1-50+,F/M,NA,ti_routine,distribute
-TX_PVLS.N.Routine.T,DE_GROUP-WTq0quAW1mf,TX_PVLS,bZOF8bon1dD,Denominator,QpNj0nSuEhD,Age/Sex/Indication/HIVStatus,PxGprLSHtqv,2020Oct,<1-50+,F/M,NA,ti_routine,distribute
+TX_PVLS.N.Routine.T,DE_GROUP-WTq0quAW1mf,TX_PVLS,bZOF8bon1dD,Numerator,Som9NRMQqV7,Age/Sex/Indication/HIVStatus,PxGprLSHtqv,2020Oct,<1-50+,F/M,NA,ti_routine,distribute
 TX_TB.D.Already.Neg.T,DE_GROUP-WTq0quAW1mf,TX_TB,tOiM2uxcnkj,Denominator,QpNj0nSuEhD,Age/Sex/TBScreen/NewExistingART/HIVStatus,xzHStH1s4R1,2020Oct,<15/>15,F/M,NA,tb_n_art_a,distribute
 TX_TB.D.New.Neg.T,DE_GROUP-WTq0quAW1mf,TX_TB,tOiM2uxcnkj,Denominator,QpNj0nSuEhD,Age/Sex/TBScreen/NewExistingART/HIVStatus,xzHStH1s4R1,2020Oct,<15/>15,F/M,NA,tb_n_art_n,distribute
 TX_TB.D.Already.Pos.T,DE_GROUP-WTq0quAW1mf,TX_TB,tOiM2uxcnkj,Denominator,QpNj0nSuEhD,Age/Sex/TBScreen/NewExistingART/HIVStatus,xzHStH1s4R1,2020Oct,<15/>15,F/M,NA,tb_p_art_a,distribute
