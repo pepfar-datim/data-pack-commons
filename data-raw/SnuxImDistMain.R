@@ -56,8 +56,7 @@ BuildDimensionList_DataPack <- function(data_element_map_item, dim_item_sets,
 
     non_mil_types_of_org_units <-
     datimutils::getDimensions("mINJi7rR1a6",
-                                 fields = "items[name,id]",
-                                 base_url = base_url) %>%
+                                 fields = "items[name,id]") %>%
     dplyr::filter(name != "Military") %>%
     .[["id"]]
     
@@ -78,18 +77,17 @@ BuildDimensionList_DataPack <- function(data_element_map_item, dim_item_sets,
     }
 }
 
-GetFy20tMechs <- function(base_url = getOption("baseurl")){
+GetFy21tMechs <- function(){
 
   
   #TODO modify format data for api function so I can make this call with getData_Analytics
 
     mech_codes <-
     datimutils::getCategories("SH885jaRe0o",
-                                 fields = "categoryOptions[id,code]",
-                                 base_url = base_url) %>%
+                                 fields = "categoryOptions[id,code]") %>%
     dplyr::rename(mechanism_co_uid = "id", mechanism_code = "code")
   
-  mechs <- paste0(base_url, "api/29/analytics.csv?dimension=SH885jaRe0o&dimension=ou:OU_GROUP-cNzfcPWEGSH;ybg3MO3hcf4&filter=pe:THIS_FINANCIAL_YEAR&filter=dx:DE_GROUP-XUA8pDYjPsw&displayProperty=SHORTNAME&outputIdScheme=UID") %>% 
+  mechs <- paste0(base_url, "api/29/analytics.csv?dimension=SH885jaRe0o&dimension=ou:OU_GROUP-cNzfcPWEGSH;ybg3MO3hcf4&filter=pe:THIS_FINANCIAL_YEAR&filter=dx:DE_GROUP-WTq0quAW1mf&displayProperty=SHORTNAME&outputIdScheme=UID") %>% 
     datapackcommons::RetryAPI("application/csv") %>% 
     httr::content() %>% 
     readr::read_csv() %>%
@@ -187,8 +185,8 @@ process_country <- function(country_uid, mechs){
   # will have a historic distribution for each target, DSD/TA, and site given psnu/IM
   # alply uses parallel processing here 
   
-  doMC::registerDoMC(cores = 5)
-  data <-  plyr::adply(datapackcommons::Map20Tto21T,
+  doMC::registerDoMC(cores = 3)
+  data <-  plyr::adply(datapackcommons::Map21Tto22T,
                      1, getSnuxIm_density,
                      datapackcommons::dim_item_sets,
                      country_uid,
@@ -222,17 +220,21 @@ devtools::install(pkg = "/Users/sam/Documents/GitHub/data-pack-commons",
                   upgrade = FALSE)
 
 library(datapackcommons)
-
+library(datimutils)
 library(dplyr)
-DHISLogin("/users/sam/.secrets/datim.json")
+datapackr::loginToDATIM("~/.secrets/cop.json")
 base_url <- getOption("baseurl")
-mechs = GetFy20tMechs()
-country_details <-  datapackcommons::GetCountryLevels(base_url) 
+mechs = GetFy21tMechs()
+country_details <-  datapackcommons::GetCountryLevels(base_url) %>% 
+#   dplyr::filter(country_name == "South Africa") %>% 
+  dplyr::arrange(country_name)
 
 data <-  country_details[["id"]] %>% 
   purrr::map(process_country, mechs)
 data <- setNames(data,country_details$id)
-#readr::write_rds(data,"/Users/sam/COP data/PSNUxIM_20200819.rds", compress = c("gz"))
-data_old=readr::read_rds("/Users/sam/COP data/PSNUxIM_20200819.rds")
+#readr::write_rds(data,"/Users/sam/COP data/PSNUxIM_20201208_2.rds", compress = c("gz"))
+data_old=readr::read_rds("/Users/sam/COP data/PSNUxIM_20201209_1.rds")
 purrr::map(names(data), ~dplyr::all_equal(data[[.x]],data_old[[.x]])) %>% 
   setNames(country_details$country_name)
+purrr::map(names(data), ~dplyr::setdiff(data[[.x]],data_old[[.x]])%>% .$indicator_code %>% unique()) %>% 
+  setNames(country_details$country_name) 

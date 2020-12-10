@@ -142,6 +142,10 @@ getDatasetUids <-  function(fiscal_year, type){
   } else if(fiscal_year == "21" & type == "targets") {
     c("Pmc0yYAIi1t", # MER Target Setting: PSNU (Facility and Community Combined)
       "s1sxJuqXsvV")  # MER Target Setting: PSNU (Facility and Community Combined) - DoD ONLY)
+  } else if(fiscal_year == "22" & type == "targets") {
+    c("wvnouBMuLuE", # Host Country Targets: DREAMS (USG),
+      "YfZot37BbTm", # MER Target Setting: PSNU (Facility and Community Combined)
+      "cihuwjoY5xP")  # MER Target Setting: PSNU (Facility and Community Combined) - DoD ONLY)
   } else if( fiscal_year == "21" & type == "subnat_impatt") {
     c("jxnjnBAb1VD", # Planning Attributes: COP Prioritization SNU 
       "j7jzezIhgPj") # Host Country Targets: COP Prioritization SNU (USG)

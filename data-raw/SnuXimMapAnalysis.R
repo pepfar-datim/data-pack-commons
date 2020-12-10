@@ -1,4 +1,5 @@
 library(datapackr)
+library(magrittr)
 library(tidyverse)
 
 getStandardDataElementGroups <- function(base_url = getOption("baseurl")){
@@ -34,7 +35,7 @@ getDataSets_Detailed <- function(dataset_uids) {
     dplyr::left_join(getStandardDataElementGroups())
 }
 
-secrets <- "/Users/sam/.secrets/testmer2.json"
+secrets <- "/Users/sam/.secrets/cop.json"
 datapackr::loginToDATIM(secrets)
 base_url <- getOption("baseurl")
 
@@ -48,26 +49,31 @@ fy_20_t <- datapackcommons::getDatasetUids("20", "targets") %>%
   dplyr::select(-dataset) %>% 
   distinct()
 
-fy_19_t <- datapackcommons::getDatasetUids("19", "targets") %>% 
+fy_22_t <- datapackcommons::getDatasetUids("22", "targets") %>% 
   getDataSets_Detailed() %>% 
   dplyr::select(-dataset) %>% 
   distinct()
 
 
-dif_19T_21T <- dplyr::setdiff(fy_21_t, fy_19_t)
-dif_20T_21T <- dplyr::setdiff(fy_21_t, fy_20_t)
+dif_20T_22T <- dplyr::setdiff(fy_22_t, fy_20_t)
+dif_21T_22T <- dplyr::setdiff(fy_22_t, fy_21_t)
 
-match_19T_21T <- dplyr::intersect(fy_21_t, fy_19_t)
-match_20T_21T <- dplyr::intersect(fy_21_t, fy_20_t)
+match_20T_22T <- dplyr::intersect(fy_22_t, fy_20_t)
+match_21T_22T <- dplyr::intersect(fy_22_t, fy_21_t)
 
 
-schema <- datapackr::cop20_data_pack_schema %>% dplyr::filter(col_type == "target"
+schema <- datapackr::cop21_data_pack_schema %>% dplyr::filter(col_type == "target"
                                                                         & dataset == "mer")
 
-dplyr::setdiff(c(schema$dataelement_dsd, schema$dataelement_ta), fy_21_t$dataelementuid)
-dplyr::setdiff(fy_21_t$dataelementuid, c(schema$dataelement_dsd, schema$dataelement_ta))
+dplyr::setdiff(c(schema$dataelement_dsd, schema$dataelement_ta), fy_21_t$data_element_uid)
+dplyr::setdiff(fy_21_t$data_element_uid, c(schema$dataelement_dsd, schema$dataelement_ta))
 
+map <- datapackcommons::Map21Tto22T
 
+temp =dplyr::full_join(fy_22_t,map, by = c(technical_area_uid ="technical_area_uid",
+                                     disaggregation_type_uid = "disagg_type_uid",
+                                     numerator_denominator_uid = "num_or_den_uid"))
+names(map)
 ##standard_de_groups <- datapackcommons::GetSqlView("vqetpxYlX1c") ## jason.datim
  ## test mer 2
 
