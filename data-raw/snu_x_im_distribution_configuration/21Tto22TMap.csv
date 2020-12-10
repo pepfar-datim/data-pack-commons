@@ -59,8 +59,8 @@ PrEP_CURR.T,DE_GROUP-WTq0quAW1mf,PrEP_CURR,pkZRNlMgL89,Numerator,Som9NRMQqV7,Age
 PrEP_CURR.KP.T,DE_GROUP-WTq0quAW1mf,PrEP_CURR,pkZRNlMgL89,Numerator,Som9NRMQqV7,KeyPop,OoC9KSMqBms,2020Oct,NA,NA,kp1,NA,distribute
 PrEP_NEW.T,DE_GROUP-WTq0quAW1mf,PrEP_NEW,gma5vVZgK49,Numerator,Som9NRMQqV7,Age/Sex,Qbz6SrpmJ1y,2020Oct,15-50+,F/M,NA,NA,distribute
 PrEP_NEW.KP.T,DE_GROUP-WTq0quAW1mf,PrEP_NEW,gma5vVZgK49,Numerator,Som9NRMQqV7,KeyPop,OoC9KSMqBms,2020Oct,NA,NA,kp1,NA,distribute
-TB_ART.Already.T,DE_GROUP-WTq0quAW1mf,TB_ART,Z6TU9Os82Yw,Numerator,Som9NRMQqV7,Age/Sex/NewExistingArt/HIVStatus,EICV6m2Ay7l,2020Oct,<1-50+,F/M,NA,NA,distribute
-TB_ART.New.T,DE_GROUP-WTq0quAW1mf,TB_ART,Z6TU9Os82Yw,Numerator,Som9NRMQqV7,Age/Sex/NewExistingArt/HIVStatus,EICV6m2Ay7l,2020Oct,<1-50+,F/M,NA,NA,distribute
+TB_ART.Already.T,DE_GROUP-WTq0quAW1mf,TB_ART,Z6TU9Os82Yw,Numerator,Som9NRMQqV7,Age/Sex/NewExistingArt/HIVStatus,EICV6m2Ay7l,2020Oct,<1-50+,F/M,NA,as_already,distribute
+TB_ART.New.T,DE_GROUP-WTq0quAW1mf,TB_ART,Z6TU9Os82Yw,Numerator,Som9NRMQqV7,Age/Sex/NewExistingArt/HIVStatus,EICV6m2Ay7l,2020Oct,<1-50+,F/M,NA,as_new,distribute
 TB_PREV.D.Already.T,DE_GROUP-WTq0quAW1mf,TB_PREV,FfxbuFZVAM5,Denominator,QpNj0nSuEhD,Age/Sex/NewExistingArt/HIVStatus,EICV6m2Ay7l,2020Oct,<15/>15,F/M,NA,as_already,distribute
 TB_PREV.D.New.T,DE_GROUP-WTq0quAW1mf,TB_PREV,FfxbuFZVAM5,Denominator,QpNj0nSuEhD,Age/Sex/NewExistingArt/HIVStatus,EICV6m2Ay7l,2020Oct,<15/>15,F/M,NA,as_new,distribute
 TB_PREV.N.Already.T,DE_GROUP-WTq0quAW1mf,TB_PREV,FfxbuFZVAM5,Numerator,Som9NRMQqV7,Age/Sex/NewExistingArt/HIVStatus,EICV6m2Ay7l,2020Oct,<15/>15,F/M,NA,as_already,distribute
