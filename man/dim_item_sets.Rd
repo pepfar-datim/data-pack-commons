@@ -5,7 +5,8 @@
 \alias{dim_item_sets}
 \title{Input to model calculation gives the mapping between dimension items and category options or the
 raw category option combination.}
-\format{A data frame with these variables:
+\format{
+A data frame with these variables:
 \describe{
   \item{dim_uid}{Dimension uid used when running indicators, co in the case of a category option combination}
   \item{dim_name}{Name for dimension - for documentation not used directly in model calculations}
@@ -29,7 +30,8 @@ raw category option combination.}
   \item{model_sets}{Semicolon seperated list of keys used for grouping the dimension item to 
   category option mappings into sets for calling the analytics api and calculating the model 
   output.}
-}}
+}
+}
 \source{
 COP19 systems team
 }

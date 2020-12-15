@@ -4,7 +4,7 @@
 \alias{RetryAPI}
 \title{RetryAPI(api_url, content_type, max_attempts)}
 \usage{
-RetryAPI(api_url, content_type, max_attempts = 3, timeout = 180)
+RetryAPI(api_url, content_type, max_attempts = 3, timeout = 300)
 }
 \arguments{
 \item{api_url}{string - full url for web request}

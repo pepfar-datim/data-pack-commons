@@ -232,8 +232,8 @@ country_details <-  datapackcommons::GetCountryLevels(base_url) %>%
 data <-  country_details[["id"]] %>% 
   purrr::map(process_country, mechs)
 data <- setNames(data,country_details$id)
-#readr::write_rds(data,"/Users/sam/COP data/PSNUxIM_20201210_1.rds", compress = c("gz"))
-data_old=readr::read_rds("/Users/sam/COP data/PSNUxIM_20201210_1.rds")
+#readr::write_rds(data,"/Users/sam/COP data/PSNUxIM_202012115_1.rds", compress = c("gz"))
+data_old=readr::read_rds("/Users/sam/COP data/PSNUxIM_20201215_1.rds")
 purrr::map(names(data), ~dplyr::all_equal(data[[.x]],data_old[[.x]])) %>% 
   setNames(country_details$country_name)
 purrr::map(names(data), ~dplyr::setdiff(data[[.x]],data_old[[.x]])%>% .$indicator_code %>% unique()) %>% 
