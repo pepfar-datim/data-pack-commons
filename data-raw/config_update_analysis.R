@@ -1,14 +1,148 @@
+library(magrittr)
 library(tidyverse)
 require(foreach)
-doMC::registerDoMC(cores = 5)
+library(datimutils)
 
-datapackcommons::DHISLogin("/users/sam/.secrets/datim.json")
-base_url <- getOption("baseurl")
 get_indicator_details <- function(uid){
   datapackcommons::getMetadata("indicators",
                                glue::glue("id:eq:{uid}"),
                                "name, id, numerator, denominator") 
 }
+
+getFormDetails <- function(fiscal_yy_int, stream){
+  datapackcommons::getDatasetUids(fiscal_yy_int,stream) %>% 
+    purrr::map(~datapackcommons::GetSqlView("DotdxKrNZxG", 
+                                            c("dataSets"), 
+                                            c(.x))) %>% 
+    dplyr::bind_rows() %>%
+    dplyr::select(-dataset) %>% 
+    distinct()
+}
+
+parseIndicators <- function(indicator_uids){
+  indicator_parts <- datimutils::getIndicators(indicator_uids,
+                                               fields = "id,numerator,denominator") %>% 
+    dplyr::mutate(numerator_addends = 
+                    stringr::str_extract_all(numerator,
+                                             "#\\{[a-zA-Z0-9]{11}([a-zA-Z0-9\\.]{12})?\\}"),
+                  numerator_addends = purrr::map(numerator_addends,
+                                                 stringr::str_remove_all, "#\\{"),
+                  numerator_addends = purrr::map(numerator_addends, 
+                                                 stringr::str_remove_all, "\\}"),
+                  numerator_addends_de = purrr::map(numerator_addends, 
+                                                    stringr::str_sub, 1, 11),
+                  numerator_addends_coc = purrr::map(numerator_addends,
+                                                     stringr::str_sub, 13, 23),
+                  numerator_addends_coc = purrr::map(numerator_addends_coc,
+                                                     na_if, ""),
+                  denominator_addends = 
+                    stringr::str_extract_all(denominator,
+                                             "#\\{[a-zA-Z0-9]{11}([a-zA-Z0-9\\.]{12})?\\}"),
+                  denominator_addends = purrr::map(denominator_addends,
+                                                   stringr::str_remove_all, "#\\{"),
+                  denominator_addends = purrr::map(denominator_addends, 
+                                                   stringr::str_remove_all, "\\}"),
+                  denominator_addends_de = purrr::map(denominator_addends, 
+                                                      stringr::str_sub, 1, 11),
+                  denominator_addends_coc = purrr::map(denominator_addends,
+                                                       stringr::str_sub, 13, 23),
+                  denominator_addends_coc = purrr::map(denominator_addends_coc,
+                                                       na_if, "")
+    )
+  
+  
+  return(indicator_parts)
+}
+
+
+doMC::registerDoMC(cores = 5)
+
+datapackr::loginToDATIM("~/.secrets/cop.json")
+base_url <- getOption("baseurl")
+data_required <- datapackcommons::data_required
+
+
+# get data element and category option combos 
+
+fy_20_r  <-  getFormDetails(20, "results") %>% 
+  dplyr::mutate(de.coc = paste(dataelementuid,
+                               categoryoptioncombouid,
+                               sep = "."),
+                fy_20_r = TRUE)
+fy_19_r  <-  getFormDetails(19, "results") %>% 
+  dplyr::mutate(de.coc = paste(dataelementuid,
+                               categoryoptioncombouid,
+                               sep = "."),
+                fy_19_r = TRUE)
+fy_21_t  <-  getFormDetails(21, "targets") %>% 
+  dplyr::mutate(de.coc = paste(dataelementuid,
+                               categoryoptioncombouid,
+                               sep = "."),
+                fy_21_t = TRUE)
+fy_20_t  <-  getFormDetails(20, "targets") %>% 
+  dplyr::mutate(de.coc = paste(dataelementuid,
+                               categoryoptioncombouid,
+                               sep = "."),
+                fy_20_t = TRUE)
+
+
+fy_21_t_fy_20_r_de_coc <- c(fy_21_t$dataelementuid, 
+                            fy_20_r$dataelementuid,
+                            fy_21_t$de.coc,
+                            fy_20_r$de.coc) %>% unique()
+
+fy_20_r_to_fy_19_r_diff <- dplyr::full_join(fy_19_r, fy_20_r) %>% 
+  dplyr::arrange() %>% 
+  dplyr::filter(is.na(fy_20_r))
+
+fy_21_t_to_fy_20_t_diff <- dplyr::full_join(fy_20_t, fy_21_t) %>% 
+  dplyr::arrange() %>% 
+  dplyr::filter(is.na(fy_21_t))
+
+
+
+
+
+
+indicators_required <- 
+  c(data_required$A.dx_id, data_required$B.dx_id) %>% 
+  unique() %>% na.omit() %>% parseIndicators() %>% 
+  dplyr::mutate(matching_num_elements = 
+                  purrr::map(numerator_addends,
+                             match,  
+                             fy_21_t_fy_20_r_de_coc),
+                matching_den_elements = 
+                  purrr::map(denominator_addends,
+                             match,  
+                             fy_21_t_fy_20_r_de_coc),
+                missing_any_elements =
+                  (purrr::map2_lgl(matching_num_elements,
+                               matching_num_elements,
+                    ~any(is.na(.x),
+                         is.na(.y)))))
+
+data_elements_only_missing <- dplyr::setdiff(c(data_required$A.dx_id,
+                                           data_required$B.dx_id),
+                                         indicators_required$id) %>%
+  dplyr::setdiff(fy_21_t_fy_20_r_de_coc)
+  
+
+print(paste("These data elements are referenced but not available", 
+            datimutils::getDataElements(data_elements_only_missing)))
+                  
+indicators_with_missing_elements <- 
+  dplyr::filter(indicators_required, 
+                missing_any_elements)
+
+purrr::map(indicators_required$denominator_addends,
+           match,  fy_21_t_fy_20_r_de_coc)
+
+de_coc <- c(indicators_required$numerator_addends,
+            indicators_required$denominator_addends)%>% unlist() %>% unique()
+
+  
+
+#FY22 Update stopped here
 
 extract_formula_components <- function(formula){
   stringr::str_split(formula, "[+-]")[[1]] %>%
@@ -24,82 +158,9 @@ extract_formula_components <- function(formula){
                                                       stringr::str_sub(value, 13,23),
                                                       NA_character_)) %>% 
     dplyr::select(- value)
-  
 }
 
-fy_21_t <- datapackcommons::GetSqlView("DotdxKrNZxG", 
-                                       c("dataSets"), 
-                                       c("Pmc0yYAIi1t")) %>% 
-  dplyr::bind_rows(datapackcommons::GetSqlView("DotdxKrNZxG", 
-                                               c("dataSets"), 
-                                               c("s1sxJuqXsvV"))) %>%
-  dplyr::select(-dataset) %>% 
-  distinct()
-
-
-
-fy_20_t <- datapackcommons::GetSqlView("DotdxKrNZxG", 
-                             c("dataSets"), 
-                             c("sBv1dj90IX6")) %>% 
-  dplyr::bind_rows(datapackcommons::GetSqlView("DotdxKrNZxG", 
-                                               c("dataSets"), 
-                                               c("nIHNMxuPUOR"))) %>%
-  dplyr::bind_rows(datapackcommons::GetSqlView("DotdxKrNZxG", 
-                                               c("dataSets"), 
-                                               c("C2G7IyPPrvD"))) %>%
-  dplyr::bind_rows(datapackcommons::GetSqlView("DotdxKrNZxG", 
-                                               c("dataSets"), 
-                                               c("HiJieecLXxN"))) %>% 
-  dplyr::select(-dataset) %>% 
-  distinct()
-
-fy_19_t <- datapackcommons::GetSqlView("DotdxKrNZxG", 
-                                       c("dataSets"), 
-                                       c("BWBS39fydnX")) %>% 
-  dplyr::bind_rows(datapackcommons::GetSqlView("DotdxKrNZxG", 
-                                               c("dataSets"), 
-                                               c("l796jk9SW7q"))) %>%
-  dplyr::bind_rows(datapackcommons::GetSqlView("DotdxKrNZxG", 
-                                               c("dataSets"), 
-                                               c("X8sn5HE5inC"))) %>%
-  dplyr::bind_rows(datapackcommons::GetSqlView("DotdxKrNZxG", 
-                                               c("dataSets"), 
-                                               c("eyI0UOWJnDk"))) %>% 
-  dplyr::select(-dataset) %>% distinct()
-            
-
-fy_19_r <- datapackcommons::GetSqlView("DotdxKrNZxG", 
-                                       c("dataSets"), 
-                                       c("KWRj80vEfHU")) %>% 
-  dplyr::bind_rows(datapackcommons::GetSqlView("DotdxKrNZxG", 
-                                               c("dataSets"), 
-                                               c("fi9yMqWLWVy"))) %>%
-  dplyr::bind_rows(datapackcommons::GetSqlView("DotdxKrNZxG", 
-                                               c("dataSets"), 
-                                               c("zUoy5hk8r0q"))) %>%
-  dplyr::bind_rows(datapackcommons::GetSqlView("DotdxKrNZxG", 
-                                               c("dataSets"), 
-                                               c("PyD4x9oFwxJ"))) %>% 
-  dplyr::select(-dataset) %>%   distinct()
-
-fy_18_r <- datapackcommons::GetSqlView("DotdxKrNZxG", 
-                                       c("dataSets"), 
-                                       c("uN01TT331OP")) %>% 
-  dplyr::bind_rows(datapackcommons::GetSqlView("DotdxKrNZxG", 
-                                               c("dataSets"), 
-                                               c("WbszaIdCi92"))) %>%
-  dplyr::bind_rows(datapackcommons::GetSqlView("DotdxKrNZxG", 
-                                               c("dataSets"), 
-                                               c("BxIx51zpAjh"))) %>%
-  dplyr::bind_rows(datapackcommons::GetSqlView("DotdxKrNZxG", 
-                                               c("dataSets"), 
-                                               c("tz1bQ3ZwUKJ"))) %>% 
-  dplyr::select(-dataset) %>%   distinct()
-
-
-
 elements_fy19r_fy20t <- dplyr::bind_rows(fy_19_r, fy_20_t)  %>% dplyr::distinct()
-data_required <- datapackcommons::data_required
 
 
 # -------------------------------------------------------------------------

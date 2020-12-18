@@ -95,7 +95,7 @@ DHISLogin_Play<-function(version) {
 #' @param timeout integer - maximum time to wait for API response
 #' @return  full api response
 #'
-RetryAPI <- function(api_url, content_type, max_attempts = 3, timeout = 180){
+RetryAPI <- function(api_url, content_type, max_attempts = 3, timeout = 300){
   for(i in 1:max_attempts){
     try({
       response <- httr::GET(api_url, httr::timeout(timeout))
@@ -200,7 +200,7 @@ getMetadata <- function(end_point,
   web_api_call <- paste0(base_url, "api/", end_point, ".json?paging=false",
                          url_filters,
                          url_fields)
-    r <- web_api_call %>% RetryAPI("application/json", 20)
+    r <- web_api_call %>% RetryAPI("application/json", 5)
     # httr::GET()
     assertthat::are_equal(r$status_code, 200L)
 #    if (r$status_code == 200L) {
@@ -234,8 +234,7 @@ ValidateNameIdPairs <- function(names, ids, type, exact = TRUE, base_url = getOp
   ids_csv  <-  unique(ids) %>% paste0(collapse = ",")
   response <- datimutils::getMetadata(!!type,
                                            filters = id %.in% ids_csv,
-                                           fields = "id,name",
-                                           base_url = base_url)
+                                           fields = "id,name")
   assertthat::has_name(response, "name")
   assertthat::has_name(response, "id")
   if (exact == TRUE){
@@ -274,8 +273,7 @@ ValidateCodeIdPairs <- function(base_url, codes, ids, type){
   ids_csv <-  ids %>% unique() %>% paste0(collapse = ",")
   response <- datimutils::getMetadata(!!type,
                                            filters = id %.in% ids_csv,
-                                           fields = "id,code",
-                                           base_url = base_url)
+                                           fields = "id,code")
   assertthat::has_name(response, "code")
   assertthat::has_name(response, "id")
   result <-  dplyr::all_equal(original, response)
@@ -357,7 +355,7 @@ GetData_Analytics <-  function(dimensions, base_url = getOption("baseurl")){
                      "&outputIdScheme=UID&hierarchyMeta=true") # gives us UIDs in response                  
   response <- api_call %>% 
     utils::URLencode()  %>%
-    RetryAPI("application/json", 20)
+    RetryAPI("application/json", 3)
   
   content <- response %>% 
     httr::content(., "text") %>% 
@@ -463,14 +461,40 @@ GetData_DataPack <- function(parameters,
   
   
   dimensions <- dplyr::bind_rows(dimensions, dimension_disaggs)
+  
+# Implemented for dreams SNUs for AGYW_PREV   
+  if(!is.na(parameters$custom_ou)){
+    results_custom <-  
+      try({tibble::tibble(type = "dimension",
+                          dim_item_uid = parameters$custom_ou,
+                          dim_uid = "ou") %>%
+          rbind(dimensions) %>% 
+          datapackcommons::GetData_Analytics()}, 
+          silent = TRUE) 
+
+    if(is.error(results_custom) || 
+       is.null(results_custom[["results"]])){ # nothing to return
+      
+      api_call <- NULL
+      results <- NULL
+    } else {
+      api_call <- results_custom[["api_call"]]
+      results_custom <-  results_custom[["results"]]
+      results <- results_custom %>% 
+        dplyr::select(-ou_hierarchy)
+    }
+    return(list("api_call" = api_call,
+                "time" = lubridate::now("UTC"),
+                "results" = results))
+  }
 
   non_mil_types_of_org_units <- 
     datimutils::getDimensions("mINJi7rR1a6",
-                                 fields = "items[name,id]",
-                                 base_url = base_url) %>%
+                                 fields = "items[name,id]") %>%
     dplyr::filter(name != "Military") %>% 
     .[["id"]]
 
+  
   results_psnu <-  tibble::tibble(type = "filter",
                                   dim_item_uid = non_mil_types_of_org_units,
                                   dim_uid = "mINJi7rR1a6") %>%

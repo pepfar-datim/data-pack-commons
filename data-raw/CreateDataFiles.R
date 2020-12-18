@@ -1,6 +1,10 @@
-require(tidyverse)
+require(magrittr)
+
 require(datapackcommons)
 require(assertthat)
+require(datimutils)
+require(tidyr)
+require(dplyr)
 
 ValidateDimItems <-
   function(data, dim_uid_colname, item_name_colname, item_uid_colname, base_url) {
@@ -11,10 +15,10 @@ ValidateDimItems <-
       paste0(collapse = ",") %>% {paste0("id:in:[", ., "]")} %>%
       {datapackcommons::getMetadata("dimensions", filters = .,
                                      fields = "items[name,id]")} %>%
-      unnest(c("items")) 
+      tidyr::unnest(c("items")) 
     
     # 2 - compare api items with items in data
-    unmatched <- data %>% dplyr::select(item_uid_colname, item_name_colname) %>%
+    unmatched <- data %>% dplyr::select(!!item_uid_colname, !!item_name_colname) %>%
       setNames(c("id", "name")) %>% 
       na.omit() %>% unique() %>%
       dplyr::anti_join(api_names_ids) 
@@ -103,10 +107,10 @@ ValidateMapT_1toT <- function(t_1_to_t, dim_item_sets, base_url){
 
   }
 
-datapackcommons::DHISLogin("/users/sam/.secrets/datim.json")
+datapackr::loginToDATIM("~/.secrets/cop.json")
 base_url <- getOption("baseurl")
 wd <- getwd()
-setwd("/Users/sam/Documents/GitHub/data-pack-commons")
+setwd("~/Documents/GitHub/data-pack-commons")
 
 dim_item_sets <- readr::read_csv("./data-raw/model_calculations/dimension_item_sets.csv",
                                  col_types = readr::cols(.default = "c", sort_order = "d", weight = "d"),
@@ -125,16 +129,16 @@ data_required <-
 
 ValidateDataRequired(data_required, base_url)
 
-Map20Tto21T <- 
-  readr::read_csv("./data-raw/snu_x_im_distribution_configuration/20Tto21TMap.csv", 
+Map21Tto22T <- 
+  readr::read_csv("./data-raw/snu_x_im_distribution_configuration/21Tto22TMap.csv", 
                   col_types = readr::cols(.default = "c"),
                   na = c("NA")) 
 
-ValidateMapT_1toT(Map20Tto21T, dim_item_sets, base_url)
+ValidateMapT_1toT(Map21Tto22T, dim_item_sets, base_url)
 
 usethis::use_data(dim_item_sets, overwrite = TRUE, compress = "gzip")
 usethis::use_data(data_required, overwrite = TRUE, compress = "gzip")
-usethis::use_data(Map20Tto21T, overwrite = TRUE, compress = "gzip")
+usethis::use_data(Map21Tto22T, overwrite = TRUE, compress = "gzip")
 
 setwd(wd)
 
