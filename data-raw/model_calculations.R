@@ -183,14 +183,25 @@ output_location <- "/Users/sam/COP data/COP21 Update/"
 # get country and prioritization level
  operating_units <- datapackcommons::GetCountryLevels(base_url) %>%
    dplyr::arrange(country_name) %>% 
-  #  filter(country_name == "South Africa") %>% 
+#    filter(country_name == "Rwanda") %>% 
    dplyr::filter(prioritization_level != 0) # Turkmenistan has no planning/priortization level
- priority_snu_data <- datapackr::getDataValueSets(c("dataElementGroup","period", "orgUnitGroup"),
-                                                        c("ofNbyQgD9xG","2019Oct","AVy8gJXym2D")) %>% 
+ 
+ priority_snu_data <- 
+   datapackr::getDataValueSets(c("dataElementGroup","period", "orgUnitGroup"),
+                               c("ofNbyQgD9xG","2020Oct","AVy8gJXym2D")) %>% 
    dplyr::select(org_unit_uid = org_unit, value)
  
- dreams_snus <- datimutils::getOrgUnitGroups("mRRlkbZolDR", # Dreams SNUs
-                                             fields = "organisationUnits[id,path]") %>% 
+ dreams_snu_path_members <-  
+   datimutils::getOrgUnitGroups("mRRlkbZolDR", # Dreams SNUs
+                                fields = "organisationUnits[path]") %>%
+   dplyr::mutate(path = stringr::str_split(path, "/")) %>%
+   unlist() %>% 
+   unique() %>% 
+   stringi::stri_remove_empty()
+
+ dreams_psnus <- datimutils::getOrgUnitGroups("AVy8gJXym2D", # PSNUs
+                                             fields = "organisationUnits[id,path]") %>%
+   dplyr::filter(id %in% dreams_snu_path_members) %>%
    dplyr::mutate(value = 1, org_unit_uid = id)
  
 # operating_units <- tibble::tribble(
@@ -247,7 +258,7 @@ for (ou_index in 1:NROW(operating_units)) {
     dplyr::inner_join(priority_snu_data)
   
   cop_data[[operating_unit$id]][["AGYW"]][["DREAMS_SNU.Flag"]][["results"]] <- 
-    dplyr::filter(dreams_snus, stringr::str_detect(path, operating_unit$id)) %>% 
+    dplyr::filter(dreams_psnus, stringr::str_detect(path, operating_unit$id)) %>% 
     dplyr::select(org_unit_uid, value)
   
   
