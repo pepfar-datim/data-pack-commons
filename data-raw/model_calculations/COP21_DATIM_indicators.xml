@@ -1,1 +1,158 @@
-<?xml version='1.0' encoding='UTF-8'?><metadata xmlns="http://dhis2.org/schema/dxf/2.0"><system><id>beea1550.us-east-1.pepfar.bao.systems</id><rev>bdcf260</rev><version>2.33.7-SNAPSHOT</version><date>2020-11-20T18:07:15.207</date></system><indicators><indicator lastUpdated="2020-11-20T18:02:35.009" id="oIxwGGpRcRW" created="2020-11-20T18:02:35.009" name="HTS_SELF (DSD+TA, KeyPop) TARGET" shortName="HTS_SELF (DSD+TA, KeyPop) TARGET "><publicAccess>rw------</publicAccess><denominatorDescription>1</denominatorDescription><numeratorDescription>HTS_SELF (DSD+TA, KeyPop) TARGET</numeratorDescription><numerator>#{qL1qysWLZoq} + #{Hx5jjGAdVsT}</numerator><denominator>1</denominator><annualized>false</annualized><indicatorType id="QEjvmP5XVSn"/><lastUpdatedBy id="tsplFKJMOD8"/><user id="tsplFKJMOD8"/><attributeValues><attributeValues><value>PEPFAR</value><attribute id="H5eprkl0cdi"/></attributeValues><attributeValues><value>SGACPublicAffairs@state.gov</value><attribute id="mOITVltKxDP"/></attributeValues></attributeValues></indicator><indicator lastUpdated="2020-10-30T10:50:54.852" id="CN3Xsd5IPib" created="2020-10-01T18:44:30.664" name="HTS_SELF (N, DSD+TA, Age/Sex) TARGET" shortName="HTS_SELF (N, DSD+TA,  Age/Sex) TARGET"><publicAccess>rw------</publicAccess><denominatorDescription>One</denominatorDescription><numeratorDescription>HTS_SELF (N, DSD+TA,Age/Sex/HIVSelfTest) TARGET</numeratorDescription><numerator>#{r9N46a1q942} + #{NcMMbbymtij}</numerator><denominator>1</denominator><annualized>false</annualized><indicatorType id="QEjvmP5XVSn"/><lastUpdatedBy id="tsplFKJMOD8"/><user id="Uhsev5495GW"/><attributeValues><attributeValues><value>PEPFAR</value><attribute id="H5eprkl0cdi"/></attributeValues><attributeValues><value>SGACPublicAffairs@state.gov</value><attribute id="mOITVltKxDP"/></attributeValues></attributeValues></indicator><indicator lastUpdated="2020-11-16T13:55:01.343" id="p2NOE1SHIjH" created="2020-11-16T13:39:47.084" name="PrEP_CURR (DSD+TA, Age/Sex)" shortName="PrEP_CURR (DSD+TA, Age/Sex)"><publicAccess>rw------</publicAccess><denominatorDescription>1</denominatorDescription><numeratorDescription>PrEP_CURR (DSD+TA, Age/Sex)</numeratorDescription><numerator>#{x5H3nrR8BNW} + #{UkV4LwXGXlP} </numerator><denominator>1</denominator><annualized>false</annualized><indicatorType id="QEjvmP5XVSn"/><lastUpdatedBy id="tsplFKJMOD8"/><user id="tsplFKJMOD8"/><attributeValues><attributeValues><value>PEPFAR</value><attribute id="H5eprkl0cdi"/></attributeValues><attributeValues><value>SGACPublicAffairs@state.gov</value><attribute id="mOITVltKxDP"/></attributeValues></attributeValues></indicator><indicator lastUpdated="2020-11-16T13:55:52.694" id="PhuPDEKovM8" created="2020-11-16T13:41:43.588" name="PrEP_NEW (DSD+TA, Age/Sex)" shortName="PrEP_NEW (DSD+TA, Age/Sex)"><publicAccess>rw------</publicAccess><denominatorDescription>1</denominatorDescription><numeratorDescription>PrEP_NEW (DSD+TA, Age/Sex)</numeratorDescription><numerator>#{KNO4emPfF91} + #{b6OI9qB0Who}</numerator><denominator>1</denominator><annualized>false</annualized><indicatorType id="QEjvmP5XVSn"/><lastUpdatedBy id="tsplFKJMOD8"/><user id="tsplFKJMOD8"/><attributeValues><attributeValues><value>PEPFAR</value><attribute id="H5eprkl0cdi"/></attributeValues><attributeValues><value>SGACPublicAffairs@state.gov</value><attribute id="mOITVltKxDP"/></attributeValues></attributeValues></indicator><indicator lastUpdated="2020-10-30T10:50:54.852" id="NS1PDORYbtn" created="2020-10-01T19:03:01.718" name="TB_PREV (N, DSD+TA, Age/NewExistingArt/HIVStatus) TARGET" shortName="TB_PREV (N, DSD+TA, NewExistArt/HIVStat) TARGET"><publicAccess>rw------</publicAccess><denominatorDescription>One</denominatorDescription><numeratorDescription>TB_PREV (N, DSD+TA, Age/NewExistingArt/HIVStatus) TARGET</numeratorDescription><numerator>#{DA7uTAScxxi} + #{MdqPezsikDr}</numerator><denominator>1</denominator><annualized>false</annualized><indicatorType id="QEjvmP5XVSn"/><lastUpdatedBy id="tsplFKJMOD8"/><user id="Uhsev5495GW"/><attributeValues><attributeValues><value>PEPFAR</value><attribute id="H5eprkl0cdi"/></attributeValues><attributeValues><value>SGACPublicAffairs@state.gov</value><attribute id="mOITVltKxDP"/></attributeValues></attributeValues></indicator><indicator lastUpdated="2020-11-20T15:15:08.255" id="tnX35ZeTGKm" created="2020-11-20T15:15:08.255" name="TX_CURR (DSD+TA, KeyPop/HIVStatus)" shortName="TX_CURR (DSD+TA, KeyPop/HIVStatus)"><publicAccess>rw------</publicAccess><denominatorDescription>1</denominatorDescription><numeratorDescription>TX_CURR (N, DSD+TA, KeyPop/HIVStatus)</numeratorDescription><numerator>#{ScQASwweWXL} + #{rEKqsIDMOgB}</numerator><denominator>1</denominator><annualized>false</annualized><indicatorType id="QEjvmP5XVSn"/><lastUpdatedBy id="tsplFKJMOD8"/><user id="tsplFKJMOD8"/><attributeValues><attributeValues><value>PEPFAR</value><attribute id="H5eprkl0cdi"/></attributeValues><attributeValues><value>SGACPublicAffairs@state.gov</value><attribute id="mOITVltKxDP"/></attributeValues></attributeValues></indicator><indicator lastUpdated="2020-11-20T15:12:07.953" id="BTF7hnGNFGD" created="2020-11-20T15:11:14.393" name="TX_CURR (DSD+TA, KeyPop/HIVStatus) TARGET" shortName="TX_CURR (DSD+TA, KeyPop/HIVStatus) TARGET"><publicAccess>rw------</publicAccess><denominatorDescription>1</denominatorDescription><numeratorDescription>TX_CURR (N, DSD+TA, KeyPop/HIVStatus) TARGET</numeratorDescription><numerator>#{OLbhrUez4dP} + #{uIqAr4ev05I}</numerator><denominator>1</denominator><annualized>false</annualized><indicatorType id="QEjvmP5XVSn"/><lastUpdatedBy id="tsplFKJMOD8"/><user id="tsplFKJMOD8"/><attributeValues><attributeValues><value>PEPFAR</value><attribute id="H5eprkl0cdi"/></attributeValues><attributeValues><value>SGACPublicAffairs@state.gov</value><attribute id="mOITVltKxDP"/></attributeValues></attributeValues></indicator></indicators></metadata>
+<?xml version="1.0" encoding="UTF-8"?>
+<metadata xmlns="http://dhis2.org/schema/dxf/2.0">
+  <system>
+    <id>beea1550.us-east-1.pepfar.bao.systems</id>
+    <rev>bdcf260</rev>
+    <version>2.33.7-SNAPSHOT</version>
+    <date>2020-11-20T18:07:15.207</date>
+  </system>
+  <indicators>
+    <indicator lastUpdated="2020-11-20T18:02:35.009" id="oIxwGGpRcRW" created="2020-11-20T18:02:35.009" name="HTS_SELF (DSD+TA, KeyPop) TARGET" shortName="HTS_SELF (DSD+TA, KeyPop) TARGET ">
+      <publicAccess>rw------</publicAccess>
+      <denominatorDescription>1</denominatorDescription>
+      <numeratorDescription>HTS_SELF (DSD+TA, KeyPop) TARGET</numeratorDescription>
+      <numerator>#{qL1qysWLZoq} + #{Hx5jjGAdVsT}</numerator>
+      <denominator>1</denominator>
+      <annualized>false</annualized>
+      <indicatorType id="QEjvmP5XVSn"/>
+      <lastUpdatedBy id="tsplFKJMOD8"/>
+      <user id="tsplFKJMOD8"/>
+      <attributeValues>
+        <attributeValues>
+          <value>PEPFAR</value>
+          <attribute id="H5eprkl0cdi"/>
+        </attributeValues>
+        <attributeValues>
+          <value>SGACPublicAffairs@state.gov</value>
+          <attribute id="mOITVltKxDP"/>
+        </attributeValues>
+      </attributeValues>
+    </indicator>
+    <indicator lastUpdated="2020-10-30T10:50:54.852" id="CN3Xsd5IPib" created="2020-10-01T18:44:30.664" name="HTS_SELF (N, DSD+TA, Age/Sex) TARGET" shortName="HTS_SELF (N, DSD+TA,  Age/Sex) TARGET">
+      <publicAccess>rw------</publicAccess>
+      <denominatorDescription>One</denominatorDescription>
+      <numeratorDescription>HTS_SELF (N, DSD+TA,Age/Sex/HIVSelfTest) TARGET</numeratorDescription>
+      <numerator>#{r9N46a1q942} + #{NcMMbbymtij}</numerator>
+      <denominator>1</denominator>
+      <annualized>false</annualized>
+      <indicatorType id="QEjvmP5XVSn"/>
+      <lastUpdatedBy id="tsplFKJMOD8"/>
+      <user id="Uhsev5495GW"/>
+      <attributeValues>
+        <attributeValues>
+          <value>PEPFAR</value>
+          <attribute id="H5eprkl0cdi"/>
+        </attributeValues>
+        <attributeValues>
+          <value>SGACPublicAffairs@state.gov</value>
+          <attribute id="mOITVltKxDP"/>
+        </attributeValues>
+      </attributeValues>
+    </indicator>
+    <indicator lastUpdated="2020-11-16T13:55:01.343" id="p2NOE1SHIjH" created="2020-11-16T13:39:47.084" name="PrEP_CURR (DSD+TA, Age/Sex)" shortName="PrEP_CURR (DSD+TA, Age/Sex)">
+      <publicAccess>rw------</publicAccess>
+      <denominatorDescription>1</denominatorDescription>
+      <numeratorDescription>PrEP_CURR (DSD+TA, Age/Sex)</numeratorDescription>
+      <numerator>#{x5H3nrR8BNW} + #{UkV4LwXGXlP} </numerator>
+      <denominator>1</denominator>
+      <annualized>false</annualized>
+      <indicatorType id="QEjvmP5XVSn"/>
+      <lastUpdatedBy id="tsplFKJMOD8"/>
+      <user id="tsplFKJMOD8"/>
+      <attributeValues>
+        <attributeValues>
+          <value>PEPFAR</value>
+          <attribute id="H5eprkl0cdi"/>
+        </attributeValues>
+        <attributeValues>
+          <value>SGACPublicAffairs@state.gov</value>
+          <attribute id="mOITVltKxDP"/>
+        </attributeValues>
+      </attributeValues>
+    </indicator>
+    <indicator lastUpdated="2020-11-16T13:55:52.694" id="PhuPDEKovM8" created="2020-11-16T13:41:43.588" name="PrEP_NEW (DSD+TA, Age/Sex)" shortName="PrEP_NEW (DSD+TA, Age/Sex)">
+      <publicAccess>rw------</publicAccess>
+      <denominatorDescription>1</denominatorDescription>
+      <numeratorDescription>PrEP_NEW (DSD+TA, Age/Sex)</numeratorDescription>
+      <numerator>#{KNO4emPfF91} + #{b6OI9qB0Who}</numerator>
+      <denominator>1</denominator>
+      <annualized>false</annualized>
+      <indicatorType id="QEjvmP5XVSn"/>
+      <lastUpdatedBy id="tsplFKJMOD8"/>
+      <user id="tsplFKJMOD8"/>
+      <attributeValues>
+        <attributeValues>
+          <value>PEPFAR</value>
+          <attribute id="H5eprkl0cdi"/>
+        </attributeValues>
+        <attributeValues>
+          <value>SGACPublicAffairs@state.gov</value>
+          <attribute id="mOITVltKxDP"/>
+        </attributeValues>
+      </attributeValues>
+    </indicator>
+    <indicator lastUpdated="2020-10-30T10:50:54.852" id="NS1PDORYbtn" created="2020-10-01T19:03:01.718" name="TB_PREV (N, DSD+TA, Age/NewExistingArt/HIVStatus) TARGET" shortName="TB_PREV (N, DSD+TA, NewExistArt/HIVStat) TARGET">
+      <publicAccess>rw------</publicAccess>
+      <denominatorDescription>One</denominatorDescription>
+      <numeratorDescription>TB_PREV (N, DSD+TA, Age/NewExistingArt/HIVStatus) TARGET</numeratorDescription>
+      <numerator>#{DA7uTAScxxi} + #{MdqPezsikDr}</numerator>
+      <denominator>1</denominator>
+      <annualized>false</annualized>
+      <indicatorType id="QEjvmP5XVSn"/>
+      <lastUpdatedBy id="tsplFKJMOD8"/>
+      <user id="Uhsev5495GW"/>
+      <attributeValues>
+        <attributeValues>
+          <value>PEPFAR</value>
+          <attribute id="H5eprkl0cdi"/>
+        </attributeValues>
+        <attributeValues>
+          <value>SGACPublicAffairs@state.gov</value>
+          <attribute id="mOITVltKxDP"/>
+        </attributeValues>
+      </attributeValues>
+    </indicator>
+    <indicator lastUpdated="2020-11-20T15:15:08.255" id="tnX35ZeTGKm" created="2020-11-20T15:15:08.255" name="TX_CURR (DSD+TA, KeyPop/HIVStatus)" shortName="TX_CURR (DSD+TA, KeyPop/HIVStatus)">
+      <publicAccess>rw------</publicAccess>
+      <denominatorDescription>1</denominatorDescription>
+      <numeratorDescription>TX_CURR (N, DSD+TA, KeyPop/HIVStatus)</numeratorDescription>
+      <numerator>#{ScQASwweWXL} + #{rEKqsIDMOgB}</numerator>
+      <denominator>1</denominator>
+      <annualized>false</annualized>
+      <indicatorType id="QEjvmP5XVSn"/>
+      <lastUpdatedBy id="tsplFKJMOD8"/>
+      <user id="tsplFKJMOD8"/>
+      <attributeValues>
+        <attributeValues>
+          <value>PEPFAR</value>
+          <attribute id="H5eprkl0cdi"/>
+        </attributeValues>
+        <attributeValues>
+          <value>SGACPublicAffairs@state.gov</value>
+          <attribute id="mOITVltKxDP"/>
+        </attributeValues>
+      </attributeValues>
+    </indicator>
+    <indicator lastUpdated="2020-11-20T15:12:07.953" id="BTF7hnGNFGD" created="2020-11-20T15:11:14.393" name="TX_CURR (DSD+TA, KeyPop/HIVStatus) TARGET" shortName="TX_CURR (DSD+TA, KeyPop/HIVStatus) TARGET">
+      <publicAccess>rw------</publicAccess>
+      <denominatorDescription>1</denominatorDescription>
+      <numeratorDescription>TX_CURR (N, DSD+TA, KeyPop/HIVStatus) TARGET</numeratorDescription>
+      <numerator>#{OLbhrUez4dP} + #{uIqAr4ev05I}</numerator>
+      <denominator>1</denominator>
+      <annualized>false</annualized>
+      <indicatorType id="QEjvmP5XVSn"/>
+      <lastUpdatedBy id="tsplFKJMOD8"/>
+      <user id="tsplFKJMOD8"/>
+      <attributeValues>
+        <attributeValues>
+          <value>PEPFAR</value>
+          <attribute id="H5eprkl0cdi"/>
+        </attributeValues>
+        <attributeValues>
+          <value>SGACPublicAffairs@state.gov</value>
+          <attribute id="mOITVltKxDP"/>
+        </attributeValues>
+      </attributeValues>
+    </indicator>
+  </indicators>
+</metadata>
