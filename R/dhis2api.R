@@ -95,10 +95,12 @@ DHISLogin_Play<-function(version) {
 #' @param timeout integer - maximum time to wait for API response
 #' @return  full api response
 #'
-RetryAPI <- function(api_url, content_type, max_attempts = 3, timeout = 300){
+RetryAPI <- function(api_url, content_type, max_attempts = 3, timeout = 300,
+                     d2_session = NULL){
+  handle = dplyr::if_else(is.null(d2_session), NULL, d2_session$handle)
   for(i in 1:max_attempts){
     try({
-      response <- httr::GET(api_url, httr::timeout(timeout))
+      response <- httr::GET(api_url, httr::timeout(timeout), handle = handle)
       if (response$status_code == 200L && 
           response$url == api_url && 
           httr::http_type(response) == content_type){
