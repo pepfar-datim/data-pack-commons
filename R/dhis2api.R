@@ -97,7 +97,12 @@ DHISLogin_Play<-function(version) {
 #'
 RetryAPI <- function(api_url, content_type, max_attempts = 3, timeout = 300,
                      d2_session = NULL){
-  handle = dplyr::if_else(is.null(d2_session), NULL, d2_session$handle)
+  if (is.null(d2_session)){
+    handle = NULL
+  } else {
+    handle = d2_session$handle
+  }
+  
   for(i in 1:max_attempts){
     try({
       response <- httr::GET(api_url, httr::timeout(timeout), handle = handle)
