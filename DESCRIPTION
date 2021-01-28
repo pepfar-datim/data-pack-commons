@@ -1,7 +1,7 @@
 Package: datapackcommons
 Type: Package
 Title: Common Utilities for with with the PEPFAR DataPack
-Version: 0.2.1
+Version: 0.2.2
 Author: Who wrote it
 Maintainer: The package maintainer <yourself@somewhere.net>
 Description: More about what it does (maybe more than one line)
@@ -12,7 +12,6 @@ LazyData: true
 URL: https://github.com/pepfar-datim/data-pack-commons
 Imports: assertthat,
     datimvalidation,
-    doMC,
     dplyr,
     glue,
     httr,
@@ -27,6 +26,7 @@ Imports: assertthat,
     tibble,
     tidyr
 Suggests: 
+    doMC,
     httptest,
     testthat
 RoxygenNote: 7.1.1
