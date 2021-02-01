@@ -35,7 +35,7 @@ getDataSets_Detailed <- function(dataset_uids) {
     dplyr::left_join(getStandardDataElementGroups())
 }
 
-secrets <- "/Users/sam/.secrets/cop.json"
+secrets <- "/Users/sam/.secrets/triage.json"
 datapackr::loginToDATIM(secrets)
 base_url <- getOption("baseurl")
 
@@ -74,6 +74,22 @@ temp =dplyr::full_join(fy_22_t,map, by = c(technical_area_uid ="technical_area_u
                                      disaggregation_type_uid = "disagg_type_uid",
                                      numerator_denominator_uid = "num_or_den_uid"))
 names(map)
+
+
+
+data = readr::read_rds("/Users/sam/COP data/PSNUxIM_20210113_1.rds") %>% 
+  purrr::reduce(dplyr::bind_rows) %>% 
+  dplyr::group_by(indicator_code, 
+                  age_option_name,
+                  sex_option_name,
+                  kp_option_name) %>% 
+  dplyr::summarise(count=dplyr::n()) %>% dplyr::ungroup() %>% 
+  dplyr::rename(valid_ages.name="age_option_name",
+                valid_sexes.name="sex_option_name",
+                valid_kps.name="kp_option_name") %>% 
+  dplyr::full_join(datapackr::map_DataPack_DATIM_DEs_COCs)
+
+
 ##standard_de_groups <- datapackcommons::GetSqlView("vqetpxYlX1c") ## jason.datim
  ## test mer 2
 
