@@ -81,9 +81,9 @@ ProcessDataRequiredRow <- function(data_spec, dim_item_sets){
     prefix <- paste0(component, ".")
 
     component_data <- SelectAndStripPrefix(prefix, data_spec)
-    analytics_results <- component_data[[1,"analytics_output"]]$results
-    analytics_api_call <- component_data[[1,"analytics_output"]]$api_call
-    analytics_time <- lubridate::as_datetime(component_data[[1,"analytics_output"]]$time)
+    analytics_results <- component_data[[1,"analytics_output"]][[1]]$results
+    analytics_api_call <- component_data[[1,"analytics_output"]][[1]]$api_call
+    #analytics_time <- lubridate::as_datetime(component_data[[1,"analytics_output"]]$time)
 
     
     if(is.null(analytics_results)){
@@ -125,10 +125,12 @@ ProcessDataRequiredRow <- function(data_spec, dim_item_sets){
     }
 
     return_list[[component]] <- c(component_data,
-                                  "api_call" = analytics_api_call,
-                                  "time" = as.POSIXct(analytics_time,
-                                                      origin = "1970-01-01",
-                                                      tz = "UTC"))
+                                  "api_call" = analytics_api_call
+                                  #,
+     #                             "time" = as.POSIXct(analytics_time,
+                                   #                   origin = "1970-01-01",
+    #                                                  tz = "UTC")
+    )
 
   }
 
@@ -240,9 +242,9 @@ for (ou_index in 1:NROW(operating_units)) {
 
 # Rename the columns of analytics output with prefix {A, B} to have matching column names in joins
   data_required = analytics_output %>%
-  dplyr::rename_all(.funs = function(x) paste0("A.", x)) %>% left_join(data_required, .)
+  dplyr::rename_all(.funs = function(x) paste0("A.", x)) %>% dplyr::left_join(data_required, .)
   data_required = analytics_output %>%
-    dplyr::rename_all(.funs = function(x) paste0("B.", x)) %>% left_join(data_required, .)
+    dplyr::rename_all(.funs = function(x) paste0("B.", x)) %>% dplyr::left_join(data_required, .)
 
 #   for each line in data required
   for (data_required_index in 1:NROW(data_required)){
@@ -266,12 +268,12 @@ for (ou_index in 1:NROW(operating_units)) {
   }
 
 print(lubridate::now())
-# saveRDS(flattenDataPackModel_21(cop_data), file = paste0(output_location,"model_data_pack_input_21_20210122_1_flat.rds"))
-# saveRDS(cop_data, file = paste0(output_location,"model_data_pack_input_21_20210122_1.rds"))
+# saveRDS(flattenDataPackModel_21(cop_data), file = paste0(output_location,"model_data_pack_input_21_20210208_1_flat.rds"))
+# saveRDS(cop_data, file = paste0(output_location,"model_data_pack_input_21_20210208_1.rds"))
 # cop_data_new=cop_data
 
 ### COMPARISAON CODE FOR TWO DIFFERENT OUTPUT FILES
-  # cop_data_old <- readRDS(file = paste0(output_location,"model_data_pack_input_21_20210122_1.rds"))
+  # cop_data_old <- readRDS(file = paste0(output_location,"model_data_pack_input_21_20210208_1.rds"))
  #   operating_units <- datapackcommons::GetCountryLevels(base_url)  # %>% filter(country_name >= "Rwanda")
 # operating_units <- tibble::tribble(~id, ~country_name,
 #                                    "Asia_Regional_Data_Pack","Asia_Regional_Data_Pack",
@@ -357,5 +359,5 @@ print(lubridate::now())
 #     }
 #   }
 # }
-#     #deltas <- deltas %>% dplyr::mutate(org_unit_name =
-#     #                                 datimvalidation::remapOUs(deltas$org_unit_uid,"ybg3MO3hcf4",mode_in = "id",mode_out = "name"))
+    #deltas <- deltas %>% dplyr::mutate(org_unit_name =
+    #                                 datimvalidation::remapOUs(deltas$org_unit_uid,"ybg3MO3hcf4",mode_in = "id",mode_out = "name"))
