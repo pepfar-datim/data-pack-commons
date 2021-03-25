@@ -35,7 +35,7 @@ getDataSets_Detailed <- function(dataset_uids) {
     dplyr::left_join(getStandardDataElementGroups())
 }
 
-secrets <- "/Users/sam/.secrets/triage.json"
+secrets <- "/Users/sam/.secrets/datim.json"
 datapackr::loginToDATIM(secrets)
 base_url <- getOption("baseurl")
 
@@ -77,7 +77,7 @@ names(map)
 
 
 
-data = readr::read_rds("/Users/sam/COP data/PSNUxIM_20210113_1.rds") %>% 
+data = readr::read_rds("/Users/sam/COP data/PSNUxIM_20210201_1.rds") %>% 
   purrr::reduce(dplyr::bind_rows) %>% 
   dplyr::group_by(indicator_code, 
                   age_option_name,
@@ -87,7 +87,8 @@ data = readr::read_rds("/Users/sam/COP data/PSNUxIM_20210113_1.rds") %>%
   dplyr::rename(valid_ages.name="age_option_name",
                 valid_sexes.name="sex_option_name",
                 valid_kps.name="kp_option_name") %>% 
-  dplyr::full_join(datapackr::map_DataPack_DATIM_DEs_COCs)
+  dplyr::full_join(datapackr::map_DataPack_DATIM_DEs_COCs) %>% 
+  dplyr::filter(!stringr::str_detect(dataelement.y,"SUBNAT"))
 
 
 ##standard_de_groups <- datapackcommons::GetSqlView("vqetpxYlX1c") ## jason.datim
