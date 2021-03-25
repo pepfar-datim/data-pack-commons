@@ -131,8 +131,14 @@ getSnuxIm_density <- function(data_element_map_item,
                                           country_uid) %>%
     datapackcommons::GetData_Analytics() %>% .[["results"]] %>% .[["Value"]] %>% sum()
   
-  if(sum(data$Value) != checksum){
-    stop(paste("Internal Error: Disaggregated data not summing up to aggregated data in getSnuxIm_density function", sum(data$Value), checksum))
+  if(sum(data$Value) > checksum){
+    stop(paste("Internal Error: Disaggregated data greater than aggregated data in getSnuxIm_density function", sum(data$Value), checksum))
+  }
+  if(sum(data$Value) < checksum){
+    warning(paste("\n\nWARNING: Disaggregated data LESS than aggregated data in getSnuxIm_density function, Was PSNU level changed since last cop? ", 
+                  "\n", data_element_map_item, " ",
+                  "\n",datimutils::getOrgUnits(country_uid)),
+            immediate. = TRUE)
   }
   
   disagg_sets  <-  c("age_set", 
@@ -151,12 +157,12 @@ getSnuxIm_density <- function(data_element_map_item,
     dplyr::rename("value" = "Value",
                   "psnu_uid" = "Organisation unit",
                   "type" = "Support Type") %>% 
-    dplyr::select(dplyr::one_of("indicator_code", "psnu_uid",
+    dplyr::select(suppressWarnings(dplyr::one_of("indicator_code", "psnu_uid",
                                 "mechanism_code", "type",
                                 "age_option_name", "age_option_uid",
                                 "sex_option_name", "sex_option_uid",
                                 "kp_option_name", "kp_option_uid",
-                                "value"))
+                                "value")))
   
   if("age_option_name" %in% names(data)){
     data$age_option_name[data$age_option_name == "<1"] <- "<01"
@@ -185,13 +191,14 @@ process_country <- function(country_uid, mechs){
   # will have a historic distribution for each target, DSD/TA, and site given psnu/IM
   # alply uses parallel processing here 
   
-  doMC::registerDoMC(cores = 3)
+ # doMC::registerDoMC(cores = 3) stopped using parallel due to warnings being hidden, 
+  #must refactor to include
   data <-  plyr::adply(datapackcommons::Map21Tto22T,
                      1, getSnuxIm_density,
                      datapackcommons::dim_item_sets,
                      country_uid,
-                     mechs, 
-                     .parallel = TRUE, .expand = FALSE, .id = NULL) 
+                     mechs #, .parallel = TRUE
+                     , .expand = FALSE, .id = NULL) 
   if(NROW(data) == 0){return(NULL)}
   
   data <-  data %>% 
@@ -226,16 +233,20 @@ datapackr::loginToDATIM("~/.secrets/datim.json")
 base_url <- getOption("baseurl")
 mechs = GetFy21tMechs()
 country_details <-  datapackcommons::GetCountryLevels(base_url) %>% 
- # dplyr::filter(country_name == "South Africa") %>% 
+  #dplyr::filter(country_name == "Liberia") %>% 
   dplyr::arrange(country_name)
 
 data <-  country_details[["id"]] %>% 
   purrr::map(process_country, mechs)
 data <- setNames(data,country_details$id)
-# readr::write_rds(data,"/Users/sam/COP data/PSNUxIM_20210113_1.rds", compress = c("gz"))
-data_old = readr::read_rds("/Users/sam/COP data/PSNUxIM_20210113_1.rds")
-purrr::map(names(data), ~dplyr::all_equal(data[[.x]],data_old[[.x]])) %>% 
-  setNames(country_details$country_name)
-purrr::map(names(data), ~dplyr::setdiff(data[[.x]],data_old[[.x]])%>% .$indicator_code %>% unique()) %>% 
-  setNames(country_details$country_name) 
+# readr::write_rds(data,"/Users/sam/COP data/PSNUxIM_20210201_1.rds", compress = c("gz"))
+data_old = readr::read_rds("/Users/sam/COP data/PSNUxIM_20210201_1.rds")
+data_old <- setNames(data_old,country_details$id)
 
+non_nulls <- purrr::map_lgl(names(data), 
+              ~ !is.null(data[[.x]]) || !is.null(data_old[[.x]]))
+names <-  names(data)[non_nulls]
+
+
+purrr::map(names, ~try(dplyr::all_equal(data[[.x]],data_old[[.x]]))) %>% 
+  setNames(datimutils::getOrgUnits(names)) 
