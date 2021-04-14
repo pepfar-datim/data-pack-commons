@@ -183,9 +183,19 @@ process_country <- function(country_uid, mechs){
   # Get the mechanisms relevant for the specifc country being processed
   # cache options required for datimvalidation function to work.
   # cache age option reverts to original after calling datim validation
-  
   mechs <-   dplyr::filter(mechs, country_uid == !!country_uid)
-  if(NROW(mechs) == 0){return(NULL)}
+  if(NROW(mechs) == 0){return( tibble::tibble( indicator_code = character(),  
+                                               psnu_uid = character(),       
+                                               mechanism_code = character(),  
+                                               type = character(),            
+                                               age_option_name = character(), 
+                                               age_option_uid = character(), 
+                                               sex_option_name = character(), 
+                                               sex_option_uid = character(),
+                                               value = double(),
+                                               kp_option_uid = character(), 
+                                               kp_option_name = character(), 
+                                               percent = double()))}
   
   # alply to call SiteDensity for each row of data_element_map (each target data element)
   # will have a historic distribution for each target, DSD/TA, and site given psnu/IM
@@ -239,7 +249,7 @@ country_details <-  datapackcommons::GetCountryLevels(base_url) %>%
 data <-  country_details[["id"]] %>% 
   purrr::map(process_country, mechs)
 data <- setNames(data,country_details$id)
-# readr::write_rds(data,"/Users/sam/COP data/PSNUxIM_20210331_1.rds", compress = c("gz"))
+# readr::write_rds(data,"/Users/sam/COP data/PSNUxIM_20210414_1.rds", compress = c("gz"))
 data_old = readr::read_rds("/Users/sam/COP data/snuxim_model_data.rds")
 data_old <- setNames(data_old,country_details$id)
 
