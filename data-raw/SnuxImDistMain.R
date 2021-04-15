@@ -201,15 +201,26 @@ process_country <- function(country_uid, mechs){
   # will have a historic distribution for each target, DSD/TA, and site given psnu/IM
   # alply uses parallel processing here 
   
- # doMC::registerDoMC(cores = 3) stopped using parallel due to warnings being hidden, 
+  doMC::registerDoMC(cores = 3) #stopped using parallel due to warnings being hidden, 
   #must refactor to include
   data <-  plyr::adply(datapackcommons::Map21Tto22T,
                      1, getSnuxIm_density,
                      datapackcommons::dim_item_sets,
                      country_uid,
-                     mechs #, .parallel = TRUE
+                     mechs , .parallel = TRUE
                      , .expand = FALSE, .id = NULL) 
-  if(NROW(data) == 0){return(NULL)}
+  if(NROW(data) == 0 || is.null(data)){return( tibble::tibble( indicator_code = character(),  
+                                                     psnu_uid = character(),       
+                                                     mechanism_code = character(),  
+                                                     type = character(),            
+                                                     age_option_name = character(), 
+                                                     age_option_uid = character(), 
+                                                     sex_option_name = character(), 
+                                                     sex_option_uid = character(),
+                                                     value = double(),
+                                                     kp_option_uid = character(), 
+                                                     kp_option_name = character(), 
+                                                     percent = double()))}
   
   data <-  data %>% 
     dplyr::group_by_at(dplyr::vars(-value)) %>% 
@@ -243,13 +254,13 @@ datapackr::loginToDATIM("~/.secrets/datim.json")
 base_url <- getOption("baseurl")
 mechs = GetFy21tMechs()
 country_details <-  datapackcommons::GetCountryLevels(base_url) %>% 
-  #dplyr::filter(country_name == "Liberia") %>% 
+#  dplyr::filter(country_name == "Burkina Faso") %>% 
   dplyr::arrange(country_name)
 
 data <-  country_details[["id"]] %>% 
   purrr::map(process_country, mechs)
 data <- setNames(data,country_details$id)
-# readr::write_rds(data,"/Users/sam/COP data/PSNUxIM_20210414_1.rds", compress = c("gz"))
+# readr::write_rds(data,"/Users/sam/COP data/PSNUxIM_20210415_1.rds", compress = c("gz"))
 data_old = readr::read_rds("/Users/sam/COP data/snuxim_model_data.rds")
 data_old <- setNames(data_old,country_details$id)
 
