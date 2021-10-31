@@ -228,7 +228,7 @@ for (ou_index in 1:NROW(operating_units)) {
     unique() %>%
     filter(!is.na(dx_id))
 
-  doMC::registerDoMC(cores = 3) # or however many cores you have access to
+  doMC::registerDoMC(cores = 5) # or however many cores you have access to
   
   include_military <- dplyr::if_else(operating_unit$country_name == "Philippines",
                  FALSE,
