@@ -58,11 +58,11 @@ ValidateDimItemSets <- function(dim_item_sets, base_url){
   }
 
 ValidateDataRequired <- function(data_required, base_url){
-  data_required %>% dplyr::filter(!is.na(A.dx_code)) %>%
-  {ValidateCodeIdPairs(base_url, .[["A.dx_code"]], .[["A.dx_id"]], "indicators")}
-  data_required %>% dplyr::filter(!is.na(B.dx_code)) %>%
-  {ValidateCodeIdPairs(base_url, .[["B.dx_code"]], .[["B.dx_id"]], "indicators")}
-  
+  # data_required %>% dplyr::filter(!is.na(A.dx_code)) %>%
+  # {ValidateCodeIdPairs(base_url, .[["A.dx_code"]], .[["A.dx_id"]], "indicators")}
+  # data_required %>% dplyr::filter(!is.na(B.dx_code)) %>%
+  # {ValidateCodeIdPairs(base_url, .[["B.dx_code"]], .[["B.dx_id"]], "indicators")}
+  # 
   data_required %>% dplyr::filter(!is.na(A.dx_name)) %>%
   {datapackcommons::ValidateNameIdPairs(.[["A.dx_name"]], 
                                         .[["A.dx_id"]], 

@@ -228,7 +228,7 @@ for (ou_index in 1:NROW(operating_units)) {
     unique() %>%
     filter(!is.na(dx_id))
 
-  doMC::registerDoMC(cores = 5) # or however many cores you have access to
+  doMC::registerDoMC(cores = 4) # or however many cores you have access to
   
   include_military <- dplyr::if_else(operating_unit$country_name == "Philippines",
                  FALSE,
@@ -270,10 +270,10 @@ for (ou_index in 1:NROW(operating_units)) {
 print(lubridate::now())
 # saveRDS(flattenDataPackModel_21(cop_data), file = paste0(output_location,"model_data_pack_input_21_20211025_1_flat.rds"))
 # saveRDS(cop_data, file = paste0(output_location,"model_data_pack_input_21_20211025_1.rds"))
-# cop_data_new=cop_data
+
 
 ### COMPARISAON CODE FOR TWO DIFFERENT OUTPUT FILES
-  # cop_data_old <- readRDS(file = paste0(output_location,"model_data_pack_input_21_20211025_1.rds"))
+
  #   operating_units <- datapackcommons::GetCountryLevels(base_url)  # %>% filter(country_name >= "Rwanda")
 # operating_units <- tibble::tribble(~id, ~country_name,
 #                                    "Asia_Regional_Data_Pack","Asia_Regional_Data_Pack",
@@ -281,83 +281,84 @@ print(lubridate::now())
 #                                    "Central_America_Data_Pack",  "Central_America_Data_Pack",
 #                                    "Western_Africa_Data_Pack", "Western_Africa_Data_Pack")
 #
-# cop_data_old=cop_data
-deltas = data.frame()
-for (operating_unit in operating_units$id) {
-  print(filter(operating_units, operating_units$id == operating_unit))
-  if (!(operating_unit %in% names(cop_data_old))) {
-    print("country not in original")
-    next
-  }
-  for (data_required_index in 1:NROW(data_required)) {
-    data_spec <-  dplyr::slice(data_required, data_required_index)
-    if (is.null(cop_data_old[[operating_unit]][[data_spec$data_pack_sheet]][[data_spec$data_pack_code]][["results"]]) &
-        is.null(cop_data_new[[operating_unit]][[data_spec$data_pack_sheet]][[data_spec$data_pack_code]][["results"]])) {
-      next
-    }
-    if (is.null(cop_data_old[[operating_unit]][[data_spec$data_pack_sheet]][[data_spec$data_pack_code]][["results"]]) &
-        !is.null(cop_data_new[[operating_unit]][[data_spec$data_pack_sheet]][[data_spec$data_pack_code]][["results"]])) {
-      print("no old but new")
-      str(data_spec)
-      print(cop_data_new[[operating_unit]][[data_spec$data_pack_sheet]][[data_spec$data_pack_code]][["results"]])
-      next
-    }
-    if (!is.null(cop_data_old[[operating_unit]][[data_spec$data_pack_sheet]][[data_spec$data_pack_code]][["results"]]) &
-        is.null(cop_data_new[[operating_unit]][[data_spec$data_pack_sheet]][[data_spec$data_pack_code]][["results"]])) {
-      print("no new but old")
-      print(data_spec)
-      str(cop_data_old[[operating_unit]][[data_spec$data_pack_sheet]][[data_spec$data_pack_code]][["results"]])
-      next
-    }
-    old_results = cop_data_old[[operating_unit]][[data_spec$data_pack_sheet]][[data_spec$data_pack_code]][["results"]] %>%
-      dplyr::select(dplyr::one_of(
-        c(
-          "sex_option_uid",
-      #    "sex_option_name",
-          "age_option_uid",
-      #    "age_option_name",
-          "kp_option_uid",
-      #    "kp_option_name",
-          "org_unit_uid",
-          "value"
-        )
-      )) %>% dplyr::filter(!is.na(value)) %>% dplyr::mutate(
-        "country_name" = dplyr::filter(operating_units, operating_units$id == operating_unit)[["country_name"]],
-        "country_uid" = operating_unit,
-        "data_pack_sheet" = data_spec$data_pack_sheet,
-        "data_pack_code" = data_spec$data_pack_code
-      )
-    new_results = cop_data_new[[operating_unit]][[data_spec$data_pack_sheet]][[data_spec$data_pack_code]][["results"]] %>%
-      dplyr::select(dplyr::one_of(
-        c(
-          "sex_option_uid",
-      #    "sex_option_name",
-          "age_option_uid",
-      #    "age_option_name",
-          "kp_option_uid",
-      #    "kp_option_name",
-          "org_unit_uid",
-          "value"
-        )
-      )) %>% dplyr::filter(!is.na(value)) %>% dplyr::mutate(
-        "country_name" = dplyr::filter(operating_units, operating_units$id == operating_unit)[["country_name"]],
-        "country_uid" = operating_unit,
-        "data_pack_sheet" = data_spec$data_pack_sheet,
-        "data_pack_code" = data_spec$data_pack_code
-      )
-    verdict <- dplyr::all_equal(old_results, new_results)
-
-    if (verdict != TRUE) {
-      old_results <- old_results %>% rename(value.old = value)
-      new_results <- new_results %>% rename(value.new = value)
-      str(data_spec$data_pack_code)
-      print(verdict)
-      deltas = full_join(old_results, new_results) %>%
-        filter(value.new != value.old |
-                 is.na(value.new) | is.na(value.old)) %>%
-        dplyr::bind_rows(deltas, .)
-    }
-  }
-}
-deltas <- deltas %>% dplyr::mutate(org_unit_name =
-                                datimvalidation::remapOUs(deltas$org_unit_uid,"ybg3MO3hcf4",mode_in = "id",mode_out = "name"))
+# cop_data_new=cop_data
+# cop_data_old <- readRDS(file = paste0(output_location,"model_data_pack_input_21_20211025_1.rds"))
+# deltas = data.frame()
+# for (operating_unit in operating_units$id) {
+#   print(filter(operating_units, operating_units$id == operating_unit))
+#   if (!(operating_unit %in% names(cop_data_old))) {
+#     print("country not in original")
+#     next
+#   }
+#   for (data_required_index in 1:NROW(data_required)) {
+#     data_spec <-  dplyr::slice(data_required, data_required_index)
+#     if (is.null(cop_data_old[[operating_unit]][[data_spec$data_pack_sheet]][[data_spec$data_pack_code]][["results"]]) &
+#         is.null(cop_data_new[[operating_unit]][[data_spec$data_pack_sheet]][[data_spec$data_pack_code]][["results"]])) {
+#       next
+#     }
+#     if (is.null(cop_data_old[[operating_unit]][[data_spec$data_pack_sheet]][[data_spec$data_pack_code]][["results"]]) &
+#         !is.null(cop_data_new[[operating_unit]][[data_spec$data_pack_sheet]][[data_spec$data_pack_code]][["results"]])) {
+#       print("no old but new")
+#       str(data_spec)
+#       print(cop_data_new[[operating_unit]][[data_spec$data_pack_sheet]][[data_spec$data_pack_code]][["results"]])
+#       next
+#     }
+#     if (!is.null(cop_data_old[[operating_unit]][[data_spec$data_pack_sheet]][[data_spec$data_pack_code]][["results"]]) &
+#         is.null(cop_data_new[[operating_unit]][[data_spec$data_pack_sheet]][[data_spec$data_pack_code]][["results"]])) {
+#       print("no new but old")
+#       print(data_spec)
+#       str(cop_data_old[[operating_unit]][[data_spec$data_pack_sheet]][[data_spec$data_pack_code]][["results"]])
+#       next
+#     }
+#     old_results = cop_data_old[[operating_unit]][[data_spec$data_pack_sheet]][[data_spec$data_pack_code]][["results"]] %>%
+#       dplyr::select(dplyr::one_of(
+#         c(
+#           "sex_option_uid",
+#       #    "sex_option_name",
+#           "age_option_uid",
+#       #    "age_option_name",
+#           "kp_option_uid",
+#       #    "kp_option_name",
+#           "org_unit_uid",
+#           "value"
+#         )
+#       )) %>% dplyr::filter(!is.na(value)) %>% dplyr::mutate(
+#         "country_name" = dplyr::filter(operating_units, operating_units$id == operating_unit)[["country_name"]],
+#         "country_uid" = operating_unit,
+#         "data_pack_sheet" = data_spec$data_pack_sheet,
+#         "data_pack_code" = data_spec$data_pack_code
+#       )
+#     new_results = cop_data_new[[operating_unit]][[data_spec$data_pack_sheet]][[data_spec$data_pack_code]][["results"]] %>%
+#       dplyr::select(dplyr::one_of(
+#         c(
+#           "sex_option_uid",
+#       #    "sex_option_name",
+#           "age_option_uid",
+#       #    "age_option_name",
+#           "kp_option_uid",
+#       #    "kp_option_name",
+#           "org_unit_uid",
+#           "value"
+#         )
+#       )) %>% dplyr::filter(!is.na(value)) %>% dplyr::mutate(
+#         "country_name" = dplyr::filter(operating_units, operating_units$id == operating_unit)[["country_name"]],
+#         "country_uid" = operating_unit,
+#         "data_pack_sheet" = data_spec$data_pack_sheet,
+#         "data_pack_code" = data_spec$data_pack_code
+#       )
+#     verdict <- dplyr::all_equal(old_results, new_results)
+# 
+#     if (verdict != TRUE) {
+#       old_results <- old_results %>% rename(value.old = value)
+#       new_results <- new_results %>% rename(value.new = value)
+#       str(data_spec$data_pack_code)
+#       print(verdict)
+#       deltas = full_join(old_results, new_results) %>%
+#         filter(value.new != value.old |
+#                  is.na(value.new) | is.na(value.old)) %>%
+#         dplyr::bind_rows(deltas, .)
+#     }
+#   }
+# }
+# deltas <- deltas %>% dplyr::mutate(org_unit_name =
+#                                 datimvalidation::remapOUs(deltas$org_unit_uid,"ybg3MO3hcf4",mode_in = "id",mode_out = "name"))
