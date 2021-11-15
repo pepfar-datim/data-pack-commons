@@ -107,7 +107,7 @@ ValidateMapT_1toT <- function(t_1_to_t, dim_item_sets, base_url){
 
   }
 
-datapackr::loginToDATIM("~/.secrets/datim.json")
+datapackr::loginToDATIM("~/.secrets/cop.json")
 base_url <- getOption("baseurl")
 wd <- getwd()
 setwd("~/Documents/GitHub/data-pack-commons")
@@ -139,6 +139,15 @@ ValidateMapT_1toT(Map21Tto22T, dim_item_sets, base_url)
 dplyr::all_equal(datapackcommons::data_required, data_required)
 dplyr::all_equal(datapackcommons::Map21Tto22T, Map21Tto22T)
 dplyr::all_equal(datapackcommons::dim_item_sets, dim_item_sets)
+dr_dif_removed <- dplyr::anti_join(datapackcommons::data_required, data_required)
+map_dif_removed <- dplyr::anti_join(datapackcommons::Map21Tto22T, Map21Tto22T)
+dim_dif_removed <- dplyr::anti_join(datapackcommons::dim_item_sets, dim_item_sets)
+dr_dif_added <- dplyr::anti_join(data_required, 
+                                 datapackcommons::data_required)
+map_dif_added <- dplyr::anti_join(Map21Tto22T, 
+                                  datapackcommons::Map21Tto22T)
+dim_dif_added <- dplyr::anti_join(dim_item_sets,
+                                  datapackcommons::dim_item_sets)
 
 usethis::use_data(dim_item_sets, overwrite = TRUE, compress = "gzip")
 usethis::use_data(data_required, overwrite = TRUE, compress = "gzip")
