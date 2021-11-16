@@ -178,8 +178,7 @@ ProcessDataRequiredRow <- function(data_spec, dim_item_sets){
 
 datapackr::loginToDATIM("/users/sam/.secrets/cop.json")
 base_url <- getOption("baseurl")
-repo_path <- "/users/sam/Documents/GitHub/COP-19-Target-Setting/"
-output_location <- "/Users/sam/COP data/COP21 Update/"
+output_location <- "/Users/sam/COP data/COP22 Update/"
 
  cop_data = list()
 # get country and prioritization level
@@ -190,7 +189,7 @@ output_location <- "/Users/sam/COP data/COP21 Update/"
  
  priority_snu_data <- 
    datapackr::getDataValueSets(c("dataElementGroup","period", "orgUnitGroup"),
-                               c("ofNbyQgD9xG","2020Oct","AVy8gJXym2D")) %>% 
+                               c("ofNbyQgD9xG","2021Oct","AVy8gJXym2D")) %>% 
    dplyr::select(org_unit_uid = org_unit, value)
  
  dreams_snu_path_members <-  
@@ -268,8 +267,8 @@ for (ou_index in 1:NROW(operating_units)) {
   }
 
 print(lubridate::now())
-# saveRDS(flattenDataPackModel_21(cop_data), file = paste0(output_location,"model_data_pack_input_21_20211025_1_flat.rds"))
-# saveRDS(cop_data, file = paste0(output_location,"model_data_pack_input_21_20211025_1.rds"))
+# saveRDS(flattenDataPackModel_21(cop_data), file = paste0(output_location,"model_data_pack_input_22_20211115_2_flat.rds"))
+# saveRDS(cop_data, file = paste0(output_location,"model_data_pack_input_22_20211115_2.rds"))
 
 
 ### COMPARISAON CODE FOR TWO DIFFERENT OUTPUT FILES
@@ -282,7 +281,7 @@ print(lubridate::now())
 #                                    "Western_Africa_Data_Pack", "Western_Africa_Data_Pack")
 #
 # cop_data_new=cop_data
-# cop_data_old <- readRDS(file = paste0(output_location,"model_data_pack_input_21_20211025_1.rds"))
+# cop_data_old <- readRDS(file = paste0(output_location,"model_data_pack_input_22_20211115_2.rds"))
 # deltas = data.frame()
 # for (operating_unit in operating_units$id) {
 #   print(filter(operating_units, operating_units$id == operating_unit))
