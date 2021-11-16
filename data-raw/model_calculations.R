@@ -267,8 +267,8 @@ for (ou_index in 1:NROW(operating_units)) {
   }
 
 print(lubridate::now())
-# saveRDS(flattenDataPackModel_21(cop_data), file = paste0(output_location,"model_data_pack_input_22_20211115_2_flat.rds"))
-# saveRDS(cop_data, file = paste0(output_location,"model_data_pack_input_22_20211115_2.rds"))
+# saveRDS(flattenDataPackModel_21(cop_data), file = paste0(output_location,"model_data_pack_input_22_20211116_1_flat.rds"))
+# saveRDS(cop_data, file = paste0(output_location,"model_data_pack_input_22_20211116_1.rds"))
 
 
 ### COMPARISAON CODE FOR TWO DIFFERENT OUTPUT FILES
@@ -359,5 +359,11 @@ print(lubridate::now())
 #     }
 #   }
 # }
-# deltas <- deltas %>% dplyr::mutate(org_unit_name =
-#                                 datimvalidation::remapOUs(deltas$org_unit_uid,"ybg3MO3hcf4",mode_in = "id",mode_out = "name"))
+# deltas <- deltas %>%
+#   dplyr::mutate(org_unit_name =
+#                   datimvalidation::remapOUs(deltas$org_unit_uid,
+#                                             "ybg3MO3hcf4",
+#                                             mode_in = "id",
+#                                             mode_out = "name"),
+#                 age =
+#                   datimutils::getCatOptions(deltas$age_option_uid))
