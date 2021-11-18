@@ -135,7 +135,7 @@ ProcessDataRequiredRow <- function(data_spec, dim_item_sets){
   }
 
   if(is.na(data_spec[[1, "calculation"]]) && data_spec[[1, "type"]] == "Numeric"){
-    return_list[["results"]] <- return_list[["A"]][["processed"]]
+    return_list[["results"]] <- return_list[["A"]][["processed"]] %>% mutate(value = round(value))
     return(return_list)
   } else if(is.na(data_spec[[1, "calculation"]]) && data_spec[[1, "type"]] == "Percent"){
     return_list[["results"]] <- return_list[["A"]][["processed"]] %>% mutate(value = value/100)
@@ -168,10 +168,17 @@ ProcessDataRequiredRow <- function(data_spec, dim_item_sets){
       str_replace_all("B", "joined_data$B") %>%
       rlang::parse_expr() %>%
       eval() %>%  mutate(joined_data, value = .)
+    
 
     calculated_data$value[is.infinite(calculated_data$value) | is.nan(calculated_data$value)] <- NA
+    if (data_spec[[1, "type"]] == "Numeric"){
+      return_list[["results"]] <- dplyr::mutate(calculated_data,
+                                                value = round(value))
+    } else {
+      return_list[["results"]] <- calculated_data
+    }
 
-    return_list[["results"]] <- calculated_data
+    
     return(return_list)
   }
 }
@@ -184,7 +191,7 @@ output_location <- "/Users/sam/COP data/COP22 Update/"
 # get country and prioritization level
  operating_units <- datapackcommons::GetCountryLevels(base_url) %>%
    dplyr::arrange(country_name) %>% 
-#    filter(country_name == "Mozambique") %>% 
+    filter(country_name == "Mozambique") %>% 
    dplyr::filter(prioritization_level != 0) # Turkmenistan has no planning/priortization level
  
  priority_snu_data <- 
@@ -281,7 +288,7 @@ print(lubridate::now())
 #                                    "Western_Africa_Data_Pack", "Western_Africa_Data_Pack")
 #
 # cop_data_new=cop_data
-# cop_data_old <- readRDS(file = paste0(output_location,"model_data_pack_input_22_20211117_1.rds"))
+# cop_data_old <- readRDS(file = paste0(output_location,"model_data_pack_input_22_20211117_2.rds"))
 # deltas = data.frame()
 # for (operating_unit in operating_units$id) {
 #   print(filter(operating_units, operating_units$id == operating_unit))
