@@ -1,0 +1,90 @@
+﻿indicator_code,dx,technical_area,technical_area_uid,num_or_den,num_or_den_uid,disagg_type,disagg_type_uid,pe,age_set,sex_set,kp_set,other_disagg,allocate
+GEND_GBV.PE.T,DE_GROUP-WTq0quAW1mf,GEND_GBV,vw3VoiA4D0s,Numerator,Som9NRMQqV7,ViolenceServiceType,QEpxdKlM3zh,2020Oct,NA,NA,NA,vt_pe,distribute
+GEND_GBV.S.T,DE_GROUP-WTq0quAW1mf,GEND_GBV,vw3VoiA4D0s,Numerator,Som9NRMQqV7,ViolenceServiceType,QEpxdKlM3zh,2020Oct,NA,NA,NA,vt_sv,distribute
+HTS_INDEX_COM.New.Neg.T,DE_GROUP-WTq0quAW1mf,HTS_INDEX,CUblPgOMGaT,Numerator,Som9NRMQqV7,IndexMod/Age/Sex/Result,xds87opkbem,2020Oct,1-50+,F/M,NA,tss_NewNeg,distribute
+HTS_INDEX_COM.New.Pos.T,DE_GROUP-WTq0quAW1mf,HTS_INDEX,CUblPgOMGaT,Numerator,Som9NRMQqV7,IndexMod/Age/Sex/Result,xds87opkbem,2020Oct,1-50+,F/M,NA,tss_NewPos,distribute
+HTS_RECENT.IndexCom.T,DE_GROUP-WTq0quAW1mf,HTS_RECENT,twyHxdQVjMC,Numerator,Som9NRMQqV7,IndexMod/Age/Sex/HIVStatus,cnlEjFkl5UZ,2020Oct,15-50+,F/M,NA,NA,distribute
+HTS_INDEX_FAC.New.Neg.T,DE_GROUP-WTq0quAW1mf,HTS_INDEX,CUblPgOMGaT,Numerator,Som9NRMQqV7,Index/Age/Sex/Result,zzNslrLngKi,2020Oct,1-50+,F/M,NA,tss_NewNeg,distribute
+HTS_INDEX_FAC.New.Pos.T,DE_GROUP-WTq0quAW1mf,HTS_INDEX,CUblPgOMGaT,Numerator,Som9NRMQqV7,Index/Age/Sex/Result,zzNslrLngKi,2020Oct,1-50+,F/M,NA,tss_NewPos,distribute
+HTS_RECENT.IndexFac.T,DE_GROUP-WTq0quAW1mf,HTS_RECENT,twyHxdQVjMC,Numerator,Som9NRMQqV7,Index/Age/Sex/HIVStatus,Tpc0Ztxae9H,2020Oct,15-50+,F/M,NA,NA,distribute
+HTS_SELF.T,DE_GROUP-WTq0quAW1mf,HTS_SELF,hGUykTtC0Xm,Numerator,Som9NRMQqV7,Age/Sex,Qbz6SrpmJ1y,2020Oct,10-50+,F/M,NA,NA,distribute
+HTS_TST.EW.Neg.T,DE_GROUP-WTq0quAW1mf,HTS_TST,f5IPTM7mieH,Numerator,Som9NRMQqV7,Emergency Ward/Age/Sex/Result,iPfNX6Ylqp1,2020Oct,1-50+,F/M,NA,tr_neg,distribute
+HTS_TST.EW.Pos.T,DE_GROUP-WTq0quAW1mf,HTS_TST,f5IPTM7mieH,Numerator,Som9NRMQqV7,Emergency Ward/Age/Sex/Result,iPfNX6Ylqp1,2020Oct,1-50+,F/M,NA,tr_pos,distribute
+HTS_RECENT.EW.T,DE_GROUP-WTq0quAW1mf,HTS_RECENT,twyHxdQVjMC,Numerator,Som9NRMQqV7,Emergency Ward/Age/Sex/HIVStatus,lJQyt3PjrVy,2020Oct,15-50+,F/M,NA,NA,distribute
+HTS_TST.Inpat.Neg.T,DE_GROUP-WTq0quAW1mf,HTS_TST,f5IPTM7mieH,Numerator,Som9NRMQqV7,Inpat/Age/Sex/Result,p6j1mfN4rjP,2020Oct,1-50+,F/M,NA,tr_neg,distribute
+HTS_TST.Inpat.Pos.T,DE_GROUP-WTq0quAW1mf,HTS_TST,f5IPTM7mieH,Numerator,Som9NRMQqV7,Inpat/Age/Sex/Result,p6j1mfN4rjP,2020Oct,1-50+,F/M,NA,tr_pos,distribute
+HTS_RECENT.Inpat.T,DE_GROUP-WTq0quAW1mf,HTS_RECENT,twyHxdQVjMC,Numerator,Som9NRMQqV7,Inpat/Age/Sex/HIVStatus,CEcYYCkTncR,2020Oct,15-50+,F/M,NA,NA,distribute
+HTS_TST.Maln.Neg.T,DE_GROUP-WTq0quAW1mf,HTS_TST,f5IPTM7mieH,Numerator,Som9NRMQqV7,Malnutrition/Age/Sex/Result,jEpJPF6IVVB,2020Oct,1-4,F/M,NA,tr_neg,distribute
+HTS_TST.Maln.Pos.T,DE_GROUP-WTq0quAW1mf,HTS_TST,f5IPTM7mieH,Numerator,Som9NRMQqV7,Malnutrition/Age/Sex/Result,jEpJPF6IVVB,2020Oct,1-4,F/M,NA,tr_pos,distribute
+HTS_TST.MobileCom.Neg.T,DE_GROUP-WTq0quAW1mf,HTS_TST,f5IPTM7mieH,Numerator,Som9NRMQqV7,MobileMod/Age/Sex/Result,Qr9eyrVLHSg,2020Oct,1-50+,F/M,NA,tr_neg,distribute
+HTS_TST.MobileCom.Pos.T,DE_GROUP-WTq0quAW1mf,HTS_TST,f5IPTM7mieH,Numerator,Som9NRMQqV7,MobileMod/Age/Sex/Result,Qr9eyrVLHSg,2020Oct,1-50+,F/M,NA,tr_pos,distribute
+HTS_RECENT.MobileCom.T,DE_GROUP-WTq0quAW1mf,HTS_RECENT,twyHxdQVjMC,Numerator,Som9NRMQqV7,MobileMod/Age/Sex/HIVStatus,EVwSAwSEfTg,2020Oct,15-50+,F/M,NA,NA,distribute
+HTS_TST.OtherCom.Neg.T,DE_GROUP-WTq0quAW1mf,HTS_TST,f5IPTM7mieH,Numerator,Som9NRMQqV7,OtherMod/Age/Sex/Result,Lhk8mjk6Yk2,2020Oct,1-50+,F/M,NA,tr_neg,distribute
+HTS_TST.OtherCom.Pos.T,DE_GROUP-WTq0quAW1mf,HTS_TST,f5IPTM7mieH,Numerator,Som9NRMQqV7,OtherMod/Age/Sex/Result,Lhk8mjk6Yk2,2020Oct,1-50+,F/M,NA,tr_pos,distribute
+HTS_RECENT.OtherCom.T,DE_GROUP-WTq0quAW1mf,HTS_RECENT,twyHxdQVjMC,Numerator,Som9NRMQqV7,OtherMod/Age/Sex/HIVStatus,G6QgzwFMWSP,2020Oct,15-50+,F/M,NA,NA,distribute
+HTS_TST.Other.Neg.T,DE_GROUP-WTq0quAW1mf,HTS_TST,f5IPTM7mieH,Numerator,Som9NRMQqV7,OtherPITC/Age/Sex/Result,E3VaSq4JOzd,2020Oct,1-50+,F/M,NA,tr_neg,distribute
+HTS_TST.Other.Pos.T,DE_GROUP-WTq0quAW1mf,HTS_TST,f5IPTM7mieH,Numerator,Som9NRMQqV7,OtherPITC/Age/Sex/Result,E3VaSq4JOzd,2020Oct,1-50+,F/M,NA,tr_pos,distribute
+HTS_RECENT.Other.T,DE_GROUP-WTq0quAW1mf,HTS_RECENT,twyHxdQVjMC,Numerator,Som9NRMQqV7,OtherPITC/Age/Sex/HIVStatus,Y3aCLwI6IU3,2020Oct,15-50+,F/M,NA,NA,distribute
+HTS_TST.Peds.Neg.T,DE_GROUP-WTq0quAW1mf,HTS_TST,f5IPTM7mieH,Numerator,Som9NRMQqV7,Pediatric/Age/Sex/Result,iFlQUEQcsfZ,2020Oct,1-4,F/M,NA,tr_neg,distribute
+HTS_TST.Peds.Pos.T,DE_GROUP-WTq0quAW1mf,HTS_TST,f5IPTM7mieH,Numerator,Som9NRMQqV7,Pediatric/Age/Sex/Result,iFlQUEQcsfZ,2020Oct,1-4,F/M,NA,tr_pos,distribute
+HTS_TST.PostANC1.Neg.T,DE_GROUP-WTq0quAW1mf,HTS_TST,f5IPTM7mieH,Numerator,Som9NRMQqV7,PMTCT PostANC/Age/Sex/Result,PTL2kxpEOg3,2020Oct,1-50+,F,NA,tr_neg,distribute
+HTS_TST.PostANC1.Pos.T,DE_GROUP-WTq0quAW1mf,HTS_TST,f5IPTM7mieH,Numerator,Som9NRMQqV7,PMTCT PostANC/Age/Sex/Result,PTL2kxpEOg3,2020Oct,1-50+,F,NA,tr_pos,distribute
+HTS_RECENT.PostANC1.T,DE_GROUP-WTq0quAW1mf,HTS_RECENT,twyHxdQVjMC,Numerator,Som9NRMQqV7,PMTCT PostANC/Age/Sex/HIVStatus,c60fuhOWPu4,2020Oct,15-50+,F,NA,NA,distribute
+HTS_TST.STI.Neg.T,DE_GROUP-WTq0quAW1mf,HTS_TST,f5IPTM7mieH,Numerator,Som9NRMQqV7,STI Clinic/Age/Sex/Result,kkfFCChSw4k,2020Oct,1-50+,F/M,NA,tr_neg,distribute
+HTS_TST.STI.Pos.T,DE_GROUP-WTq0quAW1mf,HTS_TST,f5IPTM7mieH,Numerator,Som9NRMQqV7,STI Clinic/Age/Sex/Result,kkfFCChSw4k,2020Oct,1-50+,F/M,NA,tr_pos,distribute
+HTS_RECENT.STI.T,DE_GROUP-WTq0quAW1mf,HTS_RECENT,twyHxdQVjMC,Numerator,Som9NRMQqV7,STI Clinic/Age/Sex/HIVStatus,WGV3YTTqrZ3,2020Oct,15-50+,F/M,NA,NA,distribute
+HTS_TST.VCT.Neg.T,DE_GROUP-WTq0quAW1mf,HTS_TST,f5IPTM7mieH,Numerator,Som9NRMQqV7,VCT/Age/Sex/Result,dcaYk7TXk4E,2020Oct,1-50+,F/M,NA,tr_neg,distribute
+HTS_TST.VCT.Pos.T,DE_GROUP-WTq0quAW1mf,HTS_TST,f5IPTM7mieH,Numerator,Som9NRMQqV7,VCT/Age/Sex/Result,dcaYk7TXk4E,2020Oct,1-50+,F/M,NA,tr_pos,distribute
+HTS_RECENT.VCT.T,DE_GROUP-WTq0quAW1mf,HTS_RECENT,twyHxdQVjMC,Numerator,Som9NRMQqV7,VCT/Age/Sex/HIVStatus,vYZLPZAuv8A,2020Oct,15-50+,F/M,NA,NA,distribute
+HTS_TST.KP.Neg.T,DE_GROUP-WTq0quAW1mf,HTS_TST,f5IPTM7mieH,Numerator,Som9NRMQqV7,KeyPop/Result,UkvLXoUn0wG,2020Oct,NA,NA,kp1,tr_neg,distribute
+HTS_TST.KP.Pos.T,DE_GROUP-WTq0quAW1mf,HTS_TST,f5IPTM7mieH,Numerator,Som9NRMQqV7,KeyPop/Result,UkvLXoUn0wG,2020Oct,NA,NA,kp1,tr_pos,distribute
+HTS_SELF.KP.T,DE_GROUP-WTq0quAW1mf,HTS_SELF,hGUykTtC0Xm,Numerator,Som9NRMQqV7,KeyPop,OoC9KSMqBms,2020Oct,NA,NA,kp1,NA,distribute
+HTS_RECENT.KP.T,DE_GROUP-WTq0quAW1mf,HTS_RECENT,twyHxdQVjMC,Numerator,Som9NRMQqV7,KeyPop/HIVStatus,oLVJbdHt6ou,2020Oct,NA,NA,kp1,NA,distribute
+KP_MAT.T,DE_GROUP-WTq0quAW1mf,KP_MAT,NYAJ6QkEKbC,Numerator,Som9NRMQqV7,Sex,sdHeplyj1SL,2020Oct,NA,F/M,NA,NA,distribute
+KP_PREV.T,DE_GROUP-WTq0quAW1mf,KP_PREV,Uo2vBxak9im,Numerator,Som9NRMQqV7,KeyPop,OoC9KSMqBms,2020Oct,NA,NA,kp2,NA,distribute
+OVC_HIVSTAT.T,DE_GROUP-WTq0quAW1mf,OVC_HIVSTAT,lYTgCwEjUX6,Numerator,Som9NRMQqV7,No Disagg,werJlVT6sf3,2020Oct,NA,NA,NA,NA,distribute
+OVC_SERV.Active.T,DE_GROUP-WTq0quAW1mf,OVC_SERV,RxyNwEV3oQf,Numerator,Som9NRMQqV7,Age/Sex/ProgramStatus,QG5SE83IVmL,2020Oct,<1-18+,F/M,NA,ag_a,distribute
+OVC_SERV.Grad.T,DE_GROUP-WTq0quAW1mf,OVC_SERV,RxyNwEV3oQf,Numerator,Som9NRMQqV7,Age/Sex/ProgramStatus,QG5SE83IVmL,2020Oct,<1-18+,F/M,NA,ag_g,distribute
+OVC_SERV.Prev.T,DE_GROUP-WTq0quAW1mf,OVC_SERV,RxyNwEV3oQf,Numerator,Som9NRMQqV7,Age/Sex/ProgramStatus,QG5SE83IVmL,2020Oct,5-14,F/M,NA,ag_a,distribute
+PMTCT_ART.Already.T,DE_GROUP-WTq0quAW1mf,PMTCT_ART,AaCcy7dVfWw,Numerator,Som9NRMQqV7,Age/Sex/NewExistingArt/HIVStatus,EICV6m2Ay7l,2020Oct,10-50+,F,NA,as_already,distribute
+PMTCT_ART.New.T,DE_GROUP-WTq0quAW1mf,PMTCT_ART,AaCcy7dVfWw,Numerator,Som9NRMQqV7,Age/Sex/NewExistingArt/HIVStatus,EICV6m2Ay7l,2020Oct,10-50+,F,NA,as_new,distribute
+PMTCT_EID.N.2.T,DE_GROUP-WTq0quAW1mf,PMTCT_EID,cwZbCmUvjp7,Numerator,Som9NRMQqV7,Age,fNQC7f36jre,2020Oct,<2mo,NA,NA,NA,distribute
+PMTCT_EID.N.12.T,DE_GROUP-WTq0quAW1mf,PMTCT_EID,cwZbCmUvjp7,Numerator,Som9NRMQqV7,Age,fNQC7f36jre,2020Oct,2-12mo,NA,NA,NA,distribute
+PMTCT_STAT.D.T,DE_GROUP-WTq0quAW1mf,PMTCT_STAT,BTIqHnjeG7l,Denominator,QpNj0nSuEhD,Age/Sex,Qbz6SrpmJ1y,2020Oct,10-50+,F,NA,NA,distribute
+PMTCT_STAT.N.KnownPos.T,DE_GROUP-WTq0quAW1mf,PMTCT_STAT,BTIqHnjeG7l,Numerator,Som9NRMQqV7,Age/Sex/KnownNewResult,Ua8iy6NgQks,2020Oct,10-50+,F,NA,tss_KnowPos,distribute
+PMTCT_STAT.N.New.Neg.T,DE_GROUP-WTq0quAW1mf,PMTCT_STAT,BTIqHnjeG7l,Numerator,Som9NRMQqV7,Age/Sex/KnownNewResult,Ua8iy6NgQks,2020Oct,10-50+,F,NA,tss_NewNeg,distribute
+PMTCT_STAT.N.New.Pos.T,DE_GROUP-WTq0quAW1mf,PMTCT_STAT,BTIqHnjeG7l,Numerator,Som9NRMQqV7,Age/Sex/KnownNewResult,Ua8iy6NgQks,2020Oct,10-50+,F,NA,tss_NewPos,distribute
+HTS_RECENT.PMTCT_STAT.T,DE_GROUP-WTq0quAW1mf,HTS_RECENT,twyHxdQVjMC,Numerator,Som9NRMQqV7,PMTCT ANC/Age/Sex/HIVStatus,FazeYvGkStI,2020Oct,15-50+,F,NA,NA,distribute
+PP_PREV.T,DE_GROUP-WTq0quAW1mf,PP_PREV,Fvs28dwjL6e,Numerator,Som9NRMQqV7,Age/Sex,Qbz6SrpmJ1y,2020Oct,10-50+,F/M,NA,NA,distribute
+PrEP_CURR.T,DE_GROUP-WTq0quAW1mf,PrEP_CURR,pkZRNlMgL89,Numerator,Som9NRMQqV7,Age/Sex,Qbz6SrpmJ1y,2020Oct,15-50+,F/M,NA,NA,distribute
+PrEP_CURR.KP.T,DE_GROUP-WTq0quAW1mf,PrEP_CURR,pkZRNlMgL89,Numerator,Som9NRMQqV7,KeyPop,OoC9KSMqBms,2020Oct,NA,NA,kp1,NA,distribute
+PrEP_NEW.T,DE_GROUP-WTq0quAW1mf,PrEP_NEW,gma5vVZgK49,Numerator,Som9NRMQqV7,Age/Sex,Qbz6SrpmJ1y,2020Oct,15-50+,F/M,NA,NA,distribute
+PrEP_NEW.KP.T,DE_GROUP-WTq0quAW1mf,PrEP_NEW,gma5vVZgK49,Numerator,Som9NRMQqV7,KeyPop,OoC9KSMqBms,2020Oct,NA,NA,kp1,NA,distribute
+TB_ART.Already.T,DE_GROUP-WTq0quAW1mf,TB_ART,Z6TU9Os82Yw,Numerator,Som9NRMQqV7,Age/Sex/NewExistingArt/HIVStatus,EICV6m2Ay7l,2020Oct,<1-50+,F/M,NA,as_already,distribute
+TB_ART.New.T,DE_GROUP-WTq0quAW1mf,TB_ART,Z6TU9Os82Yw,Numerator,Som9NRMQqV7,Age/Sex/NewExistingArt/HIVStatus,EICV6m2Ay7l,2020Oct,<1-50+,F/M,NA,as_new,distribute
+TB_PREV.D.Already.T,DE_GROUP-WTq0quAW1mf,TB_PREV,FfxbuFZVAM5,Denominator,QpNj0nSuEhD,Age/Sex/NewExistingArt/HIVStatus,EICV6m2Ay7l,2020Oct,<15/>15,F/M,NA,as_already,distribute
+TB_PREV.D.New.T,DE_GROUP-WTq0quAW1mf,TB_PREV,FfxbuFZVAM5,Denominator,QpNj0nSuEhD,Age/Sex/NewExistingArt/HIVStatus,EICV6m2Ay7l,2020Oct,<15/>15,F/M,NA,as_new,distribute
+TB_PREV.N.Already.T,DE_GROUP-WTq0quAW1mf,TB_PREV,FfxbuFZVAM5,Numerator,Som9NRMQqV7,Age/Sex/NewExistingArt/HIVStatus,EICV6m2Ay7l,2020Oct,<15/>15,F/M,NA,as_already,distribute
+TB_PREV.N.New.T,DE_GROUP-WTq0quAW1mf,TB_PREV,FfxbuFZVAM5,Numerator,Som9NRMQqV7,Age/Sex/NewExistingArt/HIVStatus,EICV6m2Ay7l,2020Oct,<15/>15,F/M,NA,as_new,distribute
+TB_STAT.D.T,DE_GROUP-WTq0quAW1mf,TB_STAT,rI3JlpiuwEK,Denominator,QpNj0nSuEhD,Age/Sex,Qbz6SrpmJ1y,2020Oct,<1-50+,F/M,NA,NA,distribute
+TB_STAT.N.KnownPos.T,DE_GROUP-WTq0quAW1mf,TB_STAT,rI3JlpiuwEK,Numerator,Som9NRMQqV7,Age/Sex/KnownNewResult,Ua8iy6NgQks,2020Oct,<1-50+,F/M,NA,tss_KnowPos,distribute
+TB_STAT.N.New.Neg.T,DE_GROUP-WTq0quAW1mf,TB_STAT,rI3JlpiuwEK,Numerator,Som9NRMQqV7,Age/Sex/KnownNewResult,Ua8iy6NgQks,2020Oct,<1-50+,F/M,NA,tss_NewNeg,distribute
+TB_STAT.N.New.Pos.T,DE_GROUP-WTq0quAW1mf,TB_STAT,rI3JlpiuwEK,Numerator,Som9NRMQqV7,Age/Sex/KnownNewResult,Ua8iy6NgQks,2020Oct,<1-50+,F/M,NA,tss_NewPos,distribute
+HTS_RECENT.TB.T,DE_GROUP-WTq0quAW1mf,HTS_RECENT,twyHxdQVjMC,Numerator,Som9NRMQqV7,TBClinic/Age/Sex/HIVStatus,PcsTdqSq0Id,2020Oct,15-50+,F/M,NA,NA,distribute
+TX_CURR.T,DE_GROUP-WTq0quAW1mf,TX_CURR,MvszPTQrUhy,Numerator,Som9NRMQqV7,Age/Sex/HIVStatus,pxz2gGSIQhG,2020Oct,<1-50+,F/M,NA,NA,distribute
+TX_NEW.T,DE_GROUP-WTq0quAW1mf,TX_NEW,udCop657yzi,Numerator,Som9NRMQqV7,Age/Sex/HIVStatus,pxz2gGSIQhG,2020Oct,<1-50+,F/M,NA,NA,distribute
+TX_NEW.KP.T,DE_GROUP-WTq0quAW1mf,TX_NEW,udCop657yzi,Numerator,Som9NRMQqV7,KeyPop/HIVStatus,oLVJbdHt6ou,2020Oct,NA,NA,kp1,NA,distribute
+TX_CURR.KP.T,DE_GROUP-WTq0quAW1mf,TX_CURR,MvszPTQrUhy,Numerator,Som9NRMQqV7,KeyPop/HIVStatus,oLVJbdHt6ou,2020Oct,NA,NA,kp1,NA,distribute
+TX_PVLS.D.KP.T,DE_GROUP-WTq0quAW1mf,TX_PVLS,bZOF8bon1dD,Denominator,QpNj0nSuEhD,KeyPop/HIVStatus,oLVJbdHt6ou,2020Oct,NA,NA,kp1,NA,distribute
+TX_PVLS.N.KP.T,DE_GROUP-WTq0quAW1mf,TX_PVLS,bZOF8bon1dD,Numerator,Som9NRMQqV7,KeyPop/HIVStatus,oLVJbdHt6ou,2020Oct,NA,NA,kp1,NA,distribute
+TX_PVLS.D.Routine.T,DE_GROUP-WTq0quAW1mf,TX_PVLS,bZOF8bon1dD,Denominator,QpNj0nSuEhD,Age/Sex/Indication/HIVStatus,PxGprLSHtqv,2020Oct,<1-50+,F/M,NA,ti_routine,distribute
+TX_PVLS.N.Routine.T,DE_GROUP-WTq0quAW1mf,TX_PVLS,bZOF8bon1dD,Numerator,Som9NRMQqV7,Age/Sex/Indication/HIVStatus,PxGprLSHtqv,2020Oct,<1-50+,F/M,NA,ti_routine,distribute
+TX_TB.D.Already.Neg.T,DE_GROUP-WTq0quAW1mf,TX_TB,tOiM2uxcnkj,Denominator,QpNj0nSuEhD,Age/Sex/TBScreen/NewExistingART/HIVStatus,xzHStH1s4R1,2020Oct,<15/>15,F/M,NA,tb_n_art_a,distribute
+TX_TB.D.New.Neg.T,DE_GROUP-WTq0quAW1mf,TX_TB,tOiM2uxcnkj,Denominator,QpNj0nSuEhD,Age/Sex/TBScreen/NewExistingART/HIVStatus,xzHStH1s4R1,2020Oct,<15/>15,F/M,NA,tb_n_art_n,distribute
+TX_TB.D.Already.Pos.T,DE_GROUP-WTq0quAW1mf,TX_TB,tOiM2uxcnkj,Denominator,QpNj0nSuEhD,Age/Sex/TBScreen/NewExistingART/HIVStatus,xzHStH1s4R1,2020Oct,<15/>15,F/M,NA,tb_p_art_a,distribute
+TX_TB.D.New.Pos.T,DE_GROUP-WTq0quAW1mf,TX_TB,tOiM2uxcnkj,Denominator,QpNj0nSuEhD,Age/Sex/TBScreen/NewExistingART/HIVStatus,xzHStH1s4R1,2020Oct,<15/>15,F/M,NA,tb_p_art_n,distribute
+VMMC_CIRC.Neg.T,DE_GROUP-WTq0quAW1mf,VMMC_CIRC,wdoUps1qb3V,Numerator,Som9NRMQqV7,Age/Sex/HIVStatus,pxz2gGSIQhG,2020Oct,15-50+,M,NA,tss_Neg,distribute
+VMMC_CIRC.Pos.T,DE_GROUP-WTq0quAW1mf,VMMC_CIRC,wdoUps1qb3V,Numerator,Som9NRMQqV7,Age/Sex/HIVStatus,pxz2gGSIQhG,2020Oct,15-50+,M,NA,tss_Pos,distribute
+HTS_RECENT.VMMC.T,DE_GROUP-WTq0quAW1mf,HTS_RECENT,twyHxdQVjMC,Numerator,Som9NRMQqV7,VMMC/Age/Sex/HIVStatus,mCtbMQYjHjj,2020Oct,15-50+,M,NA,NA,distribute
+VMMC_CIRC.Unk.T,DE_GROUP-WTq0quAW1mf,VMMC_CIRC,wdoUps1qb3V,Numerator,Som9NRMQqV7,Age/Sex/HIVStatus,pxz2gGSIQhG,2020Oct,15-50+,M,NA,tss_Unknown,distribute
+CXCA_SCRN.T,DE_GROUP-WTq0quAW1mf,CXCA_SCRN,qOgXk080fJH,Numerator,Som9NRMQqV7,Age/Sex/HIVStatus,pxz2gGSIQhG,2020Oct,15-50+,F,NA,NA,distribute
