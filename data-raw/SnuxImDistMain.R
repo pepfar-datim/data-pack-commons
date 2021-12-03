@@ -53,12 +53,12 @@ BuildDimensionList_DataPack <- function(data_element_map_item, dim_item_sets,
   if (mil == FALSE) {  
     # need to select all org unit types EXCEPT military because it is 
     # possible for military to be below general PSNU level in org hierarchy
+    invisible(capture.output(    non_mil_types_of_org_units <-
+                                   datimutils::getDimensions("mINJi7rR1a6",
+                                                             fields = "items[name,id]") %>%
+                                   dplyr::filter(name != "Military") %>%
+                                   .[["id"]]))
 
-    non_mil_types_of_org_units <-
-    datimutils::getDimensions("mINJi7rR1a6",
-                                 fields = "items[name,id]") %>%
-    dplyr::filter(name != "Military") %>%
-    .[["id"]]
     
     tibble::tibble(type = "filter",
                    dim_item_uid = non_mil_types_of_org_units,
@@ -87,7 +87,7 @@ GetFy21tMechs <- function(){
                                  fields = "categoryOptions[id,code]") %>%
     dplyr::rename(mechanism_co_uid = "id", mechanism_code = "code")
   
-  mechs <- paste0(base_url, "api/29/analytics.csv?dimension=SH885jaRe0o&dimension=ou:OU_GROUP-cNzfcPWEGSH;ybg3MO3hcf4&filter=pe:THIS_FINANCIAL_YEAR&filter=dx:DE_GROUP-WTq0quAW1mf&displayProperty=SHORTNAME&outputIdScheme=UID") %>% 
+  mechs <- paste0(base_url, "api/29/analytics.csv?dimension=SH885jaRe0o&dimension=ou:OU_GROUP-cNzfcPWEGSH;ybg3MO3hcf4&filter=pe:2020Oct&filter=dx:DE_GROUP-WTq0quAW1mf&displayProperty=SHORTNAME&outputIdScheme=UID") %>% 
     datapackcommons::RetryAPI("application/csv") %>% 
     httr::content() %>% 
     readr::read_csv() %>%
@@ -99,7 +99,32 @@ GetFy21tMechs <- function(){
     return(mechs)
   }
   # If I got here critical error
-  stop("Unable to get 20T mechanisms")
+  stop("Unable to get 21T mechanisms")
+}
+
+GetFy22tMechs <- function(){
+  
+  
+  #TODO modify format data for api function so I can make this call with getData_Analytics
+  
+  mech_codes <-
+    datimutils::getCategories("SH885jaRe0o",
+                              fields = "categoryOptions[id,code]") %>%
+    dplyr::rename(mechanism_co_uid = "id", mechanism_code = "code")
+  
+  mechs <- paste0(base_url, "api/29/analytics.csv?dimension=SH885jaRe0o&dimension=ou:OU_GROUP-cNzfcPWEGSH;ybg3MO3hcf4&filter=pe:2021Oct&filter=dx:DE_GROUP-QjkuCJf6lCs&displayProperty=SHORTNAME&outputIdScheme=UID") %>% 
+    datapackcommons::RetryAPI("application/csv") %>% 
+    httr::content() %>% 
+    readr::read_csv() %>%
+    dplyr::select(-Value) %>% 
+    setNames(c("mechanism_co_uid", "country_uid")) %>% 
+    dplyr::left_join(mech_codes)
+  
+  if(NROW(mechs) > 0){
+    return(mechs)
+  }
+  # If I got here critical error
+  stop("Unable to get 22T mechanisms")
 }
 
 getSnuxIm_density <- function(data_element_map_item, 
@@ -132,7 +157,9 @@ getSnuxIm_density <- function(data_element_map_item,
     datapackcommons::GetData_Analytics() %>% .[["results"]] %>% .[["Value"]] %>% sum()
   
   if(sum(data$Value) > checksum){
-    stop(paste("Internal Error: Disaggregated data greater than aggregated data in getSnuxIm_density function", sum(data$Value), checksum))
+    stop(paste("Internal Error: Disaggregated data greater than aggregated data in getSnuxIm_density function", 
+               sum(data$Value), 
+               checksum),"\n", data_element_map_item, " ")
   }
   if(sum(data$Value) < checksum){
     warning(paste("\n\nWARNING: Disaggregated data LESS than aggregated data in getSnuxIm_density function, Was PSNU level changed since last cop? ", 
@@ -203,11 +230,11 @@ process_country <- function(country_uid, mechs){
   
   doMC::registerDoMC(cores = 3) #stopped using parallel due to warnings being hidden, 
   #must refactor to include
-  data <-  plyr::adply(datapackcommons::Map21Tto22T,
+  data <-  plyr::adply(datapackcommons::Map22Tto23T,
                      1, getSnuxIm_density,
                      datapackcommons::dim_item_sets,
                      country_uid,
-                     mechs , .parallel = TRUE
+                     mechs , .parallel = FALSE
                      , .expand = FALSE, .id = NULL) 
   if(NROW(data) == 0 || is.null(data)){return( tibble::tibble( indicator_code = character(),  
                                                      psnu_uid = character(),       
@@ -250,17 +277,18 @@ devtools::install(pkg = "/Users/sam/Documents/GitHub/data-pack-commons",
 library(datapackcommons)
 library(datimutils)
 library(dplyr)
-datapackr::loginToDATIM("~/.secrets/datim.json")
+datapackr::loginToDATIM("~/.secrets/cop.json")
 base_url <- getOption("baseurl")
-mechs = GetFy21tMechs()
+mechs = GetFy22tMechs()
 country_details <-  datapackcommons::GetCountryLevels(base_url) %>% 
-#  dplyr::filter(country_name == "Burkina Faso") %>% 
+#  dplyr::filter(country_name > "Botswana") %>% 
   dplyr::arrange(country_name)
 
 data <-  country_details[["id"]] %>% 
   purrr::map(process_country, mechs)
+
 data <- setNames(data,country_details$id)
-# readr::write_rds(data,"/Users/sam/COP data/PSNUxIM_20210415_1.rds", compress = c("gz"))
+# readr::write_rds(data,"/Users/sam/COP data/PSNUxIM_202101203_COP22_baseline.rds", compress = c("gz"))
 data_old = readr::read_rds("/Users/sam/COP data/snuxim_model_data.rds")
 data_old <- setNames(data_old,country_details$id)
 
@@ -270,4 +298,9 @@ names <-  names(data)[non_nulls]
 
 
 purrr::map(names, ~try(dplyr::all_equal(data[[.x]],data_old[[.x]]))) %>% 
-  setNames(datimutils::getOrgUnits(names)) 
+  setNames(datimutils::getOrgUnits(names))
+
+deltas=purrr::map_df(names, ~try(dplyr::full_join(
+  dplyr::bind_cols(data[[.x]], tibble::tribble(~new,1)),
+  dplyr::bind_cols(data_old[[.x]], tibble::tribble(~old,1))))) %>% 
+  dplyr::filter(is.na(old) | is.na(new)) 

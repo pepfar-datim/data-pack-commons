@@ -129,12 +129,12 @@ data_required <-
 
 ValidateDataRequired(data_required, base_url)
 
-Map21Tto22T <- 
-  readr::read_csv("./data-raw/snu_x_im_distribution_configuration/21Tto22TMap.csv", 
+Map22Tto23T <- 
+  readr::read_csv("./data-raw/snu_x_im_distribution_configuration/22Tto23TMap.csv", 
                   col_types = readr::cols(.default = "c"),
                   na = c("NA")) 
 
-ValidateMapT_1toT(Map21Tto22T, dim_item_sets, base_url)
+ValidateMapT_1toT(Map22Tto23T, dim_item_sets, base_url)
 
 dplyr::all_equal(datapackcommons::data_required, data_required)
 dplyr::all_equal(datapackcommons::Map21Tto22T, Map21Tto22T)
@@ -151,7 +151,7 @@ dim_dif_added <- dplyr::anti_join(dim_item_sets,
 
 usethis::use_data(dim_item_sets, overwrite = TRUE, compress = "gzip")
 usethis::use_data(data_required, overwrite = TRUE, compress = "gzip")
-usethis::use_data(Map21Tto22T, overwrite = TRUE, compress = "gzip")
+usethis::use_data(Map22Tto23T, overwrite = TRUE, compress = "gzip")
 
 setwd(wd)
 
