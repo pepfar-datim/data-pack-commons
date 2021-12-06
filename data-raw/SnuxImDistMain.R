@@ -44,9 +44,9 @@ BuildDimensionList_DataPack <- function(data_element_map_item, dim_item_sets,
   }
   
   
-  dimension_mechanisms <- mechanisms["mechanism_co_uid"] %>% 
+  dimension_mechanisms <- mechanisms["mechanism_uid"] %>% 
     dplyr::transmute(type = "dimension",
-                     dim_item_uid = mechanism_co_uid,
+                     dim_item_uid = mechanism_uid,
                      dim_uid = "SH885jaRe0o")
   
   # remaining dimensions
@@ -85,14 +85,14 @@ GetFy21tMechs <- function(){
     mech_codes <-
     datimutils::getCategories("SH885jaRe0o",
                                  fields = "categoryOptions[id,code]") %>%
-    dplyr::rename(mechanism_co_uid = "id", mechanism_code = "code")
+    dplyr::rename(mechanism_uid = "id")
   
   mechs <- paste0(base_url, "api/29/analytics.csv?dimension=SH885jaRe0o&dimension=ou:OU_GROUP-cNzfcPWEGSH;ybg3MO3hcf4&filter=pe:2020Oct&filter=dx:DE_GROUP-WTq0quAW1mf&displayProperty=SHORTNAME&outputIdScheme=UID") %>% 
     datapackcommons::RetryAPI("application/csv") %>% 
     httr::content() %>% 
     readr::read_csv() %>%
     dplyr::select(-Value) %>% 
-    setNames(c("mechanism_co_uid", "country_uid")) %>% 
+    setNames(c("mechanism_uid", "country_uid")) %>% 
     dplyr::left_join(mech_codes)
   
   if(NROW(mechs) > 0){
@@ -107,18 +107,12 @@ GetFy22tMechs <- function(){
   
   #TODO modify format data for api function so I can make this call with getData_Analytics
   
-  mech_codes <-
-    datimutils::getCategories("SH885jaRe0o",
-                              fields = "categoryOptions[id,code]") %>%
-    dplyr::rename(mechanism_co_uid = "id", mechanism_code = "code")
-  
   mechs <- paste0(base_url, "api/29/analytics.csv?dimension=SH885jaRe0o&dimension=ou:OU_GROUP-cNzfcPWEGSH;ybg3MO3hcf4&filter=pe:2021Oct&filter=dx:DE_GROUP-QjkuCJf6lCs&displayProperty=SHORTNAME&outputIdScheme=UID") %>% 
     datapackcommons::RetryAPI("application/csv") %>% 
     httr::content() %>% 
     readr::read_csv() %>%
     dplyr::select(-Value) %>% 
-    setNames(c("mechanism_co_uid", "country_uid")) %>% 
-    dplyr::left_join(mech_codes)
+    setNames(c("mechanism_uid", "country_uid")) 
   
   if(NROW(mechs) > 0){
     return(mechs)
@@ -136,14 +130,14 @@ getSnuxIm_density <- function(data_element_map_item,
   data <-  BuildDimensionList_DataPack(data_element_map_item, 
                                        dim_item_sets,
                                        country_uid,
-                                       mechanisms["mechanism_co_uid"],
+                                       mechanisms["mechanism_uid"],
                                        mil = FALSE) %>% 
     datapackcommons::GetData_Analytics() %>% .[["results"]]
 
   data <-  BuildDimensionList_DataPack(data_element_map_item, 
                                        dim_item_sets,
                                        country_uid,
-                                       mechanisms["mechanism_co_uid"],
+                                       mechanisms["mechanism_uid"],
                                        mil = TRUE) %>% 
     datapackcommons::GetData_Analytics() %>% .[["results"]] %>% 
     dplyr::bind_rows(data)
@@ -179,13 +173,13 @@ getSnuxIm_density <- function(data_element_map_item,
                         datapackcommons::MapDimToOptions,
                         allocate = "distribute",
                         .init = data) %>% 
-    dplyr::left_join(mechanisms, by = c("Funding Mechanism" = "mechanism_co_uid")) %>% 
+    dplyr::rename("mechanism_uid" = "Funding Mechanism") %>% 
     dplyr::mutate(indicator_code = data_element_map_item$indicator_code) %>%
     dplyr::rename("value" = "Value",
                   "psnu_uid" = "Organisation unit",
                   "type" = "Support Type") %>% 
     dplyr::select(suppressWarnings(dplyr::one_of("indicator_code", "psnu_uid",
-                                "mechanism_code", "type",
+                                "mechanism_uid", "type",
                                 "age_option_name", "age_option_uid",
                                 "sex_option_name", "sex_option_uid",
                                 "kp_option_name", "kp_option_uid",
@@ -213,7 +207,7 @@ process_country <- function(country_uid, mechs){
   mechs <-   dplyr::filter(mechs, country_uid == !!country_uid)
   if(NROW(mechs) == 0){return( tibble::tibble( indicator_code = character(),  
                                                psnu_uid = character(),       
-                                               mechanism_code = character(),  
+                                               mechanism_uid = character(),  
                                                type = character(),            
                                                age_option_name = character(), 
                                                age_option_uid = character(), 
@@ -238,7 +232,7 @@ process_country <- function(country_uid, mechs){
                      , .expand = FALSE, .id = NULL) 
   if(NROW(data) == 0 || is.null(data)){return( tibble::tibble( indicator_code = character(),  
                                                      psnu_uid = character(),       
-                                                     mechanism_code = character(),  
+                                                     mechanism_uid = character(),  
                                                      type = character(),            
                                                      age_option_name = character(), 
                                                      age_option_uid = character(), 
@@ -281,15 +275,15 @@ datapackr::loginToDATIM("~/.secrets/cop.json")
 base_url <- getOption("baseurl")
 mechs = GetFy22tMechs()
 country_details <-  datapackcommons::GetCountryLevels(base_url) %>% 
-#  dplyr::filter(country_name > "Botswana") %>% 
+  dplyr::filter(country_name == "Angola") %>% 
   dplyr::arrange(country_name)
 
 data <-  country_details[["id"]] %>% 
   purrr::map(process_country, mechs)
 
 data <- setNames(data,country_details$id)
-# readr::write_rds(data,"/Users/sam/COP data/PSNUxIM_202101203_COP22_baseline.rds", compress = c("gz"))
-data_old = readr::read_rds("/Users/sam/COP data/PSNUxIM_202101203_COP22_baseline.rds")
+# readr::write_rds(data,"/Users/sam/COP data/PSNUxIM_202101206_1.rds", compress = c("gz"))
+data_old = readr::read_rds("/Users/sam/COP data/PSNUxIM_202101206_1.rds")
 data_old <- setNames(data_old,country_details$id)
 
 non_nulls <- purrr::map_lgl(names(data), 
