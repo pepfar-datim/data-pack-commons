@@ -137,15 +137,15 @@ Map22Tto23T <-
 ValidateMapT_1toT(Map22Tto23T, dim_item_sets, base_url)
 
 dplyr::all_equal(datapackcommons::data_required, data_required)
-dplyr::all_equal(datapackcommons::Map21Tto22T, Map21Tto22T)
+dplyr::all_equal(datapackcommons::Map21Tto22T, Map22Tto23T)
 dplyr::all_equal(datapackcommons::dim_item_sets, dim_item_sets)
 dr_dif_removed <- dplyr::anti_join(datapackcommons::data_required, data_required)
-map_dif_removed <- dplyr::anti_join(datapackcommons::Map21Tto22T, Map21Tto22T)
+map_dif_removed <- dplyr::anti_join(datapackcommons::Map22Tto23T, Map22Tto23T)
 dim_dif_removed <- dplyr::anti_join(datapackcommons::dim_item_sets, dim_item_sets)
 dr_dif_added <- dplyr::anti_join(data_required, 
                                  datapackcommons::data_required)
-map_dif_added <- dplyr::anti_join(Map21Tto22T, 
-                                  datapackcommons::Map21Tto22T)
+map_dif_added <- dplyr::anti_join(Map22Tto23T, 
+                                  datapackcommons::Map22Tto23T)
 dim_dif_added <- dplyr::anti_join(dim_item_sets,
                                   datapackcommons::dim_item_sets)
 
