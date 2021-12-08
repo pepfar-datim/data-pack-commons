@@ -87,7 +87,7 @@ GetFy21tMechs <- function(){
                                  fields = "categoryOptions[id,code]") %>%
     dplyr::rename(mechanism_co_uid = "id", mechanism_code = "code")
   
-  mechs <- paste0(base_url, "api/29/analytics.csv?dimension=SH885jaRe0o&dimension=ou:OU_GROUP-cNzfcPWEGSH;ybg3MO3hcf4&filter=pe:THIS_FINANCIAL_YEAR&filter=dx:DE_GROUP-WTq0quAW1mf&displayProperty=SHORTNAME&outputIdScheme=UID") %>% 
+  mechs <- paste0(base_url, "api/29/analytics.csv?dimension=SH885jaRe0o&dimension=ou:OU_GROUP-cNzfcPWEGSH;ybg3MO3hcf4&filter=pe:2020Oct&filter=dx:DE_GROUP-WTq0quAW1mf&displayProperty=SHORTNAME&outputIdScheme=UID") %>% 
     datapackcommons::RetryAPI("application/csv") %>% 
     httr::content() %>% 
     readr::read_csv() %>%
@@ -158,7 +158,7 @@ getSnuxIm_density <- function(data_element_map_item,
                   "psnu_uid" = "Organisation unit",
                   "type" = "Support Type") %>% 
     dplyr::select(suppressWarnings(dplyr::one_of("indicator_code", "psnu_uid",
-                                "mechanism_code", "type",
+                                "mechanism_code", mechanism_uid = "mechanism_co_uid", "type",
                                 "age_option_name", "age_option_uid",
                                 "sex_option_name", "sex_option_uid",
                                 "kp_option_name", "kp_option_uid",
@@ -186,7 +186,8 @@ process_country <- function(country_uid, mechs){
   mechs <-   dplyr::filter(mechs, country_uid == !!country_uid)
   if(NROW(mechs) == 0){return( tibble::tibble( indicator_code = character(),  
                                                psnu_uid = character(),       
-                                               mechanism_code = character(),  
+                                               mechanism_code = character(),
+                                               mechanism_uid = character(),
                                                type = character(),            
                                                age_option_name = character(), 
                                                age_option_uid = character(), 
@@ -207,11 +208,12 @@ process_country <- function(country_uid, mechs){
                      1, getSnuxIm_density,
                      datapackcommons::dim_item_sets,
                      country_uid,
-                     mechs , .parallel = TRUE
+                     mechs , .parallel = FALSE
                      , .expand = FALSE, .id = NULL) 
   if(NROW(data) == 0 || is.null(data)){return( tibble::tibble( indicator_code = character(),  
                                                      psnu_uid = character(),       
-                                                     mechanism_code = character(),  
+                                                     mechanism_code = character(),
+                                                     mechanism_uid = character(),
                                                      type = character(),            
                                                      age_option_name = character(), 
                                                      age_option_uid = character(), 
@@ -260,14 +262,14 @@ country_details <-  datapackcommons::GetCountryLevels(base_url) %>%
 data <-  country_details[["id"]] %>% 
   purrr::map(process_country, mechs)
 data <- setNames(data,country_details$id)
-# readr::write_rds(data,"/Users/sam/COP data/PSNUxIM_20210415_1.rds", compress = c("gz"))
-data_old = readr::read_rds("/Users/sam/COP data/snuxim_model_data.rds")
+# readr::write_rds(data,"/Users/sam/COP data/PSNUxIM_COP21_20211208_1.rds", compress = c("gz"))
+# readr::write_rds(data,"/Users/sam/COP data/psnuxim_model_data_21.rds", compress = c("gz"))
+data_old = readr::read_rds("/Users/sam/COP data/PSNUxIM_20210719_1.rds")
 data_old <- setNames(data_old,country_details$id)
 
 non_nulls <- purrr::map_lgl(names(data), 
               ~ !is.null(data[[.x]]) || !is.null(data_old[[.x]]))
 names <-  names(data)[non_nulls]
 
-
-purrr::map(names, ~try(dplyr::all_equal(data[[.x]],data_old[[.x]]))) %>% 
+purrr::map(names, ~try(isTRUE(dplyr::all_equal(data[[.x]],data_old[[.x]])))) %>% 
   setNames(datimutils::getOrgUnits(names)) 
