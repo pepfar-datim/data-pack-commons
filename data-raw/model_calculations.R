@@ -191,7 +191,7 @@ output_location <- "/Users/sam/COP data/COP22 Update/"
 # get country and prioritization level
  operating_units <- datapackcommons::GetCountryLevels(base_url) %>%
    dplyr::arrange(country_name) %>% 
-        # filter(country_name >= "Zim") %>% 
+         filter(country_name >= "Rwanda") %>% 
    dplyr::filter(prioritization_level != 0) # Turkmenistan has no planning/priortization level
  
  priority_snu_data <- 
