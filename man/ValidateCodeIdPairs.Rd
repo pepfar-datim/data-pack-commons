@@ -2,13 +2,16 @@
 % Please edit documentation in R/dhis2api.R
 \name{ValidateCodeIdPairs}
 \alias{ValidateCodeIdPairs}
-\title{ValidateCodeIdPairs(base_url, codes, ids, type)}
+\title{ValidateCodeIdPairs}
 \usage{
-ValidateCodeIdPairs(base_url, codes, ids, type)
+ValidateCodeIdPairs(
+  codes,
+  ids,
+  type,
+  d2_session = dynGet("d2_default_session", inherits = TRUE)
+)
 }
 \arguments{
-\item{base_url}{string - base address of instance (text before api/ in URL)}
-
 \item{codes}{string vector - code of spcific class of metadata - category option, indicator etc}
 
 \item{ids}{string vector - ids of specific class of metadata - category option, indicator etc}

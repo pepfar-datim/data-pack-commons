@@ -4,7 +4,13 @@
 \alias{RetryAPI}
 \title{RetryAPI(api_url, content_type, max_attempts)}
 \usage{
-RetryAPI(api_url, content_type, max_attempts = 3, timeout = 300)
+RetryAPI(
+  api_url,
+  content_type,
+  max_attempts = 3,
+  timeout = 300,
+  d2_session = dynGet("d2_default_session", inherits = TRUE)
+)
 }
 \arguments{
 \item{api_url}{string - full url for web request}

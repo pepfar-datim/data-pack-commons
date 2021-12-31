@@ -9,7 +9,7 @@ GetData_DataPack(
   org_units,
   include_military,
   dim_item_sets = datapackcommons::dim_item_sets,
-  base_url = getOption("baseurl")
+  d2_session = dynGet("d2_default_session", inherits = TRUE)
 )
 }
 \arguments{
@@ -20,8 +20,6 @@ from datapackcommons::data_required}
 or FALSE if no military org_unit (FALSE for Philippines in COP20)}
 
 \item{dim_item_sets}{datapackcommons::dim_item_sets or a subset}
-
-\item{base_url}{string - base address of instance (text before api/ in URL)}
 
 \item{country}{uid}
 }

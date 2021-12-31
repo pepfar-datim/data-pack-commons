@@ -9,7 +9,7 @@ ValidateNameIdPairs(
   ids,
   type,
   exact = TRUE,
-  base_url = getOption("baseurl")
+  d2_session = dynGet("d2_default_session", inherits = TRUE)
 )
 }
 \arguments{
@@ -21,8 +21,6 @@ ValidateNameIdPairs(
 
 \item{exact}{boolean - exact = true matches the full name in datim with the name provided
 exact = false is a case sensitive serch that the name provided is part of the name in datim}
-
-\item{base_url}{string - base address of instance (text before api/ in URL)}
 }
 \value{
 dplyr::all_equal response for exact = true or tibble of mismatches if exact = false

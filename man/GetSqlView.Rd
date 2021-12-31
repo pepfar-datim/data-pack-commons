@@ -9,7 +9,7 @@ GetSqlView(
   variable_keys = NULL,
   variable_values = NULL,
   col_types = readr::cols(.default = "c"),
-  base_url = getOption("baseurl")
+  d2_session = dynGet("d2_default_session", inherits = TRUE)
 )
 }
 \arguments{
@@ -21,8 +21,6 @@ GetSqlView(
 the related variable key}
 
 \item{col_types}{passed to readr::read_csv col_types parameter for parsing the result set}
-
-\item{base_url}{string - base address of instance (text before api/ in URL)}
 }
 \value{
 dataframe with the results of the sql view
