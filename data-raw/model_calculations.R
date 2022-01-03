@@ -183,15 +183,15 @@ ProcessDataRequiredRow <- function(data_spec, dim_item_sets){
   }
 }
 
-datapackr::loginToDATIM("/users/sam/.secrets/datim.json")
-base_url <- getOption("baseurl")
+datimutils::loginToDATIM("/users/sam/.secrets/datim.json")
+
 output_location <- "/Users/sam/COP data/COP22 Update/"
 
  cop_data = list()
 # get country and prioritization level
- operating_units <- datapackcommons::GetCountryLevels(base_url) %>%
+ operating_units <- datapackcommons::GetCountryLevels() %>%
    dplyr::arrange(country_name) %>% 
-         filter(country_name >= "Rwanda") %>% 
+         # filter(country_name >= "Rwanda") %>% 
    dplyr::filter(prioritization_level != 0) # Turkmenistan has no planning/priortization level
  
  priority_snu_data <- 
@@ -274,8 +274,8 @@ for (ou_index in 1:NROW(operating_units)) {
   }
 
 print(lubridate::now())
-# saveRDS(flattenDataPackModel_21(cop_data), file = paste0(output_location,"model_data_pack_input_22_2021129_2_flat.rds"))
-# saveRDS(cop_data, file = paste0(output_location,"model_data_pack_input_22_20211229_2.rds"))
+# saveRDS(flattenDataPackModel_21(cop_data), file = paste0(output_location,"model_data_pack_input_22_20211230_1_flat.rds"))
+# saveRDS(cop_data, file = paste0(output_location,"model_data_pack_input_22_20211230_1.rds"))
 
 
 ### COMPARISAON CODE FOR TWO DIFFERENT OUTPUT FILES
@@ -288,7 +288,7 @@ print(lubridate::now())
 #                                    "Western_Africa_Data_Pack", "Western_Africa_Data_Pack")
 #
 # cop_data_new=cop_data
-# cop_data_old <- readRDS(file = paste0(output_location,"model_data_pack_input_22_20211229_2.rds"))
+# cop_data_old <- readRDS(file = paste0(output_location,"model_data_pack_input_22_20211230_1.rds"))
 # deltas = data.frame()
 # for (operating_unit in operating_units$id) {
 #   print(filter(operating_units, operating_units$id == operating_unit))

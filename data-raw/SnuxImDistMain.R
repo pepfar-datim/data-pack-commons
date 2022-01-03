@@ -77,7 +77,8 @@ BuildDimensionList_DataPack <- function(data_element_map_item, dim_item_sets,
     }
 }
 
-GetFy21tMechs <- function(){
+GetFy21tMechs <- function(d2_session = dynGet("d2_default_session",
+                                              inherits = TRUE)){
 
   
   #TODO modify format data for api function so I can make this call with getData_Analytics
@@ -87,8 +88,9 @@ GetFy21tMechs <- function(){
                                  fields = "categoryOptions[id,code]") %>%
     dplyr::rename(mechanism_uid = "id")
   
-  mechs <- paste0(base_url, "api/29/analytics.csv?dimension=SH885jaRe0o&dimension=ou:OU_GROUP-cNzfcPWEGSH;ybg3MO3hcf4&filter=pe:2020Oct&filter=dx:DE_GROUP-WTq0quAW1mf&displayProperty=SHORTNAME&outputIdScheme=UID") %>% 
-    datapackcommons::RetryAPI("application/csv") %>% 
+  mechs <- paste0(d2_session$base_url, "api/29/analytics.csv?dimension=SH885jaRe0o&dimension=ou:OU_GROUP-cNzfcPWEGSH;ybg3MO3hcf4&filter=pe:2020Oct&filter=dx:DE_GROUP-WTq0quAW1mf&displayProperty=SHORTNAME&outputIdScheme=UID") %>% 
+    datapackcommons::RetryAPI("application/csv",
+                              d2_session = d2_session) %>% 
     httr::content() %>% 
     readr::read_csv() %>%
     dplyr::select(-Value) %>% 
@@ -102,13 +104,15 @@ GetFy21tMechs <- function(){
   stop("Unable to get 21T mechanisms")
 }
 
-GetFy22tMechs <- function(){
+GetFy22tMechs <- function(d2_session = dynGet("d2_default_session",
+                                              inherits = TRUE)){
   
   
   #TODO modify format data for api function so I can make this call with getData_Analytics
   
-  mechs <- paste0(base_url, "api/29/analytics.csv?dimension=SH885jaRe0o&dimension=ou:OU_GROUP-cNzfcPWEGSH;ybg3MO3hcf4&filter=pe:2021Oct&filter=dx:DE_GROUP-QjkuCJf6lCs&displayProperty=SHORTNAME&outputIdScheme=UID") %>% 
-    datapackcommons::RetryAPI("application/csv") %>% 
+  mechs <- paste0(d2_session$base_url, "api/29/analytics.csv?dimension=SH885jaRe0o&dimension=ou:OU_GROUP-cNzfcPWEGSH;ybg3MO3hcf4&filter=pe:2021Oct&filter=dx:DE_GROUP-QjkuCJf6lCs&displayProperty=SHORTNAME&outputIdScheme=UID") %>% 
+    datapackcommons::RetryAPI("application/csv",
+                              d2_session = d2_session) %>% 
     httr::content() %>% 
     readr::read_csv() %>%
     dplyr::select(-Value) %>% 
@@ -271,15 +275,17 @@ devtools::install(pkg = "/Users/sam/Documents/GitHub/data-pack-commons",
 library(datapackcommons)
 library(datimutils)
 library(dplyr)
-datapackr::loginToDATIM("~/.secrets/cop.json")
-base_url <- getOption("baseurl")
+datimutils::loginToDATIM("~/.secrets/datim.json")
+
 mechs = GetFy22tMechs()
-country_details <-  datapackcommons::GetCountryLevels(base_url) %>% 
+country_details <-  datapackcommons::GetCountryLevels() %>% 
   # dplyr::filter(country_name == "Rwanda") %>% 
   dplyr::arrange(country_name)
 
 data <-  country_details[["id"]] %>% 
   purrr::map(process_country, mechs)
+
+#data$ODOymOOWyl0 <- process_country("ODOymOOWyl0", mechs) 
 
 data <- setNames(data,country_details$id)
 # readr::write_rds(data,"/Users/sam/COP data/PSNUxIM_202101206_3.rds", compress = c("gz"))
