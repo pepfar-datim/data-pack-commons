@@ -279,7 +279,7 @@ datimutils::loginToDATIM("~/.secrets/datim.json")
 
 mechs = GetFy22tMechs()
 country_details <-  datapackcommons::GetCountryLevels() %>% 
-  # dplyr::filter(country_name == "Rwanda") %>% 
+   # dplyr::filter(country_name == "South Africa") %>% 
   dplyr::arrange(country_name)
 
 data <-  country_details[["id"]] %>% 
@@ -290,7 +290,7 @@ data <-  country_details[["id"]] %>%
 data <- setNames(data,country_details$id)
 # readr::write_rds(data,"/Users/sam/COP data/PSNUxIM_202101206_3.rds", compress = c("gz"))
 # readr::write_rds(data,"/Users/sam/COP data/snuxim_model_data.rds", compress = c("gz"))
-data_old = readr::read_rds("/Users/sam/COP data/PSNUxIM_202101206_2.rds")
+data_old = readr::read_rds("/Users/sam/COP data/PSNUxIM_202101206_3.rds")
 data_old <- setNames(data_old,country_details$id)
 
 non_nulls <- purrr::map_lgl(names(data), 
