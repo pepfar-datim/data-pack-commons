@@ -396,6 +396,14 @@ GetData_DataPack <- function(parameters,
   dimensions <- tibble::tribble(~type, ~dim_item_uid, ~dim_uid,
                                 "dimension", parameters$dx_id[[1]], "dx",
                                 "dimension", parameters$pe_iso[[1]], "pe")
+  if (!(parameters$dx_id %in% c("zPTqc4v5GAK",
+                                "r4zbW3owX9n"))){
+    dimensions <- #dsd and ta support types
+      dplyr::bind_rows(dimensions,
+                       tibble::tribble(~type, ~dim_item_uid, ~dim_uid,
+                                       "filter", "iM13vdNLWKb", "TWXpUVE2MqL", 
+                                       "filter", "cRAGKdWIDn4", "TWXpUVE2MqL"))
+  }
   
 # add rows to dimensions for org units
   if (!is.null(org_units)) {  
