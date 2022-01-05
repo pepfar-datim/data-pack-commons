@@ -95,7 +95,8 @@ GetFy21tMechs <- function(d2_session = dynGet("d2_default_session",
     readr::read_csv() %>%
     dplyr::select(-Value) %>% 
     setNames(c("mechanism_uid", "country_uid")) %>% 
-    dplyr::left_join(mech_codes)
+    dplyr::left_join(mech_codes) %>% 
+    dplyr::mutate(mechanism_code = datimutils::getCatOptions(mechanism_uid, fields = "code"))
   
   if(NROW(mechs) > 0){
     return(mechs)
@@ -116,7 +117,8 @@ GetFy22tMechs <- function(d2_session = dynGet("d2_default_session",
     httr::content() %>% 
     readr::read_csv() %>%
     dplyr::select(-Value) %>% 
-    setNames(c("mechanism_uid", "country_uid")) 
+    setNames(c("mechanism_uid", "country_uid")) %>% 
+    dplyr::mutate(mechanism_code = datimutils::getCatOptions(mechanism_uid, fields = "code"))
   
   if(NROW(mechs) > 0){
     return(mechs)
@@ -177,13 +179,19 @@ getSnuxIm_density <- function(data_element_map_item,
                         datapackcommons::MapDimToOptions,
                         allocate = "distribute",
                         .init = data) %>% 
-    dplyr::rename("mechanism_uid" = "Funding Mechanism") %>% 
+    dplyr::rename("mechanism_uid" = "Funding Mechanism") %>%
+    dplyr::mutate(mechanism_code = datimutils::getCatOptions(mechanism_uid, 
+                                                             fields = "code"),
+                  mechanism_uid = datimutils::getCatOptionCombos(mechanism_code,
+                                                                   by = code,
+                                                                 fields = "id"),
+                  fields = "uid") %>% 
     dplyr::mutate(indicator_code = data_element_map_item$indicator_code) %>%
     dplyr::rename("value" = "Value",
                   "psnu_uid" = "Organisation unit",
                   "type" = "Support Type") %>% 
     dplyr::select(suppressWarnings(dplyr::one_of("indicator_code", "psnu_uid",
-                                "mechanism_uid", "type",
+                                "mechanism_uid", "mechanism_code", "type",
                                 "age_option_name", "age_option_uid",
                                 "sex_option_name", "sex_option_uid",
                                 "kp_option_name", "kp_option_uid",
@@ -202,7 +210,7 @@ getSnuxIm_density <- function(data_element_map_item,
   return(data)
 }
 
-process_country <- function(country_uid, mechs){
+process_country <- function(country_uid, mechs, snu_x_im_map){
 
   print(country_uid)
   # Get the mechanisms relevant for the specifc country being processed
@@ -228,7 +236,7 @@ process_country <- function(country_uid, mechs){
   
   doMC::registerDoMC(cores = 3) #stopped using parallel due to warnings being hidden, 
   #must refactor to include
-  data <-  plyr::adply(datapackcommons::Map22Tto23T,
+  data <-  plyr::adply(snu_x_im_map,
                      1, getSnuxIm_density,
                      datapackcommons::dim_item_sets,
                      country_uid,
@@ -279,18 +287,20 @@ datimutils::loginToDATIM("~/.secrets/datim.json")
 
 mechs = GetFy22tMechs()
 country_details <-  datapackcommons::GetCountryLevels() %>% 
-   # dplyr::filter(country_name == "South Africa") %>% 
+      # dplyr::filter(country_name == "Malawi") %>% 
   dplyr::arrange(country_name)
 
 data <-  country_details[["id"]] %>% 
-  purrr::map(process_country, mechs)
+  purrr::map(process_country, mechs, datapackcommons::Map22Tto23T)
 
 #data$ODOymOOWyl0 <- process_country("ODOymOOWyl0", mechs) 
 
 data <- setNames(data,country_details$id)
-# readr::write_rds(data,"/Users/sam/COP data/PSNUxIM_20220104_1.rds", compress = c("gz"))
+# readr::write_rds(data,"/Users/sam/COP data/PSNUxIM_20220105_1.rds", compress = c("gz"))
 # readr::write_rds(data,"/Users/sam/COP data/snuxim_model_data.rds", compress = c("gz"))
-data_old = readr::read_rds("/Users/sam/COP data/PSNUxIM20220104_1.rds")
+
+# psnuxim_model_data_21.rds and psnuxim_model_data_22.rds
+data_old = readr::read_rds(file.choose())
 data_old <- setNames(data_old,country_details$id)
 
 non_nulls <- purrr::map_lgl(names(data), 
