@@ -85,11 +85,16 @@ fy_22_t  <-  getFormDetails(2022, "mer_targets") %>%
                                sep = "."),
                 fy_22_t = TRUE)
 
+fy_23_t  <-  getFormDetails(2023, "mer_targets") %>% 
+  dplyr::mutate(de.coc = paste(dataelementuid,
+                               categoryoptioncombouid,
+                               sep = "."),
+                fy_23_t = TRUE)
 
-fy_22_t_fy_21_r_de_coc <- c(fy_21_t$dataelementuid, 
-                            fy_20_r$dataelementuid,
-                            fy_21_t$de.coc,
-                            fy_20_r$de.coc) %>% unique()
+fy_22_t_fy_21_r_de_coc <- c(fy_22_t$dataelementuid, 
+                            fy_21_r$dataelementuid,
+                            fy_22_t$de.coc,
+                            fy_21_r$de.coc) %>% unique()
 
 fy_21_r_to_fy_20_r_diff <- dplyr::full_join(fy_20_r, fy_21_r) %>% 
   dplyr::arrange() %>% 
@@ -99,7 +104,9 @@ fy_22_t_to_fy_21_t_diff <- dplyr::full_join(fy_21_t, fy_22_t) %>%
   dplyr::arrange() %>% 
   dplyr::filter(is.na(fy_21_t) | is.na(fy_22_t))
 
-
+fy_23_t_to_fy_22_t_diff <- dplyr::full_join(fy_22_t, fy_23_t) %>% 
+  dplyr::arrange() %>% 
+  dplyr::filter(is.na(fy_22_t) | is.na(fy_23_t))
 
 ####################  stopped here
 
@@ -110,11 +117,11 @@ indicators_required <-
   dplyr::mutate(matching_num_elements = 
                   purrr::map(numerator_addends,
                              match,  
-                             fy_21_t_fy_20_r_de_coc),
+                             fy_22_t_fy_21_r_de_coc),
                 matching_den_elements = 
                   purrr::map(denominator_addends,
                              match,  
-                             fy_21_t_fy_20_r_de_coc),
+                             fy_22_t_fy_21_r_de_coc),
                 missing_any_elements =
                   (purrr::map2_lgl(matching_num_elements,
                                matching_num_elements,
