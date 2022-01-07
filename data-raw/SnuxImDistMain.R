@@ -244,8 +244,7 @@ process_country <- function(country_uid, mechs, snu_x_im_map){
                      mechs , .parallel = FALSE
                      , .expand = FALSE, .id = NULL) 
   if(NROW(data) == 0 || is.null(data)){return( tibble::tibble( indicator_code = character(),  
-                                                     psnu_uid = character(),
-                                                     mechanism_uid = character(),  
+                                                     psnu_uid = character(),  
                                                      mechanism_code = character(),
                                                      mechanism_uid = character(),
                                                      type = character(),            
@@ -288,21 +287,23 @@ library(datimutils)
 library(dplyr)
 datimutils::loginToDATIM("~/.secrets/datim.json")
 
-mechs = GetFy22tMechs()
+mechs = GetFy21tMechs()
 country_details <-  datapackcommons::GetCountryLevels() %>% 
       # dplyr::filter(country_name == "Malawi") %>% 
   dplyr::arrange(country_name)
 
 data <-  country_details[["id"]] %>% 
-  purrr::map(process_country, mechs, datapackcommons::Map22Tto23T)
+  purrr::map(process_country, mechs, datapackcommons::Map21Tto22T)
 
 #data$ODOymOOWyl0 <- process_country("ODOymOOWyl0", mechs) 
 
 data <- setNames(data,country_details$id)
 
-# readr::write_rds(data,"/Users/sam/COP data/PSNUxIM_20220105_1.rds", compress = c("gz"))
-# readr::write_rds(data,"/Users/sam/COP data/snuxim_model_data.rds", compress = c("gz"))
-# psnuxim_model_data_21.rds and psnuxim_model_data_22.rds
+# readr::write_rds(data,"/Users/sam/COP data/PSNUxIM_20220107_1.rds", compress = c("gz"))
+# readr::write_rds(data,"/Users/sam/COP data/psnuxim_model_data_22.rds", compress = c("gz"))
+# readr::write_rds(data,"/Users/sam/COP data/PSNUxIM_COP21_20211208_1.rds", compress = c("gz"))
+# readr::write_rds(data,"/Users/sam/COP data/psnuxim_model_data_21.rds", compress = c("gz"))
+
 
 data_old = readr::read_rds(file.choose())
 
