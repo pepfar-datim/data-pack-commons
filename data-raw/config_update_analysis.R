@@ -9,8 +9,8 @@ get_indicator_details <- function(uid){
                                "name, id, numerator, denominator") 
 }
 
-getFormDetails <- function(fiscal_yy_int, stream){
-  datapackcommons::getDatasetUids(fiscal_yy_int,stream) %>% 
+getFormDetails <- function(fiscal_yyyy_int, stream){
+  datapackr::getDatasetUids(fiscal_yyyy_int,stream) %>% 
     purrr::map(~datapackcommons::GetSqlView("DotdxKrNZxG", 
                                             c("dataSets"), 
                                             c(.x))) %>% 
@@ -57,51 +57,58 @@ parseIndicators <- function(indicator_uids){
 
 doMC::registerDoMC(cores = 5)
 
-datapackr::loginToDATIM("~/.secrets/cop.json")
-base_url <- getOption("baseurl")
+datimutils::loginToDATIM("~/.secrets/datim.json")
+
 data_required <- datapackcommons::data_required
 
 
 # get data element and category option combos 
 
-fy_20_r  <-  getFormDetails(20, "results") %>% 
+fy_20_r  <-  getFormDetails(2020, "mer_results") %>% 
   dplyr::mutate(de.coc = paste(dataelementuid,
                                categoryoptioncombouid,
                                sep = "."),
                 fy_20_r = TRUE)
-fy_19_r  <-  getFormDetails(19, "results") %>% 
+fy_21_r  <-  getFormDetails(2021, "mer_results") %>% 
   dplyr::mutate(de.coc = paste(dataelementuid,
                                categoryoptioncombouid,
                                sep = "."),
-                fy_19_r = TRUE)
-fy_21_t  <-  getFormDetails(21, "targets") %>% 
+                fy_21_r = TRUE)
+fy_21_t  <-  getFormDetails(2021, "mer_targets") %>% 
   dplyr::mutate(de.coc = paste(dataelementuid,
                                categoryoptioncombouid,
                                sep = "."),
                 fy_21_t = TRUE)
-fy_20_t  <-  getFormDetails(20, "targets") %>% 
+fy_22_t  <-  getFormDetails(2022, "mer_targets") %>% 
   dplyr::mutate(de.coc = paste(dataelementuid,
                                categoryoptioncombouid,
                                sep = "."),
-                fy_20_t = TRUE)
+                fy_22_t = TRUE)
 
+fy_23_t  <-  getFormDetails(2023, "mer_targets") %>% 
+  dplyr::mutate(de.coc = paste(dataelementuid,
+                               categoryoptioncombouid,
+                               sep = "."),
+                fy_23_t = TRUE)
 
-fy_21_t_fy_20_r_de_coc <- c(fy_21_t$dataelementuid, 
-                            fy_20_r$dataelementuid,
-                            fy_21_t$de.coc,
-                            fy_20_r$de.coc) %>% unique()
+fy_22_t_fy_21_r_de_coc <- c(fy_22_t$dataelementuid, 
+                            fy_21_r$dataelementuid,
+                            fy_22_t$de.coc,
+                            fy_21_r$de.coc) %>% unique()
 
-fy_20_r_to_fy_19_r_diff <- dplyr::full_join(fy_19_r, fy_20_r) %>% 
+fy_21_r_to_fy_20_r_diff <- dplyr::full_join(fy_20_r, fy_21_r) %>% 
   dplyr::arrange() %>% 
-  dplyr::filter(is.na(fy_20_r))
+  dplyr::filter(is.na(fy_21_r) | is.na(fy_20_r))
 
-fy_21_t_to_fy_20_t_diff <- dplyr::full_join(fy_20_t, fy_21_t) %>% 
+fy_22_t_to_fy_21_t_diff <- dplyr::full_join(fy_21_t, fy_22_t) %>% 
   dplyr::arrange() %>% 
-  dplyr::filter(is.na(fy_21_t))
+  dplyr::filter(is.na(fy_21_t) | is.na(fy_22_t))
 
+fy_23_t_to_fy_22_t_diff <- dplyr::full_join(fy_22_t, fy_23_t) %>% 
+  dplyr::arrange() %>% 
+  dplyr::filter(is.na(fy_22_t) | is.na(fy_23_t))
 
-
-
+####################  stopped here
 
 
 indicators_required <- 
@@ -110,11 +117,11 @@ indicators_required <-
   dplyr::mutate(matching_num_elements = 
                   purrr::map(numerator_addends,
                              match,  
-                             fy_21_t_fy_20_r_de_coc),
+                             fy_22_t_fy_21_r_de_coc),
                 matching_den_elements = 
                   purrr::map(denominator_addends,
                              match,  
-                             fy_21_t_fy_20_r_de_coc),
+                             fy_22_t_fy_21_r_de_coc),
                 missing_any_elements =
                   (purrr::map2_lgl(matching_num_elements,
                                matching_num_elements,

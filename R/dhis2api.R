@@ -1,63 +1,3 @@
-# devtools::check("/Users/sam/Documents/GitHub/data-pack-commons")
-# model_data_pack_input_20190201_2
-
-#' @title LoadConfig(config_path)
-#'
-#' @description Loads a JSON configuration file to access a DHIS2 instance
-#' @param config_path Path to the DHIS2 credentials file
-#' @return A parsed list of the configuration file. 
-#'
-LoadConfigFile <- function(config_path = NA) {
-  #Load from a file
-  if (!is.na(config_path)) {
-    if (file.access(config_path, mode = 4) == -1) {
-      stop(paste("Cannot read configuration located at",config_path))
-    }
-
-    dhis_config <- jsonlite::fromJSON(config_path)
-    options("baseurl" = dhis_config$dhis$baseurl)
-    options("config" = config_path)
-    return(dhis_config)
-    } else {
-      stop("You must specify a credentials file!") }
-}
-
-#' @export
-#'
-#' @description Login to DATIM
-#' @param config_path Path to the DHIS2 credentials
-#' @return boolean TRUE if log in succesful 
-DHISLogin<-function(config_path = NA) {
-  
-  dhis_config<-LoadConfigFile(config_path)
-  url <- URLencode(URL = paste0(getOption("baseurl"), "api/me"))
-  #Logging in here will give us a cookie to reuse
-  r <- httr::GET(url ,
-                 httr::authenticate(dhis_config$dhis$username, dhis_config$dhis$password),
-                 httr::timeout(60))
-  if(r$status != 200L){
-    stop("Could not authenticate you with the server!")
-  } else {
-    me <- jsonlite::fromJSON(httr::content(r,as = "text"))
-    options("organisationUnit" = me$organisationUnits$id)
-    return(TRUE)
-  }
-}
-
-#' @export
-DHISLogin_Play<-function(version) {
-  url <- URLencode(URL = paste0("https://play.dhis2.org/", version, "/api/me"))
-  #Logging in here will give us a cookie to reuse
-  r <- httr::GET(url ,
-                 httr::authenticate("admin", "district"),
-                 httr::timeout(60))
-  if(r$status != 200L){
-    stop("Could not authenticate you with the server!")
-  } else {
-    r$url %>% 
-      stringr::str_remove("api/me")
-  }
-}
 
 # #' http_was_redirected
 # #'
@@ -96,18 +36,16 @@ DHISLogin_Play<-function(version) {
 #' @return  full api response
 #'
 RetryAPI <- function(api_url, content_type, max_attempts = 3, timeout = 300,
-                     d2_session = NULL){
-  if (is.null(d2_session)){
-    handle = NULL
-  } else {
-    handle = d2_session$handle
-  }
-  
+                     d2_session = dynGet("d2_default_session",
+                                         inherits = TRUE)){
+
   for(i in 1:max_attempts){
     try({
-      response <- httr::GET(api_url, httr::timeout(timeout), handle = handle)
+      response <- httr::GET(api_url, httr::timeout(timeout), 
+                            handle = d2_session$handle)
       if (response$status_code == 200L && 
-          response$url == api_url && 
+          stringr::str_remove(response$url, ".*/api/") ==
+          stringr::str_remove(api_url,  ".*/api/") &&
           httr::http_type(response) == content_type){
         return(response)
       }
@@ -123,15 +61,18 @@ RetryAPI <- function(api_url, content_type, max_attempts = 3, timeout = 300,
 }
 
 #' @export
+#' @importFrom datimutils %.in%
 #' @title GetCountryLevels(country_names)
 #' @description Gets country uid and prioritization level using dataSetAssignments/ous
-#' @param base_url string - base address of instance (text before api/ in URL)
 #' @param countries_req list of country names to include in response
+#' @param d2_session
 #' @return dataframe with columns country_level, prioritization_level, country_name, id   
 
-GetCountryLevels <- function(base_url, countries_req = NULL){
-  response <-  paste0(base_url, "api/dataStore/dataSetAssignments/orgUnitLevels") %>%
-    RetryAPI("application/json", 20)
+GetCountryLevels <- function(countries_req = NULL,
+                             d2_session = dynGet("d2_default_session",
+                                                 inherits = TRUE)){
+  response <-  paste0(d2_session$base_url, "api/dataStore/dataSetAssignments/orgUnitLevels") %>%
+    RetryAPI("application/json", 20, d2_session = d2_session)
   
 # get api response into a data frame a reduce to columns of interest  
   countries <- response %>% httr::content(.,"text") %>%
@@ -161,12 +102,21 @@ GetCountryLevels <- function(base_url, countries_req = NULL){
   level_3_countries <- datimutils::getMetadata(organisationUnits,
                         name %.in% countries$country_name,
                         level %.in% "3",
-                        fields = "name,id")
+                        fields = "name,id",
+                        d2_session = d2_session)
+  
+  if (!is.data.frame(level_3_countries)){
+    level_3_countries <- NULL
+  }
   
   level_4_countries <- datimutils::getMetadata(organisationUnits,
                           name %.in% countries$country_name,
                           level %.in% "4",
-                          fields = "name,id")
+                          fields = "name,id",
+                          d2_session = d2_session)
+  if (!is.data.frame(level_4_countries)){
+    level_4_countries <- NULL
+  }
   
   assertthat::assert_that(NROW(level_3_countries) + NROW(level_4_countries) == NROW(countries))
 
@@ -186,12 +136,13 @@ GetCountryLevels <- function(base_url, countries_req = NULL){
 #' e.g. c("id:eq:1234","name:in:Kenya,Rwanda")
 #' @param fields - string for the fields to return structured as DHIS 2 expects,
 #' e.g. "name,id,items[name,id]"
-#' @param base_url string - base address of instance (text before api/ in URL)
+#' @param d2_session
 #' @return list of metadata details
 getMetadata <- function(end_point, 
                         filters = NULL, 
                         fields = NULL,
-                        base_url = getOption("baseurl")) {
+                        d2_session = dynGet("d2_default_session",
+                                            inherits = TRUE)) {
   
   url_filters=""
   url_fields=""
@@ -204,10 +155,11 @@ getMetadata <- function(end_point,
     url_fields <- paste0("&fields=", paste(fields,sep="",collapse=",")) %>% URLencode()
   }
   
-  web_api_call <- paste0(base_url, "api/", end_point, ".json?paging=false",
+  web_api_call <- paste0(d2_session$base_url, "api/", end_point, ".json?paging=false",
                          url_filters,
                          url_fields)
-    r <- web_api_call %>% RetryAPI("application/json", 5)
+    r <- web_api_call %>% RetryAPI("application/json", 5,
+                                   d2_session = d2_session)
     # httr::GET()
     assertthat::are_equal(r$status_code, 200L)
 #    if (r$status_code == 200L) {
@@ -227,10 +179,12 @@ getMetadata <- function(end_point,
 #' @param type string - metadata endpoint - cataegoryOptions, indicators, etc
 #' @param exact boolean - exact = true matches the full name in datim with the name provided
 #' exact = false is a case sensitive serch that the name provided is part of the name in datim
-#' @param base_url string - base address of instance (text before api/ in URL)
+#' @param d2_session
 #' @return  dplyr::all_equal response for exact = true or tibble of mismatches if exact = false
 #'
-ValidateNameIdPairs <- function(names, ids, type, exact = TRUE, base_url = getOption("baseurl")){
+ValidateNameIdPairs <- function(names, ids, type, exact = TRUE,
+                                d2_session = dynGet("d2_default_session",
+                                                    inherits = TRUE)){
   # TODO the exact and inexact paths were written at different times for different purposes, 
   # harmonize the return format
   assertthat::assert_that(is.character(names), assertthat::not_empty(names), NCOL(names) == 1,
@@ -241,7 +195,8 @@ ValidateNameIdPairs <- function(names, ids, type, exact = TRUE, base_url = getOp
   ids_csv  <-  unique(ids) %>% paste0(collapse = ",")
   response <- datimutils::getMetadata(!!type,
                                            filters = id %.in% ids_csv,
-                                           fields = "id,name")
+                                           fields = "id,name",
+                                      d2_session = d2_session)
   assertthat::has_name(response, "name")
   assertthat::has_name(response, "id")
   if (exact == TRUE){
@@ -262,16 +217,18 @@ ValidateNameIdPairs <- function(names, ids, type, exact = TRUE, base_url = getOp
   }
 
 #' @export
-#' @title ValidateCodeIdPairs(base_url, codes, ids, type)
+#' @title ValidateCodeIdPairs
 #' 
 #' @description Checks code list and paired id list (same length) and verifies they correspond to each other
-#' @param base_url string - base address of instance (text before api/ in URL)
 #' @param codes string vector - code of spcific class of metadata - category option, indicator etc
 #' @param ids string vector - ids of specific class of metadata - category option, indicator etc
 #' @param type string - metadata endpoint - cataegoryOptions, indicators, etc
+#' @param d2_session
 #' @return  dplyr::all_equal response
 #'
-ValidateCodeIdPairs <- function(base_url, codes, ids, type){
+ValidateCodeIdPairs <- function(codes, ids, type,
+                                d2_session = dynGet("d2_default_session",
+                                                    inherits = TRUE)){
   assertthat::assert_that(is.character(codes), assertthat::not_empty(codes), NCOL(codes) == 1,
                           is.character(ids),   assertthat::not_empty(ids),   NCOL(ids)   == 1,
                           assertthat::is.string(type),
@@ -279,14 +236,15 @@ ValidateCodeIdPairs <- function(base_url, codes, ids, type){
   original <- tibble::tibble(code = codes, id = ids) %>% unique()
   ids_csv <-  ids %>% unique() %>% paste0(collapse = ",")
   response <- datimutils::getMetadata(!!type,
-                                           filters = id %.in% ids_csv,
-                                           fields = "id,code")
+                                      filters = id %.in% ids_csv,
+                                      fields = "id,code",
+                                      d2_session = d2_session)
   assertthat::has_name(response, "code")
   assertthat::has_name(response, "id")
   result <-  dplyr::all_equal(original, response)
   if(result != TRUE){
     stop(list(result=result, dplyr::anti_join(original, response), dplyr::anti_join(response, original)))
-    } else{
+  } else{
     TRUE
     }
 }
@@ -301,12 +259,13 @@ ValidateCodeIdPairs <- function(base_url, codes, ids, type){
 #' @param variable_values character list - list of the variable values ordered to correspond with 
 #' the related variable key
 #' @param col_types passed to readr::read_csv col_types parameter for parsing the result set
-#' @param base_url string - base address of instance (text before api/ in URL)
+#' @param d2_session
 #' @return dataframe with the results of the sql view
 
 GetSqlView <- function(sql_view_uid, variable_keys = NULL, variable_values = NULL, 
                        col_types = readr::cols(.default = "c"),
-                       base_url = getOption("baseurl")){
+                       d2_session = dynGet("d2_default_session",
+                                           inherits = TRUE)){
   assertthat::assert_that(length(variable_keys) == length(variable_values))
   
   variable_k_v_pairs <- NULL
@@ -318,16 +277,21 @@ GetSqlView <- function(sql_view_uid, variable_keys = NULL, variable_values = NUL
       glue::glue_collapse(sep = "&") %>% paste0("?", .)
   }
   
-  api_call <- paste0(base_url, "api/sqlViews/", sql_view_uid, "/data.csv", 
+  api_call <- paste0(d2_session$base_url, 
+                     "api/sqlViews/", 
+                     sql_view_uid, 
+                     "/data.csv", 
                      variable_k_v_pairs) 
   
-  RetryAPI(api_call, "application/csv", max_attempts = 1, timeout = 600) %>% 
+  RetryAPI(api_call, "application/csv", 
+           max_attempts = 1, timeout = 600,
+           d2_session = d2_session) %>% 
     httr::content(., "text") %>% 
     readr::read_csv(col_names = TRUE, col_types = col_types)
 }
 
 #' @export
-#' @title GetData_Analytics <-  function(dimensions, base_url)
+#' @title GetData_Analytics
 #' 
 #' @description calls the analytics endpoint using the details in the dimensions parameter
 #' dataframe 
@@ -336,7 +300,7 @@ GetSqlView <- function(sql_view_uid, variable_keys = NULL, variable_values = NUL
 #' the uid of a dimension or one of the special dimension types e.g. dx, pe, ou, co. 
 #' Column dim_item_uid contains the uid of the dimension item to use which can also be
 #' a "special" uid such as DE_GROUP-zhdJiWlPvCz  
-#' @param base_url string - base address of instance (text before api/ in URL)
+#' @param d2_session
 #' @return data frame with the rows of the response
 #'
 #' @example
@@ -354,15 +318,18 @@ GetSqlView <- function(sql_view_uid, variable_keys = NULL, variable_values = NUL
 #'   datapackcommons::DHISLogin_Play("2.29")
 #'   GetData_Analytics(dimensions_sample, "https://play.dhis2.org/2.29/")
 
-GetData_Analytics <-  function(dimensions, base_url = getOption("baseurl")){
-  api_call <- paste0(base_url,  
+GetData_Analytics <-  function(dimensions,
+                               d2_session = dynGet("d2_default_session",
+                                                   inherits = TRUE)){
+  api_call <- paste0(d2_session$base_url,  
                      "api/29/analytics.json?",
                      datapackcommons::FormatForApi_Dimensions(dimensions, "type",
                                                               "dim_uid", "dim_item_uid"),
                      "&outputIdScheme=UID&hierarchyMeta=true") # gives us UIDs in response                  
   response <- api_call %>% 
     utils::URLencode()  %>%
-    RetryAPI("application/json", 3)
+    RetryAPI("application/json", 3,
+             d2_session = d2_session)
   
   content <- response %>% 
     httr::content(., "text") %>% 
@@ -399,7 +366,7 @@ GetData_Analytics <-  function(dimensions, base_url = getOption("baseurl")){
 #' @param include_military Should be TRUE if country has a military org unit,
 #' or FALSE if no military org_unit (FALSE for Philippines in COP20)
 #' @param dim_item_sets datapackcommons::dim_item_sets or a subset
-#' @param base_url string - base address of instance (text before api/ in URL)
+#' @param d2_session
 #' @return  A list with $time = time the function was called, 
 #' $api_call = api call used, and 
 #' $results = the data returnd by the analytics call
@@ -417,7 +384,8 @@ GetData_DataPack <- function(parameters,
                              org_units,
                              include_military,
                              dim_item_sets = datapackcommons::dim_item_sets,
-                             base_url = getOption("baseurl")) {
+                             d2_session = dynGet("d2_default_session",
+                                                 inherits = TRUE)) {
   
 #  assertthat::assert_that(assertthat::is.string(indicator), nchar(indicator) == 11,
   #                        assertthat::is.string(periods))
@@ -428,6 +396,14 @@ GetData_DataPack <- function(parameters,
   dimensions <- tibble::tribble(~type, ~dim_item_uid, ~dim_uid,
                                 "dimension", parameters$dx_id[[1]], "dx",
                                 "dimension", parameters$pe_iso[[1]], "pe")
+  if (!(parameters$dx_id %in% c("zPTqc4v5GAK",
+                                "r4zbW3owX9n"))){
+    dimensions <- #dsd and ta support types
+      dplyr::bind_rows(dimensions,
+                       tibble::tribble(~type, ~dim_item_uid, ~dim_uid,
+                                       "filter", "iM13vdNLWKb", "TWXpUVE2MqL", 
+                                       "filter", "cRAGKdWIDn4", "TWXpUVE2MqL"))
+  }
   
 # add rows to dimensions for org units
   if (!is.null(org_units)) {  
@@ -476,7 +452,7 @@ GetData_DataPack <- function(parameters,
                           dim_item_uid = parameters$custom_ou,
                           dim_uid = "ou") %>%
           rbind(dimensions) %>% 
-          datapackcommons::GetData_Analytics()}, 
+          datapackcommons::GetData_Analytics(d2_session = d2_session)}, 
           silent = TRUE) 
 
     if(is.error(results_custom) || 
@@ -507,7 +483,7 @@ GetData_DataPack <- function(parameters,
                                   dim_uid = "mINJi7rR1a6") %>%
     rbind(c("dimension", "OU_GROUP-AVy8gJXym2D", "ou")) %>%  # COP Prioritization SNU) dimensions
     rbind(dimensions) %>% 
-    datapackcommons::GetData_Analytics() 
+    datapackcommons::GetData_Analytics(d2_session = d2_session) 
   
   api_call <- results_psnu[["api_call"]]
   results_psnu <-  results_psnu[["results"]]

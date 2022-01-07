@@ -1,7 +1,7 @@
 Package: datapackcommons
 Type: Package
 Title: Common Utilities for with with the PEPFAR DataPack
-Version: 0.2.3
+Version: 0.2.4
 Author: Who wrote it
 Maintainer: The package maintainer <yourself@somewhere.net>
 Description: More about what it does (maybe more than one line)
@@ -23,7 +23,8 @@ Imports: assertthat,
     rlist,
     stringr,
     tibble,
-    tidyr
+    tidyr,
+    datimutils
 Suggests: 
     doMC,
     httptest,

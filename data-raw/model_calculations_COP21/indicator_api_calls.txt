@@ -1,0 +1,2 @@
+https://cop-test.datim.org/api/metadata?indicatorGroups=true&filter=name:like:COP%2021
+https://cop-test.datim.org/api/metadata?indicators=true&filter=indicatorGroups.name:like:COP%2021

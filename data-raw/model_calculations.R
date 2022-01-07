@@ -135,7 +135,7 @@ ProcessDataRequiredRow <- function(data_spec, dim_item_sets){
   }
 
   if(is.na(data_spec[[1, "calculation"]]) && data_spec[[1, "type"]] == "Numeric"){
-    return_list[["results"]] <- return_list[["A"]][["processed"]]
+    return_list[["results"]] <- return_list[["A"]][["processed"]] %>% mutate(value = round(value))
     return(return_list)
   } else if(is.na(data_spec[[1, "calculation"]]) && data_spec[[1, "type"]] == "Percent"){
     return_list[["results"]] <- return_list[["A"]][["processed"]] %>% mutate(value = value/100)
@@ -168,29 +168,35 @@ ProcessDataRequiredRow <- function(data_spec, dim_item_sets){
       str_replace_all("B", "joined_data$B") %>%
       rlang::parse_expr() %>%
       eval() %>%  mutate(joined_data, value = .)
+    
 
     calculated_data$value[is.infinite(calculated_data$value) | is.nan(calculated_data$value)] <- NA
+    if (data_spec[[1, "type"]] == "Numeric"){
+      return_list[["results"]] <- dplyr::mutate(calculated_data,
+                                                value = round(value))
+    } else {
+      return_list[["results"]] <- calculated_data
+    }
 
-    return_list[["results"]] <- calculated_data
+    
     return(return_list)
   }
 }
 
-datapackr::loginToDATIM("/users/sam/.secrets/datim.json")
-base_url <- getOption("baseurl")
-repo_path <- "/users/sam/Documents/GitHub/COP-19-Target-Setting/"
-output_location <- "/Users/sam/COP data/COP21 Update/"
+datimutils::loginToDATIM("/users/sam/.secrets/datim.json")
+
+output_location <- "/Users/sam/COP data/COP22 Update/"
 
  cop_data = list()
 # get country and prioritization level
- operating_units <- datapackcommons::GetCountryLevels(base_url) %>%
+ operating_units <- datapackcommons::GetCountryLevels() %>%
    dplyr::arrange(country_name) %>% 
-#    filter(country_name == "Rwanda") %>% 
+          # filter(country_name <= "Eswatini") %>% 
    dplyr::filter(prioritization_level != 0) # Turkmenistan has no planning/priortization level
  
  priority_snu_data <- 
    datapackr::getDataValueSets(c("dataElementGroup","period", "orgUnitGroup"),
-                               c("ofNbyQgD9xG","2020Oct","AVy8gJXym2D")) %>% 
+                               c("ofNbyQgD9xG","2021Oct","AVy8gJXym2D")) %>% 
    dplyr::select(org_unit_uid = org_unit, value)
  
  dreams_snu_path_members <-  
@@ -228,7 +234,7 @@ for (ou_index in 1:NROW(operating_units)) {
     unique() %>%
     filter(!is.na(dx_id))
 
-  doMC::registerDoMC(cores = 3) # or however many cores you have access to
+  doMC::registerDoMC(cores = 4) # or however many cores you have access to
   
   include_military <- dplyr::if_else(operating_unit$country_name == "Philippines",
                  FALSE,
@@ -268,12 +274,12 @@ for (ou_index in 1:NROW(operating_units)) {
   }
 
 print(lubridate::now())
-# saveRDS(flattenDataPackModel_21(cop_data), file = paste0(output_location,"model_data_pack_input_21_20210714_1_flat.rds"))
-# saveRDS(cop_data, file = paste0(output_location,"model_data_pack_input_21_20210714_1.rds"))
-# cop_data_new=cop_data
+# saveRDS(flattenDataPackModel_21(cop_data), file = paste0(output_location,"model_data_pack_input_22_20220106_1_flat.rds"))
+# saveRDS(cop_data, file = paste0(output_location,"model_data_pack_input_22_20220106_1.rds"))
+
 
 ### COMPARISAON CODE FOR TWO DIFFERENT OUTPUT FILES
-  # cop_data_old <- readRDS(file = paste0(output_location,"model_data_pack_input_21_20210714_1.rds"))
+
  #   operating_units <- datapackcommons::GetCountryLevels(base_url)  # %>% filter(country_name >= "Rwanda")
 # operating_units <- tibble::tribble(~id, ~country_name,
 #                                    "Asia_Regional_Data_Pack","Asia_Regional_Data_Pack",
@@ -281,7 +287,8 @@ print(lubridate::now())
 #                                    "Central_America_Data_Pack",  "Central_America_Data_Pack",
 #                                    "Western_Africa_Data_Pack", "Western_Africa_Data_Pack")
 #
-# cop_data_old=cop_data
+# cop_data_new=cop_data
+# cop_data_old <- readRDS(file = paste0(output_location,"model_data_pack_input_22_20220106_1.rds"))
 # deltas = data.frame()
 # for (operating_unit in operating_units$id) {
 #   print(filter(operating_units, operating_units$id == operating_unit))
@@ -359,5 +366,11 @@ print(lubridate::now())
 #     }
 #   }
 # }
-# deltas <- deltas %>% dplyr::mutate(org_unit_name =
-#                                 datimvalidation::remapOUs(deltas$org_unit_uid,"ybg3MO3hcf4",mode_in = "id",mode_out = "name"))
+# deltas <- deltas %>%
+#   dplyr::mutate(org_unit_name =
+#                   datimvalidation::remapOUs(deltas$org_unit_uid,
+#                                             "ybg3MO3hcf4",
+#                                             mode_in = "id",
+#                                             mode_out = "name"),
+#                 age =
+#                   datimutils::getCatOptions(deltas$age_option_uid))

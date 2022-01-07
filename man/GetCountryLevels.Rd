@@ -4,11 +4,12 @@
 \alias{GetCountryLevels}
 \title{GetCountryLevels(country_names)}
 \usage{
-GetCountryLevels(base_url, countries_req = NULL)
+GetCountryLevels(
+  countries_req = NULL,
+  d2_session = dynGet("d2_default_session", inherits = TRUE)
+)
 }
 \arguments{
-\item{base_url}{string - base address of instance (text before api/ in URL)}
-
 \item{countries_req}{list of country names to include in response}
 }
 \value{

@@ -8,7 +8,7 @@ getMetadata(
   end_point,
   filters = NULL,
   fields = NULL,
-  base_url = getOption("baseurl")
+  d2_session = dynGet("d2_default_session", inherits = TRUE)
 )
 }
 \arguments{
@@ -20,8 +20,6 @@ e.g. c("id:eq:1234","name:in:Kenya,Rwanda")}
 
 \item{fields}{- string for the fields to return structured as DHIS 2 expects,
 e.g. "name,id,items[name,id]"}
-
-\item{base_url}{string - base address of instance (text before api/ in URL)}
 }
 \value{
 list of metadata details

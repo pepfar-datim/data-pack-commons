@@ -2,9 +2,12 @@
 % Please edit documentation in R/dhis2api.R
 \name{GetData_Analytics}
 \alias{GetData_Analytics}
-\title{GetData_Analytics <-  function(dimensions, base_url)}
+\title{GetData_Analytics}
 \usage{
-GetData_Analytics(dimensions, base_url = getOption("baseurl"))
+GetData_Analytics(
+  dimensions,
+  d2_session = dynGet("d2_default_session", inherits = TRUE)
+)
 }
 \arguments{
 \item{dimensions}{data frame - must contain columns named "type", "dim_uid", 
@@ -12,8 +15,6 @@ and "dim_item_uid". Type column contains "filter" or "dimension". dim_uid contai
 the uid of a dimension or one of the special dimension types e.g. dx, pe, ou, co. 
 Column dim_item_uid contains the uid of the dimension item to use which can also be
 a "special" uid such as DE_GROUP-zhdJiWlPvCz}
-
-\item{base_url}{string - base address of instance (text before api/ in URL)}
 }
 \value{
 data frame with the rows of the response

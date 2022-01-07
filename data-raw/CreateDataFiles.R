@@ -7,7 +7,7 @@ require(tidyr)
 require(dplyr)
 
 ValidateDimItems <-
-  function(data, dim_uid_colname, item_name_colname, item_uid_colname, base_url) {
+  function(data, dim_uid_colname, item_name_colname, item_uid_colname) {
     # validate dimension item names and ids
     # 1 - Get items for all dimensions listed
     api_names_ids <- data[[dim_uid_colname]] %>% 
@@ -30,7 +30,7 @@ ValidateDimItems <-
     }
   }  
 
-ValidateDimItemSets <- function(dim_item_sets, base_url){
+ValidateDimItemSets <- function(dim_item_sets){
   
 # validate dimension names and ids
   dim_item_sets %>% dplyr::filter(!is.na(dim_uid), dim_uid != "co") %>% 
@@ -39,7 +39,7 @@ ValidateDimItemSets <- function(dim_item_sets, base_url){
 
 # validate dimension item names and ids
   dim_item_sets %>% dplyr::filter(dim_uid != "co") %>%
-  ValidateDimItems("dim_uid", "dim_item_name", "dim_item_uid", base_url)
+  ValidateDimItems("dim_uid", "dim_item_name", "dim_item_uid")
   
 # validate category option names and ids
   dim_item_sets %>% dplyr::filter(!is.na(.$option_uid)) %>%  
@@ -57,24 +57,22 @@ ValidateDimItemSets <- function(dim_item_sets, base_url){
   
   }
 
-ValidateDataRequired <- function(data_required, base_url){
-  data_required %>% dplyr::filter(!is.na(A.dx_code)) %>%
-  {ValidateCodeIdPairs(base_url, .[["A.dx_code"]], .[["A.dx_id"]], "indicators")}
-  data_required %>% dplyr::filter(!is.na(B.dx_code)) %>%
-  {ValidateCodeIdPairs(base_url, .[["B.dx_code"]], .[["B.dx_id"]], "indicators")}
-  
+ValidateDataRequired <- function(data_required){
+  # data_required %>% dplyr::filter(!is.na(A.dx_code)) %>%
+  # {ValidateCodeIdPairs(base_url, .[["A.dx_code"]], .[["A.dx_id"]], "indicators")}
+  # data_required %>% dplyr::filter(!is.na(B.dx_code)) %>%
+  # {ValidateCodeIdPairs(base_url, .[["B.dx_code"]], .[["B.dx_id"]], "indicators")}
+  # 
   data_required %>% dplyr::filter(!is.na(A.dx_name)) %>%
   {datapackcommons::ValidateNameIdPairs(.[["A.dx_name"]], 
                                         .[["A.dx_id"]], 
-                                        "indicators", 
-                                        base_url = base_url)} %>% 
+                                        "indicators")} %>% 
     assertthat::assert_that()
   
   data_required %>% dplyr::filter(!is.na(B.dx_name)) %>%
   {datapackcommons::ValidateNameIdPairs(.[["B.dx_name"]], 
                                         .[["B.dx_id"]], 
-                                        "indicators", 
-                                        base_url = base_url)} %>% 
+                                        "indicators")} %>% 
     assertthat::assert_that()
   
   
@@ -87,16 +85,16 @@ ValidateDataRequired <- function(data_required, base_url){
   # data_required %>% ValidateDimItems("B.add_dim_1_uid", "B.add_dim_1_items", "B.add_dim_1_items_uid", base_url)
 }
 
-ValidateMapT_1toT <- function(t_1_to_t, dim_item_sets, base_url){
+ValidateMapT_1toT <- function(t_1_to_t, dim_item_sets){
   
   t_1_to_t %>% mutate(dim_uid_colname = "LxhLO68FcXm") %>% 
-  ValidateDimItems("dim_uid_colname", "technical_area", "technical_area_uid", base_url) 
+  ValidateDimItems("dim_uid_colname", "technical_area", "technical_area_uid") 
   
   t_1_to_t %>% mutate(dim_uid_colname = "lD2x0c8kywj") %>% 
-    ValidateDimItems("dim_uid_colname", "num_or_den", "num_or_den_uid", base_url) 
+    ValidateDimItems("dim_uid_colname", "num_or_den", "num_or_den_uid") 
       
   t_1_to_t %>% mutate(dim_uid_colname = "HWPJnUTMjEq") %>% 
-    ValidateDimItems("dim_uid_colname", "disagg_type", "disagg_type_uid", base_url) 
+    ValidateDimItems("dim_uid_colname", "disagg_type", "disagg_type_uid") 
   
 # chack for matching model sets in Dimension item sets
   c(t_1_to_t$age_set, t_1_to_t$sex_set, t_1_to_t$kp_set, t_1_to_t$other_disagg) %>% 
@@ -107,8 +105,8 @@ ValidateMapT_1toT <- function(t_1_to_t, dim_item_sets, base_url){
 
   }
 
-datapackr::loginToDATIM("~/.secrets/datim.json")
-base_url <- getOption("baseurl")
+datimutils::loginToDATIM("~/.secrets/datim.json")
+
 wd <- getwd()
 setwd("~/Documents/GitHub/data-pack-commons")
 
@@ -120,29 +118,38 @@ dim_item_sets <- readr::read_csv("./data-raw/model_calculations/dimension_item_s
   dplyr::mutate(model_sets = stringr::str_split(model_sets,";")) %>%
   tidyr::unnest(model_sets)
 
-ValidateDimItemSets(dim_item_sets, base_url)
+ValidateDimItemSets(dim_item_sets)
 
 data_required <- 
   readr::read_csv("./data-raw/model_calculations/data_required.csv", 
                   col_types = readr::cols(.default = "c", A.value_na = "d", B.value_na = "d"),
                   na = c("NA")) %>% select(-data_pack_type)
 
-ValidateDataRequired(data_required, base_url)
+ValidateDataRequired(data_required)
 
-Map21Tto22T <- 
-  readr::read_csv("./data-raw/snu_x_im_distribution_configuration/21Tto22TMap.csv", 
+Map22Tto23T <- 
+  readr::read_csv("./data-raw/snu_x_im_distribution_configuration/22Tto23TMap.csv", 
                   col_types = readr::cols(.default = "c"),
                   na = c("NA")) 
 
-ValidateMapT_1toT(Map21Tto22T, dim_item_sets, base_url)
+ValidateMapT_1toT(Map22Tto23T, dim_item_sets)
 
 dplyr::all_equal(datapackcommons::data_required, data_required)
-dplyr::all_equal(datapackcommons::Map21Tto22T, Map21Tto22T)
+dplyr::all_equal(datapackcommons::Map22Tto23T, Map22Tto23T)
 dplyr::all_equal(datapackcommons::dim_item_sets, dim_item_sets)
+dr_dif_removed <- dplyr::anti_join(datapackcommons::data_required, data_required)
+map_dif_removed <- dplyr::anti_join(datapackcommons::Map22Tto23T, Map22Tto23T)
+dim_dif_removed <- dplyr::anti_join(datapackcommons::dim_item_sets, dim_item_sets)
+dr_dif_added <- dplyr::anti_join(data_required, 
+                                 datapackcommons::data_required)
+map_dif_added <- dplyr::anti_join(Map22Tto23T, 
+                                  datapackcommons::Map22Tto23T)
+dim_dif_added <- dplyr::anti_join(dim_item_sets,
+                                  datapackcommons::dim_item_sets)
 
 usethis::use_data(dim_item_sets, overwrite = TRUE, compress = "gzip")
 usethis::use_data(data_required, overwrite = TRUE, compress = "gzip")
-usethis::use_data(Map21Tto22T, overwrite = TRUE, compress = "gzip")
+usethis::use_data(Map22Tto23T, overwrite = TRUE, compress = "gzip")
 
 setwd(wd)
 
