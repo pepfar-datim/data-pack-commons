@@ -287,26 +287,26 @@ library(datimutils)
 library(dplyr)
 datimutils::loginToDATIM("~/.secrets/datim.json")
 
-mechs = GetFy21tMechs()
+mechs = GetFy22tMechs()
 country_details <-  datapackcommons::GetCountryLevels() %>% 
       # dplyr::filter(country_name == "Malawi") %>% 
   dplyr::arrange(country_name)
 
 data <-  country_details[["id"]] %>% 
-  purrr::map(process_country, mechs, datapackcommons::Map21Tto22T)
+  purrr::map(process_country, mechs, datapackcommons::Map22Tto23T)
 
 #data$ODOymOOWyl0 <- process_country("ODOymOOWyl0", mechs) 
 
 data <- setNames(data,country_details$id)
 
-# readr::write_rds(data,"/Users/sam/COP data/PSNUxIM_20220107_1.rds", compress = c("gz"))
+# readr::write_rds(data,"/Users/sam/COP data/PSNUxIM_20220110_1.rds", compress = c("gz"))
 # readr::write_rds(data,"/Users/sam/COP data/psnuxim_model_data_22.rds", compress = c("gz"))
-# readr::write_rds(data,"/Users/sam/COP data/PSNUxIM_COP21_20211208_1.rds", compress = c("gz"))
+# readr::write_rds(data,"/Users/sam/COP data/PSNUxIM_COP21_20220107_1.rds", compress = c("gz"))
 # readr::write_rds(data,"/Users/sam/COP data/psnuxim_model_data_21.rds", compress = c("gz"))
 
 
 data_old = readr::read_rds(file.choose())
-
+# data_old = data_old$lZsCb6y0KDX
 data_old <- setNames(data_old,country_details$id)
 
 non_nulls <- purrr::map_lgl(names(data), 

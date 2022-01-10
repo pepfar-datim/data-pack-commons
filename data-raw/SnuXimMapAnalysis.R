@@ -2,7 +2,7 @@ library(datapackr)
 library(magrittr)
 library(tidyverse)
 
-getStandardDataElementGroups <- function(base_url = getOption("baseurl")){
+getStandardDataElementGroups <- function(){
   datapackcommons::GetSqlView("m7qxbPHsikm") %>% 
     dplyr::select(data_element = dataelementname,
                   data_element_uid = dataelementuid,  
@@ -35,49 +35,50 @@ getDataSets_Detailed <- function(dataset_uids) {
     dplyr::left_join(getStandardDataElementGroups())
 }
 
-secrets <- "/Users/sam/.secrets/datim.json"
-datapackr::loginToDATIM(secrets)
-base_url <- getOption("baseurl")
+secrets <- "/Users/sam/.secrets/cop.json"
+datimutils::loginToDATIM(secrets)
+base_url <- d2_default_session
 
-fy_21_t <- datapackcommons::getDatasetUids("21", "targets") %>% 
+fy_22_t <- datapackr::getDatasetUids(2022, "mer_targets") %>% 
   getDataSets_Detailed() %>%
   dplyr::select(-dataset) %>% 
   distinct() 
   
-fy_20_t <- datapackcommons::getDatasetUids("20", "targets") %>% 
+fy_21_t <- datapackr::getDatasetUids(2021, "mer_targets") %>% 
   getDataSets_Detailed() %>% 
   dplyr::select(-dataset) %>% 
   distinct()
 
-fy_22_t <- datapackcommons::getDatasetUids("22", "targets") %>% 
+fy_23_t <- datapackr::getDatasetUids(2023, "mer_targets") %>% 
   getDataSets_Detailed() %>% 
   dplyr::select(-dataset) %>% 
   distinct()
 
 
-dif_20T_22T <- dplyr::setdiff(fy_22_t, fy_20_t)
-dif_21T_22T <- dplyr::setdiff(fy_22_t, fy_21_t)
+dif_21T_23T <- dplyr::setdiff(fy_23_t, fy_21_t)
+dif_22T_23T <- dplyr::setdiff(fy_23_t, fy_22_t)
 
-match_20T_22T <- dplyr::intersect(fy_22_t, fy_20_t)
-match_21T_22T <- dplyr::intersect(fy_22_t, fy_21_t)
+match_21T_23T <- dplyr::intersect(fy_23_t, fy_21_t)
+match_22T_23T <- dplyr::intersect(fy_23_t, fy_22_t)
 
 
-schema <- datapackr::cop21_data_pack_schema %>% dplyr::filter(col_type == "target"
-                                                                        & dataset == "mer")
+schema <- datapackr::cop22_data_pack_schema %>% dplyr::filter(col_type == "target"
+                                                              & dataset == "mer"
+                                                              & sheet_name != "PSNUxIM")
 
-dplyr::setdiff(c(schema$dataelement_dsd, schema$dataelement_ta), fy_21_t$data_element_uid)
-dplyr::setdiff(fy_21_t$data_element_uid, c(schema$dataelement_dsd, schema$dataelement_ta))
+dplyr::setdiff(c(schema$dataelement_dsd, schema$dataelement_ta), fy_22_t$data_element_uid)
+dplyr::setdiff(fy_22_t$data_element_uid, c(schema$dataelement_dsd, schema$dataelement_ta))
 
-map <- datapackcommons::Map21Tto22T
+map <- datapackcommons::Map22Tto23T
 
-temp =dplyr::full_join(fy_22_t,map, by = c(technical_area_uid ="technical_area_uid",
+temp =dplyr::full_join(fy_23_t,map, by = c(technical_area_uid ="technical_area_uid",
                                      disaggregation_type_uid = "disagg_type_uid",
                                      numerator_denominator_uid = "num_or_den_uid"))
 names(map)
 
+##########
 
-
-data = readr::read_rds("/Users/sam/COP data/PSNUxIM_20210201_1.rds") %>% 
+data = readr::read_rds("/Users/sam/COP data/PSNUxIM_20220107_1.rds") %>% 
   purrr::reduce(dplyr::bind_rows) %>% 
   dplyr::group_by(indicator_code, 
                   age_option_name,
@@ -87,8 +88,8 @@ data = readr::read_rds("/Users/sam/COP data/PSNUxIM_20210201_1.rds") %>%
   dplyr::rename(valid_ages.name="age_option_name",
                 valid_sexes.name="sex_option_name",
                 valid_kps.name="kp_option_name") %>% 
-  dplyr::full_join(datapackr::map_DataPack_DATIM_DEs_COCs) %>% 
-  dplyr::filter(!stringr::str_detect(dataelement.y,"SUBNAT"))
+  dplyr::full_join(datapackr::cop22_map_DataPack_DATIM_DEs_COCs) %>% 
+  dplyr::filter(!stringr::str_detect(dataelementname,"SUBNAT"))
 
 
 ##standard_de_groups <- datapackcommons::GetSqlView("vqetpxYlX1c") ## jason.datim

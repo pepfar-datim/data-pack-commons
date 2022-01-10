@@ -94,6 +94,11 @@ ValidateMapT_1toT <- function(t_1_to_t, dim_item_sets){
     ValidateDimItems("dim_uid_colname", "num_or_den", "num_or_den_uid") 
       
   t_1_to_t %>% mutate(dim_uid_colname = "HWPJnUTMjEq") %>% 
+    dplyr::mutate(disagg_type= 
+                    stringr::str_split(disagg_type, pattern = ";"),
+                  disagg_type_uid= 
+                    stringr::str_split(disagg_type_uid, pattern = ";")) %>% 
+    tidyr::unnest(disagg_type, disagg_type_uid) %>% 
     ValidateDimItems("dim_uid_colname", "disagg_type", "disagg_type_uid") 
   
 # chack for matching model sets in Dimension item sets
