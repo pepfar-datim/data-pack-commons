@@ -1,3 +1,14 @@
+devtools::install(pkg = "/Users/sam/Documents/GitHub/data-pack-commons",
+                  build = TRUE,
+                  upgrade = FALSE)
+
+library(datapackcommons)
+library(datimutils)
+library(dplyr)
+datimutils::loginToDATIM("~/.secrets/datim.json")
+
+cop_year = 2021
+
 #' @title BuildDimensionList_DataPack(data_element_map_item, dim_item_sets, 
 #' country_uid, mechanisms = NULL)
 #' 
@@ -107,7 +118,6 @@ GetFy21tMechs <- function(d2_session = dynGet("d2_default_session",
 
 GetFy22tMechs <- function(d2_session = dynGet("d2_default_session",
                                               inherits = TRUE)){
-  
   
   #TODO modify format data for api function so I can make this call with getData_Analytics
   
@@ -278,39 +288,31 @@ process_country <- function(country_uid, mechs, snu_x_im_map){
     dplyr::ungroup()
 }
 
-devtools::install(pkg = "/Users/sam/Documents/GitHub/data-pack-commons",
-                  build = TRUE,
-                  upgrade = FALSE)
 
-library(datapackcommons)
-library(datimutils)
-library(dplyr)
-datimutils::loginToDATIM("~/.secrets/datim.json")
+mechs <-  switch(as.character(cop_year),
+                 "2021" = GetFy21tMechs(),
+                 "2022" = GetFy22tMechs())
+fy_map <-  switch(as.character(cop_year),
+                  "2021" = datapackcommons::Map21Tto22T,
+                  "2022" = datapackcommons::Map22Tto23T)
 
-mechs = GetFy22tMechs()
 country_details <-  datapackcommons::GetCountryLevels() %>% 
-      # dplyr::filter(country_name == "Malawi") %>% 
+  # dplyr::filter(country_name == "Malawi") %>% 
   dplyr::arrange(country_name)
 
 data <-  country_details[["id"]] %>% 
-  purrr::map(process_country, mechs, datapackcommons::Map22Tto23T)
-
+  purrr::map(process_country, mechs, fy_map) %>% 
+  setNames(country_details$id)
+  
 #data$ODOymOOWyl0 <- process_country("ODOymOOWyl0", mechs) 
-
-data <- setNames(data,country_details$id)
-
-# readr::write_rds(data,"/Users/sam/COP data/PSNUxIM_20220110_1.rds", compress = c("gz"))
-# readr::write_rds(data,"/Users/sam/COP data/psnuxim_model_data_22.rds", compress = c("gz"))
-# readr::write_rds(data,"/Users/sam/COP data/PSNUxIM_COP21_20220107_1.rds", compress = c("gz"))
-# readr::write_rds(data,"/Users/sam/COP data/psnuxim_model_data_21.rds", compress = c("gz"))
 
 
 data_old = readr::read_rds(file.choose())
 # data_old = data_old$lZsCb6y0KDX
-data_old <- setNames(data_old,country_details$id)
+data_old <- setNames(data_old, country_details$id)
 
 non_nulls <- purrr::map_lgl(names(data), 
-              ~ !is.null(data[[.x]]) || !is.null(data_old[[.x]]))
+                            ~ !is.null(data[[.x]]) || !is.null(data_old[[.x]]))
 names <-  names(data)[non_nulls]
 
 purrr::map(names, ~try(dplyr::all_equal(data[[.x]],data_old[[.x]]))) %>% 
@@ -320,3 +322,66 @@ deltas=purrr::map_df(names, ~try(dplyr::full_join(
   dplyr::bind_cols(data[[.x]], tibble::tribble(~new,1)),
   dplyr::bind_cols(data_old[[.x]], tibble::tribble(~old,1))))) %>% 
   dplyr::filter(is.na(old) | is.na(new)) 
+
+
+if (cop_year == 2021){
+  readr::write_rds(data,
+                   paste0("/Users/sam/COP data/PSNUxIM_COP21_", lubridate::now("UTC"), ".rds"),
+                   compress = c("gz"))
+  readr::write_rds(data,
+                   "/Users/sam/COP data/psnuxim_model_data_21.rds",
+                   compress = c("gz"))
+  file_name <- "psnuxim_model_data_21.rds"
+} else if (cop_year == 2022){
+  readr::write_rds(data,
+                   "/Users/sam/COP data/PSNUxIM_COP22_", lubridate::now("UTC"), ".rds",
+                   compress = c("gz"))
+  readr::write_rds(data,
+                   "/Users/sam/COP data/psnuxim_model_data_22.rds",
+                   compress = c("gz"))
+  file_name <- "psnuxim_model_data_22.rds"
+}
+
+Sys.setenv(
+  AWS_PROFILE = "datapack-testing",
+  AWS_S3_BUCKET = "testing.pepfar.data.datapack"
+)
+
+s3<-paws::s3()
+
+r<-tryCatch({
+  foo<-s3$put_object(Bucket = Sys.getenv("AWS_S3_BUCKET"),
+                     Body = paste0("/Users/sam/COP data/", s3_file_name),
+                     Key = paste0("support_files/", s3_file_name))
+  print("DATIM Export sent to S3", name = "datapack")
+  TRUE
+},
+error = function(err) {
+  print("DATIM Export could not be sent to  S3",name = "datapack")
+  print(err, name = "datapack")
+  FALSE
+})
+
+Sys.setenv(
+  AWS_PROFILE = "datapack-prod",
+  AWS_S3_BUCKET = "prod.pepfar.data.datapack"
+)
+
+s3<-paws::s3()
+
+r<-tryCatch({
+  foo<-s3$put_object(Bucket = Sys.getenv("AWS_S3_BUCKET"),
+                     Body = paste0("/Users/sam/COP data/", s3_file_name),
+                     Key = paste0("support_files/", s3_file_name))
+  print("DATIM Export sent to S3", name = "datapack")
+  TRUE
+},
+error = function(err) {
+  print("DATIM Export could not be sent to  S3",name = "datapack")
+  print(err, name = "datapack")
+  FALSE
+})
+
+s3$list_objects_v2(Bucket = Sys.getenv("AWS_S3_BUCKET"),
+                   Prefix = paste0("support_files/", s3_file_name)) %>% 
+  purrr::pluck("Contents", 1, "LastModified")
