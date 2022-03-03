@@ -7,7 +7,7 @@ library(datimutils)
 library(dplyr)
 datimutils::loginToDATIM("~/.secrets/datim.json")
 
-cop_year = 2021
+cop_year = 2022
 
 #' @title BuildDimensionList_DataPack(data_element_map_item, dim_item_sets, 
 #' country_uid, mechanisms = NULL)
@@ -86,6 +86,48 @@ BuildDimensionList_DataPack <- function(data_element_map_item, dim_item_sets,
                   "dimension", "cRAGKdWIDn4", "TWXpUVE2MqL") %>% 
         dplyr::bind_rows(dimension_mechanisms, dimension_disaggs, dimension_common)
     }
+}
+
+# get a list of mechs that actually have associated data for the FY targets
+getMechsList <- function(cop_year,
+                         d2_session = dynGet("d2_default_session",
+                                             inherits = TRUE)){
+  assertthat::assert_that(cop_year %in% c(2021,
+                                          2022))
+  de_group <- dplyr::case_when(
+    cop_year == 2021 ~ "WTq0quAW1mf",
+    cop_year == 2022 ~ "QjkuCJf6lCs"
+  )
+  
+  #TODO modify format data for api function so I can make this call with getData_Analytics
+  
+  mech_codes <-
+    datimutils::getCategories("SH885jaRe0o",
+                              fields = "categoryOptions[id,code]") %>%
+    dplyr::rename(mechanism_uid = "id")
+  
+  mechs <- datimutils::getAnalytics(
+    dx = paste0("DE_GROUP-", de_group),
+    ou = "OU_GROUP-cNzfcPWEGSH;ybg3MO3hcf4"
+    datimutils::getOrgUnitGroups("cNzfcPWEGSH")
+  )
+  
+  mechs <- paste0(d2_session$base_url, 
+                  "api/29/analytics.csv?dimension=SH885jaRe0o&dimension=ou:OU_GROUP-cNzfcPWEGSH;ybg3MO3hcf4&filter=pe:2020Oct&filter=dx:DE_GROUP-WTq0quAW1mf&displayProperty=SHORTNAME&outputIdScheme=UID") %>% 
+    datapackcommons::RetryAPI("application/csv",
+                              d2_session = d2_session) %>% 
+    httr::content() %>% 
+    readr::read_csv() %>%
+    dplyr::select(-Value) %>% 
+    setNames(c("mechanism_uid", "country_uid")) %>% 
+    dplyr::left_join(mech_codes) %>% 
+    dplyr::mutate(mechanism_code = datimutils::getCatOptions(mechanism_uid, fields = "code"))
+  
+  if(NROW(mechs) > 0){
+    return(mechs)
+  }
+  # If I got here critical error
+  stop("Unable to get 21T mechanisms")
 }
 
 GetFy21tMechs <- function(d2_session = dynGet("d2_default_session",
