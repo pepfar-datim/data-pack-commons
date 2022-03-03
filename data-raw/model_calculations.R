@@ -274,9 +274,9 @@ for (ou_index in 1:NROW(operating_units)) {
   }
 
 print(lubridate::now())
-# saveRDS(flattenDataPackModel_21(cop_data), file = paste0(output_location,"model_data_pack_input_22_20220216_1_flat.rds"))
+# saveRDS(flattenDataPackModel_21(cop_data), file = paste0(output_location,"model_data_pack_input_22_20220303_1_flat.rds"))
 # saveRDS(flattenDataPackModel_21(cop_data), file = paste0(output_location,"datapack_model_data.rds"))
-# saveRDS(cop_data, file = paste0(output_location,"model_data_pack_input_22_20220216_1.rds"))
+# saveRDS(cop_data, file = paste0(output_location,"model_data_pack_input_22_20220303_1.rds"))
 
 
 ### COMPARISAON CODE FOR TWO DIFFERENT OUTPUT FILES
@@ -289,7 +289,7 @@ print(lubridate::now())
 #                                    "Western_Africa_Data_Pack", "Western_Africa_Data_Pack")
 #
 # cop_data_new=cop_data
-# cop_data_old <- readRDS(file = paste0(output_location,"model_data_pack_input_22_20220206_1.rds"))
+# cop_data_old <- readRDS(file = paste0(output_location,"model_data_pack_input_22_20220303_1.rds"))
 # deltas = data.frame()
 # for (operating_unit in operating_units$id) {
 #   print(filter(operating_units, operating_units$id == operating_unit))
@@ -375,8 +375,8 @@ print(lubridate::now())
 #                                             mode_out = "name"),
 #                 age =
 #                   datimutils::getCatOptions(deltas$age_option_uid))
-#############################
-#############################
+# #############################
+# #############################
 # Sys.setenv(
 #   AWS_PROFILE = "datapack-testing",
 #   AWS_S3_BUCKET = "testing.pepfar.data.datapack"
@@ -418,5 +418,5 @@ print(lubridate::now())
 # })
 # 
 # s3$list_objects_v2(Bucket = Sys.getenv("AWS_S3_BUCKET"),
-#                    Prefix = "support_files/datapack_model_data.rds") %>% 
+#                    Prefix = "support_files/datapack_model_data.rds") %>%
 #   purrr::pluck("Contents", 1, "LastModified")
