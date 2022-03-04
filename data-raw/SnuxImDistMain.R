@@ -7,7 +7,7 @@ library(datimutils)
 library(dplyr)
 datimutils::loginToDATIM("~/.secrets/datim.json")
 
-cop_year = 2021
+cop_year = 2022
 
 #' @title BuildDimensionList_DataPack(data_element_map_item, dim_item_sets, 
 #' country_uid, mechanisms = NULL)
@@ -88,54 +88,35 @@ BuildDimensionList_DataPack <- function(data_element_map_item, dim_item_sets,
     }
 }
 
-GetFy21tMechs <- function(d2_session = dynGet("d2_default_session",
-                                              inherits = TRUE)){
-
+# get a list of mechs that actually have associated data for the FY targets
+getMechsList <- function(cop_year,
+                         d2_session = dynGet("d2_default_session",
+                                             inherits = TRUE)){
+  assertthat::assert_that(cop_year %in% c(2021, 
+                                          2022))
+  de_group <- dplyr::case_when(
+    cop_year == 2021 ~ "WTq0quAW1mf", #"2021 MER Targets"
+    cop_year == 2022 ~ "QjkuCJf6lCs"  #"2022 MER Targets"
+  )
   
-  #TODO modify format data for api function so I can make this call with getData_Analytics
-
-    mech_codes <-
-    datimutils::getCategories("SH885jaRe0o",
-                                 fields = "categoryOptions[id,code]") %>%
-    dplyr::rename(mechanism_uid = "id")
-  
-  mechs <- paste0(d2_session$base_url, "api/29/analytics.csv?dimension=SH885jaRe0o&dimension=ou:OU_GROUP-cNzfcPWEGSH;ybg3MO3hcf4&filter=pe:2020Oct&filter=dx:DE_GROUP-WTq0quAW1mf&displayProperty=SHORTNAME&outputIdScheme=UID") %>% 
-    datapackcommons::RetryAPI("application/csv",
-                              d2_session = d2_session) %>% 
-    httr::content() %>% 
-    readr::read_csv() %>%
-    dplyr::select(-Value) %>% 
-    setNames(c("mechanism_uid", "country_uid")) %>% 
-    dplyr::left_join(mech_codes) %>% 
-    dplyr::mutate(mechanism_code = datimutils::getCatOptions(mechanism_uid, fields = "code"))
-  
-  if(NROW(mechs) > 0){
-    return(mechs)
-  }
-  # If I got here critical error
-  stop("Unable to get 21T mechanisms")
-}
-
-GetFy22tMechs <- function(d2_session = dynGet("d2_default_session",
-                                              inherits = TRUE)){
-  
-  #TODO modify format data for api function so I can make this call with getData_Analytics
-  
-  mechs <- paste0(d2_session$base_url, "api/29/analytics.csv?dimension=SH885jaRe0o&dimension=ou:OU_GROUP-cNzfcPWEGSH;ybg3MO3hcf4&filter=pe:2021Oct&filter=dx:DE_GROUP-QjkuCJf6lCs&displayProperty=SHORTNAME&outputIdScheme=UID") %>% 
-    datapackcommons::RetryAPI("application/csv",
-                              d2_session = d2_session) %>% 
-    httr::content() %>% 
-    readr::read_csv() %>%
-    dplyr::select(-Value) %>% 
-    setNames(c("mechanism_uid", "country_uid")) %>% 
-    dplyr::mutate(mechanism_code = datimutils::getCatOptions(mechanism_uid, fields = "code"))
+  mechs <- datimutils::getAnalytics(
+    dx_f = paste0("DE_GROUP-", de_group),
+    ou = paste0("OU_GROUP-",
+                datimutils::getOrgUnitGroups("Country", by = name)),
+    pe_f = paste0(cop_year - 1, "Oct"),
+    "SH885jaRe0o" %.d% "all") %>% 
+    dplyr::select(mechanism_uid = "Funding Mechanism", 
+                  country_uid = "Organisation unit") %>%  
+    dplyr::mutate(mechanism_code = 
+                    datimutils::getCatOptions(mechanism_uid, fields = "code"))
   
   if(NROW(mechs) > 0){
     return(mechs)
   }
   # If I got here critical error
-  stop("Unable to get 22T mechanisms")
+  stop("Unable to get any mechanisms")
 }
+
 
 getSnuxIm_density <- function(data_element_map_item, 
                               dim_item_sets = datapackcommons::dim_item_sets, 
@@ -289,15 +270,14 @@ process_country <- function(country_uid, mechs, snu_x_im_map){
 }
 
 
-mechs <-  switch(as.character(cop_year),
-                 "2021" = GetFy21tMechs(),
-                 "2022" = GetFy22tMechs())
+mechs <-  getMechsList(cop_year)
+
 fy_map <-  switch(as.character(cop_year),
                   "2021" = datapackcommons::Map21Tto22T,
                   "2022" = datapackcommons::Map22Tto23T)
 
 country_details <-  datapackcommons::GetCountryLevels() %>% 
-  # dplyr::filter(country_name == "Malawi") %>% 
+   # dplyr::filter(country_name == "Malawi") %>% 
   dplyr::arrange(country_name)
 
 data <-  country_details[["id"]] %>% 
@@ -326,7 +306,7 @@ deltas=purrr::map_df(names, ~try(dplyr::full_join(
 
 if (cop_year == 2021){
   readr::write_rds(data,
-                   paste0("/Users/sam/COP data/PSNUxIM_COP21_", lubridate::now("UTC"), ".rds"),
+                   paste0("/Users/sam/COP data/PSNUxIM_COP21_", lubridate::today(), ".rds"),
                    compress = c("gz"))
   readr::write_rds(data,
                    "/Users/sam/COP data/psnuxim_model_data_21.rds",
@@ -334,7 +314,7 @@ if (cop_year == 2021){
   file_name <- "psnuxim_model_data_21.rds"
 } else if (cop_year == 2022){
   readr::write_rds(data,
-                   "/Users/sam/COP data/PSNUxIM_COP22_", lubridate::now("UTC"), ".rds",
+                   paste0("/Users/sam/COP data/PSNUxIM_COP22_", lubridate::today(), ".rds"),
                    compress = c("gz"))
   readr::write_rds(data,
                    "/Users/sam/COP data/psnuxim_model_data_22.rds",
@@ -351,8 +331,8 @@ s3<-paws::s3()
 
 r<-tryCatch({
   foo<-s3$put_object(Bucket = Sys.getenv("AWS_S3_BUCKET"),
-                     Body = paste0("/Users/sam/COP data/", s3_file_name),
-                     Key = paste0("support_files/", s3_file_name))
+                     Body = paste0("/Users/sam/COP data/", file_name),
+                     Key = paste0("support_files/", file_name))
   print("DATIM Export sent to S3", name = "datapack")
   TRUE
 },
@@ -371,8 +351,8 @@ s3<-paws::s3()
 
 r<-tryCatch({
   foo<-s3$put_object(Bucket = Sys.getenv("AWS_S3_BUCKET"),
-                     Body = paste0("/Users/sam/COP data/", s3_file_name),
-                     Key = paste0("support_files/", s3_file_name))
+                     Body = paste0("/Users/sam/COP data/", file_name),
+                     Key = paste0("support_files/", file_name))
   print("DATIM Export sent to S3", name = "datapack")
   TRUE
 },
@@ -383,5 +363,5 @@ error = function(err) {
 })
 
 s3$list_objects_v2(Bucket = Sys.getenv("AWS_S3_BUCKET"),
-                   Prefix = paste0("support_files/", s3_file_name)) %>% 
+                   Prefix = paste0("support_files/", file_name)) %>% 
   purrr::pluck("Contents", 1, "LastModified")
