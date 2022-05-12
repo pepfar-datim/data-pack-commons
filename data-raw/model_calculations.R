@@ -319,7 +319,7 @@ print(lubridate::now())
 
 # compare with another model version
 
-diff(file.choose() %>% readr::read_rds(),
+diffDataPackModels(file.choose() %>% readr::read_rds(),
      flattenDataPackModel_21(cop_data))
 
 # save flattened version manually update date and version
