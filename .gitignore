@@ -39,3 +39,6 @@ vignettes/*.pdf
 inst/doc
 .Rprofile
 renv/
+packrat/lib*/
+Icon
+mechs.rds
