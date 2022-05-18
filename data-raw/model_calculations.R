@@ -1,17 +1,25 @@
-devtools::install(pkg = "~/Documents/GitHub/data-pack-commons",
-                  build = TRUE,
-                  upgrade = FALSE,
-                  build_vignettes = TRUE)
+datimutils::loginToDATIM(paste0(Sys.getenv("SECRETS_FOLDER"),
+                                "datim.json"))
 
-devtools::install(pkg = "~/Documents/GitHub/datapackr",
-                  build = TRUE,
-                  upgrade = FALSE,
-                  build_vignettes = TRUE)
+output_location <- "~/COP data/COP22 Update/"
+                         
 
-devtools::install(pkg = "~/Documents/GitHub/datimutils",
-                  build = TRUE,
-                  upgrade = FALSE,
-                  build_vignettes = TRUE)
+# install local versions of key packages if necessary
+
+# devtools::install(pkg = "~/Documents/GitHub/data-pack-commons",
+#                   build = TRUE,
+#                   upgrade = FALSE,
+#                   build_vignettes = TRUE)
+# 
+# devtools::install(pkg = "~/Documents/GitHub/datapackr",
+#                   build = TRUE,
+#                   upgrade = FALSE,
+#                   build_vignettes = TRUE)
+# 
+# devtools::install(pkg = "~/Documents/GitHub/datimutils",
+#                   build = TRUE,
+#                   upgrade = FALSE,
+#                   build_vignettes = TRUE)
 
 require(datapackcommons)
 require(datapackr)
@@ -24,22 +32,42 @@ require(rlang)
 require(assertthat)
 require(foreach)
 
+
+#' @title RenameAnalyticsColumns
+#' @description Convert columns names from analytics output to names
+#' used in this package
+#' @param data dataframe with DATIM analytics output
+#' @return data with renamed columns
 RenameAnalyticsColumns <- function(data){
   data %>% dplyr::rename(!!c("value"="Value", indicator_uid="Data",
                     "org_unit_uid" = "Organisation unit",
                     "period" = "Period")) %>% return()
 }
 
-GetData <- function(indicator_parameters, ou_uid, ou_level, ou_name, 
-                    dim_item_sets, include_military) {
+
+#' @title GetData
+#' @description Convert columns names from analytics output to names
+#' used in this package
+#' @param indicator_parameters
+#' @param ou_uid 
+#' @param ou_level
+#' @param ou_name, 
+#' @param dim_item_sets
+#' @param include_military
+#' @return data with renamed columns
+GetData <- function(indicator_parameters, 
+                    ou_uid, 
+                    dim_item_sets, 
+                    include_military) {
+  
   indicator_parameters <-  dplyr::as_tibble(indicator_parameters)
   
-        analytics_output <- datapackcommons::GetData_DataPack(indicator_parameters,
-                                                              ou_uid,
-                                                              include_military)
-          
-
-        return(dplyr::mutate(indicator_parameters, analytics_output = list(analytics_output)))
+  analytics_output <- datapackcommons::GetData_DataPack(indicator_parameters,
+                                                        ou_uid,
+                                                        include_military)
+  
+  
+  return(dplyr::mutate(indicator_parameters, analytics_output = list(analytics_output)))
 }
 
 
@@ -232,10 +260,6 @@ diffDataPackModels <- function(model_old, model_new){
   return(deltas)
 }
 
-datimutils::loginToDATIM("/users/sam/.secrets/datim.json")
-
-output_location <- "/Users/sam/COP data/COP22 Update/"
-
  cop_data = list()
 # get country and prioritization level
  operating_units <- datapackcommons::GetCountryLevels() %>%
@@ -281,12 +305,13 @@ for (ou_index in 1:NROW(operating_units)) {
 
   doMC::registerDoMC(cores = 4) # or however many cores you have access to
   
-  include_military <- dplyr::if_else(operating_unit$country_name == "Philippines",
-                 FALSE,
-                 TRUE)
-  analytics_output <- plyr::adply(indicator_parameters, 1, GetData, operating_unit$id, 
-                                  operating_unit$prioritization_level,
-                                  operating_unit$country_name, 
+  # include_military <- dplyr::if_else(operating_unit$country_name == "Philippines",
+  #                FALSE,
+  #                TRUE)
+  analytics_output <- plyr::adply(indicator_parameters, 
+                                  1, 
+                                  GetData, 
+                                  operating_unit$id,  
                                   dim_item_sets,
                                   include_military,
                                   .parallel = TRUE)
