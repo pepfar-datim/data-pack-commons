@@ -1,14 +1,17 @@
 devtools::install(pkg = "~/Documents/GitHub/data-pack-commons",
                   build = TRUE,
-                  upgrade = FALSE)
+                  upgrade = FALSE,
+                  build_vignettes = TRUE)
 
 devtools::install(pkg = "~/Documents/GitHub/datapackr",
                   build = TRUE,
-                  upgrade = FALSE)
+                  upgrade = FALSE,
+                  build_vignettes = TRUE)
 
 devtools::install(pkg = "~/Documents/GitHub/datimutils",
                   build = TRUE,
-                  upgrade = FALSE)
+                  upgrade = FALSE,
+                  build_vignettes = TRUE)
 
 require(datapackcommons)
 require(datapackr)

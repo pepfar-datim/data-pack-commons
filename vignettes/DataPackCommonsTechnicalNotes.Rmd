@@ -1,0 +1,30 @@
+---
+title: "DataPackCommons Technical Notes"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{DataPackCommons Technical Notes}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+```{r setup}
+library(datapackcommons)
+```
+
+
+# Key Files/Directories
+```{r, echo = FALSE}
+catalog <- tibble::tribble(~name, ~short_description,
+                file.path("data-raw", "model_calculations.R"),
+                "Script for generating datapack model",
+                file.path("data-raw", "SnuxImDistMain.R"),
+                "Script for generating PSNUxIM models",)
+knitr::kable(catalog)
+```
