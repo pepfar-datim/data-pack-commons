@@ -36,3 +36,6 @@ vignettes/*.pdf
 
 .R_Cache/
 .Rproj.user
+inst/doc
+.Rprofile
+renv/

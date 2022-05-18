@@ -29,7 +29,10 @@ Suggests:
     doMC,
     httptest,
     testthat,
-    datimvalidation
+    datimvalidation,
+    knitr,
+    rmarkdown
 RoxygenNote: 7.1.1
 Depends: 
     R (>= 2.10)
+VignetteBuilder: knitr
