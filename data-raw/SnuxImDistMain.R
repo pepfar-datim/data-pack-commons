@@ -1,6 +1,6 @@
-devtools::install(pkg = "/Users/sam/Documents/GitHub/data-pack-commons",
-                  build = TRUE,
-                  upgrade = FALSE)
+# devtools::install(pkg = "/Users/sam/Documents/GitHub/data-pack-commons",
+#                   build = TRUE,
+#                   upgrade = FALSE)
 
 library(datapackcommons)
 library(datimutils)
@@ -304,64 +304,64 @@ deltas=purrr::map_df(names, ~try(dplyr::full_join(
   dplyr::filter(is.na(old) | is.na(new)) 
 
 
-if (cop_year == 2021){
-  readr::write_rds(data,
-                   paste0("/Users/sam/COP data/PSNUxIM_COP21_", lubridate::today(), ".rds"),
-                   compress = c("gz"))
-  readr::write_rds(data,
-                   "/Users/sam/COP data/psnuxim_model_data_21.rds",
-                   compress = c("gz"))
-  file_name <- "psnuxim_model_data_21.rds"
-} else if (cop_year == 2022){
-  readr::write_rds(data,
-                   paste0("/Users/sam/COP data/PSNUxIM_COP22_", lubridate::today(), ".rds"),
-                   compress = c("gz"))
-  readr::write_rds(data,
-                   "/Users/sam/COP data/psnuxim_model_data_22.rds",
-                   compress = c("gz"))
-  file_name <- "psnuxim_model_data_22.rds"
-}
-
-Sys.setenv(
-  AWS_PROFILE = "datapack-testing",
-  AWS_S3_BUCKET = "testing.pepfar.data.datapack"
-)
-
-s3<-paws::s3()
-
-r<-tryCatch({
-  foo<-s3$put_object(Bucket = Sys.getenv("AWS_S3_BUCKET"),
-                     Body = paste0("/Users/sam/COP data/", file_name),
-                     Key = paste0("support_files/", file_name))
-  print("DATIM Export sent to S3", name = "datapack")
-  TRUE
-},
-error = function(err) {
-  print("DATIM Export could not be sent to  S3",name = "datapack")
-  print(err, name = "datapack")
-  FALSE
-})
-
-Sys.setenv(
-  AWS_PROFILE = "datapack-prod",
-  AWS_S3_BUCKET = "prod.pepfar.data.datapack"
-)
-
-s3<-paws::s3()
-
-r<-tryCatch({
-  foo<-s3$put_object(Bucket = Sys.getenv("AWS_S3_BUCKET"),
-                     Body = paste0("/Users/sam/COP data/", file_name),
-                     Key = paste0("support_files/", file_name))
-  print("DATIM Export sent to S3", name = "datapack")
-  TRUE
-},
-error = function(err) {
-  print("DATIM Export could not be sent to  S3",name = "datapack")
-  print(err, name = "datapack")
-  FALSE
-})
-
-s3$list_objects_v2(Bucket = Sys.getenv("AWS_S3_BUCKET"),
-                   Prefix = paste0("support_files/", file_name)) %>% 
-  purrr::pluck("Contents", 1, "LastModified")
+# if (cop_year == 2021){
+#   readr::write_rds(data,
+#                    paste0("/Users/sam/COP data/PSNUxIM_COP21_", lubridate::today(), ".rds"),
+#                    compress = c("gz"))
+#   readr::write_rds(data,
+#                    "/Users/sam/COP data/psnuxim_model_data_21.rds",
+#                    compress = c("gz"))
+#   file_name <- "psnuxim_model_data_21.rds"
+# } else if (cop_year == 2022){
+#   readr::write_rds(data,
+#                    paste0("/Users/sam/COP data/PSNUxIM_COP22_", lubridate::today(), ".rds"),
+#                    compress = c("gz"))
+#   readr::write_rds(data,
+#                    "/Users/sam/COP data/psnuxim_model_data_22.rds",
+#                    compress = c("gz"))
+#   file_name <- "psnuxim_model_data_22.rds"
+# }
+# 
+# Sys.setenv(
+#   AWS_PROFILE = "datapack-testing",
+#   AWS_S3_BUCKET = "testing.pepfar.data.datapack"
+# )
+# 
+# s3<-paws::s3()
+# 
+# r<-tryCatch({
+#   foo<-s3$put_object(Bucket = Sys.getenv("AWS_S3_BUCKET"),
+#                      Body = paste0("/Users/sam/COP data/", file_name),
+#                      Key = paste0("support_files/", file_name))
+#   print("DATIM Export sent to S3", name = "datapack")
+#   TRUE
+# },
+# error = function(err) {
+#   print("DATIM Export could not be sent to  S3",name = "datapack")
+#   print(err, name = "datapack")
+#   FALSE
+# })
+# 
+# Sys.setenv(
+#   AWS_PROFILE = "datapack-prod",
+#   AWS_S3_BUCKET = "prod.pepfar.data.datapack"
+# )
+# 
+# s3<-paws::s3()
+# 
+# r<-tryCatch({
+#   foo<-s3$put_object(Bucket = Sys.getenv("AWS_S3_BUCKET"),
+#                      Body = paste0("/Users/sam/COP data/", file_name),
+#                      Key = paste0("support_files/", file_name))
+#   print("DATIM Export sent to S3", name = "datapack")
+#   TRUE
+# },
+# error = function(err) {
+#   print("DATIM Export could not be sent to  S3",name = "datapack")
+#   print(err, name = "datapack")
+#   FALSE
+# })
+# 
+# s3$list_objects_v2(Bucket = Sys.getenv("AWS_S3_BUCKET"),
+#                    Prefix = paste0("support_files/", file_name)) %>% 
+#   purrr::pluck("Contents", 1, "LastModified")
