@@ -19,7 +19,62 @@ library(datapackcommons)
 ```
 
 
-# Key Files/Directories
+## What are the `DataPack model` and `PSNUxIM model` or `distribution` 
+
+The `DataPack model` output is an `.rds` with historic target and result data used for building and validating DataPacks. See usage here [datapackr::packDataPack](https://github.com/pepfar-datim/datapackr/blob/11248b7138a98a4e1ba72e780ebf16ebb906ed61/R/packDataPack.R#L12) and here [datapackr::checkAnalytics](https://github.com/pepfar-datim/datapackr/blob/243cd2537661f5d1e9c340a9cffe1910ff8a483d/R/checkAnalytics.R#L562). Production versions of these models are stored in sharepoint and S3. The `DataPack model` includes historic data aggregating across mechanisms (including dedupes) to the PSNU level. So in the case of results this means we are aggregating from site and community data.
+
+The `PSNUxIM model` output is an `.rds` file with historic target data broken out by mechanism. It is used for populating the PSNUxIM tab of the data pack with initial allocations of PSNU level targets to mechanisms including deduplication.
+
+Recent versions of this files can be found on [sharepoint](https://pepfar.sharepoint.com/:f:/r/sites/PRIMEInformationSystems/Shared%20Documents/COP22%20Systems%20Support/Data%20Pack/Production%20Data%20Pack%20Models?csf=1&web=1&e=3EalWl). 
+
+* A COP22 datapack model:
+[model_data_pack_input_22_20220510_1_flat.rds](https://pepfar.sharepoint.com/:u:/r/sites/PRIMEInformationSystems/Shared%20Documents/COP22%20Systems%20Support/Data%20Pack/Production%20Data%20Pack%20Models/model_data_pack_input_22_20220510_1_flat.rds?csf=1&web=1&e=gnbfHy)
+
+* A COP21 PSNUxIM distribution:
+[PSNUxIM_COP21_2022-05-16](https://pepfar.sharepoint.com/:u:/r/sites/PRIMEInformationSystems/Shared%20Documents/COP22%20Systems%20Support/Data%20Pack/Production%20Data%20Pack%20Models/PSNUxIM_COP21_2022-05-16.rds?csf=1&web=1&e=GwuGdv)
+
+* A COP22 PSNUxIM distribution:
+[PSNUxIM_COP22_2022-05-16](https://pepfar.sharepoint.com/:u:/r/sites/PRIMEInformationSystems/Shared%20Documents/COP22%20Systems%20Support/Data%20Pack/Production%20Data%20Pack%20Models/PSNUxIM_COP21_2022-05-16.rds?csf=1&web=1&e=GwuGdv)
+
+And here is a listing of the production support files on S3 as of 2022-05-18. Notice that we only keep the most current production version on S3, and the name remains stable. There is in the model generation scripts to post to S3 testing and prod environments. 
+
+`aws-vault exec datapack-prod -- aws s3 ls prod.pepfar.data.datapack/support_files/`
+
+`2021-02-04 23:36:17          0 `
+
+`2022-05-10 14:26:18    3533160 datapack_model_data.rds`
+
+`2022-05-16 21:15:17    4902501 psnuxim_model_data_21.rds`
+
+`2022-05-16 18:58:52    5991842 psnuxim_model_data_22.rds`
+
+## Generating a `DataPack model`
+
+There is a script in `datapackcommons` `data-raw/model_calculations.R`. Commented out at the end of the script is valid code for writing the output locally and to S3. Currently the main output of the script is a nested data pack model, but this isn't what datapackr uses, so we must flatten this model using `flattenDataPackModel_21`. In the TODO we have an item to change this so that the flatten version is the base model and we stop creating a nested version. 
+
+Note that in addition to the functions set up in the script, there are also functions included as part of the package. Ultimately all of the required functions should be moved over to datapackr as proper package functions.
+
+There is also a function `diffDataPackModels` that allows you to do a diff between two different *flattened* DataPack models. This is very useful for refactoring because we can compare a full before and after version of the model to make sure code changes don't lead to (unexpected) model output changes.
+
+Running the script start to finish (without uncommenting the writing of files), you will have a new version of the data pack model in an object called `cop_data`. This is the unflattened version which has some information useful in debugging, but this could be create separate from the data file itself.
+
+## Generating a `PSNUxIM distribution/model`
+
+There is a script in `datapackcommons` `data-raw/SnuxImDistMain.R`. It is currently possible to produce a PSNUxIM model for COP21 or COP22, and that variable `cop_year` is set at the top of the script. This script also contains code for comparing two versions of the PSNUxIM distribution, but it is inline at the bottom instead of in a function. It also contains code for sending the file to S3 commented out.
+
+The the final R object created by this script is called data. When written as an RDS, these are the data used by data packr to populat the PSNUxIM tab.
+
+## Generating configuration files
+
+There are three important configuration files, excel sheets, that are used to co
+
+## Configuring a `DataPackModel`
+
+## Configuring a `PSNUxIM distribution`
+
+
+
+## Key Files/Directories
 ```{r, echo = FALSE}
 catalog <- tibble::tribble(~name, ~short_description,
                 file.path("data-raw", "model_calculations.R"),
@@ -28,3 +83,18 @@ catalog <- tibble::tribble(~name, ~short_description,
                 "Script for generating PSNUxIM models",)
 knitr::kable(catalog)
 ```
+
+
+### TODO
+
+* Modify GetData_DataPack to use datimutils::getAnalytics instead of internal getData_Analytics
+    * I started on this in this [branch](https://github.com/pepfar-datim/data-pack-commons/tree/refactor-GetData_DataPack , but it was almost 2 years ago.)
+* Modify SnuxImDistMain.R to use datimutils::getAnalytics instead of internal getData_Analytics,
+* deprecate GetData_Analytics
+* Consider removing period column in final output
+* create flat file from the beginning and deprecate flatten COP function
+* remove include military = true code, all countries now have military below country level as standard
+* Make a function for comparing PSNUxIM distributions
+* Create standard functions for sending stuff to S3
+
+### Thoughts and ideas
