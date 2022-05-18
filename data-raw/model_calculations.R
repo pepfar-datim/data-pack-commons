@@ -53,18 +53,15 @@ RenameAnalyticsColumns <- function(data){
 #' @param ou_level
 #' @param ou_name, 
 #' @param dim_item_sets
-#' @param include_military
 #' @return data with renamed columns
 GetData <- function(indicator_parameters, 
                     ou_uid, 
-                    dim_item_sets, 
-                    include_military) {
+                    dim_item_sets) {
   
   indicator_parameters <-  dplyr::as_tibble(indicator_parameters)
   
   analytics_output <- datapackcommons::GetData_DataPack(indicator_parameters,
-                                                        ou_uid,
-                                                        include_military)
+                                                        ou_uid)
   
   
   return(dplyr::mutate(indicator_parameters, analytics_output = list(analytics_output)))
@@ -214,15 +211,26 @@ ProcessDataRequiredRow <- function(data_spec, dim_item_sets){
   }
 }
 
-diffDataPackModels <- function(model_old, model_new){
-  model_old <- dplyr::bind_rows(model_old) %>%
+diffDataPackModels <- function(model_old, 
+                               model_new,
+                               full_diff = TRUE){
+# only include countries present in both files
+  if(full_diff){
+    countries <- dplyr::union(names(model_old),
+                              names(model_new))
+  } else {
+    countries <- dplyr::intersect(names(model_old),
+                                  names(model_new))
+  }
+
+  model_old_filtered <- dplyr::bind_rows(model_old[countries]) %>%
     dplyr::filter(!is.na(value)) %>%
     rename(value.old = value)
-  model_new <- dplyr::bind_rows(model_new) %>% 
+  model_new_filtered <- dplyr::bind_rows(model_new[countries]) %>% 
     dplyr::filter(!is.na(value)) %>%
     rename(value.new = value)
   
-  deltas  <-  full_join(model_old, model_new) %>%
+  deltas  <-  full_join(model_old_filtered, model_new_filtered) %>%
     filter(value.new != value.old |
              is.na(value.new) | is.na(value.old))
   ancestors <- datimutils::getOrgUnits(deltas$psnu_uid, fields = "ancestors[name]")
@@ -264,7 +272,7 @@ diffDataPackModels <- function(model_old, model_new){
 # get country and prioritization level
  operating_units <- datapackcommons::GetCountryLevels() %>%
    dplyr::arrange(country_name) %>% 
-          # filter(country_name <= "Eswatini") %>% 
+             # filter(country_name %in% c("Mozambique", "Namibia")) %>% 
    dplyr::filter(prioritization_level != 0) # Turkmenistan has no planning/priortization level
  
  priority_snu_data <- 
@@ -305,15 +313,11 @@ for (ou_index in 1:NROW(operating_units)) {
 
   doMC::registerDoMC(cores = 4) # or however many cores you have access to
   
-  # include_military <- dplyr::if_else(operating_unit$country_name == "Philippines",
-  #                FALSE,
-  #                TRUE)
   analytics_output <- plyr::adply(indicator_parameters, 
                                   1, 
                                   GetData, 
                                   operating_unit$id,  
                                   dim_item_sets,
-                                  include_military,
                                   .parallel = TRUE)
 
 # Rename the columns of analytics output with prefix {A, B} to have matching column names in joins
@@ -347,7 +351,7 @@ print(lubridate::now())
 
 # compare with another model version
 
-diffDataPackModels(file.choose() %>% readr::read_rds(),
+diff <- diffDataPackModels(file.choose() %>% readr::read_rds(),
      flattenDataPackModel_21(cop_data))
 
 # save flattened version manually update date and version
