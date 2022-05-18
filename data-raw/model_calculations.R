@@ -6,12 +6,10 @@ datimutils::loginToDATIM(paste0(Sys.getenv("SECRETS_FOLDER"),
 # Countries to include in model, usually all
 operating_units <- datapackcommons::GetCountryLevels() %>%
   dplyr::arrange(country_name) %>% 
-   dplyr::filter(country_name %in% c("Mozambique", "Namibia")) %>% 
+   # dplyr::filter(country_name %in% c("Rwanda")) %>% # selec specific countries
   dplyr::filter(prioritization_level != 0) # Turkmenistan has no planning/priortization level
 
 ### END Script Parameters ####################
-
-# country_subset <-                          
 
 # install local versions of key packages if necessary
 
@@ -49,31 +47,48 @@ require(foreach)
 #' @return data with renamed columns
 RenameAnalyticsColumns <- function(data){
   data %>% dplyr::rename(!!c("value"="Value", indicator_uid="Data",
-                    "org_unit_uid" = "Organisation unit",
-                    "period" = "Period")) %>% return()
+                             "org_unit_uid" = "Organisation unit",
+                             "period" = "Period")) %>% return()
 }
 
 
 #' @title GetData
-#' @description Convert columns names from analytics output to names
-#' used in this package
-#' @param indicator_parameters
-#' @param ou_uid 
-#' @param ou_level
-#' @param ou_name, 
-#' @param dim_item_sets
-#' @return data with renamed columns
+#' @description Wrapper for calling GetData_Datapack with plyr::alply
+#' @param indicator_parameters details for a single analytics call originally coming from
+#' data_required
+#' @param ou_uid organization unit (country) uid for the analytics call 
+#' @param dim_item_sets disaggregation for the data pack generaly datapackcommons::dim_item_sets
+#' @return return the indicator parameters dataframe (row) with the analytics output
+#' to be reassembled into a full dataframe by alply
 GetData <- function(indicator_parameters, 
                     ou_uid, 
                     dim_item_sets) {
   
   indicator_parameters <-  dplyr::as_tibble(indicator_parameters)
   
+  assertthat::are_equal(names(indicator_parameters),
+                        c("custom_ou",
+                          "dx_name",
+                          "dx_id",
+                          "pe_iso",
+                          "age_set",
+                          "sex_set",
+                          "kp_set",
+                          "other_disagg_set",
+                          "technical_area",
+                          "technical_area_uid",
+                          "num_or_den",
+                          "num_or_den_uid",
+                          "disagg_type",
+                          "disagg_type_uid",
+                          "value_na" ))
+  
   analytics_output <- datapackcommons::GetData_DataPack(indicator_parameters,
-                                                        ou_uid)
+                                                        ou_uid,
+                                                        dim_item_sets = dim_item_sets)
   
-  
-  return(dplyr::mutate(indicator_parameters, analytics_output = list(analytics_output)))
+  return(dplyr::mutate(indicator_parameters, 
+                       analytics_output = list(analytics_output)))
 }
 
 
@@ -277,13 +292,17 @@ diffDataPackModels <- function(model_old,
   return(deltas)
 }
 
+# initialize cop_data list for the model
  cop_data = list()
-# get country and prioritization level
+# get impatt.priority_snu for each PSNU
  priority_snu_data <- 
    datapackr::getDataValueSets(c("dataElementGroup","period", "orgUnitGroup"),
                                c("ofNbyQgD9xG","2021Oct","AVy8gJXym2D")) %>% 
    dplyr::select(org_unit_uid = org_unit, value)
- 
+
+# get data to populat DREAMS_SNU.Flag
+# PSNUs that are an dreams SNU or contain on or more DREAMS SNUs are flagged
+# dreams_psnus are those that should be flagged
  dreams_snu_path_members <-  
    datimutils::getOrgUnitGroups("mRRlkbZolDR", # Dreams SNUs
                                 fields = "organisationUnits[path]") %>%
@@ -297,7 +316,7 @@ diffDataPackModels <- function(model_old,
    dplyr::filter(id %in% dreams_snu_path_members) %>%
    dplyr::mutate(value = 1, org_unit_uid = id)
  
-# get local copy of package config file
+# get local copy of package config file with disaggregations
 dim_item_sets <- datapackcommons::dim_item_sets
 
 # for each ou
@@ -311,12 +330,17 @@ for (ou_index in 1:NROW(operating_units)) {
   print(operating_unit$country_name)
   print(lubridate::now())
 
+# separate the A and B indicators defined in data_required for individual analytics calls
+# Only include unique sets of parameters
+  
   indicator_parameters <- datapackcommons::StackPrefixedCols(data_required, c("A.", "B.")) %>%
     unique() %>%
-    filter(!is.na(dx_id))
+    filter(!is.na(dx_id)) # most B indicators are empty, filter them out
 
   doMC::registerDoMC(cores = 4) # or however many cores you have access to
-  
+
+# Make the analytics calls for the data required
+# each row of indicator parameters contains the parameters for an analytics call
   analytics_output <- plyr::adply(indicator_parameters, 
                                   1, 
                                   GetData, 
@@ -355,7 +379,7 @@ print(lubridate::now())
 
 # compare with another model version
 
-diff <- diffDataPackModels(file.choose() %>% readr::read_rds(),
+deltas <- diffDataPackModels(file.choose() %>% readr::read_rds(),
      flattenDataPackModel_21(cop_data),
      full_diff = TRUE)
 
