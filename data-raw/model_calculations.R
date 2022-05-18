@@ -1,8 +1,17 @@
+### Script Parameters ####################
+library(magrittr)
 datimutils::loginToDATIM(paste0(Sys.getenv("SECRETS_FOLDER"),
                                 "datim.json"))
 
-output_location <- "~/COP data/COP22 Update/"
-                         
+# Countries to include in model, usually all
+operating_units <- datapackcommons::GetCountryLevels() %>%
+  dplyr::arrange(country_name) %>% 
+   dplyr::filter(country_name %in% c("Mozambique", "Namibia")) %>% 
+  dplyr::filter(prioritization_level != 0) # Turkmenistan has no planning/priortization level
+
+### END Script Parameters ####################
+
+# country_subset <-                          
 
 # install local versions of key packages if necessary
 
@@ -270,11 +279,6 @@ diffDataPackModels <- function(model_old,
 
  cop_data = list()
 # get country and prioritization level
- operating_units <- datapackcommons::GetCountryLevels() %>%
-   dplyr::arrange(country_name) %>% 
-             # filter(country_name %in% c("Mozambique", "Namibia")) %>% 
-   dplyr::filter(prioritization_level != 0) # Turkmenistan has no planning/priortization level
- 
  priority_snu_data <- 
    datapackr::getDataValueSets(c("dataElementGroup","period", "orgUnitGroup"),
                                c("ofNbyQgD9xG","2021Oct","AVy8gJXym2D")) %>% 
@@ -352,8 +356,10 @@ print(lubridate::now())
 # compare with another model version
 
 diff <- diffDataPackModels(file.choose() %>% readr::read_rds(),
-     flattenDataPackModel_21(cop_data))
+     flattenDataPackModel_21(cop_data),
+     full_diff = TRUE)
 
+# output_location <- "~/COP data/COP22 Update/"
 # save flattened version manually update date and version
 # saveRDS(flattenDataPackModel_21(cop_data), file = paste0(output_location,"model_data_pack_input_22_20220510_1_flat.rds"))
 # save flattened version to send to S3
