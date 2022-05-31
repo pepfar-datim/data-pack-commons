@@ -88,7 +88,6 @@ knitr::kable(catalog)
 ### TODO
 
 * Modify GetData_DataPack to use datimutils::getAnalytics instead of internal getData_Analytics
-    * I started on this in this [branch](https://github.com/pepfar-datim/data-pack-commons/tree/refactor-GetData_DataPack , but it was almost 2 years ago.)
 * Modify SnuxImDistMain.R to use datimutils::getAnalytics instead of internal getData_Analytics,
 * deprecate GetData_Analytics
 * Consider removing period column in final output
