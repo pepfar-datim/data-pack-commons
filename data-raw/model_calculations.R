@@ -66,23 +66,6 @@ GetData <- function(indicator_parameters,
   
   indicator_parameters <-  dplyr::as_tibble(indicator_parameters)
   
-  assertthat::are_equal(names(indicator_parameters),
-                        c("custom_ou",
-                          "dx_name",
-                          "dx_id",
-                          "pe_iso",
-                          "age_set",
-                          "sex_set",
-                          "kp_set",
-                          "other_disagg_set",
-                          "technical_area",
-                          "technical_area_uid",
-                          "num_or_den",
-                          "num_or_den_uid",
-                          "disagg_type",
-                          "disagg_type_uid",
-                          "value_na" ))
-  
   analytics_output <- datapackcommons::GetData_DataPack(indicator_parameters,
                                                         ou_uid,
                                                         dim_item_sets = dim_item_sets)
