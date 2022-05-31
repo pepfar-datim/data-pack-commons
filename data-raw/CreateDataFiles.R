@@ -6,6 +6,16 @@ require(datimutils)
 require(tidyr)
 require(dplyr)
 
+#' @title ValidateDimItems
+#' @description Compares dimension item uids and names from the configuration file
+#' to what is in DATIM. Discrepancies are returned. There should not be any
+#' discrepancies in a properly configured configuration file. 
+#' @param data configuration details for DataPack or PSNUxIM model
+#' @param dim_uid_colname name of column in data with DATIM dimension uids
+#' @param item_name_colname name of column in data with DATIM dimension item names
+#' @param item_uid_colname name of column in data with DATIM dimension item uids
+#' @return TRUE if no issues found, otherwise error 
+
 ValidateDimItems <-
   function(data, dim_uid_colname, item_name_colname, item_uid_colname) {
     # validate dimension item names and ids
@@ -29,6 +39,15 @@ ValidateDimItems <-
       TRUE
     }
   }  
+
+#' @title ValidateDimItemSets
+#' @description Internal validation of dimension_item_sets configuration. Checks
+#' the dimension, dimension item, category option, and category option combo uids and names 
+#' match what is in DATIM
+#' @param dim_item_sets the dimension configuration to validate, 
+#' generally read in from CSV
+#' @return nothing returned, but if errors in configuration are detected
+#' an error is thrown
 
 ValidateDimItemSets <- function(dim_item_sets){
   
@@ -57,12 +76,17 @@ ValidateDimItemSets <- function(dim_item_sets){
   
   }
 
+#' @title ValidateDataRequired
+#' @description Internal validation of data_required configuration. Checks
+#' the analytics data dimension name and id match what is in DATIM
+#' @param data_required data_required configuration typically read in from CSV
+#' @return nothing returned, but if errors in configuration are detected
+#' an error is thrown
+
 ValidateDataRequired <- function(data_required){
-  # data_required %>% dplyr::filter(!is.na(A.dx_code)) %>%
-  # {ValidateCodeIdPairs(base_url, .[["A.dx_code"]], .[["A.dx_id"]], "indicators")}
-  # data_required %>% dplyr::filter(!is.na(B.dx_code)) %>%
-  # {ValidateCodeIdPairs(base_url, .[["B.dx_code"]], .[["B.dx_id"]], "indicators")}
-  # 
+  
+#TODO  we have drifted from only using indicators, should this be updated
+# to check other data types such as dataElements?
   data_required %>% dplyr::filter(!is.na(A.dx_name)) %>%
   {datapackcommons::ValidateNameIdPairs(.[["A.dx_name"]], 
                                         .[["A.dx_id"]], 
@@ -75,15 +99,17 @@ ValidateDataRequired <- function(data_required){
                                         "indicators")} %>% 
     assertthat::assert_that()
   
-  
-  # data_required %>% dplyr::filter(!is.na(A.add_dim_1_uid)) %>%
-  # {ValidateNameIdPairs(.[["A.add_dim_1"]], .[["A.add_dim_1_uid"]], "dimensions")}
-  # data_required %>% dplyr::filter(!is.na(B.add_dim_1_uid)) %>%
-  # {ValidateNameIdPairs(.[["B.add_dim_1"]], .[["B.add_dim_1_uid"]], "dimensions")}
-  # 
-  # data_required %>% ValidateDimItems("A.add_dim_1_uid", "A.add_dim_1_items", "A.add_dim_1_items_uid", base_url)
-  # data_required %>% ValidateDimItems("B.add_dim_1_uid", "B.add_dim_1_items", "B.add_dim_1_items_uid", base_url)
 }
+
+#' @title ValidateMapT_1toT
+#' @description  Internal validation of PSNUxIM configuration map. Checks
+#' the analytics data dimension name and id match what is in DATIM
+#' @param t_1_to_t PSNUxIM configuration mapping to validate. Usually read 
+#' in from a CSV
+#' @param dim_item_sets the dimension configuration to use for validation, 
+#' generally read in from CSV
+#' @return nothing returned, but if errors in configuration are detected
+#' an error is thrown
 
 ValidateMapT_1toT <- function(t_1_to_t, dim_item_sets){
   
@@ -101,7 +127,7 @@ ValidateMapT_1toT <- function(t_1_to_t, dim_item_sets){
     tidyr::unnest(disagg_type, disagg_type_uid) %>% 
     ValidateDimItems("dim_uid_colname", "disagg_type", "disagg_type_uid") 
   
-# chack for matching model sets in Dimension item sets
+# check for matching model sets in Dimension item sets
   c(t_1_to_t$age_set, t_1_to_t$sex_set, t_1_to_t$kp_set, t_1_to_t$other_disagg) %>% 
     na.omit() %>% 
     {. %in% dim_item_sets$model_sets} %>% 
