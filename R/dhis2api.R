@@ -386,9 +386,11 @@ GetData_DataPack <- function(parameters,
                              dim_item_sets = datapackcommons::dim_item_sets,
                              d2_session = dynGet("d2_default_session",
                                                  inherits = TRUE)) {
-  
+# This function processes only a single set of indicator paramaters
+# which are recieved in a single rowed tibble
   assertthat::assert_that(NROW(parameters) == 1)
   
+# Check names of columns in parameter tibble are as expected
   assertthat::are_equal(names(parameters),
                         c("custom_ou",
                           "dx_name",
@@ -405,12 +407,15 @@ GetData_DataPack <- function(parameters,
                           "disagg_type",
                           "disagg_type_uid",
                           "value_na" ))
-  
+# Prepare dimensions input for GetData_Analytics call
+# data and period parameters
   dimensions <- tibble::tribble(~type, ~dim_item_uid, ~dim_uid,
                                 "dimension", parameters$dx_id[[1]], "dx",
                                 "dimension", parameters$pe_iso[[1]], "pe")
-  if (!(parameters$dx_id %in% c("zPTqc4v5GAK",
-                                "r4zbW3owX9n"))){
+# add analytics filters for support type in DSD or TA
+# expect for indicators/data elements with no support type (AGYW, Priortization)
+  if (!(parameters$dx_id %in% c("zPTqc4v5GAK", # FY21 Results AGYW_PREV Total D
+                                "r4zbW3owX9n"))){ #IMPATT.PRIORITY_SNU (N, SUBNAT) TARGET: 
     dimensions <- #dsd and ta support types
       dplyr::bind_rows(dimensions,
                        tibble::tribble(~type, ~dim_item_uid, ~dim_uid,
@@ -419,33 +424,18 @@ GetData_DataPack <- function(parameters,
   }
   
 # add rows to dimensions for org units
+# this technically allows for multiple org units, but practically
+# I think this function is only called with 1 OU
+# TODO simplify to assume only 1 OU/country uid which matches documentation
+# block
   if (!is.null(org_units)) {  
     dimensions <- purrr::reduce(org_units, 
                   ~ rbind(.x, 
                           c("dimension", .y, "ou")), 
                   .init = dimensions)
     }    
-  
-# add rows to dimensions for org unit groups
-  # if (!is.null(org_unit_groups)) {
-  #   dimensions <- purrr::reduce(org_unit_groups,
-  #                 ~ rbind(.x,
-  #                         c(
-  #                           "dimension", paste0("OU_GROUP-", .y), "ou"
-  #                         )),
-  #                 .init = dimensions)
-  # }
-  
-  # if (!is.null(org_unit_levels)) {
-  #   # add rows to dimensions for levels
-  #   dimensions <- purrr::reduce(levels,
-  #                 ~ rbind(.x,
-  #                         c("dimension", paste0("LEVEL-", .y), "ou")),
-  #                 .init = dimensions)
-  # }
-  
 
-  
+# add dimensions for the standard age, sex, kp, and other disaggregations  
   dimension_disaggs <- dim_item_sets %>% dplyr::mutate(type = "dimension") %>%  
     dplyr::filter(model_sets %in% c(parameters$age_set,
                                     parameters$sex_set,
@@ -454,11 +444,17 @@ GetData_DataPack <- function(parameters,
     dplyr::select(type, dim_item_uid, dim_uid) %>%
     unique()  %>% 
     stats::na.omit() # there are some items in dim item sets with no source dimension
+                     # these are cases when a historic disaggregation doesn't exist
+                     # and we need to create the disaggregation allocation for the
+                     # DataPack
   
   
   dimensions <- dplyr::bind_rows(dimensions, dimension_disaggs)
   
-# Implemented for dreams SNUs for AGYW_PREV   
+# Implemented for dreams SNUs for AGYW_PREV
+# currently used to select DREAMS SNU ou_group
+# we get an early return in this if block as later code
+# assumes standard orgunit groups of PSNU and Mil
   if(!is.na(parameters$custom_ou)){
     results_custom <-  
       try({tibble::tibble(type = "dimension",
@@ -484,13 +480,19 @@ GetData_DataPack <- function(parameters,
                 "results" = results))
   }
 
+# due to the existence of some countries planning at country level and
+# containing a military org unit below country level
+# we must pull data from PSNUs and Mil separately to avoid double counting
+# military data
+  
+# create list of non-military Type of organisational unit
   non_mil_types_of_org_units <- 
     datimutils::getDimensions("mINJi7rR1a6",
                                  fields = "items[name,id]") %>%
     dplyr::filter(name != "Military") %>% 
     .[["id"]]
 
-  
+# get non-military (PSNU) data
   results_psnu <-  tibble::tibble(type = "filter",
                                   dim_item_uid = non_mil_types_of_org_units,
                                   dim_uid = "mINJi7rR1a6") %>%
@@ -503,6 +505,7 @@ GetData_DataPack <- function(parameters,
   
   results_mil <- NULL
   if(include_military){    
+# get military data
     results_mil <- tibble::tribble(~type, ~dim_item_uid, ~dim_uid,
                                    "dimension", "OU_GROUP-nwQbMeALRjL", "ou") %>%  # military
     rbind(dimensions) %>% 
