@@ -113,12 +113,17 @@ ValidateDataRequired <- function(data_required){
 
 ValidateMapT_1toT <- function(t_1_to_t, dim_item_sets){
   
+# Checking technical area dimension items
   t_1_to_t %>% mutate(dim_uid_colname = "LxhLO68FcXm") %>% 
   ValidateDimItems("dim_uid_colname", "technical_area", "technical_area_uid") 
   
+# Checking numerator/denominator dimension items
   t_1_to_t %>% mutate(dim_uid_colname = "lD2x0c8kywj") %>% 
     ValidateDimItems("dim_uid_colname", "num_or_den", "num_or_den_uid") 
-      
+  
+# Checking Disaggregation Type
+# OVC_SERV has a mapping to multiple historic disaggregation types which
+# are separated by a semi-colon
   t_1_to_t %>% mutate(dim_uid_colname = "HWPJnUTMjEq") %>% 
     dplyr::mutate(disagg_type= 
                     stringr::str_split(disagg_type, pattern = ";"),
@@ -128,7 +133,10 @@ ValidateMapT_1toT <- function(t_1_to_t, dim_item_sets){
     ValidateDimItems("dim_uid_colname", "disagg_type", "disagg_type_uid") 
   
 # check for matching model sets in Dimension item sets
-  c(t_1_to_t$age_set, t_1_to_t$sex_set, t_1_to_t$kp_set, t_1_to_t$other_disagg) %>% 
+  c(t_1_to_t$age_set, 
+    t_1_to_t$sex_set, 
+    t_1_to_t$kp_set, 
+    t_1_to_t$other_disagg) %>% 
     na.omit() %>% 
     {. %in% dim_item_sets$model_sets} %>% 
     all() %>% 
@@ -136,7 +144,8 @@ ValidateMapT_1toT <- function(t_1_to_t, dim_item_sets){
 
   }
 
-datimutils::loginToDATIM("~/.secrets/datim.json")
+datimutils::loginToDATIM(paste0(Sys.getenv("SECRETS_FOLDER"),
+                                "datim.json"))
 
 wd <- getwd()
 setwd("~/Documents/GitHub/data-pack-commons")
@@ -183,61 +192,3 @@ usethis::use_data(data_required, overwrite = TRUE, compress = "gzip")
 usethis::use_data(Map22Tto23T, overwrite = TRUE, compress = "gzip")
 
 setwd(wd)
-
-
-# SQL query for mechanisms
-
-# select
-# mechs.name mechanism_name,
-# mechs.uid mechanism_co_uid,
-# mechs.code mechanism_code,
-# country_name country,
-# country_uid
-# from
-# (
-#   select
-#   distinct dv.attributeoptioncomboid,
-#   dv.sourceid,
-#   co.name,
-#   co.uid,
-#   co.code
-#   from
-#   datavalue dv
-#   inner join _periodstructure pe on
-#   dv.periodid = pe.periodid
-#   inner join categoryoptioncombos_categoryoptions coc_co on
-#   dv.attributeoptioncomboid = coc_co.categoryoptioncomboid
-#   inner join dataelementcategoryoption co on
-#   co.categoryoptionid = coc_co.categoryoptionid
-#   where
-#   dv.deleted = false
-#   and (pe.iso = '${period}')
-#   and co.uid != 'xYerKDKCefk') mechs
-# inner join (
-#   select
-#   ou.organisationunitid,
-#   ou.uid,
-#   country_uid,
-#   country_name
-#   from
-#   organisationunit ou
-#   inner join (
-#     select
-#     organisationunit.uid country_uid,
-#     organisationunit.name country_name
-#     from
-#     orgunitgroup
-#     inner join orgunitgroupmembers on
-#     orgunitgroup.orgunitgroupid = orgunitgroupmembers.orgunitgroupid
-#     inner join organisationunit on
-#     organisationunit.organisationunitid = orgunitgroupmembers.organisationunitid
-#     where
-#     orgunitgroup.uid = 'cNzfcPWEGSH') countries on
-#   ou."path" like concat('%', countries.country_uid, '%')) orgunits on
-# mechs.sourceid = orgunits.organisationunitid
-# group by
-# mechs.name,
-# mechs.uid,
-# mechs.code,
-# country_uid,
-# country_name
