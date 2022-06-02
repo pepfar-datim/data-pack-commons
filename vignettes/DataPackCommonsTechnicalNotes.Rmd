@@ -62,11 +62,20 @@ Running the script start to finish (without uncommenting the writing of files), 
 
 There is a script in `datapackcommons` `data-raw/SnuxImDistMain.R`. It is currently possible to produce a PSNUxIM model for COP21 or COP22, and that variable `cop_year` is set at the top of the script. This script also contains code for comparing two versions of the PSNUxIM distribution, but it is inline at the bottom instead of in a function. It also contains code for sending the file to S3 commented out.
 
-The the final R object created by this script is called data. When written as an RDS, these are the data used by data packr to populat the PSNUxIM tab.
+The the final R object created by this script is called data. When written as an RDS, these are the data used by datapackr to populate the PSNUxIM tab.
 
 ## Generating configuration files
 
-There are three important configuration files, excel sheets, that are used to co
+There are 2 excel files used to configure the DataPack and PSNUxIM models.
+
+1. `data-raw/model_calculations/model_calculations.xlsx`
+
+    This contains a sheet with configuration details for pulling the historic data required for the DataPack (data_required sheet) as well as details on disaggregations required for the DataPack (dimension_item_sets sheet), which may include aggregation or disaggregation compared to what is actually in DATIM. I will provide more details on the configuration below.
+1. `data-raw/snu_x_im_distribution_configuration/22Tto23TMap.xlsx`
+
+    This workbook contains 1 sheet with the configuration details for generating the PSNUxIM distribution. more details on the configuration are provided below.
+    
+The three worksheets in these two excel files are saved in csv format for version control purposes, and these three csv files are converted to .rds files for inclusion on the package with the script `data-raw/CreateDataFiles.R`. This script includes some checks to ensure the internal consistency of the configuration (e.g. names and uids match) and it also provides some comparison of the data rds files to generated with the versions currently in the package. This allows us to ensure any configuration changes are as intended.
 
 ## Configuring a `DataPackModel`
 
