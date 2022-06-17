@@ -77,9 +77,27 @@ There are 2 excel files used to configure the DataPack and PSNUxIM models.
     
 The three worksheets in these two excel files are saved in csv format for version control purposes, and these three csv files are converted to .rds files for inclusion on the package with the script `data-raw/CreateDataFiles.R`. This script includes some checks to ensure the internal consistency of the configuration (e.g. names and uids match) and it also provides some comparison of the data rds files to generated with the versions currently in the package. This allows us to ensure any configuration changes are as intended.
 
-## Configuring a `DataPackModel`
+Practically what this means is that the process for updaing the DataPack model and the PSNUsxIM distribution model requires three things.
+
+1. Update the relevant sheet(s) in `data-raw/model_calculations/model_calculations.xlsx` or `data-raw/snu_x_im_distribution_configuration/22Tto23TMap.xlsx` and save the xlsx file.
+
+    NOTE: for next year the distribution file would be named  `23Tto24TMap.xlsx` if we keep the pattern the same.  
+1. Save the updated Excel sheets as individual csv files
+    - `data-raw/model_calculations/dimension_item_sets.csv`
+    - `data-raw/model_calculations/data_required.csv`
+    - `data-raw/snu_x_im_distribution_configuration/22Tto23TMap.csv`
+1. Run the script that validates the confiuration files (csv versions) and creates the RDS files - `data-raw/CreateDataFiles.R`
+
+## Configuring `dimension_item_sets`
+
+You should familiarize yourself with the [DHIS2 API analytics endpoint](https://docs.dhis2.org/en/develop/using-the-api/dhis-core-version-238/analytics.html) in order to fully understand the content below.  
+
+The dimension item sets is used to specify which disaggregations are used to pull data from the analytics endpoint for the DataPack Model and the PSNUxIM distribution. Each `model_set` is a combination of one or more analytics dimensions and dimension items used in a DHIS2 analytics call. Each row of dimension item sets corresponds to a single dimension item.     
 
 ## Configuring a `PSNUxIM distribution`
+
+## Configuring a `DataPackModel`
+
 
 
 
@@ -104,5 +122,11 @@ knitr::kable(catalog)
 * remove include military = true code, all countries now have military below country level as standard
 * Make a function for comparing PSNUxIM distributions
 * Create standard functions for sending stuff to S3
+* Remove dimension item set model sets that are not used by the DataPackModel or the PSNUxIM distribution
+* Begin analyzing indicators in the DataPack model that will be affected by new age categories
+* Business as usual DataPack Model update
+  - if datapack content remained the same, do we have the right indicators and disaggregations for pulling FY23 target data and FY22 results data as opposed to FY22 targets and FY21 results?
+* Business as usual PSNUxIM distribution update
+  - if PSNUxIM content remained the same, do we have the right standard dissagregations for pulling FY23 target data and maping to FY24 target data?
 
 ### Thoughts and ideas
