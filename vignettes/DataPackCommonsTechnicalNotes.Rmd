@@ -128,5 +128,6 @@ knitr::kable(catalog)
   - if datapack content remained the same, do we have the right indicators and disaggregations for pulling FY23 target data and FY22 results data as opposed to FY22 targets and FY21 results?
 * Business as usual PSNUxIM distribution update
   - if PSNUxIM content remained the same, do we have the right standard dissagregations for pulling FY23 target data and maping to FY24 target data?
+* Harmonize dimension_item_set model set names with the valida_age, valid_sex, and valid_kp names in the datapack template 
 
 ### Thoughts and ideas
