@@ -1,5 +1,5 @@
 #' Input to model calculation gives the mapping between dimension items and category options or the
-#' raw category option combination.
+#' raw category option combination or other analytics dimension
 #'
 #'  - Each row corresponds to an individual category option required in the output, 
 #'    there are multiple entries per dimension and potentially even dimension item in some cases.
@@ -9,24 +9,26 @@
 #'
 #' @format A data frame with these variables:
 #' \describe{
-#'   \item{dim_uid}{Dimension uid used when running indicators, co in the case of a category option combination}
-#'   \item{dim_name}{Name for dimension - for documentation not used directly in model calculations}
+#'   \item{dim_uid}{Dimension uid used when running indicators, co in the case of a category option combination,
+#'   NA if it is a datapack dimension that is missing from DATIM's historical data}
+#'   \item{dim_name}{Name for dimension as it appears in DATIM - for documentation not used directly in model calculations}
 #'   \item{dim_item_uid}{Dimension item or category option combination used when running indicator}
-#'   \item{dim_cop_type}{The dimension type from data pack perspective. These are categories that 
-#'   can appear in the rows of the data pack. In theory different indicators could use different 
+#'   \item{dim_cop_type}{This column is purely organizational - not functional. The dimension type from data pack perspective.
+#'   These are categories that can appear in the rows of the data pack. In theory different indicators could use different 
 #'   dimensions to produce these disaggregations (e.g. Cascade age bands or Semi fine age). 
 #'   Currently we use the same dimensions respectively for age, sex, kp.}
-#'   \item{dim_item_name}{Name of the dimension item - for documentation not used directly in 
+#'   \item{dim_item_name}{Name of the dimension item as it appears in DATIM - for documentation not used directly in 
 #'   model calculations}
-#'   \item{option_name}{Name of the category option the dimension item will map to - for 
-#'   documentation not used directly in model calculations}
-#'   \item{option_uid}{UID of the category option the dimension item will map to}
+#'   \item{option_name}{Name of the category option the dimension item will map to as it appears in DATIM - for 
+#'   documentation not used directly in model calculations. In the case of data element group set dimensions, this will be NA}
+#'   \item{option_uid}{UID of the category option the dimension item will map to. Only used by datapackr in the case of age, sex and KP; 
+#'   otherwise this can be NA if it doesn't map to a single category oprtion}
 #'   \item{sort_order}{Sort order for the category option, not strictly necessary for any 
 #'   processing but can be useful in debugging and config work}
 #'   \item{weight}{Value from 0-1 indicating the percent of the value for the dimension item that 
 #'   gets distributed the category option when the raw values are distributed 
 #'   (column "allocate" = "distribute" in data_required.csv) E.g. Dimension item 40-49 may 
-#'   appear twice once for category optiuon 40-44 and once for 45-49. 
+#'   appear twice once for category option 40-44 and once for 45-49. 
 #'   Each of these rows would have weight .5}
 #'   \item{model_sets}{Semicolon seperated list of keys used for grouping the dimension item to 
 #'   category option mappings into sets for calling the analytics api and calculating the model 
@@ -34,8 +36,6 @@
 #' }
 #' @source COP19 systems team 
 "dim_item_sets"
-
-
 
 #' Input to model calculation. One row per required data pack column (from DATIM).
 #' Includes parameters (dimensions, items) for calling the indicators, and the key to 

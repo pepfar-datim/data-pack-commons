@@ -7,7 +7,7 @@
 GetData_DataPack(
   parameters,
   org_units,
-  include_military,
+  include_military = TRUE,
   dim_item_sets = datapackcommons::dim_item_sets,
   d2_session = dynGet("d2_default_session", inherits = TRUE)
 )

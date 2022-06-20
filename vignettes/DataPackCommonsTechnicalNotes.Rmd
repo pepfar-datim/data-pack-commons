@@ -90,15 +90,45 @@ Practically what this means is that the process for updaing the DataPack model a
 
 ## Configuring `dimension_item_sets`
 
-You should familiarize yourself with the [DHIS2 API analytics endpoint](https://docs.dhis2.org/en/develop/using-the-api/dhis-core-version-238/analytics.html) in order to fully understand the content below.  
+You should familiarize yourself with the [DHIS2 API analytics endpoint](https://docs.dhis2.org/en/develop/using-the-api/dhis-core-version-238/analytics.html) in order to fully understand the content below.
 
-The dimension item sets is used to specify which disaggregations are used to pull data from the analytics endpoint for the DataPack Model and the PSNUxIM distribution. Each `model_set` is a combination of one or more analytics dimensions and dimension items used in a DHIS2 analytics call. Each row of dimension item sets corresponds to a single dimension item.     
+The data in the DataPack is generally organized with an age and sex, or a key population in the rows (EID and GEND don't have row dissagregates, age is implied in EID columns). Additionally the columns often also have an implied disaggregation of some kind. For example `HTS_TST.KP.Pos.T_1` is disaggregated by key population status and an implied disagregation (analytics filer) on HIV test +. `TB_STAT.N.New.Pos.T_1` is disaggregated age: 1-65+, sex Male/Female and has an implied disagg on HIV Test Status (Specific) = Newly Tested Positives (Specific). This is similar for the PSNUxIM distribution.
+
+The dimension item sets configuration is used to specify which disaggregations are used to pull data from the DHIS2 analytics endpoint for the DataPack Model and the PSNUxIM distribution. Each Column in the DataPack and unique indicator code in the PSNUxIM distributions can be associated with up to 3 dimension item or model sets. Age and/or sex and/or other disagg; or KP and/or other disagg.
+
+An important aspect of the dimension item set configuration is it allows us to specify special situations for splitting historic data into new disaggregations for the datapack or aggregating historic data for use in the datapack. 
+
+Examples
+
+### Standard age disaggregation
+
+### Age disaggregation
+
+
+
+Each `model_set` is a combination of one or more analytics dimensions and dimension items used in a DHIS2 analytics call. Most columns of dimension_item_sets are described here in the docs (`?datapackcommons::dim_item_sets`). The column `model_sets` in the dimension_items_sets excel sheet is semi-colon delimited and gets unnested in the package object `datapack::dim_item_sets`. A model set is the foreign key for the groupings that are used in the data_required and PSNUxIM model configurations to link the configuration to the ages, sexes, kps and other disaggs.
+
+For every column of the datapack there will be one or more model sets
 
 ## Configuring a `PSNUxIM distribution`
 
-## Configuring a `DataPackModel`
+## Configuring a `DataPack Model`
 
+The DataPack model is used to populate certain columns of the `DataPack` with historic data in DATIM. Usually the target data for the current fiscal year/preceding COP year, and the results data from the prior fiscal year. So for COP 23 this means the historic data for the most part will be FY23/COP22 targets and FY22 results. The only edge case at the moment is `TB_PREV.N.R` which aggregates the last 5 years of data for COP22 (perhaps the prior 6 years for COP23).
 
+In the datapack columns that take historic data are categorized as `mer/past` or `datapack/calculation`, e.g.
+
+```{r}
+head(dplyr::filter(datapackr::cop22_data_pack_schema, 
+              (dataset == "mer" & col_type == "past") |
+              (dataset == "datapack" & col_type == "calculation")))
+```
+
+Usually an indicator code with T_1 indicates the prior cop year (so T_1 in COP23 = FY23/COP22 targets = 2022Oct period) and R indicates results from the last fiscal year (so R in COP23 indicates FY22 results = 2021Oct period).
+
+Consider the PMTCT tab of the datapack
+
+Replicate vs distribute We never distribute 
 
 
 ## Key Files/Directories
@@ -129,5 +159,14 @@ knitr::kable(catalog)
 * Business as usual PSNUxIM distribution update
   - if PSNUxIM content remained the same, do we have the right standard dissagregations for pulling FY23 target data and maping to FY24 target data?
 * Harmonize dimension_item_set model set names with the valida_age, valid_sex, and valid_kp names in the datapack template 
+* Remove dim_cop_type row from dim_item_sets - we don't use it for anything
+* enable tech_area, num_den, disagg_type in data_required asfilters. We use these in the SNUxIM distribution but not currently in `DataPack model`
+  - `TB_PREV.N.R` condfiguration for this is quite awkward
+* fully support mutli-item dimensions (with semicolons or pipes or some other special character)
+  - added for `OVC_SERV.Active.T` and `OVC_SERV.Grad.T` PSNUxIM distribution but I think only partially implemented
+* change full formula column into more of a description column perhaps with reference to data pack documentation
 
 ### Thoughts and ideas
+
+* Reevealuate use desire to use indicators and basis of data pulls for `DataPack Model` - we don't use indicators for `PSNUxIM`
+* 
