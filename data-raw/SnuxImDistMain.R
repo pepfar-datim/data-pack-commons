@@ -303,7 +303,13 @@ deltas=purrr::map_df(names, ~try(dplyr::full_join(
   dplyr::bind_cols(data_old[[.x]], tibble::tribble(~old,1))))) %>% 
   dplyr::filter(is.na(old) | is.na(new)) 
 
+ancestors <- datimutils::getOrgUnits(deltas$psnu_uid, fields = "ancestors[name]")
+deltas <- dplyr::mutate(deltas,
+                        psnu = datimutils::getOrgUnits(psnu_uid),
+                        ou = purrr::map_chr(ancestors, purrr::pluck,1,3),
+                        snu1 = purrr::map_chr(ancestors, purrr::pluck,1,4, .default = NA_character_))
 
+# 
 # if (cop_year == 2021){
 #   readr::write_rds(data,
 #                    paste0("/Users/sam/COP data/PSNUxIM_COP21_", lubridate::today(), ".rds"),
@@ -363,5 +369,5 @@ deltas=purrr::map_df(names, ~try(dplyr::full_join(
 # })
 # 
 # s3$list_objects_v2(Bucket = Sys.getenv("AWS_S3_BUCKET"),
-#                    Prefix = paste0("support_files/", file_name)) %>% 
+#                    Prefix = paste0("support_files/", file_name)) %>%
 #   purrr::pluck("Contents", 1, "LastModified")
