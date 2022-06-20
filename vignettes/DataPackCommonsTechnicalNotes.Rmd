@@ -16,6 +16,7 @@ knitr::opts_chunk$set(
 
 ```{r setup}
 library(datapackcommons)
+library(tidyverse)
 ```
 
 
@@ -98,12 +99,38 @@ The dimension item sets configuration is used to specify which disaggregations a
 
 An important aspect of the dimension item set configuration is it allows us to specify special situations for splitting historic data into new disaggregations for the datapack or aggregating historic data for use in the datapack. 
 
-Examples
+#### Examples
 
-### Standard age disaggregation
+###### Standard key population disaggregation
 
-### Age disaggregation
+This is the most basic example, we are pulling data from the `Key Populations v3` dimension, we include all of the dimension items under this dimension. As this dimension is actually a category, the category option uids and the dimension item uids match. The weights are all equal to 1 because we aren't aggregating or disaggeregating the data further for the data pack. The `model_set` her is `kp1` so that is the foreign key we will use in the other configuration files to pull data with these disaggregations. 
 
+https://www.datim.org/api/dimensions?filter=name:eq:Key%20Populations%20v3&fields=:all,items[name,id]
+https://www.datim.org/api/categories?filter=name:eq:Key%20Populations%20v3&fields=name,id,categoryOptions[name,id]
+
+```{r}
+dplyr::filter(datapackcommons::dim_item_sets, model_sets == "kp1") %>% as.data.frame()
+```
+
+
+###### Ages with additional distribution to new ages
+
+Historically the highest age category has been 50+, but with COP22 and 23 the finer age bands are being use creating 50-54, 55-59, 60-64, and 65+. For the purposes of the datapack we need to be allocate or distribute historic data for the 50+ age category to these new age bands. Here is an example of a model set that does this:
+
+```{r}
+dplyr::filter(datapackcommons::dim_item_sets, model_sets == "15-65+") %>% as.data.frame()
+```
+
+`https://www.datim.org/api/dimensions?filter=name:eq:Age:%20Cascade%20Age%20bands&fields=:all,items[name,id]`
+
+
+Some important things to note, this dimension does NOT come from a category, it is a a category group set. The dimension items are not necessarily category options, and the name and uids differ from category options. For instance the dimension item is `<item name="10-14 (Specific)" id="tIZRQs0FK5P"/>`, but the underlying category option is `<categoryOption name="10-14" id="jcGQdcpPSJP"/>`
+
+https://www.datim.org/api/categoryOptionGroups/tIZRQs0FK5P?fields=:all,categoryOptions[name,id]
+
+Also the 15-65+ model set does not include all of the dimension items from the `Age: Cascade Age bands` dimension/category group set.
+
+In the configuration we can see that the 50+ dimension item appears 4 times in order to allocate the 50+ data to the 4 new age categories. This distribution of data happens in the data pack commons code. The 50+ data is proportionally distributed to 50-54, 55-59, 60-64, 65+ with weights .42, .35, .14, .09 (sum to 1), respectivly. 
 
 
 Each `model_set` is a combination of one or more analytics dimensions and dimension items used in a DHIS2 analytics call. Most columns of dimension_item_sets are described here in the docs (`?datapackcommons::dim_item_sets`). The column `model_sets` in the dimension_items_sets excel sheet is semi-colon delimited and gets unnested in the package object `datapack::dim_item_sets`. A model set is the foreign key for the groupings that are used in the data_required and PSNUxIM model configurations to link the configuration to the ages, sexes, kps and other disaggs.
