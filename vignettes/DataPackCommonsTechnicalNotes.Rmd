@@ -99,11 +99,11 @@ The dimension item sets configuration is used to specify which disaggregations a
 
 An important aspect of the dimension item set configuration is it allows us to specify special situations for splitting historic data into new disaggregations for the datapack or aggregating historic data for use in the datapack. 
 
-#### Examples
+### Dimension item set examples
 
 ###### Standard key population disaggregation
 
-This is the most basic example, we are pulling data from the `Key Populations v3` dimension, we include all of the dimension items under this dimension. As this dimension is actually a category, the category option uids and the dimension item uids match. The weights are all equal to 1 because we aren't aggregating or disaggeregating the data further for the data pack. The `model_set` her is `kp1` so that is the foreign key we will use in the other configuration files to pull data with these disaggregations. 
+This is the most basic example, we are pulling data from the `Key Populations v3` dimension, we include all of the dimension items under this dimension. As this dimension is actually a category, the category option uids and the dimension item uids match. The weights are all equal to 1 because we aren't aggregating or disaggeregating the data further for the data pack. The `model_set` here is `kp1` so that is the foreign key we will use in the other configuration files to pull data with these disaggregations. 
 
 https://www.datim.org/api/dimensions?filter=name:eq:Key%20Populations%20v3&fields=:all,items[name,id]
 https://www.datim.org/api/categories?filter=name:eq:Key%20Populations%20v3&fields=name,id,categoryOptions[name,id]
@@ -138,6 +138,15 @@ Each `model_set` is a combination of one or more analytics dimensions and dimens
 For every column of the datapack there will be one or more model sets
 
 ## Configuring a `PSNUxIM distribution`
+
+The PSNUxIM distribution provides data for allocation targets set in the main data pack tabs to mechanisms on the PSNUxIM tab. We use historic data, specifically prior year targets data, to create these allocations. We take the list of targets for the cop year and map those to targets from the prior year. In most cases this is a direct mappingto the same data element from the previous year. In the case of completely new indicators, however, we sometimes need to map to a different indicator from the prior year. If there is really no good historic data to link a new indicator too, we sometimes leave it out of the PSNUxIM distribution.
+
+So the configuration requires a reference to a target data element from the previous year. We specify the data element using its technical area, num/den, and disaggregation type. Unfortunately I cannot recall exactly why we chose to use these data element groups and group sets instead of using data element uids directly. It is perhaps slightly easier to maintain as is, if the data element changes it is usually only the disaggregation type that requires updating.
+
+### Examples
+
+
+
 
 ## Configuring a `DataPack Model`
 
@@ -174,21 +183,21 @@ knitr::kable(catalog)
 * Modify GetData_DataPack to use datimutils::getAnalytics instead of internal getData_Analytics
 * Modify SnuxImDistMain.R to use datimutils::getAnalytics instead of internal getData_Analytics,
 * deprecate GetData_Analytics
-* Consider removing period column in final output
-* create flat file from the beginning and deprecate flatten COP function
-* remove include military = true code, all countries now have military below country level as standard
-* Make a function for comparing PSNUxIM distributions
-* Create standard functions for sending stuff to S3
+* enable tech_area, num_den, disagg_type in data_required as filters. We use these in the SNUxIM distribution but not currently in `DataPack model`
+  - `TB_PREV.N.R` configuration for this is quite awkward
+* Remove dim_cop_type row from dim_item_sets - we don't use it for anything
 * Remove dimension item set model sets that are not used by the DataPackModel or the PSNUxIM distribution
-* Begin analyzing indicators in the DataPack model that will be affected by new age categories
+* Analyze harmonizing dimension_item_set model set names with the valida_age, valid_sex, and valid_kp names in the datapack template
 * Business as usual DataPack Model update
   - if datapack content remained the same, do we have the right indicators and disaggregations for pulling FY23 target data and FY22 results data as opposed to FY22 targets and FY21 results?
 * Business as usual PSNUxIM distribution update
   - if PSNUxIM content remained the same, do we have the right standard dissagregations for pulling FY23 target data and maping to FY24 target data?
-* Harmonize dimension_item_set model set names with the valida_age, valid_sex, and valid_kp names in the datapack template 
-* Remove dim_cop_type row from dim_item_sets - we don't use it for anything
-* enable tech_area, num_den, disagg_type in data_required asfilters. We use these in the SNUxIM distribution but not currently in `DataPack model`
-  - `TB_PREV.N.R` condfiguration for this is quite awkward
+* Make a function for comparing PSNUxIM distributions
+* create flat file from the beginning and deprecate flatten COP function
+* Consider removing period column in final output
+* remove include military = true code, all countries now have military below country level as standard
+* Create standard functions for sending stuff to S3
+* Begin analyzing indicators in the DataPack model that will be affected by new age categories
 * fully support mutli-item dimensions (with semicolons or pipes or some other special character)
   - added for `OVC_SERV.Active.T` and `OVC_SERV.Grad.T` PSNUxIM distribution but I think only partially implemented
 * change full formula column into more of a description column perhaps with reference to data pack documentation
