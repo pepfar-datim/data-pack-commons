@@ -201,6 +201,10 @@ knitr::kable(catalog)
 * fully support mutli-item dimensions (with semicolons or pipes or some other special character)
   - added for `OVC_SERV.Active.T` and `OVC_SERV.Grad.T` PSNUxIM distribution but I think only partially implemented
 * change full formula column into more of a description column perhaps with reference to data pack documentation
+* Check on sending yearly versioned copieds of datapack model to s3
+* Hand Over COP21 OPUs
+* Consider moving PSNUxIM distribution config to datapack template
+
 
 ### Thoughts and ideas
 
