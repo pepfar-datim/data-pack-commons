@@ -380,151 +380,194 @@ GetData_Analytics <-  function(dimensions,
 # # org_unit_levels=NULL
 #  GetData_DataPack(parameters=parameters, org_units = org_units)
 
-GetData_DataPack <- function(parameters, 
+GetData_DataPack <- function(parameters,
                              org_units,
                              include_military = TRUE,
                              dim_item_sets = datapackcommons::dim_item_sets,
                              d2_session = dynGet("d2_default_session",
                                                  inherits = TRUE)) {
-# This function processes only a single set of indicator paramaters
-# which are recieved in a single rowed tibble
+  # This function processes only a single set of indicator paramaters
+  # which are recieved in a single rowed tibble
   assertthat::assert_that(NROW(parameters) == 1)
   
-# Check names of columns in parameter tibble are as expected
-  assertthat::are_equal(names(parameters),
-                        c("custom_ou",
-                          "dx_name",
-                          "dx_id",
-                          "pe_iso",
-                          "age_set",
-                          "sex_set",
-                          "kp_set",
-                          "other_disagg_set",
-                          "technical_area",
-                          "technical_area_uid",
-                          "num_or_den",
-                          "num_or_den_uid",
-                          "disagg_type",
-                          "disagg_type_uid",
-                          "value_na" ))
-# Prepare dimensions input for GetData_Analytics call
-# data and period parameters
-  dimensions <- tibble::tribble(~type, ~dim_item_uid, ~dim_uid,
-                                "dimension", parameters$dx_id[[1]], "dx",
-                                "dimension", parameters$pe_iso[[1]], "pe")
-# add analytics filters for support type in DSD or TA
-# expect for indicators/data elements with no support type (AGYW, Priortization)
+  # Check names of columns in parameter tibble are as expected
+  assertthat::are_equal(
+    names(parameters),
+    c(
+      "custom_ou",
+      "dx_name",
+      "dx_id",
+      "pe_iso",
+      "age_set",
+      "sex_set",
+      "kp_set",
+      "other_disagg_set",
+      "technical_area",
+      "technical_area_uid",
+      "num_or_den",
+      "num_or_den_uid",
+      "disagg_type",
+      "disagg_type_uid",
+      "value_na"
+    )
+  )
+  
+  # data and period parameters
+  # create the initial inputs for dimensions and period
+  analytics_input <- list()
+  analytics_input$dx <- parameters$dx_id[[1]]
+  analytics_input$pe <- parameters$pe_iso[[1]]
+  
+  # add analytics filters for support type in DSD or TA
+  # expect for indicators/data elements with no support type (AGYW, Priortization)
   if (!(parameters$dx_id %in% c("zPTqc4v5GAK", # FY21 Results AGYW_PREV Total D
-                                "r4zbW3owX9n"))){ #IMPATT.PRIORITY_SNU (N, SUBNAT) TARGET: 
-    dimensions <- #dsd and ta support types
-      dplyr::bind_rows(dimensions,
-                       tibble::tribble(~type, ~dim_item_uid, ~dim_uid,
-                                       "filter", "iM13vdNLWKb", "TWXpUVE2MqL", 
-                                       "filter", "cRAGKdWIDn4", "TWXpUVE2MqL"))
+                                "r4zbW3owX9n"))) {
+    #IMPATT.PRIORITY_SNU (N, SUBNAT) TARGET:
+    
+    f <- toString(sprintf("'%s'", c("cRAGKdWIDn4", "iM13vdNLWKb")))
+    filters <- paste("TWXpUVE2MqL", "%.f%", "c(", f, ")")
+    fils_list <- eval(parse(text = filters))
+    analytics_input <-  append(analytics_input, fils_list)
+    
   }
   
-# add rows to dimensions for org units
-# this technically allows for multiple org units, but practically
-# I think this function is only called with 1 OU
-# TODO simplify to assume only 1 OU/country uid which matches documentation
-# block
-  if (!is.null(org_units)) {  
-    dimensions <- purrr::reduce(org_units, 
-                  ~ rbind(.x, 
-                          c("dimension", .y, "ou")), 
-                  .init = dimensions)
-    }    
-
-# add dimensions for the standard age, sex, kp, and other disaggregations  
-  dimension_disaggs <- dim_item_sets %>% dplyr::mutate(type = "dimension") %>%  
-    dplyr::filter(model_sets %in% c(parameters$age_set,
-                                    parameters$sex_set,
-                                    parameters$kp_set,
-                                    parameters$other_disagg_set)) %>% 
+  # add rows to dimensions for org units
+  # this technically allows for multiple org units, but practically
+  # I think this function is only called with 1 OU
+  # TODO simplify to assume only 1 OU/country uid which matches documentation
+  # block
+  if (!is.null(org_units)) {
+    analytics_input$ou <- org_units
+  }
+  
+  # add dimensions for the standard age, sex, kp, and other disaggregations
+  dimension_disaggs <-
+    dim_item_sets %>% dplyr::mutate(type = "dimension") %>%
+    dplyr::filter(
+      model_sets %in% c(
+        parameters$age_set,
+        parameters$sex_set,
+        parameters$kp_set,
+        parameters$other_disagg_set
+      )
+    ) %>%
     dplyr::select(type, dim_item_uid, dim_uid) %>%
-    unique()  %>% 
+    unique()  %>%
     stats::na.omit() # there are some items in dim item sets with no source dimension
-                     # these are cases when a historic disaggregation doesn't exist
-                     # and we need to create the disaggregation allocation for the
-                     # DataPack
+  # these are cases when a historic disaggregation doesn't exist
+  # and we need to create the disaggregation allocation for the
+  # DataPack
   
   
-  dimensions <- dplyr::bind_rows(dimensions, dimension_disaggs)
+  # create the dimension list of the extras with their corresponding dim-items
+  dims <- dimension_disaggs %>% select(dim_uid) %>% unique()
+  dim_list <- dims$dim_uid %>% lapply(function(uid) {
+    # prepare dim item uids and dim
+    dim_uid <- sprintf("'%s'", uid)
+    dim_item_uids <-
+      toString(sprintf("'%s'", dimension_disaggs[dimension_disaggs$dim_uid == uid,]$dim_item_uid))
+    
+    # prepare param to pass
+    # we pre-evaluate so that the api params are set for passing
+    res <- paste(dim_uid, "%.d%", "c(", dim_item_uids, ")")
+    res <- eval(parse(text = res))
+  })
   
-# Implemented for dreams SNUs for AGYW_PREV
-# currently used to select DREAMS SNU ou_group
-# we get an early return in this if block as later code
-# assumes standard orgunit groups of PSNU and Mil
-  if(!is.na(parameters$custom_ou)){
-    results_custom <-  
-      try({tibble::tibble(type = "dimension",
-                          dim_item_uid = parameters$custom_ou,
-                          dim_uid = "ou") %>%
-          rbind(dimensions) %>% 
-          datapackcommons::GetData_Analytics(d2_session = d2_session)}, 
-          silent = TRUE) 
+  # prepare final analytics input
+  analytics_input_f <- append(analytics_input, dim_list)
+  
+  # custom data ----
+  # Implemented for dreams SNUs for AGYW_PREV
+  # currently used to select DREAMS SNU ou_group
+  # we get an early return in this if block as later code
+  # assumes standard orgunit groups of PSNU and Mil
+  if (!is.na(parameters$custom_ou)) {
 
-    if(is.error(results_custom) || 
-       is.null(results_custom[["results"]])){ # nothing to return
-      
-      api_call <- NULL
-      results <- NULL
-    } else {
-      api_call <- results_custom[["api_call"]]
-      results_custom <-  results_custom[["results"]]
-      results <- results_custom %>% 
-        dplyr::select(-ou_hierarchy)
-    }
-    return(list("api_call" = api_call,
-                "time" = lubridate::now("UTC"),
-                "results" = results))
+    results <- 
+    tryCatch(
+      {
+        do.call(datimutils::getAnalytics, analytics_input_f) %>%
+          tibble() %>%
+          select(Data,
+                 `Age: Cascade Age bands`,
+                 `Cascade sex`,
+                 `Organisation unit`,
+                 Period,
+                 Value)  
+      },
+      error=function() {
+        results <- NULL
+        return(results)
+      }
+    )
+    
+    return(results)
   }
-
-# due to the existence of some countries planning at country level and
-# containing a military org unit below country level
-# we must pull data from PSNUs and Mil separately to avoid double counting
-# military data
   
-# create list of non-military Type of organisational unit
-  non_mil_types_of_org_units <- 
+  # base data starts without military ----
+  # due to the existence of some countries planning at country level and
+  # containing a military org unit below country level
+  # we must pull data from PSNUs and Mil separately to avoid double counting
+  # military data
+  
+  # create list of non-military Type of organisational unit
+  non_mil_types_of_org_units <-
     datimutils::getDimensions("mINJi7rR1a6",
-                                 fields = "items[name,id]") %>%
-    dplyr::filter(name != "Military") %>% 
+                              fields = "items[name,id]") %>%
+    dplyr::filter(name != "Military") %>%
     .[["id"]]
-
-# get non-military (PSNU) data
-  results_psnu <-  tibble::tibble(type = "filter",
-                                  dim_item_uid = non_mil_types_of_org_units,
-                                  dim_uid = "mINJi7rR1a6") %>%
-    rbind(c("dimension", "OU_GROUP-AVy8gJXym2D", "ou")) %>%  # COP Prioritization SNU) dimensions
-    rbind(dimensions) %>% 
-    datapackcommons::GetData_Analytics(d2_session = d2_session) 
   
-  api_call <- results_psnu[["api_call"]]
-  results_psnu <-  results_psnu[["results"]]
+  # add extra filters from non_mil_types
+  f_extra <- toString(sprintf("'%s'", non_mil_types_of_org_units))
+  filters_extra <- paste("mINJi7rR1a6", "%.f%", "c(", f_extra, ")")
+  fils_list_extra <- eval(parse(text = filters_extra))
   
+  # add extra dimension for COP Prioritization SNU
+  analytics_input_f$ou = c(analytics_input_f$ou, 'OU_GROUP-AVy8gJXym2D')
+  
+  # get non-military (PSNU) data
+  results_psnu <-   do.call(datimutils::getAnalytics,
+                            append(analytics_input_f,
+                                   fils_list_extra)) %>%
+    tibble() %>%
+    select(Data,
+           `Age: Cascade Age bands`,
+           `Cascade sex`,
+           `Organisation unit`,
+           Period,
+           Value)
+  
+  # military data added if needed ----
   results_mil <- NULL
-  if(include_military){    
-# get military data
-    results_mil <- tibble::tribble(~type, ~dim_item_uid, ~dim_uid,
-                                   "dimension", "OU_GROUP-nwQbMeALRjL", "ou") %>%  # military
-    rbind(dimensions) %>% 
-    datapackcommons::GetData_Analytics() %>% 
-    .[["results"]]
-}                                       
+  if (include_military) {
+    # add military ou dimension
+    analytics_input_f$ou = c(analytics_input_f$ou, 'OU_GROUP-nwQbMeALRjL')
+    
+    # call military data
+    results_mil <-   do.call(datimutils::getAnalytics,
+                             append(analytics_input_f,
+                                    fils_list_extra)) %>%
+      tibble() %>%
+      select(Data,
+             `Age: Cascade Age bands`,
+             `Cascade sex`,
+             `Organisation unit`,
+             Period,
+             Value)
+  }
   
-  if(is.null(results_psnu) && is.null(results_mil)){ # nothing to return
+  # finalize results ----
+  if (is.null(results_psnu) && is.null(results_mil)) {
+    # nothing to return
     results <- NULL
-  } else if (is.null(results_mil)) { # psnu but no mil data
-    results <- dplyr::select(results_psnu, -ou_hierarchy)
+  } else if (is.null(results_mil)) {
+    # psnu but no mil data
+    results <- results_psnu
   } else {
-    results <- dplyr::bind_rows(results_psnu, results_mil) %>% 
-      dplyr::select(-ou_hierarchy)
+    # return everything
+    results <- dplyr::bind_rows(results_psnu, results_mil)
   }
   
+  return(results)
   
-  return(list("api_call" = api_call,
-              "time" = lubridate::now("UTC"),
-              "results" = results))
-
-  }
+}
