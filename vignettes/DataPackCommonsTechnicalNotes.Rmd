@@ -101,7 +101,7 @@ An important aspect of the dimension item set configuration is it allows us to s
 
 ### Dimension item set examples
 
-###### Standard key population disaggregation
+###### Standard key population disaggregation 1:1 dimension items to category options
 
 This is the most basic example, we are pulling data from the `Key Populations v3` dimension, we include all of the dimension items under this dimension. As this dimension is actually a category, the category option uids and the dimension item uids match. The weights are all equal to 1 because we aren't aggregating or disaggeregating the data further for the data pack. The `model_set` here is `kp1` so that is the foreign key we will use in the other configuration files to pull data with these disaggregations. 
 
@@ -111,6 +111,10 @@ https://www.datim.org/api/categories?filter=name:eq:Key%20Populations%20v3&field
 ```{r}
 dplyr::filter(datapackcommons::dim_item_sets, model_sets == "kp1") %>% as.data.frame()
 ```
+
+###### `option_name = NA`
+
+1st note that in all cases where `option_name = NA` the `dim_cop_type = other_disagg`, so we are not dealing with explicit age, sex, kp disaggregates to appear in DataPack rows, but rather implicit disaggregations as part of the data pack indicator/target.   
 
 
 ###### Ages with additional distribution to new ages
@@ -146,6 +150,10 @@ So the configuration requires a reference to a target data element from the prev
 ### Examples
 
 
+
+###### 	OVC_SERV.DREAMS.T
+
+OVC_SERV.DREAMS.T broke the pattern of mapping a data apck target to a single pair of DSD and TA data elements from the previous year.
 
 
 ## Configuring a `DataPack Model`
@@ -183,9 +191,11 @@ knitr::kable(catalog)
 * Modify GetData_DataPack to use datimutils::getAnalytics instead of internal getData_Analytics
 * Modify SnuxImDistMain.R to use datimutils::getAnalytics instead of internal getData_Analytics,
 * deprecate GetData_Analytics
+
+
 * enable tech_area, num_den, disagg_type in data_required as filters. We use these in the SNUxIM distribution but not currently in `DataPack model`
   - `TB_PREV.N.R` configuration for this is quite awkward
-* Remove dim_cop_type row from dim_item_sets - we don't use it for anything
+
 * Remove dimension item set model sets that are not used by the DataPackModel or the PSNUxIM distribution
 * Analyze harmonizing dimension_item_set model set names with the valida_age, valid_sex, and valid_kp names in the datapack template
 * Business as usual DataPack Model update
@@ -204,6 +214,8 @@ knitr::kable(catalog)
 * Check on sending yearly versioned copieds of datapack model to s3
 * Hand Over COP21 OPUs
 * Consider moving PSNUxIM distribution config to datapack template
+* PSNUxIM configuration for  COP23 - analyze switching data element group for `OVC_SERV.DREAMS.T` from `All MER targets` to `MER targets`
+  - it is not obvious why we are using `All MER targets` for this indicator, for COP23 we should determine if we can switch to `MER targets` to be consistent with the other PSNUxIM distribution elements 
 
 
 ### Thoughts and ideas
