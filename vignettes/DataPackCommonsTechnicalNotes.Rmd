@@ -205,6 +205,7 @@ knitr::kable(catalog)
 * change full formula column into more of a description column perhaps with reference to data pack documentation
 * Consider moving PSNUxIM distribution config to datapack template
 * Hand Over COP21 OPUs
+* Determine if GetCountryLevels can be removed
 
 ###### later
 
