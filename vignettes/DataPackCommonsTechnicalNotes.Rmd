@@ -188,32 +188,37 @@ knitr::kable(catalog)
 
 ### TODO
 
+###### Short term
+
 * Modify GetData_DataPack to use datimutils::getAnalytics instead of internal getData_Analytics
 * Modify SnuxImDistMain.R to use datimutils::getAnalytics instead of internal getData_Analytics,
 * deprecate GetData_Analytics
-
-
-* enable tech_area, num_den, disagg_type in data_required as filters. We use these in the SNUxIM distribution but not currently in `DataPack model`
-  - `TB_PREV.N.R` configuration for this is quite awkward
-
-* Remove dimension item set model sets that are not used by the DataPackModel or the PSNUxIM distribution
+* Remove dimension item set model sets that are not used by the DataPackModel or the COP22 or COP21 PSNUxIM distribution
 * Analyze harmonizing dimension_item_set model set names with the valida_age, valid_sex, and valid_kp names in the datapack template
-* Business as usual DataPack Model update
-  - if datapack content remained the same, do we have the right indicators and disaggregations for pulling FY23 target data and FY22 results data as opposed to FY22 targets and FY21 results?
+  - bonus points for figuring out if we can put this directly in DATIM metadata some how.
 * Business as usual PSNUxIM distribution update
   - if PSNUxIM content remained the same, do we have the right standard dissagregations for pulling FY23 target data and maping to FY24 target data?
 * Make a function for comparing PSNUxIM distributions
+* Investigate time lag indicators in DATIM
+* Create standard functions for sending stuff to S3
+  - modify import scripts and datapack model and PSNUxIM generation scritps to use
+* change full formula column into more of a description column perhaps with reference to data pack documentation
+* Consider moving PSNUxIM distribution config to datapack template
+* Hand Over COP21 OPUs
+
+###### later
+
+* enable tech_area, num_den, disagg_type in data_required as filters. We use these in the SNUxIM distribution but not currently in `DataPack model`
+  - `TB_PREV.N.R` configuration for this is quite awkward
+* Business as usual DataPack Model update
+  - if datapack content remained the same, do we have the right indicators and disaggregations for pulling FY23 target data and FY22 results data as opposed to FY22 targets and FY21 results?
 * create flat file from the beginning and deprecate flatten COP function
 * Consider removing period column in final output
 * remove include military = true code, all countries now have military below country level as standard
-* Create standard functions for sending stuff to S3
 * Begin analyzing indicators in the DataPack model that will be affected by new age categories
 * fully support mutli-item dimensions (with semicolons or pipes or some other special character)
   - added for `OVC_SERV.Active.T` and `OVC_SERV.Grad.T` PSNUxIM distribution but I think only partially implemented
-* change full formula column into more of a description column perhaps with reference to data pack documentation
 * Check on sending yearly versioned copieds of datapack model to s3
-* Hand Over COP21 OPUs
-* Consider moving PSNUxIM distribution config to datapack template
 * PSNUxIM configuration for  COP23 - analyze switching data element group for `OVC_SERV.DREAMS.T` from `All MER targets` to `MER targets`
   - it is not obvious why we are using `All MER targets` for this indicator, for COP23 we should determine if we can switch to `MER targets` to be consistent with the other PSNUxIM distribution elements 
 
