@@ -486,14 +486,9 @@ GetData_DataPack <- function(parameters,
     results <- 
     tryCatch(
       {
-        do.call(datimutils::getAnalytics, analytics_input_f) %>%
-          tibble() %>%
-          select(Data,
-                 `Age: Cascade Age bands`,
-                 `Cascade sex`,
-                 `Organisation unit`,
-                 Period,
-                 Value)  
+        do.call(datimutils::getAnalytics
+                , analytics_input_f) %>%
+          tibble() 
       },
       error=function() {
         results <- NULL
@@ -526,17 +521,12 @@ GetData_DataPack <- function(parameters,
   analytics_input_f$ou = c(analytics_input_f$ou, 'OU_GROUP-AVy8gJXym2D')
   
   # get non-military (PSNU) data
-  results_psnu <-   do.call(datimutils::getAnalytics,
+  results_psnu <-   
+    do.call(datimutils::getAnalytics,
                             append(analytics_input_f,
                                    fils_list_extra)) %>%
-    tibble() %>%
-    select(Data,
-           `Age: Cascade Age bands`,
-           `Cascade sex`,
-           `Organisation unit`,
-           Period,
-           Value)
-  
+    tibble() 
+
   # military data added if needed ----
   results_mil <- NULL
   if (include_military) {
@@ -544,16 +534,11 @@ GetData_DataPack <- function(parameters,
     analytics_input_f$ou = c(analytics_input_f$ou, 'OU_GROUP-nwQbMeALRjL')
     
     # call military data
-    results_mil <-   do.call(datimutils::getAnalytics,
+    results_mil <-   
+      do.call(datimutils::getAnalytics,
                              append(analytics_input_f,
                                     fils_list_extra)) %>%
-      tibble() %>%
-      select(Data,
-             `Age: Cascade Age bands`,
-             `Cascade sex`,
-             `Organisation unit`,
-             Period,
-             Value)
+      tibble() 
   }
   
   # finalize results ----
