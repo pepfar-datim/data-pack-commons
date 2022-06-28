@@ -2,6 +2,8 @@
 #                   build = TRUE,
 #                   upgrade = FALSE)
 
+### Setup and parameters ###
+
 library(datapackcommons)
 library(datimutils)
 library(dplyr)
@@ -9,8 +11,9 @@ datimutils::loginToDATIM("~/.secrets/datim.json")
 
 cop_year = 2022
 
-#' @title BuildDimensionList_DataPack(data_element_map_item, dim_item_sets, 
-#' country_uid, mechanisms = NULL)
+### End Parameters ###
+
+#' @title BuildDimensionList_DataPack
 #' 
 #' @description get list of dimensions (parameters) for analytics call to get data for SNUxIM 
 #' distribution. Tightly coupled to DATIM as it contains some hard coded dimension uids 
@@ -62,30 +65,33 @@ BuildDimensionList_DataPack <- function(data_element_map_item, dim_item_sets,
   
   # remaining dimensions
   if (mil == FALSE) {  
-    # need to select all org unit types EXCEPT military because it is 
+    # when mil == FALSE need to select all org unit types EXCEPT military because it is 
     # possible for military to be below general PSNU level in org hierarchy
-    invisible(capture.output(    non_mil_types_of_org_units <-
-                                   datimutils::getDimensions("mINJi7rR1a6",
-                                                             fields = "items[name,id]") %>%
-                                   dplyr::filter(name != "Military") %>%
-                                   .[["id"]]))
-
     
-    tibble::tibble(type = "filter",
+    invisible( # hide some datimutils outut that is being printed to console
+      capture.output(
+        non_mil_types_of_org_units <-
+          datimutils::getDimensions("mINJi7rR1a6", # Type of organisational unit org group set
+                                    fields = "items[name,id]") %>%
+          dplyr::filter(name != "Military") %>%
+          .[["id"]]))
+    
+    
+    tibble::tibble(type = "filter", # select only non-mil org units, filter = aggregated
                    dim_item_uid = non_mil_types_of_org_units,
                    dim_uid = "mINJi7rR1a6") %>% 
-    dplyr::bind_rows(tibble::tribble(~type, ~dim_item_uid, ~dim_uid, 
-                  "dimension", "OU_GROUP-AVy8gJXym2D", "ou", # COP Prioritization SNU
-                  "dimension", "iM13vdNLWKb", "TWXpUVE2MqL", #dsd and ta support types
-                  "dimension", "cRAGKdWIDn4", "TWXpUVE2MqL")) %>% 
-    dplyr::bind_rows(dimension_mechanisms, dimension_disaggs, dimension_common)
-    } else {
-  tibble::tribble(~type, ~dim_item_uid, ~dim_uid,
-                  "dimension", "OU_GROUP-nwQbMeALRjL", "ou", # military
-                  "dimension", "iM13vdNLWKb", "TWXpUVE2MqL", #dsd and ta support types
-                  "dimension", "cRAGKdWIDn4", "TWXpUVE2MqL") %>% 
-        dplyr::bind_rows(dimension_mechanisms, dimension_disaggs, dimension_common)
-    }
+      dplyr::bind_rows(tibble::tribble(~type, ~dim_item_uid, ~dim_uid, 
+                                       "dimension", "OU_GROUP-AVy8gJXym2D", "ou", # COP Prioritization SNU
+                                       "dimension", "iM13vdNLWKb", "TWXpUVE2MqL", #dsd and ta support types
+                                       "dimension", "cRAGKdWIDn4", "TWXpUVE2MqL")) %>% 
+      dplyr::bind_rows(dimension_mechanisms, dimension_disaggs, dimension_common)
+  } else {
+    tibble::tribble(~type, ~dim_item_uid, ~dim_uid,
+                    "dimension", "OU_GROUP-nwQbMeALRjL", "ou", # military
+                    "dimension", "iM13vdNLWKb", "TWXpUVE2MqL", #dsd and ta support types
+                    "dimension", "cRAGKdWIDn4", "TWXpUVE2MqL") %>% 
+      dplyr::bind_rows(dimension_mechanisms, dimension_disaggs, dimension_common)
+  }
 }
 
 # get a list of mechs that actually have associated data for the FY targets
@@ -123,7 +129,7 @@ getSnuxIm_density <- function(data_element_map_item,
                               country_uid,
                               mechanisms){ 
   
-  
+# first get non-mil data
   data <-  BuildDimensionList_DataPack(data_element_map_item, 
                                        dim_item_sets,
                                        country_uid,
@@ -131,6 +137,7 @@ getSnuxIm_density <- function(data_element_map_item,
                                        mil = FALSE) %>% 
     datapackcommons::GetData_Analytics() %>% .[["results"]]
 
+# now get mil data and combine with non-mil
   data <-  BuildDimensionList_DataPack(data_element_map_item, 
                                        dim_item_sets,
                                        country_uid,
@@ -138,22 +145,26 @@ getSnuxIm_density <- function(data_element_map_item,
                                        mil = TRUE) %>% 
     datapackcommons::GetData_Analytics() %>% .[["results"]] %>% 
     dplyr::bind_rows(data)
-  
+
+# early return if no data
   if (NROW(data) == 0) return(NULL)
   
-  # quick check that data disaggregated by psnu, mechanism, and support type sum to country total    
-  checksum <- BuildDimensionList_DataPack(data_element_map_item,
+# quick check that data disaggregated by psnu, mechanism, and support type sum to country total    
+
+# get country level totals (checksum)
+    checksum <- BuildDimensionList_DataPack(data_element_map_item,
                                           dim_item_sets,
                                           country_uid) %>%
     datapackcommons::GetData_Analytics() %>% .[["results"]] %>% .[["Value"]] %>% sum()
   
-  if(sum(data$Value) > checksum){
+  if(sum(data$Value) > checksum){ # this is hard stop, we must be double counting data somehow
     stop(paste("Internal Error: Disaggregated data greater than aggregated data in getSnuxIm_density function", 
                sum(data$Value), 
                checksum),"\n", data_element_map_item, " ")
   }
-  if(sum(data$Value) < checksum){
-    warning(paste("\n\nWARNING: Disaggregated data LESS than aggregated data in getSnuxIm_density function, Was PSNU level changed since last cop? ", 
+  if(sum(data$Value) < checksum){ # if PSNU level in org hierarchy was lowered may be CORRECTLY
+                                  # missing some historic target data
+    warning(paste("\n\nWARNING: Disaggregated data LESS than aggregated data in getSnuxIm_density function, Was PSNU level changed since last COP? ", 
                   "\n", data_element_map_item, " ",
                   "\n",datimutils::getOrgUnits(country_uid)),
             immediate. = TRUE)
@@ -168,7 +179,7 @@ getSnuxIm_density <- function(data_element_map_item,
   
   data <- purrr::reduce(disagg_sets,
                         datapackcommons::MapDimToOptions,
-                        allocate = "distribute",
+                        allocate = "distribute", # we allways distribute data for PSNUxIM
                         .init = data) %>% 
     dplyr::rename("mechanism_uid" = "Funding Mechanism") %>%
     dplyr::mutate(mechanism_code = datimutils::getCatOptions(mechanism_uid, 
@@ -227,26 +238,31 @@ process_country <- function(country_uid, mechs, snu_x_im_map){
   # alply uses parallel processing here 
   
   doMC::registerDoMC(cores = 3) #stopped using parallel due to warnings being hidden, 
-  #must refactor to include
+  # must refactor to output warnings in some way
+  # important because getSnuxIm_density outputs a warning when checksum doesn't reconcile
   data <-  plyr::adply(snu_x_im_map,
                      1, getSnuxIm_density,
                      datapackcommons::dim_item_sets,
                      country_uid,
                      mechs , .parallel = FALSE
                      , .expand = FALSE, .id = NULL) 
-  if(NROW(data) == 0 || is.null(data)){return( tibble::tibble( indicator_code = character(),  
-                                                     psnu_uid = character(),  
-                                                     mechanism_code = character(),
-                                                     mechanism_uid = character(),
-                                                     type = character(),            
-                                                     age_option_name = character(), 
-                                                     age_option_uid = character(), 
-                                                     sex_option_name = character(), 
-                                                     sex_option_uid = character(),
-                                                     value = double(),
-                                                     kp_option_uid = character(), 
-                                                     kp_option_name = character(), 
-                                                     percent = double()))}
+  # when no relevant data available
+  if(NROW(data) == 0 || is.null(data)){
+    return( # empty tibble with expected columns 
+      tibble::tibble(indicator_code = character(),  
+                     psnu_uid = character(),  
+                     mechanism_code = character(),
+                     mechanism_uid = character(),
+                     type = character(),            
+                     age_option_name = character(), 
+                     age_option_uid = character(), 
+                     sex_option_name = character(), 
+                     sex_option_uid = character(),
+                     value = double(),
+                     kp_option_uid = character(), 
+                     kp_option_name = character(), 
+                     percent = double()))
+    }
   
   data <-  data %>% 
     dplyr::group_by_at(dplyr::vars(-value)) %>% 
@@ -269,6 +285,9 @@ process_country <- function(country_uid, mechs, snu_x_im_map){
     dplyr::ungroup()
 }
 
+#### End Functions
+
+### Start script execution
 
 mechs <-  getMechsList(cop_year)
 
