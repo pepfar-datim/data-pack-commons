@@ -169,17 +169,21 @@ getSnuxIm_density <- function(data_element_map_item,
                   "\n",datimutils::getOrgUnits(country_uid)),
             immediate. = TRUE)
   }
-  
+
+# create list object with element containing dim_item_sets rows
+# for each disagg type -- age, sex, kp, other
   disagg_sets  <-  c("age_set", 
                      "sex_set", 
                      "kp_set", 
                      "other_disagg") %>% 
     purrr::map(~dplyr::filter(dim_item_sets,
                               model_sets == data_element_map_item[[1, .]]))
+
+# aggregate data based on dim_item_sets
   
   data <- purrr::reduce(disagg_sets,
                         datapackcommons::MapDimToOptions,
-                        allocate = "distribute", # we allways distribute data for PSNUxIM
+                        allocate = "distribute", # we always distribute data for PSNUxIM
                         .init = data) %>% 
     dplyr::rename("mechanism_uid" = "Funding Mechanism") %>%
     dplyr::mutate(mechanism_code = datimutils::getCatOptions(mechanism_uid, 
@@ -215,9 +219,7 @@ getSnuxIm_density <- function(data_element_map_item,
 process_country <- function(country_uid, mechs, snu_x_im_map){
 
   print(country_uid)
-  # Get the mechanisms relevant for the specifc country being processed
-  # cache options required for datimvalidation function to work.
-  # cache age option reverts to original after calling datim validation
+  # Get the mechanisms relevant for the specific country being processed
   mechs <-   dplyr::filter(mechs, country_uid == !!country_uid)
   if(NROW(mechs) == 0){return( tibble::tibble( indicator_code = character(),  
                                                psnu_uid = character(),     
