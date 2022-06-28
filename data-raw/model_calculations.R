@@ -281,7 +281,7 @@ diffDataPackModels <- function(model_old,
  priority_snu_data <- 
    datapackr::getDataValueSets(c("dataElementGroup","period", "orgUnitGroup"),
                                c("ofNbyQgD9xG","2021Oct","AVy8gJXym2D")) %>% 
-   dplyr::select(org_unit_uid = org_unit, value)
+   dplyr::select(org_unit_uid = org_unit, value) %>% dplyr::mutate(value = as.double(value))
 
 # get data to populat DREAMS_SNU.Flag
 # PSNUs that are an dreams SNU or contain on or more DREAMS SNUs are flagged
