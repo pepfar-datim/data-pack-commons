@@ -474,7 +474,7 @@ GetData_DataPack <- function(parameters,
   })
   
   # prepare final analytics input
-  analytics_input_f <- append(analytics_input, dim_list)
+  analytics_input_base <- append(analytics_input, dim_list)
   
   # custom data ----
   # Implemented for dreams SNUs for AGYW_PREV
@@ -482,21 +482,33 @@ GetData_DataPack <- function(parameters,
   # we get an early return in this if block as later code
   # assumes standard orgunit groups of PSNU and Mil
   if (!is.na(parameters$custom_ou)) {
-
-    results <- 
-    tryCatch(
-      {
-        do.call(datimutils::getAnalytics
-                , analytics_input_f) %>%
-          tibble() 
-      },
-      error=function() {
-        results <- NULL
-        return(results)
-      }
-    )
     
-    return(results)
+    # create custom input
+    analytics_input_cus <- analytics_input_base
+    
+    # add custom ou dimension
+    analytics_input_cus$ou = c(analytics_input_cus$ou, parameters$custom_ou)
+
+    results_custom <-  
+      try({do.call(datimutils::getAnalytics
+                   , analytics_input_cus) %>%
+          tibble()}, 
+          silent = TRUE) 
+    
+    if(is.error(results_custom) || 
+       is.null(results_custom[["results"]])){ # nothing to return
+      
+      api_call <- NULL
+      results <- NULL
+    } else {
+      api_call <- 'Not Avaialble...'
+      results_custom <-  results_custom[["results"]]
+      results <- results_custom 
+    }
+    
+    return(list("api_call" = 'Not Avaialble...',
+                "time" = lubridate::now("UTC"),
+                "results" = results))
   }
   
   # base data starts without military ----
@@ -518,34 +530,40 @@ GetData_DataPack <- function(parameters,
   fils_list_extra <- eval(parse(text = filters_extra))
   
   # add extra dimension for COP Prioritization SNU
-  analytics_input_f$ou = c(analytics_input_f$ou, 'OU_GROUP-AVy8gJXym2D')
+  analytics_input_non_mil <- analytics_input_base # create a copy for non mil call
+  analytics_input_non_mil$ou = c(analytics_input_non_mil$ou, 'OU_GROUP-AVy8gJXym2D')
+  analytics_input_non_mil <- append(analytics_input_non_mil, fils_list_extra)
   
   # get non-military (PSNU) data
   results_psnu <-   
     do.call(datimutils::getAnalytics,
-                            append(analytics_input_f,
-                                   fils_list_extra)) %>%
+            analytics_input_non_mil
+            ) %>%
     tibble() 
 
   # military data added if needed ----
   results_mil <- NULL
   if (include_military) {
+    
+    # create military input
+    analytics_input_mil <- analytics_input_base
+    
     # add military ou dimension
-    analytics_input_f$ou = c(analytics_input_f$ou, 'OU_GROUP-nwQbMeALRjL')
+    analytics_input_mil$ou = c(analytics_input_mil$ou, 'OU_GROUP-nwQbMeALRjL')
     
     # call military data
     results_mil <-   
       do.call(datimutils::getAnalytics,
-                             append(analytics_input_f,
-                                    fils_list_extra)) %>%
+              analytics_input_mil) %>%
       tibble() 
+    
   }
   
   # finalize results ----
-  if (is.null(results_psnu) && is.null(results_mil)) {
+  if (NROW(results_psnu) == 0 && NROW(results_mil) == 0) {
     # nothing to return
     results <- NULL
-  } else if (is.null(results_mil)) {
+  } else if (NROW(results_mil) == 0) {
     # psnu but no mil data
     results <- results_psnu
   } else {
@@ -553,6 +571,8 @@ GetData_DataPack <- function(parameters,
     results <- dplyr::bind_rows(results_psnu, results_mil)
   }
   
-  return(results)
+  return(list("api_call" = 'Not Avaialble...',
+              "time" = lubridate::now("UTC"),
+              "results" = results))
   
 }
