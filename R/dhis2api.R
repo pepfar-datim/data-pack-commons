@@ -455,8 +455,7 @@ GetData_DataPack <- function(parameters,
     unique()  %>%
     stats::na.omit() # there are some items in dim item sets with no source dimension
   # these are cases when a historic disaggregation doesn't exist
-  # and we need to create the disaggregation allocation for the
-  # DataPack
+  # and we need to create the disaggregation allocation for the DataPack
   
   
   # create the dimension list of the extras with their corresponding dim-items
@@ -474,6 +473,8 @@ GetData_DataPack <- function(parameters,
   })
   
   # prepare final analytics input
+  analytics_input$timemout <- 300 # set timeout to over 5 minutes
+  analytics_input$retry <- 3
   analytics_input_base <- append(analytics_input, dim_list)
   
   # custom data ----
@@ -494,14 +495,14 @@ GetData_DataPack <- function(parameters,
                    , analytics_input_cus) %>%
           tibble()}, 
           silent = TRUE) 
-    
+
     if(is.error(results_custom) || 
        is.null(results_custom[["results"]])){ # nothing to return
       
       api_call <- NULL
       results <- NULL
     } else {
-      api_call <- 'Not Avaialble...'
+
       results_custom <-  results_custom[["results"]]
       results <- results_custom 
     }
@@ -535,11 +536,18 @@ GetData_DataPack <- function(parameters,
   analytics_input_non_mil <- append(analytics_input_non_mil, fils_list_extra)
   
   # get non-military (PSNU) data
-  results_psnu <-   
-    do.call(datimutils::getAnalytics,
-            analytics_input_non_mil
-            ) %>%
-    tibble() 
+  results_psnu <- NULL
+  attempt <- 0
+  while( is.null(results_psnu) && attempt <= 3 ) {
+    attempt <- attempt + 1
+    try(
+      results_psnu <-  
+        do.call(datimutils::getAnalytics,
+                analytics_input_non_mil
+        ) %>%
+        tibble() 
+    )
+  } 
 
   # military data added if needed ----
   results_mil <- NULL
@@ -556,7 +564,6 @@ GetData_DataPack <- function(parameters,
       do.call(datimutils::getAnalytics,
               analytics_input_mil) %>%
       tibble() 
-    
   }
   
   # finalize results ----
