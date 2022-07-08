@@ -538,7 +538,7 @@ GetData_DataPack <- function(parameters,
   # get non-military (PSNU) data
   results_psnu <- NULL
   attempt <- 0
-  while( is.null(results_psnu) && attempt <= 3 ) {
+  while( is.null(results_psnu) && attempt <= 5 ) {
     attempt <- attempt + 1
     try(
       results_psnu <-  
