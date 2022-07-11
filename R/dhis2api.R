@@ -497,13 +497,13 @@ GetData_DataPack <- function(parameters,
           silent = TRUE) 
 
     if(is.error(results_custom) || 
-       is.null(results_custom[["results"]])){ # nothing to return
+       is.null(results_custom) || 
+       NROW(results_custom) < 1){ # nothing to return
       
       api_call <- NULL
       results <- NULL
     } else {
-
-      results_custom <-  results_custom[["results"]]
+      
       results <- results_custom 
     }
     
@@ -536,18 +536,18 @@ GetData_DataPack <- function(parameters,
   analytics_input_non_mil <- append(analytics_input_non_mil, fils_list_extra)
   
   # get non-military (PSNU) data
-  results_psnu <- NULL
-  attempt <- 0
-  while( is.null(results_psnu) && attempt <= 5 ) {
-    attempt <- attempt + 1
-    try(
+    results_psnu <- NULL
+    attempt <- 0
+    while( is.null(results_psnu) && attempt <= 8 ) {
+      attempt <- attempt + 1
+      try(
       results_psnu <-  
         do.call(datimutils::getAnalytics,
                 analytics_input_non_mil
         ) %>%
         tibble() 
-    )
-  } 
+     )
+   } 
 
   # military data added if needed ----
   results_mil <- NULL
