@@ -423,9 +423,7 @@ GetData_DataPack <- function(parameters,
   if (!(parameters$dx_id %in% c("zPTqc4v5GAK", # FY21 Results AGYW_PREV Total D
                                 "r4zbW3owX9n"))) {
     #IMPATT.PRIORITY_SNU (N, SUBNAT) TARGET:
-    f <- toString(sprintf("'%s'", c("cRAGKdWIDn4", "iM13vdNLWKb")))
-    filters <- paste("TWXpUVE2MqL", "%.f%", "c(", f, ")")
-    fils_list <- eval(parse(text = filters))
+    fils_list <- TWXpUVE2MqL %.f% c("cRAGKdWIDn4", "iM13vdNLWKb")
     analytics_input <-  append(analytics_input, fils_list)
     
   }
@@ -462,13 +460,13 @@ GetData_DataPack <- function(parameters,
   dim_list <- dims$dim_uid %>% lapply(function(uid) {
     # prepare dim item uids and dim
     dim_uid <- sprintf("'%s'", uid)
-    dim_item_uids <-
-      toString(sprintf("'%s'", dimension_disaggs[dimension_disaggs$dim_uid == uid,]$dim_item_uid))
+    dim_item_uids <- toString(sprintf("'%s'", dimension_disaggs[dimension_disaggs$dim_uid == uid,]$dim_item_uid))
     
     # prepare param to pass
     # we pre-evaluate so that the api params are set for passing
     res <- paste(dim_uid, "%.d%", "c(", dim_item_uids, ")")
     res <- eval(parse(text = res))
+
   })
   
   # prepare final analytics input
