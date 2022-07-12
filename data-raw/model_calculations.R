@@ -320,7 +320,7 @@ for (ou_index in 1:NROW(operating_units)) {
     unique() %>%
     filter(!is.na(dx_id)) # most B indicators are empty, filter them out
 
-  doMC::registerDoMC(cores = 8) # or however many cores you have access to
+  doMC::registerDoMC(cores = 4) # or however many cores you have access to
 
 # Make the analytics calls for the data required
 # each row of indicator parameters contains the parameters for an analytics call

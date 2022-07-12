@@ -423,7 +423,6 @@ GetData_DataPack <- function(parameters,
   if (!(parameters$dx_id %in% c("zPTqc4v5GAK", # FY21 Results AGYW_PREV Total D
                                 "r4zbW3owX9n"))) {
     #IMPATT.PRIORITY_SNU (N, SUBNAT) TARGET:
-    
     f <- toString(sprintf("'%s'", c("cRAGKdWIDn4", "iM13vdNLWKb")))
     filters <- paste("TWXpUVE2MqL", "%.f%", "c(", f, ")")
     fils_list <- eval(parse(text = filters))
@@ -473,7 +472,7 @@ GetData_DataPack <- function(parameters,
   })
   
   # prepare final analytics input
-  analytics_input$timemout <- 300 # set timeout to over 5 minutes
+  analytics_input$timeout <- 300 # set timeout to over 5 minutes
   analytics_input$retry <- 3
   analytics_input_base <- append(analytics_input, dim_list)
   
@@ -536,18 +535,11 @@ GetData_DataPack <- function(parameters,
   analytics_input_non_mil <- append(analytics_input_non_mil, fils_list_extra)
   
   # get non-military (PSNU) data
-    results_psnu <- NULL
-    attempt <- 0
-    while( is.null(results_psnu) && attempt <= 8 ) {
-      attempt <- attempt + 1
-      try(
       results_psnu <-  
         do.call(datimutils::getAnalytics,
                 analytics_input_non_mil
         ) %>%
         tibble() 
-     )
-   } 
 
   # military data added if needed ----
   results_mil <- NULL
