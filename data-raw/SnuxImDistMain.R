@@ -6,6 +6,7 @@ library(datapackcommons)
 library(datimutils)
 library(dplyr)
 datimutils::loginToDATIM("~/.secrets/datim.json")
+datimutils::loginToDATIM(paste0(Sys.getenv("SECRETS_FOLDER"),"datim.json"))
 cop_year = 2022
 
 translateDims <- function(dimensions_df) {
