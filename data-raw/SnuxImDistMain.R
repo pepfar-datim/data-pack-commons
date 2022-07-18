@@ -9,6 +9,11 @@ datimutils::loginToDATIM("~/.secrets/datim.json")
 datimutils::loginToDATIM(paste0(Sys.getenv("SECRETS_FOLDER"),"datim.json"))
 cop_year = 2022
 
+#' @title translateDims(dimensions_df)
+#' 
+#' @description takes a dimensions data frame and translates it into a list item for input to get_analytics
+#' @param dimensions_df a dimensions data frame.
+#' @return  List of dimensions for the analytics call to datimutils::getAnalytics
 translateDims <- function(dimensions_df) {
   
   dims <- dimensions_df %>% select(dim_uid) %>% unique()
@@ -43,7 +48,7 @@ translateDims <- function(dimensions_df) {
 #' level data
 #' When included the dimensions include psnu, mechanism, AND DSD/TA disaggregation.
 #' When null psnu, mechanism and DSD/TA disaggregation are excluded giving country level totals.
-#' @return  List of dimensions for the analytics call GetData_Analytics
+#' @return  List of dimensions for the analytics call datimutils::getAnalytics
 BuildDimensionList_DataPack <- function(data_element_map_item, dim_item_sets, 
                                         country_uid, mechanisms = NULL,
                                         mil = FALSE){
@@ -55,53 +60,50 @@ BuildDimensionList_DataPack <- function(data_element_map_item, dim_item_sets,
     pe %.f% data_element_map_item[[1,"pe"]],
     "LxhLO68FcXm" %.d% data_element_map_item[[1,"technical_area_uid"]],
     "lD2x0c8kywj" %.d% data_element_map_item[[1,"num_or_den_uid"]],
-    "HWPJnUTMjEq" %.d% data_element_map_item[[1,"disagg_type_uid"]]
+    "HWPJnUTMjEq" %.d% data_element_map_item[[1,"disagg_type_uid"]],
+    retry = 3,
+    timeout = 300
   )
   
-  
-  # pull dimension disaggs as df
-  dimension_disaggs <- dim_item_sets %>% dplyr::mutate(type = "dimension") %>%  
+  # pull dimension disaggs as data frame and translate to list
+  dimensions_disaggs_list <- dim_item_sets %>% dplyr::mutate(type = "dimension") %>%  
     dplyr::filter(model_sets %in% c(data_element_map_item$age_set,
                                     data_element_map_item$sex_set,
                                     data_element_map_item$kp_set,
                                     data_element_map_item$other_disagg)) %>% 
     dplyr::select(type, dim_item_uid, dim_uid) %>%
     unique()  %>% 
-    stats::na.omit() # there are some items in dim item sets with no source dimension
+    stats::na.omit() %>% translateDims(.)
   
-  # convert dimension disaggs into list
-  dimension_disaggs_list <- translateDims(dimension_disaggs)
-  
+  # if mechanisms are null return appended list of dimensions_common and dimensions_disaggs
   if (is.null(mechanisms)){
     return(append(
       dimensions_common_list,
-      dimension_disaggs_list
+      dimensions_disaggs_list
     ))
   }
   
-  
-  dimension_mechanisms <- mechanisms["mechanism_uid"] %>% 
+  # build dimensions and translate to list
+  dimensions_mechanisms_list <- mechanisms["mechanism_uid"] %>% 
     dplyr::transmute(type = "dimension",
                      dim_item_uid = mechanism_uid,
-                     dim_uid = "SH885jaRe0o")
-  
-  dimension_mechanisms_list <- translateDims(dimension_mechanisms)
+                     dim_uid = "SH885jaRe0o") %>% translateDims(.)
   
   # remaining dimensions
   if (mil == FALSE) {  
     # need to select all org unit types EXCEPT military because it is 
     # possible for military to be below general PSNU level in org hierarchy
-    invisible(capture.output(    non_mil_types_of_org_units <-
+    invisible(capture.output(non_mil_types_of_org_units <-
                                    datimutils::getDimensions("mINJi7rR1a6",
                                                              fields = "items[name,id]") %>%
                                    dplyr::filter(name != "Military") %>%
                                    .[["id"]]))
-    
+    # create result item 
     res <- 
       c(
         dimensions_common_list,
-        dimension_mechanisms_list,
-        dimension_disaggs_list,
+        dimensions_mechanisms_list,
+        dimensions_disaggs_list,
         list(
           "mINJi7rR1a6" %.f% non_mil_types_of_org_units,
           #"ou" %.d% "OU_GROUP-AVy8gJXym2D",
@@ -109,6 +111,7 @@ BuildDimensionList_DataPack <- function(data_element_map_item, dim_item_sets,
         )
       )
     
+    # add ou dimension
     res[grepl("dimension=ou:", res)] <- paste0(res[grepl("dimension=ou:", res)],";","OU_GROUP-AVy8gJXym2D")
     
     res
@@ -118,8 +121,8 @@ BuildDimensionList_DataPack <- function(data_element_map_item, dim_item_sets,
     res <- 
       c(
         dimensions_common_list,
-        dimension_mechanisms_list,
-        dimension_disaggs_list,
+        dimensions_mechanisms_list,
+        dimensions_disaggs_list,
         list(
           #"mINJi7rR1a6" %.f% non_mil_types_of_org_units,
           #"ou" %.d% "OU_GROUP-nwQbMeALRjL",
@@ -127,6 +130,7 @@ BuildDimensionList_DataPack <- function(data_element_map_item, dim_item_sets,
         )
       )
     
+    # add ou dimension
     res[grepl("dimension=ou:", res)] <- paste0(res[grepl("dimension=ou:", res)],";","OU_GROUP-nwQbMeALRjL")
     
     res
@@ -169,37 +173,56 @@ getSnuxIm_density <- function(data_element_map_item,
                               country_uid,
                               mechanisms){ 
   
-  print(data_element_map_item)
-  print(mechanisms)
+  #print(data_element_map_item)
+  #print(mechanisms)
+  print("going for non military")
   
-  data1 <-  BuildDimensionList_DataPack_local(data_element_map_item, 
-                                       dim_item_sets,
-                                       country_uid,
-                                       mechanisms["mechanism_uid"],
-                                       mil = FALSE)
-  print("non military call...")
-  print(data1)
-  data1 %<>%getAnalytics()
+  
+  data1 <- NULL
+  attempt <- 0
+  while( is.null(data1) && attempt <= 3 ) {
+    attempt <- attempt + 1
+    try(
+      data1 <-  BuildDimensionList_DataPack(data_element_map_item, 
+                                            dim_item_sets,
+                                            country_uid,
+                                            mechanisms["mechanism_uid"],
+                                            mil = FALSE) %>% do.call(getAnalytics, .)
+    )
+  } 
+  
+  
     #datapackcommons::GetData_Analytics() %>% .[["results"]]
+  print("going for military")
+  
+  data2 <- NULL
+  attempt <- 0
+  while( is.null(data2) && attempt <= 3 ) {
+    attempt <- attempt + 1
+    try(
+      
+      data2 <-  BuildDimensionList_DataPack(data_element_map_item, 
+                                            dim_item_sets,
+                                            country_uid,
+                                            mechanisms["mechanism_uid"],
+                                            mil = TRUE) %>% do.call(getAnalytics, .)
+      #datapackcommons::GetData_Analytics() %>% .[["results"]] %>% 
+    )
+  } 
+  
+  
 
-  data2 <-  BuildDimensionList_DataPack_local(data_element_map_item, 
-                                       dim_item_sets,
-                                       country_uid,
-                                       mechanisms["mechanism_uid"],
-                                       mil = TRUE) #%>% getAnalytics()
-    #datapackcommons::GetData_Analytics() %>% .[["results"]] %>% 
-  print("military call...")
-  print(data2)
-  data2 %<>%getAnalytics()
+  
   
   data <- dplyr::bind_rows(data1, data2)
+  rm(data1, data2)
   
   if (NROW(data) == 0) return(NULL)
   
   # quick check that data disaggregated by psnu, mechanism, and support type sum to country total    
-  checksum <- BuildDimensionList_DataPack_local(data_element_map_item,
+  checksum <- BuildDimensionList_DataPack(data_element_map_item,
                                           dim_item_sets,
-                                          country_uid) %>% getAnalytics() %>% .[["Value"]] %>% sum()
+                                          country_uid) %>% do.call(getAnalytics,.) %>% .[["Value"]] %>% sum()
     #datapackcommons::GetData_Analytics() %>% .[["results"]] %>% .[["Value"]] %>% sum()
   
   if(sum(data$Value) > checksum){
