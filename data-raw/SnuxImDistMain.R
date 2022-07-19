@@ -2,12 +2,17 @@
 #                   build = TRUE,
 #                   upgrade = FALSE)
 
+# NOTES ------------------------------------------------------------------------
+# the following script generates the model for the SNIXUIM distribution
+
 library(datapackcommons)
 library(datimutils)
 library(dplyr)
 datimutils::loginToDATIM("~/.secrets/datim.json")
 datimutils::loginToDATIM(paste0(Sys.getenv("SECRETS_FOLDER"),"datim.json"))
 cop_year = 2022
+
+#  FUNCTIONS -------------------------------------------------------------------
 
 #' @title translateDims(dimensions_df)
 #' 
@@ -106,7 +111,6 @@ BuildDimensionList_DataPack <- function(data_element_map_item, dim_item_sets,
         dimensions_disaggs_list,
         list(
           "mINJi7rR1a6" %.f% non_mil_types_of_org_units,
-          #"ou" %.d% "OU_GROUP-AVy8gJXym2D",
           "TWXpUVE2MqL" %.d% c("iM13vdNLWKb", "cRAGKdWIDn4")
         )
       )
@@ -124,8 +128,6 @@ BuildDimensionList_DataPack <- function(data_element_map_item, dim_item_sets,
         dimensions_mechanisms_list,
         dimensions_disaggs_list,
         list(
-          #"mINJi7rR1a6" %.f% non_mil_types_of_org_units,
-          #"ou" %.d% "OU_GROUP-nwQbMeALRjL",
           "TWXpUVE2MqL" %.d% c("iM13vdNLWKb", "cRAGKdWIDn4")
         )
       )
@@ -173,47 +175,19 @@ getSnuxIm_density <- function(data_element_map_item,
                               country_uid,
                               mechanisms){ 
   
-  #print(data_element_map_item)
-  #print(mechanisms)
-  print("going for non military")
-  
-  
-  data1 <- NULL
-  attempt <- 0
-  while( is.null(data1) && attempt <= 3 ) {
-    attempt <- attempt + 1
-    try(
+
       data1 <-  BuildDimensionList_DataPack(data_element_map_item, 
                                             dim_item_sets,
                                             country_uid,
                                             mechanisms["mechanism_uid"],
                                             mil = FALSE) %>% do.call(getAnalytics, .)
-    )
-  } 
-  
-  
-    #datapackcommons::GetData_Analytics() %>% .[["results"]]
-  print("going for military")
-  
-  data2 <- NULL
-  attempt <- 0
-  while( is.null(data2) && attempt <= 3 ) {
-    attempt <- attempt + 1
-    try(
-      
+
       data2 <-  BuildDimensionList_DataPack(data_element_map_item, 
                                             dim_item_sets,
                                             country_uid,
                                             mechanisms["mechanism_uid"],
                                             mil = TRUE) %>% do.call(getAnalytics, .)
-      #datapackcommons::GetData_Analytics() %>% .[["results"]] %>% 
-    )
-  } 
-  
-  
-
-  
-  
+ 
   data <- dplyr::bind_rows(data1, data2)
   rm(data1, data2)
   
@@ -347,6 +321,8 @@ getSnuxIm_density <- function(data_element_map_item,
     dplyr::ungroup()
 }
 
+ 
+ # SCRIPTING -------------------------------------------------------------------
 
 mechs <-  getMechsList(cop_year)
 
