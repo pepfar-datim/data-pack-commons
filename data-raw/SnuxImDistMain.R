@@ -8,11 +8,11 @@
 library(datapackcommons)
 library(datimutils)
 library(dplyr)
-datimutils::loginToDATIM("~/.secrets/datim.json")
-datimutils::loginToDATIM(paste0(Sys.getenv("SECRETS_FOLDER"),"datim.json"))
+datimutils::loginToDATIM("~/.secrets/datim.json") 
+datimutils::loginToDATIM(paste0(Sys.getenv("SECRETS_FOLDER"),"datim.json")) # added for a different config access
 cop_year = 2022
 
-#  FUNCTIONS -------------------------------------------------------------------
+# FUNCTIONS -------------------------------------------------------------------
 
 #' @title translateDims(dimensions_df)
 #' 
@@ -197,7 +197,6 @@ getSnuxIm_density <- function(data_element_map_item,
   checksum <- BuildDimensionList_DataPack(data_element_map_item,
                                           dim_item_sets,
                                           country_uid) %>% do.call(getAnalytics,.) %>% .[["Value"]] %>% sum()
-    #datapackcommons::GetData_Analytics() %>% .[["results"]] %>% .[["Value"]] %>% sum()
   
   if(sum(data$Value) > checksum){
     stop(paste("Internal Error: Disaggregated data greater than aggregated data in getSnuxIm_density function", 
@@ -334,12 +333,14 @@ country_details <-  datapackcommons::GetCountryLevels() %>%
    # dplyr::filter(country_name == "Malawi") %>% 
   dplyr::arrange(country_name)
 
+# start process of collecitng api data for every country
 data <-  country_details[["id"]] %>% 
   purrr::map(process_country, mechs, fy_map) %>% 
   setNames(country_details$id)
   
 #data$ODOymOOWyl0 <- process_country("ODOymOOWyl0", mechs) 
 
+# COMPARE MODELS ---------------------------------------------------------------
 
 data_old = readr::read_rds(file.choose())
 # data_old = data_old$lZsCb6y0KDX
@@ -362,6 +363,8 @@ deltas <- dplyr::mutate(deltas,
                         psnu = datimutils::getOrgUnits(psnu_uid),
                         ou = purrr::map_chr(ancestors, purrr::pluck,1,3),
                         snu1 = purrr::map_chr(ancestors, purrr::pluck,1,4, .default = NA_character_))
+
+print(paste0("The difference between the older model and the new model is: ", nrow(deltas)))
 
 # 
 # if (cop_year == 2021){
