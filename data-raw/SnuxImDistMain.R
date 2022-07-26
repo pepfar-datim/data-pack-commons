@@ -2,12 +2,41 @@
 #                   build = TRUE,
 #                   upgrade = FALSE)
 
+# NOTES ------------------------------------------------------------------------
+# the following script generates the model for the SNIXUIM distribution
+
 library(datapackcommons)
 library(datimutils)
 library(dplyr)
-datimutils::loginToDATIM("~/.secrets/datim.json")
-
+datimutils::loginToDATIM("~/.secrets/datim.json") 
+datimutils::loginToDATIM(paste0(Sys.getenv("SECRETS_FOLDER"),"datim.json")) # added for a different config access
 cop_year = 2022
+
+# FUNCTIONS -------------------------------------------------------------------
+
+#' @title translateDims(dimensions_df)
+#' 
+#' @description takes a dimensions data frame and translates it into a list item for input to get_analytics
+#' @param dimensions_df a dimensions data frame.
+#' @return  List of dimensions for the analytics call to datimutils::getAnalytics
+translateDims <- function(dimensions_df) {
+  
+  dims <- dimensions_df %>% select(dim_uid) %>% unique()
+  
+  res <- dims$dim_uid %>% lapply(function(uid) {
+    # prepare dim item uids and dim
+    dim_uid <- sprintf("'%s'", uid)
+    dim_item_uids <- toString(sprintf("'%s'", dimensions_df[dimensions_df$dim_uid == uid,]$dim_item_uid))
+    
+    # prepare param to pass
+    # we pre-evaluate so that the api params are set for passing
+    res <- paste(dim_uid, "%.d%", "c(", dim_item_uids, ")")
+    res <- eval(parse(text = res))
+    
+  })
+  return (res)
+}
+
 
 #' @title BuildDimensionList_DataPack(data_element_map_item, dim_item_sets, 
 #' country_uid, mechanisms = NULL)
@@ -24,68 +53,91 @@ cop_year = 2022
 #' level data
 #' When included the dimensions include psnu, mechanism, AND DSD/TA disaggregation.
 #' When null psnu, mechanism and DSD/TA disaggregation are excluded giving country level totals.
-#' @return  List of dimensions for the analytics call GetData_Analytics
+#' @return  List of dimensions for the analytics call datimutils::getAnalytics
 BuildDimensionList_DataPack <- function(data_element_map_item, dim_item_sets, 
                                         country_uid, mechanisms = NULL,
                                         mil = FALSE){
   
-  # prepare df of common dimensions and filters as expected by GetData_analytics  
-  dimension_common <- 
-    tibble::tribble(~type, ~dim_item_uid, ~dim_uid,
-                    "filter", data_element_map_item[[1,"dx"]],"dx", 
-                    "filter", data_element_map_item[[1,"pe"]], "pe",
-                    "dimension", country_uid, "ou",
-                    "dimension", data_element_map_item[[1,"technical_area_uid"]], "LxhLO68FcXm",
-                    "dimension", data_element_map_item[[1,"num_or_den_uid"]],"lD2x0c8kywj",
-                    "dimension", data_element_map_item[[1,"disagg_type_uid"]],"HWPJnUTMjEq"
-    )
+  # prepare base list input for dimensions and filters fed to getAnalytics
+  dimensions_common_list <- list(
+    ou %.d% country_uid,
+    dx %.f% data_element_map_item[[1,"dx"]],
+    pe %.f% data_element_map_item[[1,"pe"]],
+    "LxhLO68FcXm" %.d% data_element_map_item[[1,"technical_area_uid"]],
+    "lD2x0c8kywj" %.d% data_element_map_item[[1,"num_or_den_uid"]],
+    "HWPJnUTMjEq" %.d% data_element_map_item[[1,"disagg_type_uid"]],
+    retry = 3,
+    timeout = 300
+  )
   
-  # prepare df of dimensions and filters as expected by GetData_analytics  
-  dimension_disaggs <- dim_item_sets %>% dplyr::mutate(type = "dimension") %>%  
+  # pull dimension disaggs as data frame and translate to list
+  dimensions_disaggs_list <- dim_item_sets %>% dplyr::mutate(type = "dimension") %>%  
     dplyr::filter(model_sets %in% c(data_element_map_item$age_set,
                                     data_element_map_item$sex_set,
                                     data_element_map_item$kp_set,
                                     data_element_map_item$other_disagg)) %>% 
     dplyr::select(type, dim_item_uid, dim_uid) %>%
     unique()  %>% 
-    stats::na.omit() # there are some items in dim item sets with no source dimension
+    stats::na.omit() %>% translateDims(.)
   
+  # if mechanisms are null return appended list of dimensions_common and dimensions_disaggs
   if (is.null(mechanisms)){
-    return(dplyr::bind_rows(dimension_common, dimension_disaggs))
+    return(append(
+      dimensions_common_list,
+      dimensions_disaggs_list
+    ))
   }
   
-  
-  dimension_mechanisms <- mechanisms["mechanism_uid"] %>% 
+  # build dimensions and translate to list
+  dimensions_mechanisms_list <- mechanisms["mechanism_uid"] %>% 
     dplyr::transmute(type = "dimension",
                      dim_item_uid = mechanism_uid,
-                     dim_uid = "SH885jaRe0o")
+                     dim_uid = "SH885jaRe0o") %>% translateDims(.)
   
   # remaining dimensions
   if (mil == FALSE) {  
     # need to select all org unit types EXCEPT military because it is 
     # possible for military to be below general PSNU level in org hierarchy
-    invisible(capture.output(    non_mil_types_of_org_units <-
+    invisible(capture.output(non_mil_types_of_org_units <-
                                    datimutils::getDimensions("mINJi7rR1a6",
                                                              fields = "items[name,id]") %>%
                                    dplyr::filter(name != "Military") %>%
                                    .[["id"]]))
-
+    # create result item 
+    res <- 
+      c(
+        dimensions_common_list,
+        dimensions_mechanisms_list,
+        dimensions_disaggs_list,
+        list(
+          "mINJi7rR1a6" %.f% non_mil_types_of_org_units,
+          "TWXpUVE2MqL" %.d% c("iM13vdNLWKb", "cRAGKdWIDn4") #dsd and ta support types
+        )
+      )
     
-    tibble::tibble(type = "filter",
-                   dim_item_uid = non_mil_types_of_org_units,
-                   dim_uid = "mINJi7rR1a6") %>% 
-    dplyr::bind_rows(tibble::tribble(~type, ~dim_item_uid, ~dim_uid, 
-                  "dimension", "OU_GROUP-AVy8gJXym2D", "ou", # COP Prioritization SNU
-                  "dimension", "iM13vdNLWKb", "TWXpUVE2MqL", #dsd and ta support types
-                  "dimension", "cRAGKdWIDn4", "TWXpUVE2MqL")) %>% 
-    dplyr::bind_rows(dimension_mechanisms, dimension_disaggs, dimension_common)
-    } else {
-  tibble::tribble(~type, ~dim_item_uid, ~dim_uid,
-                  "dimension", "OU_GROUP-nwQbMeALRjL", "ou", # military
-                  "dimension", "iM13vdNLWKb", "TWXpUVE2MqL", #dsd and ta support types
-                  "dimension", "cRAGKdWIDn4", "TWXpUVE2MqL") %>% 
-        dplyr::bind_rows(dimension_mechanisms, dimension_disaggs, dimension_common)
-    }
+    # add ou dimension
+    res[grepl("dimension=ou:", res)] <- paste0(res[grepl("dimension=ou:", res)],";","OU_GROUP-AVy8gJXym2D") # COP Prioritization SNU
+    
+    res
+    
+  } else {
+    
+    res <- 
+      c(
+        dimensions_common_list,
+        dimensions_mechanisms_list,
+        dimensions_disaggs_list,
+        list(
+          "TWXpUVE2MqL" %.d% c("iM13vdNLWKb", "cRAGKdWIDn4") #dsd and ta support types
+        )
+      )
+    
+    # add ou dimension
+    res[grepl("dimension=ou:", res)] <- paste0(res[grepl("dimension=ou:", res)],";","OU_GROUP-nwQbMeALRjL") # military
+    
+    res
+  }
+  
 }
 
 # get a list of mechs that actually have associated data for the FY targets
@@ -123,29 +175,28 @@ getSnuxIm_density <- function(data_element_map_item,
                               country_uid,
                               mechanisms){ 
   
-  
-  data <-  BuildDimensionList_DataPack(data_element_map_item, 
-                                       dim_item_sets,
-                                       country_uid,
-                                       mechanisms["mechanism_uid"],
-                                       mil = FALSE) %>% 
-    datapackcommons::GetData_Analytics() %>% .[["results"]]
 
-  data <-  BuildDimensionList_DataPack(data_element_map_item, 
-                                       dim_item_sets,
-                                       country_uid,
-                                       mechanisms["mechanism_uid"],
-                                       mil = TRUE) %>% 
-    datapackcommons::GetData_Analytics() %>% .[["results"]] %>% 
-    dplyr::bind_rows(data)
+      data1 <-  BuildDimensionList_DataPack(data_element_map_item, 
+                                            dim_item_sets,
+                                            country_uid,
+                                            mechanisms["mechanism_uid"],
+                                            mil = FALSE) %>% do.call(getAnalytics, .)
+
+      data2 <-  BuildDimensionList_DataPack(data_element_map_item, 
+                                            dim_item_sets,
+                                            country_uid,
+                                            mechanisms["mechanism_uid"],
+                                            mil = TRUE) %>% do.call(getAnalytics, .)
+ 
+  data <- dplyr::bind_rows(data1, data2)
+  rm(data1, data2)
   
   if (NROW(data) == 0) return(NULL)
   
   # quick check that data disaggregated by psnu, mechanism, and support type sum to country total    
   checksum <- BuildDimensionList_DataPack(data_element_map_item,
                                           dim_item_sets,
-                                          country_uid) %>%
-    datapackcommons::GetData_Analytics() %>% .[["results"]] %>% .[["Value"]] %>% sum()
+                                          country_uid) %>% do.call(getAnalytics,.) %>% .[["Value"]] %>% sum()
   
   if(sum(data$Value) > checksum){
     stop(paste("Internal Error: Disaggregated data greater than aggregated data in getSnuxIm_density function", 
@@ -201,7 +252,7 @@ getSnuxIm_density <- function(data_element_map_item,
   return(data)
 }
 
-process_country <- function(country_uid, mechs, snu_x_im_map){
+ process_country <- function(country_uid, mechs, snu_x_im_map){
 
   print(country_uid)
   # Get the mechanisms relevant for the specifc country being processed
@@ -269,6 +320,8 @@ process_country <- function(country_uid, mechs, snu_x_im_map){
     dplyr::ungroup()
 }
 
+ 
+ # SCRIPTING -------------------------------------------------------------------
 
 mechs <-  getMechsList(cop_year)
 
@@ -280,12 +333,14 @@ country_details <-  datapackcommons::GetCountryLevels() %>%
    # dplyr::filter(country_name == "Malawi") %>% 
   dplyr::arrange(country_name)
 
+# start process of collecitng api data for every country
 data <-  country_details[["id"]] %>% 
   purrr::map(process_country, mechs, fy_map) %>% 
   setNames(country_details$id)
   
 #data$ODOymOOWyl0 <- process_country("ODOymOOWyl0", mechs) 
 
+# COMPARE MODELS ---------------------------------------------------------------
 
 data_old = readr::read_rds(file.choose())
 # data_old = data_old$lZsCb6y0KDX
@@ -308,6 +363,8 @@ deltas <- dplyr::mutate(deltas,
                         psnu = datimutils::getOrgUnits(psnu_uid),
                         ou = purrr::map_chr(ancestors, purrr::pluck,1,3),
                         snu1 = purrr::map_chr(ancestors, purrr::pluck,1,4, .default = NA_character_))
+
+print(paste0("The difference between the older model and the new model is: ", nrow(deltas)))
 
 # 
 # if (cop_year == 2021){
