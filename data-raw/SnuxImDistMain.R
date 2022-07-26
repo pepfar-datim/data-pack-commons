@@ -111,12 +111,12 @@ BuildDimensionList_DataPack <- function(data_element_map_item, dim_item_sets,
         dimensions_disaggs_list,
         list(
           "mINJi7rR1a6" %.f% non_mil_types_of_org_units,
-          "TWXpUVE2MqL" %.d% c("iM13vdNLWKb", "cRAGKdWIDn4")
+          "TWXpUVE2MqL" %.d% c("iM13vdNLWKb", "cRAGKdWIDn4") #dsd and ta support types
         )
       )
     
     # add ou dimension
-    res[grepl("dimension=ou:", res)] <- paste0(res[grepl("dimension=ou:", res)],";","OU_GROUP-AVy8gJXym2D")
+    res[grepl("dimension=ou:", res)] <- paste0(res[grepl("dimension=ou:", res)],";","OU_GROUP-AVy8gJXym2D") # COP Prioritization SNU
     
     res
     
@@ -128,12 +128,12 @@ BuildDimensionList_DataPack <- function(data_element_map_item, dim_item_sets,
         dimensions_mechanisms_list,
         dimensions_disaggs_list,
         list(
-          "TWXpUVE2MqL" %.d% c("iM13vdNLWKb", "cRAGKdWIDn4")
+          "TWXpUVE2MqL" %.d% c("iM13vdNLWKb", "cRAGKdWIDn4") #dsd and ta support types
         )
       )
     
     # add ou dimension
-    res[grepl("dimension=ou:", res)] <- paste0(res[grepl("dimension=ou:", res)],";","OU_GROUP-nwQbMeALRjL")
+    res[grepl("dimension=ou:", res)] <- paste0(res[grepl("dimension=ou:", res)],";","OU_GROUP-nwQbMeALRjL") # military
     
     res
   }
