@@ -382,7 +382,6 @@ GetData_Analytics <-  function(dimensions,
 
 GetData_DataPack <- function(parameters,
                              org_units,
-                             include_military = TRUE,
                              dim_item_sets = datapackcommons::dim_item_sets,
                              d2_session = dynGet("d2_default_session",
                                                  inherits = TRUE)) {
@@ -540,21 +539,21 @@ GetData_DataPack <- function(parameters,
         tibble() 
 
   # military data added if needed ----
+  # all OUs have military below the country level as standard
+  # so a call for military data is always executed
   results_mil <- NULL
-  if (include_military) {
     
-    # create military input
-    analytics_input_mil <- analytics_input_base
+  # create military input
+  analytics_input_mil <- analytics_input_base
     
-    # add military ou dimension
-    analytics_input_mil$ou = c(analytics_input_mil$ou, 'OU_GROUP-nwQbMeALRjL')
+  # add military ou dimension
+  analytics_input_mil$ou = c(analytics_input_mil$ou, 'OU_GROUP-nwQbMeALRjL')
     
-    # call military data
-    results_mil <-   
-      do.call(datimutils::getAnalytics,
-              analytics_input_mil) %>%
-      tibble() 
-  }
+  # call military data
+  results_mil <-   
+    do.call(datimutils::getAnalytics,
+            analytics_input_mil) %>%
+    tibble() 
   
   # finalize results ----
   if (NROW(results_psnu) == 0 && NROW(results_mil) == 0) {
