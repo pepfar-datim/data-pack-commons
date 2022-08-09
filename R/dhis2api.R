@@ -363,7 +363,6 @@ GetData_Analytics <-  function(dimensions,
 #' @param parameters paramemters for calling an indicator 
 #' from datapackcommons::data_required
 #' @param  country uid
-#' @param include_military Should be TRUE if country has a military org unit,
 #' or FALSE if no military org_unit (FALSE for Philippines in COP20)
 #' @param dim_item_sets datapackcommons::dim_item_sets or a subset
 #' @param d2_session
