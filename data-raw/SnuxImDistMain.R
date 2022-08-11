@@ -5,6 +5,8 @@
 # NOTES ------------------------------------------------------------------------
 # the following script generates the model for the SNIXUIM distribution
 
+### Setup and parameters ###
+
 library(datapackcommons)
 library(datimutils)
 library(dplyr)
@@ -75,13 +77,17 @@ BuildDimensionList_DataPack <- function(data_element_map_item, dim_item_sets,
 
   # remaining dimensions
   if (mil == FALSE) {
-    # need to select all org unit types EXCEPT military because it is
+    # when mil == FALSE need to select all org unit types EXCEPT military because it is
     # possible for military to be below general PSNU level in org hierarchy
-    invisible(capture.output(non_mil_types_of_org_units <-
-                                   datimutils::getDimensions("mINJi7rR1a6",
-                                                             fields = "items[name,id]") %>%
-                                   dplyr::filter(name != "Military") %>%
-                                   .[["id"]]))
+    invisible(
+      capture.output(
+        non_mil_types_of_org_units <-
+          datimutils::getDimensions("mINJi7rR1a6", # Type of organisational unit org group set
+                                    fields = "items[name,id]") %>%
+          dplyr::filter(name != "Military") %>%
+          .[["id"]]))
+
+
     # create result item
     res <-
       c(
@@ -156,6 +162,7 @@ getSnuxIm_density <- function(data_element_map_item,
                               mechanisms) {
 
 
+      # first get non-mil data
       data1 <-  BuildDimensionList_DataPack(data_element_map_item,
                                             dim_item_sets,
                                             country_uid,
@@ -163,6 +170,7 @@ getSnuxIm_density <- function(data_element_map_item,
                                             mil = FALSE) %>%
         do.call(getAnalytics, .)
 
+      # now get mil data and combine with non-mil
       data2 <-  BuildDimensionList_DataPack(data_element_map_item,
                                             dim_item_sets,
                                             country_uid,
@@ -173,9 +181,12 @@ getSnuxIm_density <- function(data_element_map_item,
   data <- dplyr::bind_rows(data1, data2)
   rm(data1, data2)
 
+  # early return if no data
   if (NROW(data) == 0) return(NULL)
 
   # quick check that data disaggregated by psnu, mechanism, and support type sum to country total
+
+  # get country level totals (checksum)
   checksum <- BuildDimensionList_DataPack(data_element_map_item,
                                           dim_item_sets,
                                           country_uid) %>%
@@ -183,12 +194,13 @@ getSnuxIm_density <- function(data_element_map_item,
     .[["Value"]] %>%
     sum()
 
-  if (sum(data$Value) > checksum) {
+  if (sum(data$Value) > checksum) { # this is hard stop, we must be double counting data somehow
     stop(paste("Internal Error: Disaggregated data greater than aggregated data in getSnuxIm_density function",
                sum(data$Value),
                checksum), "\n", data_element_map_item, " ")
   }
-  if (sum(data$Value) < checksum) {
+  if (sum(data$Value) < checksum) { # if PSNU level in org hierarchy was lowered may be CORRECTLY
+                                    # missing some historic target data
     warning(paste("\n\nWARNING: Disaggregated data LESS than aggregated data in getSnuxIm_density function,",
                   " Was PSNU level changed since last cop? ",
                   "\n", data_element_map_item, " ",
@@ -196,6 +208,8 @@ getSnuxIm_density <- function(data_element_map_item,
             immediate. = TRUE)
   }
 
+# create list object with element containing dim_item_sets rows
+# for each disagg type -- age, sex, kp, other
   disagg_sets  <-  c("age_set",
                      "sex_set",
                      "kp_set",
@@ -203,9 +217,11 @@ getSnuxIm_density <- function(data_element_map_item,
     purrr::map(~dplyr::filter(dim_item_sets,
                               model_sets == data_element_map_item[[1, .]]))
 
+# aggregate data based on dim_item_sets
+
   data <- purrr::reduce(disagg_sets,
                         datapackcommons::MapDimToOptions,
-                        allocate = "distribute",
+                        allocate = "distribute", # we always distribute data for PSNUxIM
                         .init = data) %>%
     dplyr::rename("mechanism_uid" = "Funding Mechanism") %>%
     dplyr::mutate(mechanism_code = datimutils::getCatOptions(mechanism_uid,
@@ -241,9 +257,7 @@ getSnuxIm_density <- function(data_element_map_item,
  process_country <- function(country_uid, mechs, snu_x_im_map) {
 
   print(country_uid)
-  # Get the mechanisms relevant for the specifc country being processed
-  # cache options required for datimvalidation function to work.
-  # cache age option reverts to original after calling datim validation
+  # Get the mechanisms relevant for the specific country being processed
   mechs <-   dplyr::filter(mechs, country_uid == !!country_uid)
   if (NROW(mechs) == 0) {
     return(tibble::tibble(indicator_code = character(),
@@ -266,30 +280,33 @@ getSnuxIm_density <- function(data_element_map_item,
   # alply uses parallel processing here
 
   doMC::registerDoMC(cores = 3) #stopped using parallel due to warnings being hidden,
-  #must refactor to include
+  # must refactor to output warnings in some way
+  # important because getSnuxIm_density outputs a warning when checksum doesn't reconcile
   data <-  plyr::adply(snu_x_im_map,
                      1, getSnuxIm_density,
                      datapackcommons::dim_item_sets,
                      country_uid,
                      mechs, .parallel = FALSE,
                      .expand = FALSE, .id = NULL)
-  if (NROW(data) == 0 || is.null(data)) {
-    return(tibble::tibble(indicator_code = character(),
-                           psnu_uid = character(),
-                           mechanism_code = character(),
-                           mechanism_uid = character(),
-                           type = character(),
-                           age_option_name = character(),
-                           age_option_uid = character(),
-                           sex_option_name = character(),
-                           sex_option_uid = character(),
-                           value = double(),
-                           kp_option_uid = character(),
-                           kp_option_name = character(),
-                           percent = double()))
+  # when no relevant data available
+  if(NROW(data) == 0 || is.null(data)) {
+    return( # empty tibble with expected columns
+      tibble::tibble(indicator_code = character(),
+                     psnu_uid = character(),
+                     mechanism_code = character(),
+                     mechanism_uid = character(),
+                     type = character(),
+                     age_option_name = character(),
+                     age_option_uid = character(),
+                     sex_option_name = character(),
+                     sex_option_uid = character(),
+                     value = double(),
+                     kp_option_uid = character(),
+                     kp_option_name = character(),
+                     percent = double()))
     }
 
-  data <-  data %>%
+  data <- data %>%
     dplyr::group_by_at(dplyr::vars(-value)) %>%
     dplyr::summarise(value = sum(value, na.rm = TRUE)) %>%
     dplyr::ungroup()
@@ -310,6 +327,9 @@ getSnuxIm_density <- function(data_element_map_item,
     dplyr::ungroup()
 }
 
+#### End Functions
+
+### Start script execution
 
  # SCRIPTING -------------------------------------------------------------------
 
