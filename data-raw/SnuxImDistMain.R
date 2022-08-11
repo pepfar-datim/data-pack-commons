@@ -14,34 +14,7 @@ cop_year <- 2022
 
 # FUNCTIONS -------------------------------------------------------------------
 
-#' @title translateDims(dimensions_df)
-#'
-#' @description takes a dimensions data frame and translates it into a list item for input to get_analytics
-#' @param dimensions_df a dimensions data frame.
-#' @return  List of dimensions for the analytics call to datimutils::getAnalytics
-translateDims <- function(dimensions_df) {
-
-  dims <- dimensions_df %>%
-    select(dim_uid) %>%
-    unique()
-
-  res <- dims$dim_uid %>%
-    lapply(function(uid) {
-      # prepare dim item uids and dim
-      dim_uid <- sprintf("'%s'", uid)
-      dim_item_uids <- toString(sprintf("'%s'", dimensions_df[dimensions_df$dim_uid == uid, ]$dim_item_uid))
-
-      # prepare param to pass
-      # we pre-evaluate so that the api params are set for passing
-      res <- paste(dim_uid, "%.d%", "c(", dim_item_uids, ")")
-      res <- eval(parse(text = res))
-
-    })
-  return(res)
-}
-
-
-#' @title BuildDimensionList_DataPack(data_element_map_item, dim_item_sets,
+#' @title BuildDimensionList_DataPack(data_element_map_item, dim_item_sets, 
 #' country_uid, mechanisms = NULL)
 #'
 #' @description get list of dimensions (parameters) for analytics call to get data for SNUxIM
