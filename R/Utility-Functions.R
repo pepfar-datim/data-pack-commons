@@ -1,5 +1,5 @@
 #' @export
-#' @title translateDims(dimensions_df)
+#' @title Translate Dimensions
 #' 
 #' @description takes a dimensions data frame and translates it into a list item for input to get_analytics
 #' @param dimensions_df a dimensions data frame.

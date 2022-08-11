@@ -2,7 +2,7 @@
 % Please edit documentation in R/Utility-Functions.R
 \name{translateDims}
 \alias{translateDims}
-\title{translateDims(dimensions_df)}
+\title{Translate Dimensions}
 \usage{
 translateDims(dimensions_df)
 }
