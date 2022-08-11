@@ -449,7 +449,8 @@ GetData_DataPack <- function(parameters,
     ) %>%
     dplyr::select(type, dim_item_uid, dim_uid) %>%
     unique()  %>%
-    stats::na.omit() %>% translateDims(.) # there are some items in dim item sets with no source dimension
+    stats::na.omit() %>%
+    translateDims() # there are some items in dim item sets with no source dimension
   # these are cases when a historic disaggregation doesn't exist
   # and we need to create the disaggregation allocation for the DataPack
   
@@ -532,7 +533,7 @@ GetData_DataPack <- function(parameters,
   analytics_input_mil <- analytics_input_base
     
   # add military ou dimension
-  analytics_input_mil$ou = c(analytics_input_mil$ou, 'OU_GROUP-nwQbMeALRjL')
+  analytics_input_mil$ou <- c(analytics_input_mil$ou, 'OU_GROUP-nwQbMeALRjL')
     
   # call military data
   results_mil <-   
