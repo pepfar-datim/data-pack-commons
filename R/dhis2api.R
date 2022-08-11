@@ -371,7 +371,6 @@ GetData_Analytics <-  function(dimensions,
 #' @param parameters paramemters for calling an indicator
 #' from datapackcommons::data_required
 #' @param  country uid
-#' @param include_military Should be TRUE if country has a military org unit,
 #' or FALSE if no military org_unit (FALSE for Philippines in COP20)
 #' @param dim_item_sets datapackcommons::dim_item_sets or a subset
 #' @param d2_session
@@ -390,7 +389,6 @@ GetData_Analytics <-  function(dimensions,
 
 GetData_DataPack <- function(parameters,
                              org_units,
-                             include_military = TRUE,
                              dim_item_sets = datapackcommons::dim_item_sets,
                              d2_session = dynGet("d2_default_session",
                                                  inherits = TRUE)) {
@@ -446,6 +444,7 @@ GetData_DataPack <- function(parameters,
   }
 
   # add dimensions for the standard age, sex, kp, and other disaggregations
+  # this gets translated into a list object via translateDims in order to leverage getAnalytics
   dimension_disaggs <-
     dim_item_sets %>%
     dplyr::mutate(type = "dimension") %>%
@@ -459,30 +458,16 @@ GetData_DataPack <- function(parameters,
     ) %>%
     dplyr::select(type, dim_item_uid, dim_uid) %>%
     unique()  %>%
-    stats::na.omit() # there are some items in dim item sets with no source dimension
+    stats::na.omit() %>%
+    translateDims() # there are some items in dim item sets with no source dimension
   # these are cases when a historic disaggregation doesn't exist
   # and we need to create the disaggregation allocation for the DataPack
-
-
-  # create the dimension list of the extras with their corresponding dim-items
-  dims <- dimension_disaggs %>% select(dim_uid) %>% unique()
-  dim_list <- dims$dim_uid %>% lapply(function(uid) {
-    # prepare dim item uids and dim
-    dim_uid <- sprintf("'%s'", uid)
-    dim_item_uids <- toString(sprintf("'%s'", dimension_disaggs[dimension_disaggs$dim_uid == uid, ]$dim_item_uid))
-
-    # prepare param to pass
-    # we pre-evaluate so that the api params are set for passing
-    res <- paste(dim_uid, "%.d%", "c(", dim_item_uids, ")")
-    res <- eval(parse(text = res))
-
-  })
-
+  
   # prepare final analytics input
   analytics_input$timeout <- 300 # set timeout to over 5 minutes
   analytics_input$retry <- 3
-  analytics_input_base <- append(analytics_input, dim_list)
-
+  analytics_input_base <- append(analytics_input, dimension_disaggs)
+  
   # custom data ----
   # Implemented for dreams SNUs for AGYW_PREV
   # currently used to select DREAMS SNU ou_group
@@ -551,22 +536,22 @@ GetData_DataPack <- function(parameters,
         tibble()
 
   # military data added if needed ----
+  # all OUs have military below the country level as standard
+  # so a call for military data is always executed
   results_mil <- NULL
-  if (include_military) {
-
-    # create military input
-    analytics_input_mil <- analytics_input_base
-
-    # add military ou dimension
-    analytics_input_mil$ou <- c(analytics_input_mil$ou, "OU_GROUP-nwQbMeALRjL")
-
-    # call military data
-    results_mil <-
-      do.call(datimutils::getAnalytics,
-              analytics_input_mil) %>%
-      tibble()
-  }
-
+    
+  # create military input
+  analytics_input_mil <- analytics_input_base
+    
+  # add military ou dimension
+  analytics_input_mil$ou <- c(analytics_input_mil$ou, 'OU_GROUP-nwQbMeALRjL')
+    
+  # call military data
+  results_mil <-   
+    do.call(datimutils::getAnalytics,
+            analytics_input_mil) %>%
+    tibble() 
+  
   # finalize results ----
   if (NROW(results_psnu) == 0 && NROW(results_mil) == 0) {
     # nothing to return
