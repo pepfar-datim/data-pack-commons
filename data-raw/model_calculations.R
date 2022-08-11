@@ -303,7 +303,7 @@ diffDataPackModels <- function(model_old,
 dim_item_sets <- datapackcommons::dim_item_sets
 
 # for each ou
-for (ou_index in seq_len(operating_units)) {
+for (ou_index in seq_len(NROW(operating_units))) {
   # start with fresh local copy of data_required.csv
   data_required <-  datapackcommons::data_required
   operating_unit <-  dplyr::slice(operating_units, ou_index)
@@ -340,7 +340,7 @@ for (ou_index in seq_len(operating_units)) {
     dplyr::left_join(data_required, .)
 
 #   for each line in data required
-  for (data_required_index in seq_len(data_required)) {
+  for (data_required_index in seq_len(NROW(data_required))) {
 
     data_spec <-  dplyr::slice(data_required, data_required_index)
     cop_data[[operating_unit$id]][[data_spec$data_pack_sheet]][[data_spec$data_pack_code]] <-
