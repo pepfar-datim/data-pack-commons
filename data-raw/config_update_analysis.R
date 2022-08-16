@@ -57,7 +57,8 @@ parseIndicators <- function(indicator_uids) {
 
 doMC::registerDoMC(cores = 5)
 
-datimutils::loginToDATIM("~/.secrets/datim.json")
+datimutils::loginToDATIM(paste0(Sys.getenv("SECRETS_FOLDER"),
+                                "datim.json"))
 
 data_required <- datapackcommons::data_required
 
