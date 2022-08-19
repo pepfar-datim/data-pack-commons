@@ -14,39 +14,6 @@
 context("Test interactions with DHIS 2 analytics")
 require(httptest)
 #DHISLogin("/users/sam/.secrets/play.json")
-------------
-test_that("We can get data with GetData_Analytics", {
-#httptest::use_mock_api()
-  datimutils::loginToDATIM(base_url = "https://play.dhis2.org/2.36/",
-                           username = "admin",
-                           password = "district")
-  base_url <- d2_default_session$base_url
-
-  dimensions <- tibble::tribble(~type, ~dim_item_uid, ~dim_uid,
-                                "filter", "vihpFUg2WTy", "dx", #PMTCT positive test rate indicator
-                                "dimension", "ImspTQPwCqd", "ou", # sierra leone
-                                "dimension", "LEVEL-2", "ou",
-                                "filter", "LAST_YEAR", "pe",
-                                "dimension", "UOqJW6HPvvL", "veGzholzPQm",
-                                "dimension", "WAl0OCcIYxr", "veGzholzPQm",
-                                "dimension", "uYxK4wmcPqA", "J5jldMd8OHv",
-                                "dimension", "EYbopBOJWsW", "J5jldMd8OHv")
-  # veGzholzPQm = HIV age, UOqJW6HPvvL = 15-24y, WAl0OCcIYxr = 25-49y,
-  # J5jldMd8OHv = Facility Type, uYxK4wmcPqA = CHP, EYbopBOJWsW = MCHP
-
-  response <- GetData_Analytics(dimensions,
-                                d2_session = d2_default_session)
-  testthat::expect_equal(stringr::str_remove(response$api_call, ".*/api/"),
-                         paste0("29/analytics.json?",
-         "dimension=J5jldMd8OHv:uYxK4wmcPqA;EYbopBOJWsW&dimension=ou:ImspTQPwCqd;LEVEL-2",
-         "&dimension=veGzholzPQm:UOqJW6HPvvL;WAl0OCcIYxr&filter=dx:vihpFUg2WTy",
-         "&filter=pe:LAST_YEAR&outputIdScheme=UID&hierarchyMeta=true"))
-  testthat::expect_gt(NROW(response$results), 0)
-  testthat::expect_named(response$results,
-                         c("Facility Type", "Organisation unit",
-                           "HIV age", "Value", "ou_hierarchy"))
-#  httptest:::stop_mocking()
-})
 
 httptest::use_mock_api()
 test_that("RetryAPI", {

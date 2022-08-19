@@ -17,7 +17,7 @@ GetSqlView(
 
 \item{variable_keys}{character list - list of the variable names for the sql view}
 
-\item{variable_values}{character list - list of the variable values ordered to correspond with 
+\item{variable_values}{character list - list of the variable values ordered to correspond with
 the related variable key}
 
 \item{col_types}{passed to readr::read_csv col_types parameter for parsing the result set}

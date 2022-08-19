@@ -15,6 +15,6 @@ RenameDimensionColumns(data, type)
 The dataframe with renamed column names for dimensions
 }
 \description{
-Renames the original column names of datapackcommons::dim_items_sets, 
+Renames the original column names of datapackcommons::dim_items_sets,
 by prepending the string in the type parameter
 }

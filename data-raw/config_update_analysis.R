@@ -1,3 +1,6 @@
+#TODO
+# check with Sam the general use of this script as it is missing variables and does not run in completion
+
 library(magrittr)
 library(tidyverse)
 require(foreach)
@@ -252,7 +255,10 @@ dplyr::setdiff(combined_data_elements$displayName, elements_fy19r_fy20t$dataelem
 
 
 
-
+#TODO
+# ask Sam about missing variables. The below function requires a missing fy variable
+# current errors is: Error in do.ply(i) :
+# task 1 failed - "object 'elements_fy19r_fy20t' not found"
 
 plyr::alply(data_required, 1, get_invalid_data_elements, .parallel = TRUE)
 
@@ -274,7 +280,8 @@ indicators_with_co_combos <- dplyr::filter(indicators,
                                            stringr::str_detect(numerator, "\\.") |
                                              stringr::str_detect(denominator, "\\."))
 
-
+#TODO
+# ask Sam about missing variable "object 'elements_fy19r_fy20t' not found"
 temp <- plyr::alply(indicators_with_co_combos, 1,
                     compare_indicator_cocs, elements_fy19r_fy20t) %>%
   set_names(indicators_with_co_combos$name)
@@ -300,6 +307,8 @@ denominator_components <- indicators$denominator[indicators$denominator != 1] %>
   purrr::map(~datapackcommons::getMetadata("dataElements",
                                            glue::glue("id:eq:{.x}")))
 
+#TODO
+# ask Sam there is failure here with binding -- can be fixed but should confirm before fixing
 combined_componenets <- dplyr::bind_rows(numerator_components, denominator_components) %>%
   distinct()
 
