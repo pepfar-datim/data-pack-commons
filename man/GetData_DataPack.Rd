@@ -7,7 +7,6 @@
 GetData_DataPack(
   parameters,
   org_units,
-  include_military,
   dim_item_sets = datapackcommons::dim_item_sets,
   d2_session = dynGet("d2_default_session", inherits = TRUE)
 )
@@ -16,12 +15,10 @@ GetData_DataPack(
 \item{parameters}{paramemters for calling an indicator 
 from datapackcommons::data_required}
 
-\item{include_military}{Should be TRUE if country has a military org unit,
-or FALSE if no military org_unit (FALSE for Philippines in COP20)}
-
 \item{dim_item_sets}{datapackcommons::dim_item_sets or a subset}
 
-\item{country}{uid}
+\item{country}{uid
+or FALSE if no military org_unit (FALSE for Philippines in COP20)}
 }
 \value{
 A list with $time = time the function was called, 

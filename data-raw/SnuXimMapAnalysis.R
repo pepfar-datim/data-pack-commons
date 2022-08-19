@@ -2,17 +2,17 @@ library(datapackr)
 library(magrittr)
 library(tidyverse)
 
-getStandardDataElementGroups <- function(){
-  datapackcommons::GetSqlView("m7qxbPHsikm") %>% 
+getStandardDataElementGroups <- function() {
+  datapackcommons::GetSqlView("m7qxbPHsikm") %>%
     dplyr::select(data_element = dataelementname,
-                  data_element_uid = dataelementuid,  
+                  data_element_uid = dataelementuid,
                   data_element_code = dataelementcode,
                   technical_area  = `Technical Area`,
                   technical_area_uid = LxhLO68FcXm,
                   targets_results = `Targets / Results`,
                   targets_results_uid = IeMmjHyBUpi,
                   support_type = `Support Type`,
-                  support_type_uid = `TWXpUVE2MqL`,                                   
+                  support_type_uid = `TWXpUVE2MqL`,
                   numerator_denominator = `Numerator / Denominator`,
                   numerator_denominator_uid = `lD2x0c8kywj`,
                   disaggregation_type = `Disaggregation Type`,
@@ -21,17 +21,17 @@ getStandardDataElementGroups <- function(){
 }
 
 getDataSets_Detailed <- function(dataset_uids) {
-  purrr::map(dataset_uids, ~ datapackcommons::GetSqlView("DotdxKrNZxG", 
-                                                         c("dataSets"), 
-                                                         c(.x))) %>% 
-    dplyr::bind_rows() %>% 
-    dplyr::select(-dataelementdesc, -shortname) %>%   
+  purrr::map(dataset_uids, ~ datapackcommons::GetSqlView("DotdxKrNZxG",
+                                                         c("dataSets"),
+                                                         c(.x))) %>%
+    dplyr::bind_rows() %>%
+    dplyr::select(-dataelementdesc, -shortname) %>%
     dplyr::rename(data_element = "dataelement",
                   data_element_code = "code",
                   data_element_uid = "dataelementuid",
                   category_option_combo = "categoryoptioncombo",
                   category_option_combo_code = "categoryoptioncombocode",
-                  category_option_combo_uid = "categoryoptioncombouid" ) %>% 
+                  category_option_combo_uid = "categoryoptioncombouid") %>%
     dplyr::left_join(getStandardDataElementGroups())
 }
 
@@ -39,19 +39,19 @@ secrets <- "/Users/sam/.secrets/cop.json"
 datimutils::loginToDATIM(secrets)
 base_url <- d2_default_session$base_url
 
-fy_22_t <- datapackr::getDatasetUids(2022, "mer_targets") %>% 
+fy_22_t <- datapackr::getDatasetUids(2022, "mer_targets") %>%
   getDataSets_Detailed() %>%
-  dplyr::select(-dataset) %>% 
-  distinct() 
-  
-fy_21_t <- datapackr::getDatasetUids(2021, "mer_targets") %>% 
-  getDataSets_Detailed() %>% 
-  dplyr::select(-dataset) %>% 
+  dplyr::select(-dataset) %>%
   distinct()
 
-fy_23_t <- datapackr::getDatasetUids(2023, "mer_targets") %>% 
-  getDataSets_Detailed() %>% 
-  dplyr::select(-dataset) %>% 
+fy_21_t <- datapackr::getDatasetUids(2021, "mer_targets") %>%
+  getDataSets_Detailed() %>%
+  dplyr::select(-dataset) %>%
+  distinct()
+
+fy_23_t <- datapackr::getDatasetUids(2023, "mer_targets") %>%
+  getDataSets_Detailed() %>%
+  dplyr::select(-dataset) %>%
   distinct()
 
 
@@ -64,34 +64,36 @@ match_21T_23T <- dplyr::intersect(fy_23_t, fy_21_t)
 match_22T_23T <- dplyr::intersect(fy_23_t, fy_22_t)
 
 
-schema <- datapackr::cop22_data_pack_schema %>% dplyr::filter(col_type == "target"
-                                                              & dataset == "mer"
-                                                              & sheet_name != "PSNUxIM")
+schema <- datapackr::cop22_data_pack_schema %>%
+  dplyr::filter(col_type == "target"
+                & dataset == "mer"
+                & sheet_name != "PSNUxIM")
 
 dplyr::setdiff(c(schema$dataelement_dsd, schema$dataelement_ta), fy_22_t$data_element_uid)
 dplyr::setdiff(fy_22_t$data_element_uid, c(schema$dataelement_dsd, schema$dataelement_ta))
 
 map <- datapackcommons::Map22Tto23T
 
-temp =dplyr::full_join(fy_23_t,map, by = c(technical_area_uid ="technical_area_uid",
-                                     disaggregation_type_uid = "disagg_type_uid",
-                                     numerator_denominator_uid = "num_or_den_uid"))
+temp <- dplyr::full_join(fy_23_t, map, by = c(technical_area_uid = "technical_area_uid",
+                                              disaggregation_type_uid = "disagg_type_uid",
+                                              numerator_denominator_uid = "num_or_den_uid"))
 names(map)
 
 
 
-data = readr::read_rds("/Users/sam/COP data/PSNUxIM_20220110_1.rds") %>% 
-  purrr::reduce(dplyr::bind_rows) %>% 
-  dplyr::group_by(indicator_code, 
+data <- readr::read_rds("/Users/sam/COP data/PSNUxIM_20220110_1.rds") %>%
+  purrr::reduce(dplyr::bind_rows) %>%
+  dplyr::group_by(indicator_code,
                   age_option_name,
                   sex_option_name,
-                  kp_option_name) %>% 
-  dplyr::summarise(count=dplyr::n()) %>% dplyr::ungroup() %>% 
-  dplyr::rename(valid_ages.name="age_option_name",
-                valid_sexes.name="sex_option_name",
-                valid_kps.name="kp_option_name") %>% 
-  dplyr::full_join(datapackr::cop22_map_DataPack_DATIM_DEs_COCs) %>% 
-  dplyr::filter(!stringr::str_detect(dataelementname,"SUBNAT"))
+                  kp_option_name) %>%
+  dplyr::summarise(count = dplyr::n()) %>%
+  dplyr::ungroup() %>%
+  dplyr::rename(valid_ages.name = "age_option_name",
+                valid_sexes.name = "sex_option_name",
+                valid_kps.name = "kp_option_name") %>%
+  dplyr::full_join(datapackr::cop22_map_DataPack_DATIM_DEs_COCs) %>%
+  dplyr::filter(!stringr::str_detect(dataelementname, "SUBNAT"))
 
 ##########
 ##standard_de_groups <- datapackcommons::GetSqlView("vqetpxYlX1c") ## jason.datim
@@ -109,7 +111,7 @@ data = readr::read_rds("/Users/sam/COP data/PSNUxIM_20220110_1.rds") %>%
 # dataelementcode data_element_code,
 # technicalarea technical_area,
 # technicalareauid technical_area_uid,
-# numordenom num_or_denom, 
+# numordenom num_or_denom,
 # numordenomuid num_or_denom_uid,
 # supporttype support_type,
 # supporttypeuid support_type_uid,

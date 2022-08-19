@@ -16,6 +16,7 @@ knitr::opts_chunk$set(
 
 ```{r setup}
 library(datapackcommons)
+library(tidyverse)
 ```
 
 
@@ -62,16 +63,116 @@ Running the script start to finish (without uncommenting the writing of files), 
 
 There is a script in `datapackcommons` `data-raw/SnuxImDistMain.R`. It is currently possible to produce a PSNUxIM model for COP21 or COP22, and that variable `cop_year` is set at the top of the script. This script also contains code for comparing two versions of the PSNUxIM distribution, but it is inline at the bottom instead of in a function. It also contains code for sending the file to S3 commented out.
 
-The the final R object created by this script is called data. When written as an RDS, these are the data used by data packr to populat the PSNUxIM tab.
+The the final R object created by this script is called data. When written as an RDS, these are the data used by datapackr to populate the PSNUxIM tab.
 
 ## Generating configuration files
 
-There are three important configuration files, excel sheets, that are used to co
+There are 2 excel files used to configure the DataPack and PSNUxIM models.
 
-## Configuring a `DataPackModel`
+1. `data-raw/model_calculations/model_calculations.xlsx`
+
+    This contains a sheet with configuration details for pulling the historic data required for the DataPack (data_required sheet) as well as details on disaggregations required for the DataPack (dimension_item_sets sheet), which may include aggregation or disaggregation compared to what is actually in DATIM. I will provide more details on the configuration below.
+1. `data-raw/snu_x_im_distribution_configuration/22Tto23TMap.xlsx`
+
+    This workbook contains 1 sheet with the configuration details for generating the PSNUxIM distribution. more details on the configuration are provided below.
+    
+The three worksheets in these two excel files are saved in csv format for version control purposes, and these three csv files are converted to .rds files for inclusion on the package with the script `data-raw/CreateDataFiles.R`. This script includes some checks to ensure the internal consistency of the configuration (e.g. names and uids match) and it also provides some comparison of the data rds files to generated with the versions currently in the package. This allows us to ensure any configuration changes are as intended.
+
+Practically what this means is that the process for updaing the DataPack model and the PSNUsxIM distribution model requires three things.
+
+1. Update the relevant sheet(s) in `data-raw/model_calculations/model_calculations.xlsx` or `data-raw/snu_x_im_distribution_configuration/22Tto23TMap.xlsx` and save the xlsx file.
+
+    NOTE: for next year the distribution file would be named  `23Tto24TMap.xlsx` if we keep the pattern the same.  
+1. Save the updated Excel sheets as individual csv files
+    - `data-raw/model_calculations/dimension_item_sets.csv`
+    - `data-raw/model_calculations/data_required.csv`
+    - `data-raw/snu_x_im_distribution_configuration/22Tto23TMap.csv`
+1. Run the script that validates the confiuration files (csv versions) and creates the RDS files - `data-raw/CreateDataFiles.R`
+
+## Configuring `dimension_item_sets`
+
+You should familiarize yourself with the [DHIS2 API analytics endpoint](https://docs.dhis2.org/en/develop/using-the-api/dhis-core-version-238/analytics.html) in order to fully understand the content below.
+
+The data in the DataPack is generally organized with an age and sex, or a key population in the rows (EID and GEND don't have row dissagregates, age is implied in EID columns). Additionally the columns often also have an implied disaggregation of some kind. For example `HTS_TST.KP.Pos.T_1` is disaggregated by key population status and an implied disagregation (analytics filer) on HIV test +. `TB_STAT.N.New.Pos.T_1` is disaggregated age: 1-65+, sex Male/Female and has an implied disagg on HIV Test Status (Specific) = Newly Tested Positives (Specific). This is similar for the PSNUxIM distribution.
+
+The dimension item sets configuration is used to specify which disaggregations are used to pull data from the DHIS2 analytics endpoint for the DataPack Model and the PSNUxIM distribution. Each Column in the DataPack and unique indicator code in the PSNUxIM distributions can be associated with up to 3 dimension item or model sets. Age and/or sex and/or other disagg; or KP and/or other disagg.
+
+An important aspect of the dimension item set configuration is it allows us to specify special situations for splitting historic data into new disaggregations for the datapack or aggregating historic data for use in the datapack. 
+
+### Dimension item set examples
+
+###### Standard key population disaggregation 1:1 dimension items to category options
+
+This is the most basic example, we are pulling data from the `Key Populations v3` dimension, we include all of the dimension items under this dimension. As this dimension is actually a category, the category option uids and the dimension item uids match. The weights are all equal to 1 because we aren't aggregating or disaggeregating the data further for the data pack. The `model_set` here is `kp1` so that is the foreign key we will use in the other configuration files to pull data with these disaggregations. 
+
+https://www.datim.org/api/dimensions?filter=name:eq:Key%20Populations%20v3&fields=:all,items[name,id]
+https://www.datim.org/api/categories?filter=name:eq:Key%20Populations%20v3&fields=name,id,categoryOptions[name,id]
+
+```{r}
+dplyr::filter(datapackcommons::dim_item_sets, model_sets == "kp1") %>% as.data.frame()
+```
+
+###### `option_name = NA`
+
+1st note that in all cases where `option_name = NA` the `dim_cop_type = other_disagg`, so we are not dealing with explicit age, sex, kp disaggregates to appear in DataPack rows, but rather implicit disaggregations as part of the data pack indicator/target.   
+
+
+###### Ages with additional distribution to new ages
+
+Historically the highest age category has been 50+, but with COP22 and 23 the finer age bands are being use creating 50-54, 55-59, 60-64, and 65+. For the purposes of the datapack we need to be allocate or distribute historic data for the 50+ age category to these new age bands. Here is an example of a model set that does this:
+
+```{r}
+dplyr::filter(datapackcommons::dim_item_sets, model_sets == "15-65+") %>% as.data.frame()
+```
+
+`https://www.datim.org/api/dimensions?filter=name:eq:Age:%20Cascade%20Age%20bands&fields=:all,items[name,id]`
+
+
+Some important things to note, this dimension does NOT come from a category, it is a a category group set. The dimension items are not necessarily category options, and the name and uids differ from category options. For instance the dimension item is `<item name="10-14 (Specific)" id="tIZRQs0FK5P"/>`, but the underlying category option is `<categoryOption name="10-14" id="jcGQdcpPSJP"/>`
+
+https://www.datim.org/api/categoryOptionGroups/tIZRQs0FK5P?fields=:all,categoryOptions[name,id]
+
+Also the 15-65+ model set does not include all of the dimension items from the `Age: Cascade Age bands` dimension/category group set.
+
+In the configuration we can see that the 50+ dimension item appears 4 times in order to allocate the 50+ data to the 4 new age categories. This distribution of data happens in the data pack commons code. The 50+ data is proportionally distributed to 50-54, 55-59, 60-64, 65+ with weights .42, .35, .14, .09 (sum to 1), respectivly. 
+
+
+Each `model_set` is a combination of one or more analytics dimensions and dimension items used in a DHIS2 analytics call. Most columns of dimension_item_sets are described here in the docs (`?datapackcommons::dim_item_sets`). The column `model_sets` in the dimension_items_sets excel sheet is semi-colon delimited and gets unnested in the package object `datapack::dim_item_sets`. A model set is the foreign key for the groupings that are used in the data_required and PSNUxIM model configurations to link the configuration to the ages, sexes, kps and other disaggs.
+
+For every column of the datapack there will be one or more model sets
 
 ## Configuring a `PSNUxIM distribution`
 
+The PSNUxIM distribution provides data for allocation targets set in the main data pack tabs to mechanisms on the PSNUxIM tab. We use historic data, specifically prior year targets data, to create these allocations. We take the list of targets for the cop year and map those to targets from the prior year. In most cases this is a direct mappingto the same data element from the previous year. In the case of completely new indicators, however, we sometimes need to map to a different indicator from the prior year. If there is really no good historic data to link a new indicator too, we sometimes leave it out of the PSNUxIM distribution.
+
+So the configuration requires a reference to a target data element from the previous year. We specify the data element using its technical area, num/den, and disaggregation type. Unfortunately I cannot recall exactly why we chose to use these data element groups and group sets instead of using data element uids directly. It is perhaps slightly easier to maintain as is, if the data element changes it is usually only the disaggregation type that requires updating.
+
+### Examples
+
+
+
+###### 	OVC_SERV.DREAMS.T
+
+OVC_SERV.DREAMS.T broke the pattern of mapping a data apck target to a single pair of DSD and TA data elements from the previous year.
+
+
+## Configuring a `DataPack Model`
+
+The DataPack model is used to populate certain columns of the `DataPack` with historic data in DATIM. Usually the target data for the current fiscal year/preceding COP year, and the results data from the prior fiscal year. So for COP 23 this means the historic data for the most part will be FY23/COP22 targets and FY22 results. The only edge case at the moment is `TB_PREV.N.R` which aggregates the last 5 years of data for COP22 (perhaps the prior 6 years for COP23).
+
+In the datapack columns that take historic data are categorized as `mer/past` or `datapack/calculation`, e.g.
+
+```{r}
+head(dplyr::filter(datapackr::cop22_data_pack_schema,
+              (dataset == "mer" & col_type == "past") |
+              (dataset == "datapack" & col_type == "calculation")))
+```
+
+Usually an indicator code with T_1 indicates the prior cop year (so T_1 in COP23 = FY23/COP22 targets = 2022Oct period) and R indicates results from the last fiscal year (so R in COP23 indicates FY22 results = 2021Oct period).
+
+Consider the PMTCT tab of the datapack
+
+Replicate vs distribute We never distribute 
 
 
 ## Key Files/Directories
@@ -80,21 +181,50 @@ catalog <- tibble::tribble(~name, ~short_description,
                 file.path("data-raw", "model_calculations.R"),
                 "Script for generating datapack model",
                 file.path("data-raw", "SnuxImDistMain.R"),
-                "Script for generating PSNUxIM models",)
+                "Script for generating PSNUxIM models")
 knitr::kable(catalog)
 ```
 
 
 ### TODO
 
+###### Short term
+
 * Modify GetData_DataPack to use datimutils::getAnalytics instead of internal getData_Analytics
-    * I started on this in this [branch](https://github.com/pepfar-datim/data-pack-commons/tree/refactor-GetData_DataPack , but it was almost 2 years ago.)
 * Modify SnuxImDistMain.R to use datimutils::getAnalytics instead of internal getData_Analytics,
 * deprecate GetData_Analytics
-* Consider removing period column in final output
-* create flat file from the beginning and deprecate flatten COP function
-* remove include military = true code, all countries now have military below country level as standard
+* Remove dimension item set model sets that are not used by the DataPackModel or the COP22 or COP21 PSNUxIM distribution
+* Analyze harmonizing dimension_item_set model set names with the valida_age, valid_sex, and valid_kp names in the datapack template
+  - bonus points for figuring out if we can put this directly in DATIM metadata some how.
+* Business as usual PSNUxIM distribution update
+  - if PSNUxIM content remained the same, do we have the right standard dissagregations for pulling FY23 target data and maping to FY24 target data?
 * Make a function for comparing PSNUxIM distributions
+* Investigate time lag indicators in DATIM
 * Create standard functions for sending stuff to S3
+  - modify import scripts and datapack model and PSNUxIM generation scritps to use
+* change full formula column into more of a description column perhaps with reference to data pack documentation
+* Consider moving PSNUxIM distribution config to datapack template
+* Hand Over COP21 OPUs
+* Determine if GetCountryLevels can be removed
+
+###### later
+
+* enable tech_area, num_den, disagg_type in data_required as filters. We use these in the SNUxIM distribution but not currently in `DataPack model`
+  - `TB_PREV.N.R` configuration for this is quite awkward
+* Business as usual DataPack Model update
+  - if datapack content remained the same, do we have the right indicators and disaggregations for pulling FY23 target data and FY22 results data as opposed to FY22 targets and FY21 results?
+* create flat file from the beginning and deprecate flatten COP function
+* Consider removing period column in final output
+* remove include military = true code, all countries now have military below country level as standard
+* Begin analyzing indicators in the DataPack model that will be affected by new age categories
+* fully support mutli-item dimensions (with semicolons or pipes or some other special character)
+  - added for `OVC_SERV.Active.T` and `OVC_SERV.Grad.T` PSNUxIM distribution but I think only partially implemented
+* Check on sending yearly versioned copieds of datapack model to s3
+* PSNUxIM configuration for  COP23 - analyze switching data element group for `OVC_SERV.DREAMS.T` from `All MER targets` to `MER targets`
+  - it is not obvious why we are using `All MER targets` for this indicator, for COP23 we should determine if we can switch to `MER targets` to be consistent with the other PSNUxIM distribution elements 
+
 
 ### Thoughts and ideas
+
+* Reevealuate use desire to use indicators and basis of data pulls for `DataPack Model` - we don't use indicators for `PSNUxIM`
+* 
