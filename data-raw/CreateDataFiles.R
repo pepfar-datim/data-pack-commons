@@ -110,12 +110,13 @@ ValidateMapT_1toT <- function(t_1_to_t, dim_item_sets){
 
   }
 
-datimutils::loginToDATIM("~/.secrets/datim.json")
+secrets <- Sys.getenv("SECRETS_FOLDER") %>% paste0(., "datim.json")
+datimutils::loginToDATIM(secrets)
 
 wd <- getwd()
-setwd("~/Documents/GitHub/data-pack-commons")
+setwd("~/Documents/Repos/data-pack-commons")
 
-dim_item_sets <- readr::read_csv("./data-raw/model_calculations/dimension_item_sets.csv",
+dim_item_sets <- readr::read_csv("./data-raw/model_calculations/updated_dimension_item_sets.csv",
                                  col_types = readr::cols(.default = "c", sort_order = "d", weight = "d"),
                                  na = c("NA")) %>%
   dplyr::select(dim_uid, dim_name, dim_item_uid, dim_cop_type,
@@ -123,14 +124,14 @@ dim_item_sets <- readr::read_csv("./data-raw/model_calculations/dimension_item_s
   dplyr::mutate(model_sets = stringr::str_split(model_sets,";")) %>%
   tidyr::unnest(model_sets)
 
-ValidateDimItemSets(dim_item_sets)
+ValidateDimItemSets(dim_item_sets) #Throws an error Need to investigate # Thu Aug 18 09:58:48 2022 ------------------------------
 
 data_required <- 
   readr::read_csv("./data-raw/model_calculations/data_required.csv", 
                   col_types = readr::cols(.default = "c", A.value_na = "d", B.value_na = "d"),
                   na = c("NA")) %>% select(-data_pack_type)
 
-ValidateDataRequired(data_required)
+ValidateDataRequired(data_required) 
 
 Map22Tto23T <- 
   readr::read_csv("./data-raw/snu_x_im_distribution_configuration/22Tto23TMap.csv", 

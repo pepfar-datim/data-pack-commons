@@ -317,7 +317,7 @@ diffDataPackModels <- function(model_old,
    dplyr::mutate(value = 1, org_unit_uid = id)
  
 # get local copy of package config file with disaggregations
-dim_item_sets <- datapackcommons::dim_item_sets
+dim_item_sets <- datapackcommons::dim_item_sets #MIGGGGHT have to update to drop datpackcommons:: for testing but will try
 
 # for each ou
 for (ou_index in 1:NROW(operating_units)) {
