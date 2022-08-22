@@ -101,7 +101,7 @@ ValidateMapT_1toT <- function(t_1_to_t, dim_item_sets){
     tidyr::unnest(disagg_type, disagg_type_uid) %>% 
     ValidateDimItems("dim_uid_colname", "disagg_type", "disagg_type_uid") 
   
-# chack for matching model sets in Dimension item sets
+# check for matching model sets in Dimension item sets
   c(t_1_to_t$age_set, t_1_to_t$sex_set, t_1_to_t$kp_set, t_1_to_t$other_disagg) %>% 
     na.omit() %>% 
     {. %in% dim_item_sets$model_sets} %>% 
@@ -116,7 +116,7 @@ datimutils::loginToDATIM(secrets)
 wd <- getwd()
 setwd("~/Documents/Repos/data-pack-commons")
 
-dim_item_sets <- readr::read_csv("./data-raw/model_calculations/updated_dimension_item_sets.csv",
+dim_item_sets <- readr::read_csv("./data-raw/model_calculations/dimension_item_sets.csv",
                                  col_types = readr::cols(.default = "c", sort_order = "d", weight = "d"),
                                  na = c("NA")) %>%
   dplyr::select(dim_uid, dim_name, dim_item_uid, dim_cop_type,
@@ -124,7 +124,7 @@ dim_item_sets <- readr::read_csv("./data-raw/model_calculations/updated_dimensio
   dplyr::mutate(model_sets = stringr::str_split(model_sets,";")) %>%
   tidyr::unnest(model_sets)
 
-ValidateDimItemSets(dim_item_sets) #Throws an error Need to investigate # Thu Aug 18 09:58:48 2022 ------------------------------
+ValidateDimItemSets(dim_item_sets)
 
 data_required <- 
   readr::read_csv("./data-raw/model_calculations/data_required.csv", 
