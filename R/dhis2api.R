@@ -187,48 +187,6 @@ ValidateCodeIdPairs <- function(codes, ids, type,
 }
 
 #' @export
-#' @title GetSqlView
-#'
-#' @description Runs specified sql view with specified sql view variables and returns
-#' a tibble with the results. It is possible to specify the col_types when reading in the data
-#' @param sql_view_uid chr - the uid of the sql view
-#' @param variable_keys character list - list of the variable names for the sql view
-#' @param variable_values character list - list of the variable values ordered to correspond with
-#' the related variable key
-#' @param col_types passed to readr::read_csv col_types parameter for parsing the result set
-#' @param d2_session
-#' @return dataframe with the results of the sql view
-
-GetSqlView <- function(sql_view_uid, variable_keys = NULL, variable_values = NULL,
-                       col_types = readr::cols(.default = "c"),
-                       d2_session = dynGet("d2_default_session",
-                                           inherits = TRUE)) {
-  assertthat::assert_that(length(variable_keys) == length(variable_values))
-
-  variable_k_v_pairs <- NULL
-# format sql variable key value pairs for api call
-  if (length(variable_keys) > 0) {
-    variable_k_v_pairs <-
-      purrr::map2_chr(variable_keys, variable_values,
-                      ~paste0("var=", .x, ":", .y)) %>%
-      glue::glue_collapse(sep = "&") %>%
-      paste0("?", .)
-  }
-
-  api_call <- paste0(d2_session$base_url,
-                     "api/sqlViews/",
-                     sql_view_uid,
-                     "/data.csv",
-                     variable_k_v_pairs)
-
-  RetryAPI(api_call, "application/csv",
-           max_attempts = 1, timeout = 600,
-           d2_session = d2_session) %>%
-    httr::content(., "text") %>%
-    readr::read_csv(col_names = TRUE, col_types = col_types)
-}
-
-#' @export
 #' @title GetData_DataPack
 #' @param parameters paramemters for calling an indicator
 #' from datapackcommons::data_required

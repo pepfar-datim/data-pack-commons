@@ -147,23 +147,4 @@ testthat::expect_true(datapackcommons::ValidateNameIdPairs(c("ANC 1", "Coverage"
 })
 httptest::stop_mocking()
 
-# This method is not yet exported
-testthat::test_that("GetSqlView", {
-  datimutils::loginToDATIM(base_url = "https://play.dhis2.org/2.36/",
-                           username = "admin",
-                           password = "district")
 
-  result <- GetSqlView("qMYMT0iUGkG", "valueType", "TEXT") %>%
-    dplyr::select(valuetype) %>%
-    dplyr::distinct()
-
-  testthat::expect_equal(length(result), 1)
-  testthat::expect_equal(result[[1]], "TEXT")
-  testthat::expect_error(
-    GetSqlView("qMYMT0iUGkG", "valueType")
-    )
-
-  result <- GetSqlView("GCZ01m3pIRd")
-  testthat::expect_gt(NROW(result), 0)
-  }
-  )

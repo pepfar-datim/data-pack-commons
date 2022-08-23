@@ -6,6 +6,9 @@ library(tidyverse)
 require(foreach)
 library(datimutils)
 
+# TODO function get_indicator_details is unused passed the stopped here line
+# removed getMetadata from R file as it can be brought back in manually
+# left datapackcommons library reference so that datimutils::getMetadata is not being reference here
 get_indicator_details <- function(uid) {
   datapackcommons::getMetadata("indicators",
                                glue::glue("id:eq:{uid}"),
@@ -20,7 +23,7 @@ getFormDetails <- function(fiscal_yyyy_int, stream) {
     dplyr::bind_rows() %>%
     dplyr::select(-dataset) %>%
     distinct() %>%
-    mutate(across(where(is.character), str_trim)) %>%
+    mutate(across(where(is.character), str_trim)) %>% #trimming implemented to clean white space
     as_tibble()
 }
 
