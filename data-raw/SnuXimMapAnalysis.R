@@ -35,10 +35,11 @@ getDataSets_Detailed <- function(dataset_uids) {
     dplyr::left_join(getStandardDataElementGroups())
 }
 
-secrets <- "/Users/sam/.secrets/cop.json"
-datimutils::loginToDATIM(secrets)
+#secrets <- "/Users/sam/.secrets/cop.json"
+datimutils::loginToDATIM(paste0(Sys.getenv("SECRETS_FOLDER"),"datim.json"))
 base_url <- d2_default_session$base_url
 
+#TODO ask sam about the code below as it currently does not run
 fy_22_t <- datapackr::getDatasetUids(2022, "mer_targets") %>%
   getDataSets_Detailed() %>%
   dplyr::select(-dataset) %>%
