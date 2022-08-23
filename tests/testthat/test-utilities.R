@@ -103,8 +103,9 @@ test_that("MapDimToOptions", {
   )
 
   # Taking the sex dimention item sets with model sets as "F/M/U"
+  # Tue Aug 23 09:55:58 2022 - The model set"F/M/U" was replaced with F/M.
   sex_set <- datapackcommons::dim_item_sets %>%
-    dplyr::filter(model_sets == "F/M/U")
+    dplyr::filter(model_sets == "F/M") #"F/M/U"
 
 
   unique(sex_set$dim_name) %>%
@@ -116,8 +117,8 @@ test_that("MapDimToOptions", {
     testthat::expect_equal(joined_output_1$sex_weight * value)
 
   nrow(joined_output_1 %>%
-         dplyr::filter((sex_dim_item_name == "Unspecified sex"))) %>%
-    testthat::expect_equal(2)
+         dplyr::filter((sex_dim_item_name == "Females"))) %>%
+    testthat::expect_equal(1) # "Unspecified sex" above and 2 here
 
 
   missing_sex_set <- datapackcommons::dim_item_sets %>%
