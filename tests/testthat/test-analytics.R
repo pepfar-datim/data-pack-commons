@@ -36,30 +36,6 @@ test_that("RetryAPI", {
 httptest::stop_mocking()
 
 httptest::use_mock_api()
-test_that("GetCountryLevels", {
-
-  datim_session_mock <- list(base_url = "https://www.datim.org/",
-                        handle = httr::handle("https://www.datim.org/"))
-  data <- GetCountryLevels(d2_session = datim_session_mock)
-  expect_gt(NROW(data), 0)
-  expect_named(data, c("country_level", "prioritization_level",
-                       "facility_level", "community_level",
-                       "country_name", "id"))
-
-  expect_error(GetCountryLevels(c("nonsense", "Rwanda"),
-                                d2_session = datim_session_mock))
-  expect_error(GetCountryLevels(c("Rwanda", "Rwanda"),
-                                d2_session = datim_session_mock))
-
-  data <- GetCountryLevels(c("Kenya", "Rwanda"),
-                           d2_session = datim_session_mock)
-  expect_equal(NROW(data), 2)
-  expect_setequal(data$country_name, c("Kenya", "Rwanda"))
-  })
-
-httptest::stop_mocking()
-
-httptest::use_mock_api()
 test_that("ValidateCodeIdPairs", {
 
   play_session_mock <- list(base_url = "https://play.dhis2.org/2.29/",

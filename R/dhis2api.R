@@ -35,76 +35,8 @@ RetryAPI <- function(api_url, content_type, max_attempts = 3, timeout = 300,
 }
 
 #' @export
-#' @importFrom datimutils %.in%
-#' @title GetCountryLevels(country_names)
-#' @description Gets country uid and prioritization level using dataSetAssignments/ous
-#' @param countries_req list of country names to include in response
-#' @param d2_session
-#' @return dataframe with columns country_level, prioritization_level, country_name, id
-
-GetCountryLevels <- function(countries_req = NULL,
-                             d2_session = dynGet("d2_default_session",
-                                                 inherits = TRUE)) {
-  response <-  paste0(d2_session$base_url, "api/dataStore/dataSetAssignments/orgUnitLevels") %>%
-    RetryAPI("application/json", 20, d2_session = d2_session)
-
-# get api response into a data frame a reduce to columns of interest
-  countries <- response %>%
-    httr::content(., "text") %>%
-    jsonlite::fromJSON() %>%
-    do.call(rbind.data.frame, .) %>%
-    dplyr::mutate(country_name = rownames(.),
-                  prioritization_level = prioritization, country_level = country,
-                  community_level = community, facility_level = facility) %>%
-    dplyr::select(country_level, prioritization_level,
-                  facility_level, community_level, country_name)
-
-# If specific counties were requested filter and assert we got the correct results
-  if (!is.null(countries_req)) {
-    countries <- countries %>% dplyr::filter(country_name %in% countries_req)
-    assertthat::assert_that(
-      NROW(countries) == NROW(countries_req),
-      setequal(countries$country_name, countries_req),
-      msg = "Error in GetCountryPrioritizationLevel, results do not correspond to countries requested")
-  }
-
-# look up country uid by name
-# specifing country level as there are some cases of a countries name appearing
-# as an org unit more than once, e.g. Ghana
-# countries can appear on level 3 or 4 or org hierarchy currently
-
-  assertthat::assert_that(min(countries$country_level) > 2, max(countries$country_level) < 5)
-  countries$country_name_url <- plyr::laply(countries$country_name, utils::URLencode, reserved = TRUE)
-
-  level_3_countries <- datimutils::getMetadata(organisationUnits,
-                        name %.in% countries$country_name,
-                        level %.in% "3",
-                        fields = "name,id",
-                        d2_session = d2_session)
-
-  if (!is.data.frame(level_3_countries)) {
-    level_3_countries <- NULL
-  }
-
-  level_4_countries <- datimutils::getMetadata(organisationUnits,
-                          name %.in% countries$country_name,
-                          level %.in% "4",
-                          fields = "name,id",
-                          d2_session = d2_session)
-  if (!is.data.frame(level_4_countries)) {
-    level_4_countries <- NULL
-  }
-
-  assertthat::assert_that(NROW(level_3_countries) + NROW(level_4_countries) == NROW(countries))
-
-# stack level 3 and l;evel 4 countries and join the uid to the main list of countries
-  rbind(level_3_countries, level_4_countries) %>%
-    dplyr::left_join(countries, ., by = c("country_name" = "name")) %>%
-    dplyr::select(-country_name_url)
-}
-
-#' @export
 #' @title ValidateNameIdPairs(names, ids, type)
+#' @importFrom datimutils %.in%
 #'
 #' @description Checks name list and paired id list (same length) and verifies they correspond to each other
 #' @param names string vector - names of spcific class of metadata - category option, indicator etc
