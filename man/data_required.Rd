@@ -4,7 +4,7 @@
 \name{data_required}
 \alias{data_required}
 \title{Input to model calculation. One row per required data pack column (from DATIM).
-Includes parameters (dimensions, items) for calling the indicators, and the key to 
+Includes parameters (dimensions, items) for calling the indicators, and the key to
 dimension_items_sets for mapping to category options for output.}
 \format{
 A data frame with these variables:
@@ -12,18 +12,18 @@ A data frame with these variables:
   \item{data_pack_sheet}{Datapack Excel sheet label - from datapack schems}
   \item{data_pack_code}{given identifier to map output to a specific column in datapack - from
   datapack schema}
-  \item{type}{numeric or percent - if percent then values recieved from DATIM will be 
+  \item{type}{numeric or percent - if percent then values recieved from DATIM will be
   divided by 100 - from datapack schema}
   \item{full_formula}{specification for required calculation/output - from datapack schema}
-  \item{allocate}{determines how dimension that splits to multiple category options will be 
-  handled. If distribute the value returned by analytics will be multiplied by the weight from 
-  corresponding entry in dim_item_sets. Replicate means the value is copied and NA means 
+  \item{allocate}{determines how dimension that splits to multiple category options will be
+  handled. If distribute the value returned by analytics will be multiplied by the weight from
+  corresponding entry in dim_item_sets. Replicate means the value is copied and NA means
   there are no dimensions in the indicator call.
-  
-  Note: when data are distributed it is sometimes the case that we receive results for a 
-  category option from more than one dimension (e.g. age 1-4 data can result from analytics 
-  dimension <5 and 1-9): These “duplicates” are added together in the code. This should not 
-  happen in the case of replicate and the program will throw an error if duplicate category 
+
+  Note: when data are distributed it is sometimes the case that we receive results for a
+  category option from more than one dimension (e.g. age 1-4 data can result from analytics
+  dimension <5 and 1-9): These “duplicates” are added together in the code. This should not
+  happen in the case of replicate and the program will throw an error if duplicate category
   options result from the indicator call.}
   \item{A.dx_code}{indicator code}
   \item{A.dx_id}{indicator uid}
@@ -31,9 +31,9 @@ A data frame with these variables:
   \item{A.age_set}{age set from dim_item_sets}
   \item{A.sex_set}{sex set from dim_item_sets}
   \item{A.kp_set}{key population set from dim_item_sets}
-  \item{A.add_dim_1}{Name of additional dimension - details on one nonstandard (age, sex, kp) 
-  dimension used when calling the datim indicator. Currently on one dimension item is 
-  supported. These do not get mapped to category options as they act more as a filter than an 
+  \item{A.add_dim_1}{Name of additional dimension - details on one nonstandard (age, sex, kp)
+  dimension used when calling the datim indicator. Currently on one dimension item is
+  supported. These do not get mapped to category options as they act more as a filter than an
   explicit dimension.}
   \item{A.add_dim_1_uid}{additonal dimensions uid}
   \item{A.add_dim_1_items}{name of additional dimension item to filter on - only one supported}
@@ -58,8 +58,8 @@ COP19 systems team
 data_required
 }
 \description{
-Each data pack output can be the result of combining up to two DATIM indicators into a 
-combining calculation. The indicators are designated A and B and the calculation combining 
+Each data pack output can be the result of combining up to two DATIM indicators into a
+combining calculation. The indicators are designated A and B and the calculation combining
 them is in the calculation column.
 }
 \keyword{datasets}
