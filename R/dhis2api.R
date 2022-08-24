@@ -1,40 +1,4 @@
 #' @export
-#' @title RetryAPI(api_url, content_type, max_attempts)
-#'
-#' @description Submits specified api request up to specified maximum times
-#' stopping when expected content type is returned with 200 response
-#' @param api_url string - full url for web request
-#' @param content_type string - expected type of content in reposne e.d 'application/json'
-#' @param max_attempts integer - maximum number of retries for succesful request
-#' @param timeout integer - maximum time to wait for API response
-#' @return  full api response
-#'
-RetryAPI <- function(api_url, content_type, max_attempts = 3, timeout = 300,
-                     d2_session = dynGet("d2_default_session",
-                                         inherits = TRUE)) {
-
-  for (i in 1:max_attempts) {
-    try({
-      response <- httr::GET(api_url, httr::timeout(timeout),
-                            handle = d2_session$handle)
-      if (response$status_code == 200L &&
-          stringr::str_remove(response$url, ".*/api/") ==
-          stringr::str_remove(api_url,  ".*/api/") &&
-          httr::http_type(response) == content_type) {
-        return(response)
-      }
-      if (response$status_code >= 300 &&
-          response$status_code < 500) { #client error or redirect
-        break
-      }
-    })
-    Sys.sleep(i / 2 + 1)
-  }
-  # if i am here all my attempts failed
-  stop(paste("Failed to obtain valid response in RetryAPI for:", api_url))
-}
-
-#' @export
 #' @title ValidateNameIdPairs(names, ids, type)
 #' @importFrom datimutils %.in%
 #'
