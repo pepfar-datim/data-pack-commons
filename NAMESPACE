@@ -3,7 +3,6 @@
 export(FormatForApi_Dimensions)
 export(GetCountryLevels)
 export(GetData_DataPack)
-export(GetSqlView)
 export(MapDimToOptions)
 export(RenameDimensionColumns)
 export(RetryAPI)

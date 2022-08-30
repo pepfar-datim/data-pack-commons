@@ -6,6 +6,9 @@ library(tidyverse)
 require(foreach)
 library(datimutils)
 
+# TODO function get_indicator_details is unused passed the stopped here line
+# removed getMetadata from R file as it can be brought back in manually
+# left datapackcommons library reference so that datimutils::getMetadata is not being reference here
 get_indicator_details <- function(uid) {
   datapackcommons::getMetadata("indicators",
                                glue::glue("id:eq:{uid}"),
@@ -14,12 +17,14 @@ get_indicator_details <- function(uid) {
 
 getFormDetails <- function(fiscal_yyyy_int, stream) {
   datapackr::getDatasetUids(fiscal_yyyy_int, stream) %>%
-    purrr::map(~datapackcommons::GetSqlView("DotdxKrNZxG",
-                                            c("dataSets"),
-                                            c(.x))) %>%
+    purrr::map(~datimutils::getSqlView(sql_view_uid = "DotdxKrNZxG",
+                                       variable_keys = c("dataSets"),
+                                       variable_values = c(.x))) %>%
     dplyr::bind_rows() %>%
     dplyr::select(-dataset) %>%
-    distinct()
+    distinct() %>%
+    mutate(across(where(is.character), str_trim)) %>% #trimming implemented to clean white space
+    as_tibble()
 }
 
 parseIndicators <- function(indicator_uids) {
@@ -134,6 +139,7 @@ indicators_required <-
                     ~any(is.na(.x),
                          is.na(.y)))))
 
+#TODO ask about because cannot run because missing fy_21_t_fy_20_r_de_coc variable
 data_elements_only_missing <- dplyr::setdiff(c(data_required$A.dx_id,
                                            data_required$B.dx_id),
                                          indicators_required$id) %>%
@@ -147,6 +153,7 @@ indicators_w_missing_elements <-
   dplyr::filter(indicators_required,
                 missing_any_elements)
 
+#TODO ask about because cannot run because missing fy_21_t_fy_20_r_de_coc variable
 purrr::map(indicators_required$denominator_addends,
            match, fy_21_t_fy_20_r_de_coc)
 
@@ -175,6 +182,7 @@ extract_formula_components <- function(formula) {
     dplyr::select(- value)
 }
 
+# TODO ask cannot run fy_19_r variable is missing
 elements_fy19r_fy20t <- dplyr::bind_rows(fy_19_r, fy_20_t) %>% dplyr::distinct()
 
 
