@@ -16,50 +16,6 @@ require(httptest)
 #DHISLogin("/users/sam/.secrets/play.json")
 
 httptest::use_mock_api()
-test_that("RetryAPI", {
-  play_session_mock <- list(base_url = "https://play.dhis2.org/2.29/",
-                             handle = httr::handle("https://play.dhis2.org/2.29/"))
-
-  api_url <- paste0("https://play.dhis2.org/2.29/api/29/analytics.csv?outputIdScheme=UID",
-  "&dimension=dx:vihpFUg2WTy&dimension=pe:LAST_YEAR&dimension=ou:LEVEL-2;ImspTQPwCqd",
-  "&dimension=J5jldMd8OHv:uYxK4wmcPqA;EYbopBOJWsW&dimension=veGzholzPQm:UOqJW6HPvvL;WAl0OCcIYxr")
-  testthat::expect_type(RetryAPI(api_url, "application/csv", 1,
-                                 d2_session = play_session_mock),
-                        "list")
-  testthat::expect_error(RetryAPI(api_url, "application/json", 1,
-                                  d2_session = play_session_mock))
-  api_url <- "https://play.dhis2.org/NONSENSE"
-  testthat::expect_error(RetryAPI(api_url, "text/html", 1,
-                                  d2_session = play_session_mock))
-
-})
-httptest::stop_mocking()
-
-httptest::use_mock_api()
-test_that("GetCountryLevels", {
-
-  datim_session_mock <- list(base_url = "https://www.datim.org/",
-                        handle = httr::handle("https://www.datim.org/"))
-  data <- GetCountryLevels(d2_session = datim_session_mock)
-  expect_gt(NROW(data), 0)
-  expect_named(data, c("country_level", "prioritization_level",
-                       "facility_level", "community_level",
-                       "country_name", "id"))
-
-  expect_error(GetCountryLevels(c("nonsense", "Rwanda"),
-                                d2_session = datim_session_mock))
-  expect_error(GetCountryLevels(c("Rwanda", "Rwanda"),
-                                d2_session = datim_session_mock))
-
-  data <- GetCountryLevels(c("Kenya", "Rwanda"),
-                           d2_session = datim_session_mock)
-  expect_equal(NROW(data), 2)
-  expect_setequal(data$country_name, c("Kenya", "Rwanda"))
-  })
-
-httptest::stop_mocking()
-
-httptest::use_mock_api()
 test_that("ValidateCodeIdPairs", {
 
   play_session_mock <- list(base_url = "https://play.dhis2.org/2.29/",

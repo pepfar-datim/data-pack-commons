@@ -1,33 +1,5 @@
 ### Script Parameters ####################
 library(magrittr)
-datimutils::loginToDATIM(paste0(Sys.getenv("SECRETS_FOLDER"),
-                                "datim.json"))
-
-# Countries to include in model, usually all
-operating_units <- datapackcommons::GetCountryLevels() %>%
-  dplyr::arrange(country_name) %>%
-   # dplyr::filter(country_name %in% c("Rwanda")) %>% # selec specific countries
-  dplyr::filter(prioritization_level != 0) # Turkmenistan has no planning/priortization level
-
-### END Script Parameters ####################
-
-# install local versions of key packages if necessary
-
-# devtools::install(pkg = "~/Documents/GitHub/data-pack-commons",
-#                   build = TRUE,
-#                   upgrade = FALSE,
-#                   build_vignettes = TRUE)
-#
-# devtools::install(pkg = "~/Documents/GitHub/datapackr",
-#                   build = TRUE,
-#                   upgrade = FALSE,
-#                   build_vignettes = TRUE)
-#
-# devtools::install(pkg = "~/Documents/GitHub/datimutils",
-#                   build = TRUE,
-#                   upgrade = FALSE,
-#                   build_vignettes = TRUE)
-
 require(datapackcommons)
 require(datapackr)
 require(datimutils)
@@ -39,6 +11,16 @@ require(rlang)
 require(assertthat)
 require(foreach)
 
+# login to datim
+datimutils::loginToDATIM(paste0(Sys.getenv("SECRETS_FOLDER"),
+                                "datim.json"))
+
+# Countries to include in model, usually all
+# Turkmenistan has no planning/priortization level
+operating_units <- datimutils::getOrgUnitGroups("Country", name, fields = "organisationUnits[name,id]") %>%
+  filter(name != "Turkmenistan") %>%
+  dplyr::arrange(name) %>%
+  select(country_name = name, id)
 
 #' @title RenameAnalyticsColumns
 #' @description Convert columns names from analytics output to names

@@ -10,13 +10,12 @@
 library(datapackcommons)
 library(datimutils)
 library(dplyr)
-datimutils::loginToDATIM("~/.secrets/datim.json")
 datimutils::loginToDATIM(paste0(Sys.getenv("SECRETS_FOLDER"), "datim.json")) # added for a different config access
 cop_year <- 2022
 
 # FUNCTIONS -------------------------------------------------------------------
 
-#' @title BuildDimensionList_DataPack(data_element_map_item, dim_item_sets, 
+#' @title BuildDimensionList_DataPack(data_element_map_item, dim_item_sets,
 #' country_uid, mechanisms = NULL)
 #'
 #' @description get list of dimensions (parameters) for analytics call to get data for SNUxIM
@@ -339,11 +338,13 @@ fy_map <-  switch(as.character(cop_year),
                   "2021" = datapackcommons::Map21Tto22T,
                   "2022" = datapackcommons::Map22Tto23T)
 
-country_details <-  datapackcommons::GetCountryLevels() %>%
-   # dplyr::filter(country_name == "Malawi") %>%
-  dplyr::arrange(country_name)
+# pull list of countries to iterate through
+country_details <-  datimutils::getOrgUnitGroups("Country", name, fields = "organisationUnits[name,id]") %>%
+  filter(name != "Turkmenistan") %>%
+  dplyr::arrange(name) %>%
+  select(country_name = name, id)
 
-# start process of collecitng api data for every country
+# start process of collecting api data for every country
 data <-  country_details[["id"]] %>%
   purrr::map(process_country, mechs, fy_map) %>%
   setNames(country_details$id)
