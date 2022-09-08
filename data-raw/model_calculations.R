@@ -6,7 +6,7 @@ datimutils::loginToDATIM(paste0(Sys.getenv("SECRETS_FOLDER"),
 # Countries to include in model, usually all
 operating_units <- datapackcommons::GetCountryLevels() %>%
   dplyr::arrange(country_name) %>%
-   # dplyr::filter(country_name %in% c("Rwanda")) %>% # selec specific countries
+    # dplyr::filter(country_name %in% c("South Africa")) %>% # selec specific countries
   dplyr::filter(prioritization_level != 0) # Turkmenistan has no planning/priortization level
 
 ### END Script Parameters ####################
@@ -278,9 +278,9 @@ diffDataPackModels <- function(model_old,
  cop_data <- list()
 # get impatt.priority_snu for each PSNU
  priority_snu_data <-
-   datapackr::getDataValueSets(c("dataElementGroup", "period", "orgUnitGroup"),
+   datimutils::getDataValueSets(c("dataElementGroup", "period", "orgUnitGroup"),
                                c("ofNbyQgD9xG", "2021Oct", "AVy8gJXym2D")) %>%
-   dplyr::select(org_unit_uid = org_unit, value) %>%
+   dplyr::select(org_unit_uid = orgUnit, value) %>%
    dplyr::mutate(value = as.double(value))
 
 # get data to populat DREAMS_SNU.Flag
