@@ -328,15 +328,15 @@
     },
     "datimutils": {
       "Package": "datimutils",
-      "Version": "0.5.2",
+      "Version": "0.5.3",
       "Source": "GitHub",
       "RemoteType": "github",
       "RemoteHost": "api.github.com",
       "RemoteRepo": "datimutils",
       "RemoteUsername": "pepfar-datim",
       "RemoteRef": "master",
-      "RemoteSha": "1f81eb3dd872154abdf5d77540e3494bd8468dd8",
-      "Hash": "11361204052bb668789e935b39644f8e",
+      "RemoteSha": "988a38572078b5a98577335f8ba21309a3581ddb",
+      "Hash": "34681061ff82a52498d0289296b671ca",
       "Requirements": [
         "httr",
         "jsonlite",
