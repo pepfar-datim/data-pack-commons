@@ -288,7 +288,7 @@ getSnuxIm_density <- function(data_element_map_item,
                      mechs, .parallel = FALSE,
                      .expand = FALSE, .id = NULL)
   # when no relevant data available
-  if(NROW(data) == 0 || is.null(data)) {
+  if (NROW(data) == 0 || is.null(data)) {
     return( # empty tibble with expected columns
       tibble::tibble(indicator_code = character(),
                      psnu_uid = character(),

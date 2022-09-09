@@ -260,9 +260,9 @@ diffDataPackModels <- function(model_old,
  cop_data <- list()
 # get impatt.priority_snu for each PSNU
  priority_snu_data <-
-   datapackr::getDataValueSets(c("dataElementGroup", "period", "orgUnitGroup"),
+   datimutils::getDataValueSets(c("dataElementGroup", "period", "orgUnitGroup"),
                                c("ofNbyQgD9xG", "2021Oct", "AVy8gJXym2D")) %>%
-   dplyr::select(org_unit_uid = org_unit, value) %>%
+   dplyr::select(org_unit_uid = orgUnit, value) %>%
    dplyr::mutate(value = as.double(value))
 
 # get data to populat DREAMS_SNU.Flag

@@ -260,7 +260,7 @@ GetData_DataPack <- function(parameters,
   analytics_input_mil <- analytics_input_base
 
   # add military ou dimension
-  analytics_input_mil$ou <- c(analytics_input_mil$ou, 'OU_GROUP-nwQbMeALRjL')
+  analytics_input_mil$ou <- c(analytics_input_mil$ou, "OU_GROUP-nwQbMeALRjL")
 
   # call military data
   results_mil <-
