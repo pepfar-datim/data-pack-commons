@@ -16,7 +16,7 @@ cop_year <- 2022
 
 # FUNCTIONS -------------------------------------------------------------------
 
-#' @title BuildDimensionList_DataPack(data_element_map_item, dim_item_sets, 
+#' @title BuildDimensionList_DataPack(data_element_map_item, dim_item_sets,
 #' country_uid, mechanisms = NULL)
 #'
 #' @description get list of dimensions (parameters) for analytics call to get data for SNUxIM
@@ -289,7 +289,7 @@ getSnuxIm_density <- function(data_element_map_item,
                      mechs, .parallel = FALSE,
                      .expand = FALSE, .id = NULL)
   # when no relevant data available
-  if(NROW(data) == 0 || is.null(data)) {
+  if (NROW(data) == 0 || is.null(data)) {
     return( # empty tibble with expected columns
       tibble::tibble(indicator_code = character(),
                      psnu_uid = character(),

@@ -462,12 +462,12 @@ GetData_DataPack <- function(parameters,
     translateDims() # there are some items in dim item sets with no source dimension
   # these are cases when a historic disaggregation doesn't exist
   # and we need to create the disaggregation allocation for the DataPack
-  
+
   # prepare final analytics input
   analytics_input$timeout <- 300 # set timeout to over 5 minutes
   analytics_input$retry <- 3
   analytics_input_base <- append(analytics_input, dimension_disaggs)
-  
+
   # custom data ----
   # Implemented for dreams SNUs for AGYW_PREV
   # currently used to select DREAMS SNU ou_group
@@ -539,19 +539,19 @@ GetData_DataPack <- function(parameters,
   # all OUs have military below the country level as standard
   # so a call for military data is always executed
   results_mil <- NULL
-    
+
   # create military input
   analytics_input_mil <- analytics_input_base
-    
+
   # add military ou dimension
-  analytics_input_mil$ou <- c(analytics_input_mil$ou, 'OU_GROUP-nwQbMeALRjL')
-    
+  analytics_input_mil$ou <- c(analytics_input_mil$ou, "OU_GROUP-nwQbMeALRjL")
+
   # call military data
-  results_mil <-   
+  results_mil <-
     do.call(datimutils::getAnalytics,
             analytics_input_mil) %>%
-    tibble() 
-  
+    tibble()
+
   # finalize results ----
   if (NROW(results_psnu) == 0 && NROW(results_mil) == 0) {
     # nothing to return
