@@ -340,7 +340,6 @@ fy_map <-  switch(as.character(cop_year),
 
 # pull list of countries to iterate through
 country_details <-  datimutils::getOrgUnitGroups("Country", name, fields = "organisationUnits[name,id]") %>%
-  filter(name != "Turkmenistan") %>%
   dplyr::arrange(name) %>%
   select(country_name = name, id)
 
