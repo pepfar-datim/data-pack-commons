@@ -39,7 +39,8 @@ getDataSets_Detailed <- function(dataset_uids) {
 }
 
 #secrets <- "/Users/sam/.secrets/cop.json"
-datimutils::loginToDATIM(paste0(Sys.getenv("SECRETS_FOLDER"),"datim.json"))
+datimutils::loginToDATIM(paste0(Sys.getenv("SECRETS_FOLDER"),
+                                "datim.json"))
 base_url <- d2_default_session$base_url
 
 #TODO ask sam about the code below as it currently does not run, GetSqlView does not find a valid sql view
