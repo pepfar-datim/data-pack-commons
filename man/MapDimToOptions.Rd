@@ -11,11 +11,14 @@ MapDimToOptions(data, items_to_options, allocate)
 
 \item{items_to_options}{dimension item sets dataframe filtered by one of the model sets}
 
-\item{allocate}{If allocate is set to "distriute", mutates a column in the returned df with the weight being multiplied to the value}
+\item{allocate}{If allocate is set to "distriute", mutates a column in the returned df with
+the weight being multiplied to the value}
 }
 \value{
-If there are no options provided, returns the analytics output, else if there are no dim_uid in the options list, joins the data using crossing or left join,
-else if the allocation is set to "distriute", then renames them adds a value column and finally performs the renaming of the dimension columns.
+If there are no options provided, returns the analytics output, else if there are no dim_uid
+in the options list, joins the data using crossing or left join,
+else if the allocation is set to "distriute", then renames them adds a value column and
+finally performs the renaming of the dimension columns.
 }
 \description{
 A function that maps dimensions from a dataframe to the options sets

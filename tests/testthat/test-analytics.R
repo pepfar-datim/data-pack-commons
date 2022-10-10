@@ -14,83 +14,6 @@
 context("Test interactions with DHIS 2 analytics")
 require(httptest)
 #DHISLogin("/users/sam/.secrets/play.json")
-------------
-test_that("We can get data with GetData_Analytics", {
-#httptest::use_mock_api()
-  datimutils::loginToDATIM(base_url = "https://play.dhis2.org/2.36/",
-                           username = "admin",
-                           password = "district")
-  base_url <- d2_default_session$base_url
-
-  dimensions <- tibble::tribble(~type, ~dim_item_uid, ~dim_uid,
-                                "filter", "vihpFUg2WTy", "dx", #PMTCT positive test rate indicator
-                                "dimension", "ImspTQPwCqd", "ou", # sierra leone
-                                "dimension", "LEVEL-2", "ou",
-                                "filter", "LAST_YEAR", "pe",
-                                "dimension", "UOqJW6HPvvL", "veGzholzPQm",
-                                "dimension", "WAl0OCcIYxr", "veGzholzPQm",
-                                "dimension", "uYxK4wmcPqA", "J5jldMd8OHv",
-                                "dimension", "EYbopBOJWsW", "J5jldMd8OHv")
-  # veGzholzPQm = HIV age, UOqJW6HPvvL = 15-24y, WAl0OCcIYxr = 25-49y,
-  # J5jldMd8OHv = Facility Type, uYxK4wmcPqA = CHP, EYbopBOJWsW = MCHP
-
-  response <- GetData_Analytics(dimensions,
-                                d2_session = d2_default_session)
-  testthat::expect_equal(stringr::str_remove(response$api_call, ".*/api/"),
-                         paste0("29/analytics.json?",
-         "dimension=J5jldMd8OHv:uYxK4wmcPqA;EYbopBOJWsW&dimension=ou:ImspTQPwCqd;LEVEL-2",
-         "&dimension=veGzholzPQm:UOqJW6HPvvL;WAl0OCcIYxr&filter=dx:vihpFUg2WTy",
-         "&filter=pe:LAST_YEAR&outputIdScheme=UID&hierarchyMeta=true"))
-  testthat::expect_gt(NROW(response$results), 0)
-  testthat::expect_named(response$results,
-                         c("Facility Type", "Organisation unit",
-                           "HIV age", "Value", "ou_hierarchy"))
-#  httptest:::stop_mocking()
-})
-
-httptest::use_mock_api()
-test_that("RetryAPI", {
-  play_session_mock <- list(base_url = "https://play.dhis2.org/2.29/",
-                             handle = httr::handle("https://play.dhis2.org/2.29/"))
-
-  api_url <- paste0("https://play.dhis2.org/2.29/api/29/analytics.csv?outputIdScheme=UID",
-  "&dimension=dx:vihpFUg2WTy&dimension=pe:LAST_YEAR&dimension=ou:LEVEL-2;ImspTQPwCqd",
-  "&dimension=J5jldMd8OHv:uYxK4wmcPqA;EYbopBOJWsW&dimension=veGzholzPQm:UOqJW6HPvvL;WAl0OCcIYxr")
-  testthat::expect_type(RetryAPI(api_url, "application/csv", 1,
-                                 d2_session = play_session_mock),
-                        "list")
-  testthat::expect_error(RetryAPI(api_url, "application/json", 1,
-                                  d2_session = play_session_mock))
-  api_url <- "https://play.dhis2.org/NONSENSE"
-  testthat::expect_error(RetryAPI(api_url, "text/html", 1,
-                                  d2_session = play_session_mock))
-
-})
-httptest::stop_mocking()
-
-httptest::use_mock_api()
-test_that("GetCountryLevels", {
-
-  datim_session_mock <- list(base_url = "https://www.datim.org/",
-                        handle = httr::handle("https://www.datim.org/"))
-  data <- GetCountryLevels(d2_session = datim_session_mock)
-  expect_gt(NROW(data), 0)
-  expect_named(data, c("country_level", "prioritization_level",
-                       "facility_level", "community_level",
-                       "country_name", "id"))
-
-  expect_error(GetCountryLevels(c("nonsense", "Rwanda"),
-                                d2_session = datim_session_mock))
-  expect_error(GetCountryLevels(c("Rwanda", "Rwanda"),
-                                d2_session = datim_session_mock))
-
-  data <- GetCountryLevels(c("Kenya", "Rwanda"),
-                           d2_session = datim_session_mock)
-  expect_equal(NROW(data), 2)
-  expect_setequal(data$country_name, c("Kenya", "Rwanda"))
-  })
-
-httptest::stop_mocking()
 
 httptest::use_mock_api()
 test_that("ValidateCodeIdPairs", {
@@ -179,24 +102,3 @@ testthat::expect_true(datapackcommons::ValidateNameIdPairs(c("ANC 1", "Coverage"
                                                            d2_session = play_session_mock))
 })
 httptest::stop_mocking()
-
-# This method is not yet exported
-testthat::test_that("GetSqlView", {
-  datimutils::loginToDATIM(base_url = "https://play.dhis2.org/2.36/",
-                           username = "admin",
-                           password = "district")
-
-  result <- GetSqlView("qMYMT0iUGkG", "valueType", "TEXT") %>%
-    dplyr::select(valuetype) %>%
-    dplyr::distinct()
-
-  testthat::expect_equal(length(result), 1)
-  testthat::expect_equal(result[[1]], "TEXT")
-  testthat::expect_error(
-    GetSqlView("qMYMT0iUGkG", "valueType")
-    )
-
-  result <- GetSqlView("GCZ01m3pIRd")
-  testthat::expect_gt(NROW(result), 0)
-  }
-  )

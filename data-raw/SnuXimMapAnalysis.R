@@ -2,8 +2,10 @@ library(datapackr)
 library(magrittr)
 library(tidyverse)
 
+#TODO ask sam about the code below as it currently does not run for GetSqlView, followup reference on line 44
+# removed library references in script as I am removing function from R, we can always bring back manually
 getStandardDataElementGroups <- function() {
-  datapackcommons::GetSqlView("m7qxbPHsikm") %>%
+  GetSqlView("m7qxbPHsikm") %>%
     dplyr::select(data_element = dataelementname,
                   data_element_uid = dataelementuid,
                   data_element_code = dataelementcode,
@@ -20,8 +22,9 @@ getStandardDataElementGroups <- function() {
                   )
 }
 
+#TODO ask sam about the code below as it currently does not run for GetSqlView, followup reference on line 44
 getDataSets_Detailed <- function(dataset_uids) {
-  purrr::map(dataset_uids, ~ datapackcommons::GetSqlView("DotdxKrNZxG",
+  purrr::map(dataset_uids, ~ GetSqlView("DotdxKrNZxG",
                                                          c("dataSets"),
                                                          c(.x))) %>%
     dplyr::bind_rows() %>%
@@ -35,10 +38,12 @@ getDataSets_Detailed <- function(dataset_uids) {
     dplyr::left_join(getStandardDataElementGroups())
 }
 
-secrets <- "/Users/sam/.secrets/cop.json"
-datimutils::loginToDATIM(secrets)
+#secrets <- "/Users/sam/.secrets/cop.json"
+datimutils::loginToDATIM(paste0(Sys.getenv("SECRETS_FOLDER"),
+                                "datim.json"))
 base_url <- d2_default_session$base_url
 
+#TODO ask sam about the code below as it currently does not run, GetSqlView does not find a valid sql view
 fy_22_t <- datapackr::getDatasetUids(2022, "mer_targets") %>%
   getDataSets_Detailed() %>%
   dplyr::select(-dataset) %>%

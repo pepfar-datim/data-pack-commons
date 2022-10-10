@@ -190,10 +190,10 @@ knitr::kable(catalog)
 
 ###### Short term
 
-* Modify GetData_DataPack to use datimutils::getAnalytics instead of internal getData_Analytics
-* Modify SnuxImDistMain.R to use datimutils::getAnalytics instead of internal getData_Analytics,
-* deprecate GetData_Analytics
-* Remove dimension item set model sets that are not used by the DataPackModel or the COP22 or COP21 PSNUxIM distribution
+* DONE -Modify GetData_DataPack to use datimutils::getAnalytics instead of internal getData_Analytics
+* DONE -Modify SnuxImDistMain.R to use datimutils::getAnalytics instead of internal getData_Analytics,
+* DONE -deprecate GetData_Analytics
+* DONE/PENDING -Remove dimension item set model sets that are not used by the DataPackModel or the COP22 or COP21 PSNUxIM distribution
 * Analyze harmonizing dimension_item_set model set names with the valida_age, valid_sex, and valid_kp names in the datapack template
   - bonus points for figuring out if we can put this directly in DATIM metadata some how.
 * Business as usual PSNUxIM distribution update
@@ -205,7 +205,7 @@ knitr::kable(catalog)
 * change full formula column into more of a description column perhaps with reference to data pack documentation
 * Consider moving PSNUxIM distribution config to datapack template
 * Hand Over COP21 OPUs
-* Determine if GetCountryLevels can be removed
+* DONE -Determine if GetCountryLevels can be removed
 
 ###### later
 

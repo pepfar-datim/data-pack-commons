@@ -12,7 +12,7 @@ GetData_DataPack(
 )
 }
 \arguments{
-\item{parameters}{paramemters for calling an indicator 
+\item{parameters}{paramemters for calling an indicator
 from datapackcommons::data_required}
 
 \item{dim_item_sets}{datapackcommons::dim_item_sets or a subset}
@@ -21,8 +21,8 @@ from datapackcommons::data_required}
 or FALSE if no military org_unit (FALSE for Philippines in COP20)}
 }
 \value{
-A list with $time = time the function was called, 
-$api_call = api call used, and 
+A list with $time = time the function was called,
+$api_call = api call used, and
 $results = the data returnd by the analytics call
 }
 \description{

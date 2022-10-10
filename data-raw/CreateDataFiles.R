@@ -1,5 +1,4 @@
 require(magrittr)
-
 require(datapackcommons)
 require(assertthat)
 require(datimutils)
@@ -25,8 +24,7 @@ ValidateDimItems <-
       na.omit() %>%
       paste0(collapse = ",") %>%
       {paste0("id:in:[", ., "]")} %>% # nolint: brace_linter.
-      {datapackcommons::getMetadata("dimensions", filters = ., fields = "items[name,id]")} %>% # nolint: brace_linter.
-      tidyr::unnest(c("items"))
+      {datimutils::getMetadata("dimensions", filters = ., fields = "items[name,id]")} # nolint: brace_linter.
 
     # 2 - compare api items with items in data
     unmatched <- data %>%

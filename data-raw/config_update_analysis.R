@@ -1,8 +1,14 @@
+#TODO
+# check with Sam the general use of this script as it is missing variables and does not run in completion
+
 library(magrittr)
 library(tidyverse)
 require(foreach)
 library(datimutils)
 
+# TODO function get_indicator_details is unused passed the stopped here line
+# removed getMetadata from R file as it can be brought back in manually
+# left datapackcommons library reference so that datimutils::getMetadata is not being reference here
 get_indicator_details <- function(uid) {
   datapackcommons::getMetadata("indicators",
                                glue::glue("id:eq:{uid}"),
@@ -11,12 +17,14 @@ get_indicator_details <- function(uid) {
 
 getFormDetails <- function(fiscal_yyyy_int, stream) {
   datapackr::getDatasetUids(fiscal_yyyy_int, stream) %>%
-    purrr::map(~datapackcommons::GetSqlView("DotdxKrNZxG",
-                                            c("dataSets"),
-                                            c(.x))) %>%
+    purrr::map(~datimutils::getSqlView(sql_view_uid = "DotdxKrNZxG",
+                                       variable_keys = c("dataSets"),
+                                       variable_values = c(.x))) %>%
     dplyr::bind_rows() %>%
     dplyr::select(-dataset) %>%
-    distinct()
+    distinct() %>%
+    mutate(across(where(is.character), str_trim)) %>% #trimming implemented to clean white space
+    as_tibble()
 }
 
 parseIndicators <- function(indicator_uids) {
@@ -57,7 +65,8 @@ parseIndicators <- function(indicator_uids) {
 
 doMC::registerDoMC(cores = 5)
 
-datimutils::loginToDATIM("~/.secrets/datim.json")
+datimutils::loginToDATIM(paste0(Sys.getenv("SECRETS_FOLDER"),
+                                "datim.json"))
 
 data_required <- datapackcommons::data_required
 
@@ -130,6 +139,7 @@ indicators_required <-
                     ~any(is.na(.x),
                          is.na(.y)))))
 
+#TODO ask about because cannot run because missing fy_21_t_fy_20_r_de_coc variable
 data_elements_only_missing <- dplyr::setdiff(c(data_required$A.dx_id,
                                            data_required$B.dx_id),
                                          indicators_required$id) %>%
@@ -143,6 +153,7 @@ indicators_w_missing_elements <-
   dplyr::filter(indicators_required,
                 missing_any_elements)
 
+#TODO ask about because cannot run because missing fy_21_t_fy_20_r_de_coc variable
 purrr::map(indicators_required$denominator_addends,
            match, fy_21_t_fy_20_r_de_coc)
 
@@ -171,6 +182,7 @@ extract_formula_components <- function(formula) {
     dplyr::select(- value)
 }
 
+# TODO ask cannot run fy_19_r variable is missing
 elements_fy19r_fy20t <- dplyr::bind_rows(fy_19_r, fy_20_t) %>% dplyr::distinct()
 
 
@@ -251,7 +263,10 @@ dplyr::setdiff(combined_data_elements$displayName, elements_fy19r_fy20t$dataelem
 
 
 
-
+#TODO
+# ask Sam about missing variables. The below function requires a missing fy variable
+# current errors is: Error in do.ply(i) :
+# task 1 failed - "object 'elements_fy19r_fy20t' not found"
 
 plyr::alply(data_required, 1, get_invalid_data_elements, .parallel = TRUE)
 
@@ -273,7 +288,8 @@ indicators_with_co_combos <- dplyr::filter(indicators,
                                            stringr::str_detect(numerator, "\\.") |
                                              stringr::str_detect(denominator, "\\."))
 
-
+#TODO
+# ask Sam about missing variable "object 'elements_fy19r_fy20t' not found"
 temp <- plyr::alply(indicators_with_co_combos, 1,
                     compare_indicator_cocs, elements_fy19r_fy20t) %>%
   set_names(indicators_with_co_combos$name)
@@ -299,6 +315,8 @@ denominator_components <- indicators$denominator[indicators$denominator != 1] %>
   purrr::map(~datapackcommons::getMetadata("dataElements",
                                            glue::glue("id:eq:{.x}")))
 
+#TODO
+# ask Sam there is failure here with binding -- can be fixed but should confirm before fixing
 combined_componenets <- dplyr::bind_rows(numerator_components, denominator_components) %>%
   distinct()
 
