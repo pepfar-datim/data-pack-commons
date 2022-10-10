@@ -102,5 +102,3 @@ testthat::expect_true(datapackcommons::ValidateNameIdPairs(c("ANC 1", "Coverage"
                                                            d2_session = play_session_mock))
 })
 httptest::stop_mocking()
-
-

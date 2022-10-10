@@ -33,5 +33,4 @@ jobs:
       - run:
           name: Lint packages
           command: |
-                R -e "install.packages('lintr')"
                 R -e "foo<-unique(names(lintr::lint_package())); if ( length(foo) > 0 ) stop(foo)"
