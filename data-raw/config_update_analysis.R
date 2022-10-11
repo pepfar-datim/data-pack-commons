@@ -16,7 +16,7 @@ get_indicator_details <- function(uid) {
 }
 
 getFormDetails <- function(fiscal_yyyy_int, stream) {
-  datapackr::getDatasetUids(fiscal_yyyy_int, stream) %>%
+  datapackr::getDatasetUids((fiscal_yyyy_int - 1), stream) %>%
     purrr::map(~datimutils::getSqlView(sql_view_uid = "DotdxKrNZxG",
                                        variable_keys = c("dataSets"),
                                        variable_values = c(.x))) %>%

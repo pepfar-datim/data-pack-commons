@@ -44,17 +44,17 @@ datimutils::loginToDATIM(paste0(Sys.getenv("SECRETS_FOLDER"),
 base_url <- d2_default_session$base_url
 
 #TODO ask sam about the code below as it currently does not run, GetSqlView does not find a valid sql view
-fy_22_t <- datapackr::getDatasetUids(2022, "mer_targets") %>%
+fy_22_t <- datapackr::getDatasetUids(2022 - 1, "mer_targets") %>%
   getDataSets_Detailed() %>%
   dplyr::select(-dataset) %>%
   distinct()
 
-fy_21_t <- datapackr::getDatasetUids(2021, "mer_targets") %>%
+fy_21_t <- datapackr::getDatasetUids(2021 - 1, "mer_targets") %>%
   getDataSets_Detailed() %>%
   dplyr::select(-dataset) %>%
   distinct()
 
-fy_23_t <- datapackr::getDatasetUids(2023, "mer_targets") %>%
+fy_23_t <- datapackr::getDatasetUids(2023 - 1, "mer_targets") %>%
   getDataSets_Detailed() %>%
   dplyr::select(-dataset) %>%
   distinct()
