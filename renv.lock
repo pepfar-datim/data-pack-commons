@@ -298,7 +298,7 @@
     },
     "datapackr": {
       "Package": "datapackr",
-      "Version": "5.3.0",
+      "Version": "5.3.2",
       "Source": "GitHub",
       "Remotes": "pepfar-datim/datimutils, pepfar-datim/datim-validation",
       "RemoteType": "github",
@@ -306,15 +306,14 @@
       "RemoteRepo": "datapackr",
       "RemoteUsername": "pepfar-datim",
       "RemoteRef": "HEAD",
-      "RemoteSha": "e5258d2012888899c28b37d141083ea26a64f20b",
-      "Hash": "9a46f4751d69a05e5d9c8bcd6eed3e27",
+      "RemoteSha": "dd5a08ee8cfca4824d65dda335b3da6e63e2266c",
+      "Hash": "19fd8310000e8588b08c9a1ffd0f60e0",
       "Requirements": [
         "assertthat",
         "crayon",
         "datimutils",
         "datimvalidation",
         "dplyr",
-        "fuzzyjoin",
         "httr",
         "jsonlite",
         "lubridate",
@@ -567,22 +566,6 @@
       "Hash": "7c89603d81793f0d5486d91ab1fc6f1d",
       "Requirements": []
     },
-    "fuzzyjoin": {
-      "Package": "fuzzyjoin",
-      "Version": "0.1.6",
-      "Source": "Repository",
-      "Repository": "CRAN",
-      "Hash": "24af5fc67dbeaac6d776a8e6630aacd9",
-      "Requirements": [
-        "dplyr",
-        "geosphere",
-        "purrr",
-        "stringdist",
-        "stringr",
-        "tibble",
-        "tidyr"
-      ]
-    },
     "gargle": {
       "Package": "gargle",
       "Version": "1.2.0",
@@ -608,16 +591,6 @@
       "Repository": "CRAN",
       "Hash": "15e9634c0fcd294799e9b2e929ed1b86",
       "Requirements": []
-    },
-    "geosphere": {
-      "Package": "geosphere",
-      "Version": "1.5-14",
-      "Source": "Repository",
-      "Repository": "CRAN",
-      "Hash": "1ce6e028f3d056dad1ea9c3c0a5444bf",
-      "Requirements": [
-        "sp"
-      ]
     },
     "gert": {
       "Package": "gert",
@@ -1435,24 +1408,6 @@
       "Source": "Repository",
       "Repository": "CRAN",
       "Hash": "3606bb09e0914edd4fc8313b500dcd5e",
-      "Requirements": []
-    },
-    "sp": {
-      "Package": "sp",
-      "Version": "1.5-0",
-      "Source": "Repository",
-      "Repository": "CRAN",
-      "Hash": "2a118bdd2db0a301711e0a9e3e3206d5",
-      "Requirements": [
-        "lattice"
-      ]
-    },
-    "stringdist": {
-      "Package": "stringdist",
-      "Version": "0.9.8",
-      "Source": "Repository",
-      "Repository": "CRAN",
-      "Hash": "c8b6c79c3b2d7d8475f3ab35cd99737b",
       "Requirements": []
     },
     "stringi": {
