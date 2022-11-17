@@ -11,6 +11,8 @@ require(rlang)
 require(assertthat)
 require(foreach)
 
+cop_year = 2023
+
 # login to datim
 datimutils::loginToDATIM(paste0(Sys.getenv("SECRETS_FOLDER"),
                                 "datim.json"))
@@ -261,9 +263,10 @@ diffDataPackModels <- function(model_old,
 # get impatt.priority_snu for each PSNU
 # we use get data value sets to pull raw data instead of the analytics endpoint
 # because the priortization level cannot/should not be aggregated
+
  priority_snu_data <-
    datimutils::getDataValueSets(c("dataElementGroup", "period", "orgUnitGroup"),
-                               c("ofNbyQgD9xG", "2022Oct", "AVy8gJXym2D")) %>%
+                               c("ofNbyQgD9xG", paste0(cop_year - 1,"Oct"), "AVy8gJXym2D")) %>%
    dplyr::select(org_unit_uid = orgUnit, value) %>%
    dplyr::mutate(value = as.double(value))
 
