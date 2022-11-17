@@ -11,7 +11,7 @@ require(rlang)
 require(assertthat)
 require(foreach)
 
-cop_year = 2023
+cop_year <- 2023
 
 # login to datim
 datimutils::loginToDATIM(paste0(Sys.getenv("SECRETS_FOLDER"),
@@ -266,7 +266,7 @@ diffDataPackModels <- function(model_old,
 
  priority_snu_data <-
    datimutils::getDataValueSets(c("dataElementGroup", "period", "orgUnitGroup"),
-                               c("ofNbyQgD9xG", paste0(cop_year - 1,"Oct"), "AVy8gJXym2D")) %>%
+                               c("ofNbyQgD9xG", paste0(cop_year - 1, "Oct"), "AVy8gJXym2D")) %>%
    dplyr::select(org_unit_uid = orgUnit, value) %>%
    dplyr::mutate(value = as.double(value))
 
