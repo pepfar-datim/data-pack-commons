@@ -141,7 +141,8 @@ getMechsList <- function(cop_year,
     ou = paste0("OU_GROUP-",
                 datimutils::getOrgUnitGroups("Country", by = name)),
     pe_f = paste0(cop_year - 1, "Oct"),
-    "SH885jaRe0o" %.d% "all") %>%
+    "SH885jaRe0o" %.d% "all",
+    timeout = 180) %>%
     dplyr::select(mechanism_uid = "Funding Mechanism",
                   country_uid = "Organisation unit") %>%
     dplyr::mutate(mechanism_code =
