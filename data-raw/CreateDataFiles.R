@@ -160,10 +160,10 @@ ValidateMapT_1toT <- function(t_1_to_t, dim_item_sets) {
   }
 
 datimutils::loginToDATIM(paste0(Sys.getenv("SECRETS_FOLDER"),
-                                "datim.json"))
+                                "coptest.json"))
 
 wd <- getwd()
-setwd("~/Documents/GitHub/data-pack-commons")
+# setwd("~/Documents/GitHub/data-pack-commons")
 
 dim_item_sets <- readr::read_csv("./data-raw/model_calculations/dimension_item_sets.csv",
                                  col_types = readr::cols(.default = "c", sort_order = "d", weight = "d"),
