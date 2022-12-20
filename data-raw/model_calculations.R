@@ -222,7 +222,7 @@ diffDataPackModels <- function(model_old,
   model_new_filtered <- dplyr::bind_rows(model_new[countries]) %>%
     dplyr::filter(!is.na(value)) %>%
     dplyr::mutate(value = round(value, 5)) %>%
-    rename(value.new = value)%>%
+    rename(value.new = value) %>%
     dplyr::select(-period)
 
   deltas  <-  full_join(model_old_filtered, model_new_filtered) %>%
