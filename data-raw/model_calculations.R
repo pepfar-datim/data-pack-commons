@@ -15,7 +15,7 @@ cop_year <- 2023
 
 # login to datim
 datimutils::loginToDATIM(paste0(Sys.getenv("SECRETS_FOLDER"),
-                                "coptest.json"))
+                                "cop.json"))
 
 # Countries to include in model, usually all
 # Turkmenistan has no planning/priortization level
@@ -217,13 +217,16 @@ diffDataPackModels <- function(model_old,
   model_old_filtered <- dplyr::bind_rows(model_old[countries]) %>%
     dplyr::filter(!is.na(value)) %>%
     dplyr::mutate(value = round(value, 5)) %>%
-    rename(value.old = value)
+    rename(value.old = value) %>%
+    dplyr::select(-period)
   model_new_filtered <- dplyr::bind_rows(model_new[countries]) %>%
     dplyr::filter(!is.na(value)) %>%
     dplyr::mutate(value = round(value, 5)) %>%
-    rename(value.new = value)
+    rename(value.new = value)%>%
+    dplyr::select(-period)
 
   deltas  <-  full_join(model_old_filtered, model_new_filtered) %>%
+    dplyr::mutate(diff = value.new - value.old) %>%
     filter(value.new != value.old |
              is.na(value.new) | is.na(value.old))
   ancestors <- datimutils::getOrgUnits(deltas$psnu_uid, fields = "ancestors[name]")
