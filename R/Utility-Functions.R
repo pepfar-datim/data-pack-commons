@@ -179,3 +179,66 @@ MapDimToOptions <- function(data, items_to_options, allocate) {
       RenameDimensionColumns(cop_category)
   }
 }
+
+#' @export
+#' @title diffSnuximModels(model_old, model_new, full_diff = TRUE)
+#'
+#' @description A function that compares old and new snuxim models
+#' @param model_old list - snuxim model
+#' @param model_new list - snuxim model
+#' @param ancestors_data list - optional ancestor data, mainly for testing
+#' @param data_psnu character vector of psnu data, mainly for testing
+#' @param full_diff If TRUE compares model difference fully
+#' @return deltas representing difference in data of both models
+#'
+diffSnuximModels <- function(model_old, model_new,
+                             data_ancestors = NULL,
+                             data_psnu = NULL,
+                             full_diff = TRUE) {
+
+  # only include countries present in both files
+  if (full_diff) {
+    country_details <- dplyr::union(names(model_old),
+                                    names(model_new))
+  } else {
+    country_details <- dplyr::intersect(names(model_old),
+                                        names(model_new))
+  }
+
+  # bind list item rows and add relevant columns
+  model_old_filtered <- dplyr::bind_rows(model_old[country_details]) %>%
+    dplyr::filter(!is.na(value)) %>%
+    dplyr::mutate(value = round(value, 5)) %>%
+    rename(value.old = value)
+
+  model_new_filtered <- dplyr::bind_rows(model_new[country_details]) %>%
+    dplyr::filter(!is.na(value)) %>%
+    dplyr::mutate(value = round(value, 5)) %>%
+    rename(value.new = value)
+
+  deltas  <-  full_join(model_old_filtered, model_new_filtered) %>%
+    filter(value.new != value.old |
+             is.na(value.new) | is.na(value.old))
+
+  # add other columns
+  if (!is.null(data_ancestors)) {
+    ancestors <- data_ancestors
+    } else {
+      ancestors <- datimutils::getOrgUnits(deltas$psnu_uid,
+                                            fields = "ancestors[name]")
+    }
+
+   if (!is.null(data_psnu)) {
+     deltas <- dplyr::mutate(deltas,
+                             psnu = data_psnu,
+                             ou = purrr::map_chr(ancestors, purrr::pluck, 1, 3),
+                             snu1 = purrr::map_chr(ancestors, purrr::pluck, 1, 4, .default = NA_character_))
+   } else {
+     deltas <- dplyr::mutate(deltas,
+                             psnu = datimutils::getOrgUnits(psnu_uid),
+                             ou = purrr::map_chr(ancestors, purrr::pluck, 1, 3),
+                             snu1 = purrr::map_chr(ancestors, purrr::pluck, 1, 4, .default = NA_character_))
+   }
+
+  return(deltas)
+}
