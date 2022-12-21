@@ -148,7 +148,7 @@ test_that("MapDimToOptions", {
   testthat::expect_equal(sample_data, joined_no_items_to_options)
 })
 
-library(tibble)
+library(dplyr)
 test_that("Can compare psnuxim model data", {
 
   # list of countries lets say of new model pulled
