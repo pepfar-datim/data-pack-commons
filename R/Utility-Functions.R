@@ -194,7 +194,11 @@ MapDimToOptions <- function(data, items_to_options, allocate) {
 diffSnuximModels <- function(model_old, model_new,
                              data_ancestors = NULL,
                              data_psnu = NULL,
-                             full_diff = TRUE) {
+                             full_diff = TRUE,
+                             d2_session = dynGet("d2_default_session",
+                                                 inherits = TRUE)
+                             )
+  {
 
   # only include countries present in both files
   if (full_diff) {
@@ -223,10 +227,11 @@ diffSnuximModels <- function(model_old, model_new,
   # add other columns
   if (!is.null(data_ancestors)) {
     ancestors <- data_ancestors
-    } else {
-      ancestors <- datimutils::getOrgUnits(deltas$psnu_uid,
-                                            fields = "ancestors[name]")
-    }
+  } else {
+    ancestors <- datimutils::getOrgUnits(deltas$psnu_uid,
+                                         fields = "ancestors[name]",
+                                         d2_session = d2_session)
+  }
 
    if (!is.null(data_psnu)) {
      deltas <- dplyr::mutate(deltas,
@@ -235,7 +240,8 @@ diffSnuximModels <- function(model_old, model_new,
                              snu1 = purrr::map_chr(ancestors, purrr::pluck, 1, 4, .default = NA_character_))
    } else {
      deltas <- dplyr::mutate(deltas,
-                             psnu = datimutils::getOrgUnits(psnu_uid),
+                             psnu = datimutils::getOrgUnits(psnu_uid,
+                                                            d2_session = d2_session),
                              ou = purrr::map_chr(ancestors, purrr::pluck, 1, 3),
                              snu1 = purrr::map_chr(ancestors, purrr::pluck, 1, 4, .default = NA_character_))
    }
