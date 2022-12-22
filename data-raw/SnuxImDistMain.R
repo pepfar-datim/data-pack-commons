@@ -364,28 +364,36 @@ deltas <- diffSnuximModels(
 print(paste0("The difference between the older model and the new model is: ", nrow(deltas)))
 
 
-# # data_old = data_old$lZsCb6y0KDX
+# MANUAL COMPARISON ARCHIVAL CODE -----
+# data <- readr::read_rds(file.choose())
+# data_old <- readr::read_rds(file.choose())
+#
+#
+# # # data_old = data_old$lZsCb6y0KDX
+#
 # data_old <- setNames(data_old, country_details$id)
+# #
+#  non_nulls <- purrr::map_lgl(names(data),
+#                              ~ !is.null(data[[.x]]) || !is.null(data_old[[.x]]))
+#  names <-  names(data)[non_nulls]
+# #
+#  purrr::map(names, ~try(dplyr::all_equal(data[[.x]], data_old[[.x]]))) %>%
+#    setNames(datimutils::getOrgUnits(names))
+# #
+#  deltas <- purrr::map_df(names, ~try(dplyr::full_join(
+#    dplyr::bind_cols(data[[.x]], tibble::tribble(~new, 1)),
+#    dplyr::bind_cols(data_old[[.x]], tibble::tribble(~old, 1))))) %>%
+#    dplyr::filter(is.na(old) | is.na(new))
+# #
+#  ancestors <- datimutils::getOrgUnits(deltas$psnu_uid, fields = "ancestors[name]")
+#  deltas <- dplyr::mutate(deltas,
+#                          psnu = datimutils::getOrgUnits(psnu_uid),
+#                          ou = purrr::map_chr(ancestors, purrr::pluck, 1, 3),
+#                          snu1 = purrr::map_chr(ancestors, purrr::pluck, 1, 4, .default = NA_character_))
 #
-# non_nulls <- purrr::map_lgl(names(data),
-#                             ~ !is.null(data[[.x]]) || !is.null(data_old[[.x]]))
-# names <-  names(data)[non_nulls]
-#
-# purrr::map(names, ~try(dplyr::all_equal(data[[.x]], data_old[[.x]]))) %>%
-#   setNames(datimutils::getOrgUnits(names))
-#
-# deltas <- purrr::map_df(names, ~try(dplyr::full_join(
-#   dplyr::bind_cols(data[[.x]], tibble::tribble(~new, 1)),
-#   dplyr::bind_cols(data_old[[.x]], tibble::tribble(~old, 1))))) %>%
-#   dplyr::filter(is.na(old) | is.na(new))
-#
-# ancestors <- datimutils::getOrgUnits(deltas$psnu_uid, fields = "ancestors[name]")
-# deltas <- dplyr::mutate(deltas,
-#                         psnu = datimutils::getOrgUnits(psnu_uid),
-#                         ou = purrr::map_chr(ancestors, purrr::pluck, 1, 3),
-#                         snu1 = purrr::map_chr(ancestors, purrr::pluck, 1, 4, .default = NA_character_))
+# print(paste0("The difference between the older model and the new model is: ", nrow(deltas)))
 
-#print(paste0("The difference between the older model and the new model is: ", nrow(deltas)))
+
 
 #
 # if (cop_year == 2021){

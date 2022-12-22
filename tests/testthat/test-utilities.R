@@ -163,8 +163,7 @@ test_that("Can compare psnuxim model data", {
   new_model <- list(
     XOivy2uDpMF = tribble(
       ~indicator_code, ~psnu_uid, ~value,
-      "HTS_INDEX_COM.New.Neg.T", "bSwiBL5Y4SW", 2,
-      "HTS_INDEX_COM.New.Neg.T", "bSwiBL5Y4SW", 2
+      "HTS_INDEX_COM.New.Neg.T", "bSwiBL5Y4SW", 4
     ),
     CDGPst7p3vc = tribble()
   )
@@ -173,7 +172,7 @@ test_that("Can compare psnuxim model data", {
   old_model <- list(
     XOivy2uDpMF = tribble(
       ~indicator_code, ~psnu_uid, ~value,
-      "HTS_INDEX_COM.New.Neg.T", "bSwiBL5Y4SW", 1
+      "HTS_INDEX_COM.New.Neg.T", "bSwiBL5Y4SW", 2
     ),
     CDGPst7p3vc = tribble(),
     a71G4Gtcttv = tribble(
@@ -193,18 +192,18 @@ test_that("Can compare psnuxim model data", {
     )
   )
 
-  # run function for partial diff
+  # PARTIAL DIFF, ONLY SAME COUNTRIES ----
   partial_deltas <- diffSnuximModels(
     model_old = old_model,
     model_new = new_model,
     data_ancestors = ancestors_data,
-    data_psnu = c("_Military Angola", "_Military Angola"),
+    data_psnu = c("_Military Angola"),
     full_diff = FALSE)
+
   testthat::expect_equal(nrow(partial_deltas), 2)
   rm(ancestors_data)
 
-  # run function for full diff
-
+  # FULL DIFF, ALL COUNTRIES ----
   ancestors_data <- list(
     tribble(
       ~name,

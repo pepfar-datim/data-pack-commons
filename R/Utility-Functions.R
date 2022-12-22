@@ -211,17 +211,18 @@ diffSnuximModels <- function(model_old, model_new,
   # bind list item rows and add relevant columns
   model_old_filtered <- dplyr::bind_rows(model_old[country_details]) %>%
     dplyr::filter(!is.na(value)) %>%
-    dplyr::mutate(value = round(value, 5)) %>%
-    dplyr::rename(value.old = value)
+    #dplyr::mutate(value = round(value, 2)) %>%
+    dplyr::mutate(old = 1)
 
   model_new_filtered <- dplyr::bind_rows(model_new[country_details]) %>%
     dplyr::filter(!is.na(value)) %>%
-    dplyr::mutate(value = round(value, 5)) %>%
-    dplyr::rename(value.new = value)
+    #dplyr::mutate(value = round(value, 2)) %>%
+    dplyr::mutate(new = 1)
 
-  deltas  <-  dplyr::full_join(model_old_filtered, model_new_filtered) %>%
-    dplyr::filter(value.new != value.old |
-             is.na(value.new) | is.na(value.old))
+  deltas  <-  dplyr::full_join(model_new_filtered, model_old_filtered) %>%
+    dplyr::filter(new != old |
+             is.na(new) | is.na(old)
+             )
 
   # add other columns
   if (!is.null(data_ancestors)) {
