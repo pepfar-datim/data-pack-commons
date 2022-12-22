@@ -209,15 +209,15 @@ diffSnuximModels <- function(model_old, model_new,
   model_old_filtered <- dplyr::bind_rows(model_old[country_details]) %>%
     dplyr::filter(!is.na(value)) %>%
     dplyr::mutate(value = round(value, 5)) %>%
-    rename(value.old = value)
+    dplyr::rename(value.old = value)
 
   model_new_filtered <- dplyr::bind_rows(model_new[country_details]) %>%
     dplyr::filter(!is.na(value)) %>%
     dplyr::mutate(value = round(value, 5)) %>%
-    rename(value.new = value)
+    dplyr::rename(value.new = value)
 
-  deltas  <-  full_join(model_old_filtered, model_new_filtered) %>%
-    filter(value.new != value.old |
+  deltas  <-  dplyr::full_join(model_old_filtered, model_new_filtered) %>%
+    dplyr::filter(value.new != value.old |
              is.na(value.new) | is.na(value.old))
 
   # add other columns
