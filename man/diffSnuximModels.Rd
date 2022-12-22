@@ -9,7 +9,8 @@ diffSnuximModels(
   model_new,
   data_ancestors = NULL,
   data_psnu = NULL,
-  full_diff = TRUE
+  full_diff = TRUE,
+  d2_session = dynGet("d2_default_session", inherits = TRUE)
 )
 }
 \arguments{

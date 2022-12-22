@@ -197,8 +197,7 @@ diffSnuximModels <- function(model_old, model_new,
                              full_diff = TRUE,
                              d2_session = dynGet("d2_default_session",
                                                  inherits = TRUE)
-                             )
-  {
+                             ) {
 
   # only include countries present in both files
   if (full_diff) {
