@@ -162,8 +162,8 @@ test_that("Can compare psnuxim model data", {
   # new model data
   new_model <- list(
     XOivy2uDpMF = tribble(
-      ~indicator_code, ~psnu_uid, ~value,
-      "HTS_INDEX_COM.New.Neg.T", "bSwiBL5Y4SW", 4
+      ~indicator_code, ~psnu_uid, ~value, ~percent,
+      "HTS_INDEX_COM.New.Neg.T", "bSwiBL5Y4SW", 4, .45
     ),
     CDGPst7p3vc = tribble()
   )
@@ -171,21 +171,17 @@ test_that("Can compare psnuxim model data", {
   # old model that we "load" in
   old_model <- list(
     XOivy2uDpMF = tribble(
-      ~indicator_code, ~psnu_uid, ~value,
-      "HTS_INDEX_COM.New.Neg.T", "bSwiBL5Y4SW", 2
+      ~indicator_code, ~psnu_uid, ~value, ~ percent,
+      "HTS_INDEX_COM.New.Neg.T", "bSwiBL5Y4SW", 2, .45
     ),
     CDGPst7p3vc = tribble(),
     a71G4Gtcttv = tribble(
-      ~indicator_code, ~psnu_uid, ~value,
-      "CXCA_SCRN.T", "a3zBlSiF0wB", 16
+      ~indicator_code, ~psnu_uid, ~value, ~percent,
+      "CXCA_SCRN.T", "a3zBlSiF0wB", 16, .1
     )
   )
 
   ancestors_data <- list(
-    tribble(
-      ~name,
-      "Global", "Africa", "Angola"
-    ),
     tribble(
       ~name,
       "Global", "Africa", "Angola"
@@ -200,7 +196,7 @@ test_that("Can compare psnuxim model data", {
     data_psnu = c("_Military Angola"),
     full_diff = FALSE)
 
-  testthat::expect_equal(nrow(partial_deltas), 2)
+  testthat::expect_equal(nrow(partial_deltas), 1)
   rm(ancestors_data)
 
   # FULL DIFF, ALL COUNTRIES ----
@@ -211,11 +207,7 @@ test_that("Can compare psnuxim model data", {
     ),
     tribble(
       ~name,
-      "Global", "Africa", "Angola"
-    ),
-    tribble(
-      ~name,
-      "Global", "Africa", "Angola", "Matabeleland North"
+      "Global", "Africa", "Zimbabwe", "Matabeleland North"
     )
   )
 
@@ -223,8 +215,8 @@ test_that("Can compare psnuxim model data", {
      model_old = old_model,
      model_new = new_model,
      data_ancestors = ancestors_data,
-     data_psnu = c("_Military Angola", "_Military Angola", "Lupane"),
+     data_psnu = c("_Military Angola", "Lupane"),
      full_diff = TRUE)
-   testthat::expect_equal(nrow(total_diff), 3)
+   testthat::expect_equal(nrow(total_diff), 2)
 
 })
