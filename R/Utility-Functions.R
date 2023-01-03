@@ -197,7 +197,7 @@ diffSnuximModels <- function(model_old, model_new,
                              full_diff = TRUE,
                              d2_session = dynGet("d2_default_session",
                                                  inherits = TRUE)
-                             ) {
+) {
 
   # only include countries present in both files
   if (full_diff) {
@@ -211,18 +211,29 @@ diffSnuximModels <- function(model_old, model_new,
   # bind list item rows and add relevant columns
   model_old_filtered <- dplyr::bind_rows(model_old[country_details]) %>%
     dplyr::filter(!is.na(value)) %>%
-    #dplyr::mutate(value = round(value, 2)) %>%
-    dplyr::mutate(old = 1)
+    dplyr::mutate(value = round(value, 5),
+                  percent = round(percent, 5)) %>%
+    rename(value.old = value,
+           percent.old = percent)
+  #dplyr::mutate(value = round(value, 2)) %>%
+  #dplyr::mutate(old = 1)
 
   model_new_filtered <- dplyr::bind_rows(model_new[country_details]) %>%
     dplyr::filter(!is.na(value)) %>%
-    #dplyr::mutate(value = round(value, 2)) %>%
-    dplyr::mutate(new = 1)
-
+    dplyr::mutate(value = round(value, 5),
+                  percent = round(percent, 5)) %>%
+    rename(value.new = value,
+           percent.new = percent)
+  #dplyr::mutate(value = round(value, 2)) %>%
+  #dplyr::mutate(old = 1)
   deltas  <-  dplyr::full_join(model_new_filtered, model_old_filtered) %>%
-    dplyr::filter(new != old |
-             is.na(new) | is.na(old)
-             )
+    dplyr::filter(value.new != value.old |
+                    percent.new != percent.old |
+                    is.na(value.new) |
+                    is.na(value.old) |
+                    is.na(percent.new) |
+                    is.na(percent.old)
+    )
 
   # add other columns
   if (!is.null(data_ancestors)) {
@@ -233,18 +244,18 @@ diffSnuximModels <- function(model_old, model_new,
                                          d2_session = d2_session)
   }
 
-   if (!is.null(data_psnu)) {
-     deltas <- dplyr::mutate(deltas,
-                             psnu = data_psnu,
-                             ou = purrr::map_chr(ancestors, purrr::pluck, 1, 3),
-                             snu1 = purrr::map_chr(ancestors, purrr::pluck, 1, 4, .default = NA_character_))
-   } else {
-     deltas <- dplyr::mutate(deltas,
-                             psnu = datimutils::getOrgUnits(psnu_uid,
-                                                            d2_session = d2_session),
-                             ou = purrr::map_chr(ancestors, purrr::pluck, 1, 3),
-                             snu1 = purrr::map_chr(ancestors, purrr::pluck, 1, 4, .default = NA_character_))
-   }
+  if (!is.null(data_psnu)) {
+    deltas <- dplyr::mutate(deltas,
+                            psnu = data_psnu,
+                            ou = purrr::map_chr(ancestors, purrr::pluck, 1, 3),
+                            snu1 = purrr::map_chr(ancestors, purrr::pluck, 1, 4, .default = NA_character_))
+  } else {
+    deltas <- dplyr::mutate(deltas,
+                            psnu = datimutils::getOrgUnits(psnu_uid,
+                                                           d2_session = d2_session),
+                            ou = purrr::map_chr(ancestors, purrr::pluck, 1, 3),
+                            snu1 = purrr::map_chr(ancestors, purrr::pluck, 1, 4, .default = NA_character_))
+  }
 
   return(deltas)
 }
