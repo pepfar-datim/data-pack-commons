@@ -147,3 +147,76 @@ test_that("MapDimToOptions", {
 
   testthat::expect_equal(sample_data, joined_no_items_to_options)
 })
+
+library(dplyr)
+test_that("Can compare psnuxim model data", {
+
+  # list of countries lets say of new model pulled
+  country_details <-
+    tribble(
+      ~country_name, ~id,
+      "Angola", "XOivy2uDpMF",
+      "Antigua and Barbuda", "CDGPst7p3vc"
+    )
+
+  # new model data
+  new_model <- list(
+    XOivy2uDpMF = tribble(
+      ~indicator_code, ~psnu_uid, ~value, ~percent,
+      "HTS_INDEX_COM.New.Neg.T", "bSwiBL5Y4SW", 4, .45
+    ),
+    CDGPst7p3vc = tribble()
+  )
+
+  # old model that we "load" in
+  old_model <- list(
+    XOivy2uDpMF = tribble(
+      ~indicator_code, ~psnu_uid, ~value, ~ percent,
+      "HTS_INDEX_COM.New.Neg.T", "bSwiBL5Y4SW", 2, .45
+    ),
+    CDGPst7p3vc = tribble(),
+    a71G4Gtcttv = tribble(
+      ~indicator_code, ~psnu_uid, ~value, ~percent,
+      "CXCA_SCRN.T", "a3zBlSiF0wB", 16, .1
+    )
+  )
+
+  ancestors_data <- list(
+    tribble(
+      ~name,
+      "Global", "Africa", "Angola"
+    )
+  )
+
+  # PARTIAL DIFF, ONLY SAME COUNTRIES ----
+  partial_deltas <- diffSnuximModels(
+    model_old = old_model,
+    model_new = new_model,
+    data_ancestors = ancestors_data,
+    data_psnu = c("_Military Angola"),
+    full_diff = FALSE)
+
+  testthat::expect_equal(nrow(partial_deltas), 1)
+  rm(ancestors_data)
+
+  # FULL DIFF, ALL COUNTRIES ----
+  ancestors_data <- list(
+    tribble(
+      ~name,
+      "Global", "Africa", "Angola"
+    ),
+    tribble(
+      ~name,
+      "Global", "Africa", "Zimbabwe", "Matabeleland North"
+    )
+  )
+
+   total_diff <- diffSnuximModels(
+     model_old = old_model,
+     model_new = new_model,
+     data_ancestors = ancestors_data,
+     data_psnu = c("_Military Angola", "Lupane"),
+     full_diff = TRUE)
+   testthat::expect_equal(nrow(total_diff), 2)
+
+})
