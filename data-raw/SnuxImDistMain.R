@@ -10,7 +10,7 @@
 library(datapackcommons)
 library(datimutils)
 library(dplyr)
-datimutils::loginToDATIM(paste0(Sys.getenv("SECRETS_FOLDER"), "datim.json")) # added for a different config access
+datimutils::loginToDATIM(paste0(Sys.getenv("SECRETS_FOLDER"), "coptest.json")) # added for a different config access
 cop_year <- 2022
 
 # FUNCTIONS -------------------------------------------------------------------
@@ -457,3 +457,24 @@ print(paste0("The difference between the older model and the new model is: ", nr
 # s3$list_objects_v2(Bucket = Sys.getenv("AWS_S3_BUCKET"),
 #                    Prefix = paste0("support_files/", file_name)) %>%
 #   purrr::pluck("Contents", 1, "LastModified")
+
+# dreams districts useful for filtering dreams in case
+# dreams_districts <- c(
+#   "Botswana",
+#   "Cote d'Ivoire",
+#   "Eswatini",
+#   "Kenya",
+#   "Lesotho",
+#   "Malawi",
+#   "Mozambique",
+#   "Namibia",
+#   "Rwanda",
+#   "South Africa",
+#   "South Sudan",
+#   "Tanzania",
+#   "Uganda",
+#   "Zambia",
+#   "Zimbabwe",
+#   "Haiti"
+#
+# )
