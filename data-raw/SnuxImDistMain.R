@@ -11,7 +11,7 @@ library(datapackcommons)
 library(datimutils)
 library(dplyr)
 datimutils::loginToDATIM(paste0(Sys.getenv("SECRETS_FOLDER"), "coptest.json")) # added for a different config access
-cop_year <- 2022
+cop_year <- 0
 
 # FUNCTIONS -------------------------------------------------------------------
 
@@ -130,7 +130,9 @@ getMechsList <- function(cop_year,
                          d2_session = dynGet("d2_default_session",
                                              inherits = TRUE)) {
   assertthat::assert_that(cop_year %in% c(2021,
-                                          2022))
+                                          2022,
+                                          0))
+  if (cop_year == 0) {cop_year = 2022} # temporary code to get mechs for last year for initial cop23 dev
   de_group <- dplyr::case_when(
     cop_year == 2021 ~ "WTq0quAW1mf", #"2021 MER Targets"
     cop_year == 2022 ~ "QjkuCJf6lCs"  #"2022 MER Targets"
@@ -337,12 +339,14 @@ mechs <-  getMechsList(cop_year)
 
 fy_map <-  switch(as.character(cop_year),
                   "2021" = datapackcommons::Map21Tto22T,
-                  "2022" = datapackcommons::Map22Tto23T)
+                  "2022" = datapackcommons::Map22Tto23T,
+                  "0" = datapackcommons::Map23Tto24T)
 
 # pull list of countries to iterate through
 country_details <-  datimutils::getOrgUnitGroups("Country", name, fields = "organisationUnits[name,id]") %>%
   dplyr::arrange(name) %>%
-  select(country_name = name, id)
+  select(country_name = name, id) #%>%
+#  dplyr::filter(country_name == "South Africa")
 
 # start process of collecting api data for every country
 data <-  country_details[["id"]] %>%
@@ -358,7 +362,7 @@ data_old <- readr::read_rds(file.choose())
 deltas <- diffSnuximModels(
   data_old,
   data,
-  full_diff = FALSE
+  full_diff = TRUE
 )
 
 print(paste0("The difference between the older model and the new model is: ", nrow(deltas)))
