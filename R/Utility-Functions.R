@@ -259,3 +259,48 @@ diffSnuximModels <- function(model_old, model_new,
 
   return(deltas)
 }
+
+#' @export
+#' @title diffDataEntryForm(x, y)
+#'
+#' @description A function that compares two data entry forms
+#' @param x a data frame result from a sql view
+#' @param y a data frame result from a sql view
+#' @return a list of all three differences
+#'
+diffDataEntryForm <- function(x, y) {
+
+  # in x but not y
+  x_not_y <- tryCatch({
+    dplyr::anti_join(x, y)
+  }, error = function(e) {
+    print(e)
+    stop("in X but not Y could not be calculated because of error ^")
+  })
+
+  # in y but not x
+  y_not_x <- tryCatch({
+    dplyr::anti_join(y, x)
+  }, error = function(e) {
+    print(e)
+    stop("in Y but not X could not be calculated because of error ^")
+  })
+
+  # in x and y
+  x_and_y <- tryCatch({
+    dplyr::inner_join(x, y)
+  }, error = function(e) {
+    print(e)
+    stop("in X and Y, could not be calculated because of error ^")
+  })
+
+  # list
+  diff_list <-
+    list(
+      "x_not_y" = x_not_y,
+      "y_not_x" = y_not_x,
+      "x_and_y" = x_and_y
+    )
+
+  return(diff_list)
+}

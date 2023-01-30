@@ -148,6 +148,7 @@ test_that("MapDimToOptions", {
   testthat::expect_equal(sample_data, joined_no_items_to_options)
 })
 
+# test psnuxim model differences ----
 library(dplyr)
 test_that("Can compare psnuxim model data", {
 
@@ -218,5 +219,52 @@ test_that("Can compare psnuxim model data", {
      data_psnu = c("_Military Angola", "Lupane"),
      full_diff = TRUE)
    testthat::expect_equal(nrow(total_diff), 2)
+
+})
+
+# test data entry form differences ----
+
+test_that("Can compare datasets from sqlviews", {
+
+  # form a
+  a <-
+    data.frame(
+      x = c(1, 2, 3, 4, 5, 6, 7),
+      y = c("A", "B", "C", "D", "E", "F", "G")
+    )
+
+  # form b
+  b <-
+    data.frame(
+      x = c(8, 9, 10, 4, 5, 6, 7),
+      y = c("H", "I", "J", "D", "E", "F", "G")
+    )
+
+  # test positive list result
+  res <- diffDataEntryForm(a, b)
+  testthat::expect_equal(
+    res,
+    list(
+      "x_not_y" =
+        data.frame(
+          x = c(1, 2, 3),
+          y = c("A", "B", "C")
+        ),
+      "y_not_x" =
+        data.frame(
+          x = c(8, 9, 10),
+          y = c("H", "I", "J")
+        ),
+      "x_and_y" =
+        data.frame(
+          x = c(4, 5, 6, 7),
+          y = c("D", "E", "F", "G")
+        )
+    )
+  )
+
+  # test error stop
+  b <- data.frame()
+  testthat::expect_error(diffDataEntryForm(a, b))
 
 })
