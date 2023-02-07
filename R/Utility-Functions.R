@@ -267,20 +267,48 @@ diffSnuximModels <- function(model_old, model_new,
 #' that access sqlviews
 #' @param uid_a a uid for a sqlView
 #' @param uid_b a uid for a sqlView
+#' @sql_view_data_a for testing can provide manual dataframe input
+#' @sql_view_data_b for testing can provide manual dataframe input
+#' @param d2_session
 #' @return a list of all three differences
 #'
-diffDataEntryForm <- function(uid_a, uid_b) {
+diffDataEntryForm <- function(
+  uid_a,
+  uid_b,
+  sql_view_data_a = NULL,
+  sql_view_data_b = NULL,
+  d2_session = dynGet("d2_default_session", inherits = TRUE)
+  ) {
+
+  # for testing purposes we add manual data passing
+  # stop function run if these params are partially defined
+  if ((!is.null(sql_view_data_a) &&
+     is.null(sql_view_data_b)) ||
+    (!is.null(sql_view_data_b) &&
+     is.null(sql_view_data_a))) {
+    stop("If atttempting to pass data in manually both params a and b must be defined!")
+  }
 
   # pull the sql views
-  x <- datimutils::getSqlView(sql_view_uid = uid_a,
-                              variable_keys = c("dataSets"),
-                              variable_values = c("YfZot37BbTm")) %>%
-    dplyr::rename("A.dataset" = "dataset")
+  # for testing purposes offer the option of passing manual data
+  # this helps us understand what the function actually does
+  if (is.null(sql_view_data_a)) {
+    x <-  datimutils::getSqlView(sql_view_uid = uid_a,
+                             variable_keys = c("dataSets"),
+                             variable_values = c("YfZot37BbTm")) %>%
+        dplyr::rename("A.dataset" = "dataset")
+  } else {
+    x <- sql_view_data_a
+  }
 
-  y <- datimutils::getSqlView(sql_view_uid = uid_b,
-                              variable_keys = c("dataSets"),
-                              variable_values = c("iADcaCD5YXh")) %>%
-    dplyr::rename("B.dataset" = "dataset")
+  if (is.null(sql_view_data_b)) {
+    y <- datimutils::getSqlView(sql_view_uid = uid_b,
+                                variable_keys = c("dataSets"),
+                                variable_values = c("iADcaCD5YXh")) %>%
+      dplyr::rename("B.dataset" = "dataset")
+  } else {
+    y <- sql_view_data_b
+  }
 
   # in x but not y
   x_not_y <- tryCatch({

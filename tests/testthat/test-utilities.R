@@ -241,7 +241,12 @@ test_that("Can compare datasets from sqlviews", {
     )
 
   # test positive list result
-  res <- diffDataEntryForm(a, b)
+  res <- diffDataEntryForm(
+    uid_a = NULL,
+    uid_b = NULL,
+    sql_view_data_a = a,
+    sql_view_data_b = b)
+
   testthat::expect_equal(
     res,
     list(
@@ -263,8 +268,23 @@ test_that("Can compare datasets from sqlviews", {
     )
   )
 
-  # test error stop
-  b <- data.frame()
-  testthat::expect_error(diffDataEntryForm(a, b))
+  # test error stop on mismatch of manual data
+  testthat::expect_error(
+    diffDataEntryForm(
+    uid_a = NULL,
+    uid_b = NULL,
+    sql_view_data_a = a,
+    sql_view_data_b = NULL),
+    "If atttempting to pass data in manually both params a and b must be defined!"
+  )
+
+  testthat::expect_error(
+    diffDataEntryForm(
+      uid_a = NULL,
+      uid_b = NULL,
+      sql_view_data_a = NULL,
+      sql_view_data_b = b),
+    "If atttempting to pass data in manually both params a and b must be defined!"
+  )
 
 })
