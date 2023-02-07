@@ -261,14 +261,26 @@ diffSnuximModels <- function(model_old, model_new,
 }
 
 #' @export
-#' @title diffDataEntryForm(x, y)
+#' @title diffDataEntryForm(uid_a, uid_b)
 #'
-#' @description A function that compares two data entry forms
-#' @param x a data frame result from a sql view
-#' @param y a data frame result from a sql view
+#' @description A function that compares two data entry forms based of uid inputs
+#' that access sqlviews
+#' @param uid_a a uid for a sqlView
+#' @param uid_b a uid for a sqlView
 #' @return a list of all three differences
 #'
-diffDataEntryForm <- function(x, y) {
+diffDataEntryForm <- function(uid_a, uid_b) {
+
+  # pull the sql views
+  x <- datimutils::getSqlView(sql_view_uid = uid_a,
+                              variable_keys = c("dataSets"),
+                              variable_values = c("YfZot37BbTm")) %>%
+    dplyr::rename("A.dataset" = "dataset")
+
+  y <- datimutils::getSqlView(sql_view_uid = uid_b,
+                              variable_keys = c("dataSets"),
+                              variable_values = c("iADcaCD5YXh")) %>%
+    dplyr::rename("B.dataset" = "dataset")
 
   # in x but not y
   x_not_y <- tryCatch({
