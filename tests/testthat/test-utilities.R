@@ -224,67 +224,79 @@ test_that("Can compare psnuxim model data", {
 
 # test data entry form differences ----
 
-test_that("Can compare datasets from sqlviews", {
+test_that("Can compare dataframes", {
 
   # form a
   a <-
     data.frame(
-      x = c(1, 2, 3, 4, 5, 6, 7),
+      A.dataset = c(1, 2, 3, 4, 5, 6, 7),
       y = c("A", "B", "C", "D", "E", "F", "G")
     )
 
   # form b
   b <-
     data.frame(
-      x = c(8, 9, 10, 4, 5, 6, 7),
-      y = c("H", "I", "J", "D", "E", "F", "G")
+      B.dataset = c(8, 9, 10, 4, 5, 6, 7),
+      z = c("H", "I", "J", "D", "E", "F", "G")
     )
 
-  # test positive list result
-  res <- diffDataEntryForm(
-    uid_a = NULL,
-    uid_b = NULL,
-    sql_view_data_a = a,
-    sql_view_data_b = b)
+  d <- list()
 
+  # test dataframe stop error if param is empty
+  testthat::expect_error(
+    diffDataFrames(
+      dataframe_a = NULL,
+      dataframe_b = b
+    ),
+    "one or both of your dataframe values are empty!"
+  )
+
+  # test dataframe stop error
+  testthat::expect_error(
+    diffDataFrames(
+      dataframe_a = d,
+      dataframe_b = b
+    ),
+    "one or both of these are not dataframes!"
+  )
+
+  # test stop error if names are unequal
+  testthat::expect_error(
+    diffDataFrames(
+      dataframe_a = a,
+      dataframe_b = b
+    ),
+    "your dataframes seem to have different names!"
+  )
+
+  # test positive list result
+  names(b)[names(b) == "z"] <- "y"
+  res <- diffDataFrames(
+    dataframe_a = a,
+    dataframe_b = b
+  )
+
+  # test output is as expected
   testthat::expect_equal(
     res,
     list(
-      "x_not_y" =
+      "a_not_b" =
         data.frame(
-          x = c(1, 2, 3),
+          A.dataset = c(1, 2, 3),
           y = c("A", "B", "C")
         ),
-      "y_not_x" =
+      "b_not_a" =
         data.frame(
-          x = c(8, 9, 10),
+          B.dataset = c(8, 9, 10),
           y = c("H", "I", "J")
         ),
-      "x_and_y" =
+      "a_and_b" =
         data.frame(
-          x = c(4, 5, 6, 7),
-          y = c("D", "E", "F", "G")
+          A.dataset = c(4, 5, 6, 7),
+          y = c("D", "E", "F", "G"),
+          B.dataset = c(4, 5, 6, 7)
         )
     )
-  )
-
-  # test error stop on mismatch of manual data
-  testthat::expect_error(
-    diffDataEntryForm(
-    uid_a = NULL,
-    uid_b = NULL,
-    sql_view_data_a = a,
-    sql_view_data_b = NULL),
-    "If atttempting to pass data in manually both params a and b must be defined!"
-  )
-
-  testthat::expect_error(
-    diffDataEntryForm(
-      uid_a = NULL,
-      uid_b = NULL,
-      sql_view_data_a = NULL,
-      sql_view_data_b = b),
-    "If atttempting to pass data in manually both params a and b must be defined!"
   )
 
 })

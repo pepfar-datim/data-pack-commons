@@ -263,56 +263,77 @@ diffSnuximModels <- function(model_old, model_new,
 #' @export
 #' @title diffDataEntryForm(uid_a, uid_b)
 #'
-#' @description A function that compares two data entry forms based of uid inputs
+#' @description A function that compares two data entry forms based on uid inputs
 #' that access sqlviews
 #' @param dataset_a a dataset uid
 #' @param dataset_b a dataset uid
-#' @sql_view_data_a for testing can provide manual dataframe input
-#' @sql_view_data_b for testing can provide manual dataframe input
 #' @param d2_session
 #' @return a list of all three differences
 #'
 diffDataEntryForm <- function(
-    dataset_a,
-    dataset_b,
-    sql_view_data_a = NULL,
-    sql_view_data_b = NULL,
+    uid_a,
+    uid_b,
     d2_session = dynGet("d2_default_session", inherits = TRUE)
 ) {
 
-  # for testing purposes we add manual data passing
-  # stop function run if these params are partially defined
-  if ((!is.null(sql_view_data_a) &&
-     is.null(sql_view_data_b)) ||
-    (!is.null(sql_view_data_b) &&
-     is.null(sql_view_data_a))) {
-    stop("If atttempting to pass data in manually both params a and b must be defined!")
-  }
 
   # pull the sql views
-  # for testing purposes offer the option of passing manual data
-  # this helps us understand what the function actually does
-  if (is.null(sql_view_data_a)) {
-    a <-  datimutils::getSqlView(sql_view_uid = "DotdxKrNZxG",
+  a <-  datimutils::getSqlView(sql_view_uid = "DotdxKrNZxG",
                              variable_keys = c("dataSets"),
-                             variable_values = c(dataset_a)) %>%
+                             variable_values = c(uid_a)) %>%
         dplyr::rename("A.dataset" = "dataset")
-  } else {
-    a <- sql_view_data_a
+
+
+  b <- datimutils::getSqlView(sql_view_uid = "DotdxKrNZxG",
+                                variable_keys = c("dataSets"),
+                                variable_values = c(uid_b)) %>%
+      dplyr::rename("B.dataset" = "dataset")
+
+  # run the diff
+  res <- diffDataFrames(
+    a,
+    b
+  )
+
+  return(res)
+
+}
+
+#' @export
+#' @title diffDataFrames(dataframe_a, dataframe_b)
+#'
+#' @description A function that compares two dataframes and returns a list
+#' combination of joins between those two dataframes
+#' @param dataset_a a dataframe
+#' @param dataset_b a dataframe
+#' @return a list of all three differences
+#'
+diffDataFrames <- function(
+  dataframe_a,
+  dataframe_b
+  ) {
+
+  # ensure data frames are present as params
+  if (is.null(dataframe_a) || is.null(dataframe_b)) {
+    stop("one or both of your dataframe values are empty!")
   }
 
-  if (is.null(sql_view_data_b)) {
-    b <- datimutils::getSqlView(sql_view_uid = "DotdxKrNZxG",
-                                variable_keys = c("dataSets"),
-                                variable_values = c(dataset_b)) %>%
-      dplyr::rename("B.dataset" = "dataset")
-  } else {
-    b <- sql_view_data_b
+  # ensure the class of the objects going in
+  if (!is.data.frame(dataframe_a) || !is.data.frame(dataframe_b)) {
+    stop("one or both of these are not dataframes!")
+  }
+
+  # ensure names of the data frames are the same
+  # filter out dataset column so as not to trip error
+  if (!identical(names(dataframe_a)[!grepl("dataset", names(dataframe_a))],
+                names(dataframe_b)[!grepl("dataset", names(dataframe_b))])
+     ) {
+    stop("your dataframes seem to have different names!")
   }
 
   # in a but not b
   a_not_b <- tryCatch({
-    dplyr::anti_join(a, b)
+    dplyr::anti_join(dataframe_a, dataframe_b)
   }, error = function(e) {
     print(e)
     stop("in X but not Y could not be calculated because of error ^")
@@ -320,7 +341,7 @@ diffDataEntryForm <- function(
 
   # in b but not a
   b_not_a <- tryCatch({
-    dplyr::anti_join(b, a)
+    dplyr::anti_join(dataframe_b, dataframe_a)
   }, error = function(e) {
     print(e)
     stop("in B but not A could not be calculated because of error ^")
@@ -328,7 +349,7 @@ diffDataEntryForm <- function(
 
   # in a and b
   a_and_b <- tryCatch({
-    dplyr::inner_join(a, b)
+    dplyr::inner_join(dataframe_a, dataframe_b)
   }, error = function(e) {
     print(e)
     stop("in A and B, could not be calculated because of error ^")
@@ -343,4 +364,5 @@ diffDataEntryForm <- function(
     )
 
   return(diff_list)
+
 }
