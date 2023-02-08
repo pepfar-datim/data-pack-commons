@@ -293,53 +293,53 @@ diffDataEntryForm <- function(
   # for testing purposes offer the option of passing manual data
   # this helps us understand what the function actually does
   if (is.null(sql_view_data_a)) {
-    x <-  datimutils::getSqlView(sql_view_uid = "DotdxKrNZxG",
+    a <-  datimutils::getSqlView(sql_view_uid = "DotdxKrNZxG",
                              variable_keys = c("dataSets"),
                              variable_values = c(dataset_a)) %>%
         dplyr::rename("A.dataset" = "dataset")
   } else {
-    x <- sql_view_data_a
+    a <- sql_view_data_a
   }
 
   if (is.null(sql_view_data_b)) {
-    y <- datimutils::getSqlView(sql_view_uid = "DotdxKrNZxG",
+    b <- datimutils::getSqlView(sql_view_uid = "DotdxKrNZxG",
                                 variable_keys = c("dataSets"),
                                 variable_values = c(dataset_b)) %>%
       dplyr::rename("B.dataset" = "dataset")
   } else {
-    y <- sql_view_data_b
+    b <- sql_view_data_b
   }
 
-  # in x but not y
-  x_not_y <- tryCatch({
-    dplyr::anti_join(x, y)
+  # in a but not b
+  a_not_b <- tryCatch({
+    dplyr::anti_join(a, b)
   }, error = function(e) {
     print(e)
     stop("in X but not Y could not be calculated because of error ^")
   })
 
-  # in y but not x
-  y_not_x <- tryCatch({
-    dplyr::anti_join(y, x)
+  # in b but not a
+  b_not_a <- tryCatch({
+    dplyr::anti_join(b, a)
   }, error = function(e) {
     print(e)
-    stop("in Y but not X could not be calculated because of error ^")
+    stop("in B but not A could not be calculated because of error ^")
   })
 
-  # in x and y
-  x_and_y <- tryCatch({
-    dplyr::inner_join(x, y)
+  # in a and b
+  a_and_b <- tryCatch({
+    dplyr::inner_join(a, b)
   }, error = function(e) {
     print(e)
-    stop("in X and Y, could not be calculated because of error ^")
+    stop("in A and B, could not be calculated because of error ^")
   })
 
   # list
   diff_list <-
     list(
-      "x_not_y" = x_not_y,
-      "y_not_x" = y_not_x,
-      "x_and_y" = x_and_y
+      "a_not_b" = a_not_b,
+      "b_not_a" = b_not_a,
+      "a_and_b" = a_and_b
     )
 
   return(diff_list)
