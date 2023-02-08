@@ -1,11 +1,14 @@
+# This script uses a custom SQL view not in prod.
+# It may need to be imported into cop-test.
+# Metadata import file is here:
+# data-pack-commons/data-raw/get _dataelementgroupsetstructure resource table.xml
+
 library(datapackr)
 library(magrittr)
 library(tidyverse)
 
-#TODO ask sam about the code below as it currently does not run for GetSqlView, followup reference on line 44
-# removed library references in script as I am removing function from R, we can always bring back manually
 getStandardDataElementGroups <- function() {
-  GetSqlView("m7qxbPHsikm") %>%
+  datimutils::getSqlView(sql_view_uid = "m7qxbPHsikm") %>%
     dplyr::select(data_element = dataelementname,
                   data_element_uid = dataelementuid,
                   data_element_code = dataelementcode,
@@ -22,11 +25,11 @@ getStandardDataElementGroups <- function() {
                   )
 }
 
-#TODO ask sam about the code below as it currently does not run for GetSqlView, followup reference on line 44
 getDataSets_Detailed <- function(dataset_uids) {
-  purrr::map(dataset_uids, ~ GetSqlView("DotdxKrNZxG",
-                                                         c("dataSets"),
-                                                         c(.x))) %>%
+  purrr::map(dataset_uids,
+             ~ datimutils::getSqlView(sql_view_uid = "DotdxKrNZxG",
+                                      variable_keys = c("dataSets"),
+                                      variable_values = c(.x))) %>%
     dplyr::bind_rows() %>%
     dplyr::select(-dataelementdesc, -shortname) %>%
     dplyr::rename(data_element = "dataelement",
@@ -40,16 +43,10 @@ getDataSets_Detailed <- function(dataset_uids) {
 
 #secrets <- "/Users/sam/.secrets/cop.json"
 datimutils::loginToDATIM(paste0(Sys.getenv("SECRETS_FOLDER"),
-                                "datim.json"))
-base_url <- d2_default_session$base_url
+                                "coptest.json"))
 
 #TODO ask sam about the code below as it currently does not run, GetSqlView does not find a valid sql view
 fy_22_t <- datapackr::getDatasetUids(2022 - 1, "mer_targets") %>%
-  getDataSets_Detailed() %>%
-  dplyr::select(-dataset) %>%
-  distinct()
-
-fy_21_t <- datapackr::getDatasetUids(2021 - 1, "mer_targets") %>%
   getDataSets_Detailed() %>%
   dplyr::select(-dataset) %>%
   distinct()
@@ -59,14 +56,22 @@ fy_23_t <- datapackr::getDatasetUids(2023 - 1, "mer_targets") %>%
   dplyr::select(-dataset) %>%
   distinct()
 
+fy_24_t <- c("dA9C5bL44NX", #MER Target Setting: PSNU (Facility and Community Combined) (TARGETS)
+             "A2GxohPT9Hw", #MER Target Setting: PSNU (Facility and Community Combined) - DoD ONLY (TARGETS)
+             "vpDd67HlZcT") %>% #
+  getDataSets_Detailed() %>%
+  dplyr::select(-dataset) %>%
+  distinct()
 
-dif_21T_23T <- dplyr::setdiff(fy_23_t, fy_21_t)
-dif_21T_22T <- dplyr::setdiff(fy_22_t, fy_21_t)
+
+dif_22T_24T <- dplyr::setdiff(fy_24_t, fy_22_t)
 dif_22T_23T <- dplyr::setdiff(fy_23_t, fy_22_t)
 dif_23T_22T <- dplyr::setdiff(fy_22_t, fy_23_t)
+dif_23T_24T <- dplyr::setdiff(fy_24_t, fy_23_t)
+dif_24T_23T <- dplyr::setdiff(fy_23_t, fy_24_t)
 
-match_21T_23T <- dplyr::intersect(fy_23_t, fy_21_t)
 match_22T_23T <- dplyr::intersect(fy_23_t, fy_22_t)
+match_23T_24T <- dplyr::intersect(fy_24_t, fy_23_t)
 
 
 schema <- datapackr::cop22_data_pack_schema %>%
