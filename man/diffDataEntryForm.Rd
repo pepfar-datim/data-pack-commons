@@ -5,17 +5,17 @@
 \title{diffDataEntryForm(uid_a, uid_b)}
 \usage{
 diffDataEntryForm(
-  uid_a,
-  uid_b,
+  dataset_a,
+  dataset_b,
   sql_view_data_a = NULL,
   sql_view_data_b = NULL,
   d2_session = dynGet("d2_default_session", inherits = TRUE)
 )
 }
 \arguments{
-\item{uid_a}{a uid for a sqlView}
+\item{dataset_a}{a dataset uid}
 
-\item{uid_b}{a uid for a sqlView}
+\item{dataset_b}{a dataset uid}
 }
 \value{
 a list of all three differences
