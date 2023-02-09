@@ -299,4 +299,12 @@ test_that("Can compare dataframes", {
     )
   )
 
+  # test return null when join fails
+  a$y <- c(6, 7, 1, 3, 5, 6, 8) # num vals crash join
+  res <- diffDataFrames(
+    dataframe_a = a,
+    dataframe_b = b
+  )
+  testthat::expect_null(unique(res)[[1]])
+
 })

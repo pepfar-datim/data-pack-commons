@@ -335,16 +335,14 @@ diffDataFrames <- function(
   a_not_b <- tryCatch({
     dplyr::anti_join(dataframe_a, dataframe_b)
   }, error = function(e) {
-    print(e)
-    stop("in X but not Y could not be calculated because of error ^")
+    return(NULL)
   })
 
   # in b but not a
   b_not_a <- tryCatch({
     dplyr::anti_join(dataframe_b, dataframe_a)
   }, error = function(e) {
-    print(e)
-    stop("in B but not A could not be calculated because of error ^")
+    return(NULL)
   })
 
   # in a and b
@@ -352,7 +350,7 @@ diffDataFrames <- function(
     dplyr::inner_join(dataframe_a, dataframe_b)
   }, error = function(e) {
     print(e)
-    stop("in A and B, could not be calculated because of error ^")
+    return(NULL)
   })
 
   # list
