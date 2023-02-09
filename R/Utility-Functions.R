@@ -267,7 +267,7 @@ diffSnuximModels <- function(model_old, model_new,
 #' that access sqlviews
 #' @param dataset_a a dataset uid
 #' @param dataset_b a dataset uid
-#' @param d2_session
+#' @param d2_session a d2_session
 #' @return a list of all three differences
 #'
 diffDataEntryForm <- function(

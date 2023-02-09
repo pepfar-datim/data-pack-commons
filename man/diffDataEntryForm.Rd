@@ -5,14 +5,14 @@
 \title{diffDataEntryForm(uid_a, uid_b)}
 \usage{
 diffDataEntryForm(
-  dataset_a,
-  dataset_b,
-  sql_view_data_a = NULL,
-  sql_view_data_b = NULL,
+  uid_a,
+  uid_b,
   d2_session = dynGet("d2_default_session", inherits = TRUE)
 )
 }
 \arguments{
+\item{d2_session}{a d2_session}
+
 \item{dataset_a}{a dataset uid}
 
 \item{dataset_b}{a dataset uid}
@@ -21,6 +21,6 @@ diffDataEntryForm(
 a list of all three differences
 }
 \description{
-A function that compares two data entry forms based of uid inputs
+A function that compares two data entry forms based on uid inputs
 that access sqlviews
 }
