@@ -74,11 +74,8 @@ stable <- dplyr::select(comparison_community$a_and_b, dataelement, categoryoptio
 joined_community <- dplyr::full_join(added, removed) %>%
   dplyr::full_join(stable) %>%
   dplyr::filter(purrr::map2_lgl(added, removed,
-                                ~ !(is.null(.x) && is.null(.y))))
-
-
-
-
+                                ~ !(is.null(.x) && is.null(.y)))) %>%
+  dplyr::mutate(type = "comunity")
 
 # MER R: Facility Based FY2022Q4 - BHlhyPmRTUY
 # MER R: Facility Based FY2021Q4 - zL8TlPVzEBZ
@@ -105,9 +102,26 @@ stable <- dplyr::select(comparison_facility$a_and_b, dataelement, categoryoption
   dplyr::rename("stable" = "data")
 
 # combined
-joined_community <- dplyr::full_join(added, removed) %>%
+joined_facility <- dplyr::full_join(added, removed) %>%
   dplyr::full_join(stable) %>%
   dplyr::filter(purrr::map2_lgl(added, removed,
-                                ~ !(is.null(.x) && is.null(.y))))
+                                ~ !(is.null(.x) && is.null(.y)))) %>%
+  dplyr::mutate(type = "facility")
+
+
+# bind pull unique list
+joined_all <- rbind(
+  joined_community,
+  joined_facility
+)
+
+# overlapped items
+overlap <- joined_all[duplicated(joined_all$dataelement),]$dataelement
+joined_all_overlap <- joined_all[joined_all$dataelement %in% overlap,] %>%
+  dplyr::arrange(dataelement)
+
+# unique records
+joined_all_uniq <- joined_all[!duplicated(joined_all$dataelement),]
+
 
 ### End DP-896
