@@ -143,8 +143,11 @@ GetData_DataPack <- function(parameters,
   # add analytics filters for support type in DSD or TA
   # expect for indicators/data elements with no support type (AGYW, Priortization)
   if (!(parameters$dx_id %in% c("zPTqc4v5GAK", # FY21 Results AGYW_PREV Total D
-                                "r4zbW3owX9n"))) {
-    #IMPATT.PRIORITY_SNU (N, SUBNAT) TARGET:
+                                "r4zbW3owX9n", #IMPATT.PRIORITY_SNU (N, SUBNAT) TARGET:
+                                "uWfP6tHu3ao", # FY22 Results AGYW_PREV Total D
+                                "NbVyANRjRTS" # COP22 Targets AGYW_PREV BEGUN
+                                ))) {
+
     fils_list <- TWXpUVE2MqL %.f% c("cRAGKdWIDn4", "iM13vdNLWKb")
     analytics_input <-  append(analytics_input, fils_list)
 
@@ -159,7 +162,7 @@ GetData_DataPack <- function(parameters,
     analytics_input$ou <- org_units
   }
 
-  # add dimensions for the standard age, sex, kp, and other disaggregations
+  # add dimensions for the standard age, sex, kp
   # this gets translated into a list object via translateDims in order to leverage getAnalytics
   dimension_disaggs <-
     dim_item_sets %>%
@@ -168,9 +171,7 @@ GetData_DataPack <- function(parameters,
       model_sets %in% c(
         parameters$age_set,
         parameters$sex_set,
-        parameters$kp_set,
-        parameters$other_disagg_set
-      )
+        parameters$kp_set)
     ) %>%
     dplyr::select(type, dim_item_uid, dim_uid) %>%
     unique()  %>%
@@ -179,10 +180,28 @@ GetData_DataPack <- function(parameters,
   # these are cases when a historic disaggregation doesn't exist
   # and we need to create the disaggregation allocation for the DataPack
 
+  # add filters for other disaggregations
+  # this gets translated into a list object via translateDims in order to leverage getAnalytics
+  other_disaggs <-
+    dim_item_sets %>%
+    dplyr::mutate(type = "filter") %>%
+    dplyr::filter(
+      model_sets %in% c(
+        parameters$other_disagg_set
+      )
+    ) %>%
+    dplyr::select(type, dim_item_uid, dim_uid) %>%
+    unique()  %>%
+    stats::na.omit() %>%
+    translateFils()
+
+
   # prepare final analytics input
   analytics_input$timeout <- 300 # set timeout to over 5 minutes
   analytics_input$retry <- 3
-  analytics_input_base <- append(analytics_input, dimension_disaggs)
+  analytics_input_base <-
+    append(analytics_input, dimension_disaggs) %>%
+    append(other_disaggs)
 
   # custom data ----
   # Implemented for dreams SNUs for AGYW_PREV

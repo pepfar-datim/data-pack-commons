@@ -141,7 +141,8 @@ getMechsList <- function(cop_year,
     ou = paste0("OU_GROUP-",
                 datimutils::getOrgUnitGroups("Country", by = name)),
     pe_f = paste0(cop_year - 1, "Oct"),
-    "SH885jaRe0o" %.d% "all") %>%
+    "SH885jaRe0o" %.d% "all",
+    timeout = 180) %>%
     dplyr::select(mechanism_uid = "Funding Mechanism",
                   country_uid = "Organisation unit") %>%
     dplyr::mutate(mechanism_code =
@@ -353,28 +354,46 @@ data <-  country_details[["id"]] %>%
 # COMPARE MODELS ---------------------------------------------------------------
 
 data_old <- readr::read_rds(file.choose())
-# data_old = data_old$lZsCb6y0KDX
-data_old <- setNames(data_old, country_details$id)
 
-non_nulls <- purrr::map_lgl(names(data),
-                            ~ !is.null(data[[.x]]) || !is.null(data_old[[.x]]))
-names <-  names(data)[non_nulls]
-
-purrr::map(names, ~try(dplyr::all_equal(data[[.x]], data_old[[.x]]))) %>%
-  setNames(datimutils::getOrgUnits(names))
-
-deltas <- purrr::map_df(names, ~try(dplyr::full_join(
-  dplyr::bind_cols(data[[.x]], tibble::tribble(~new, 1)),
-  dplyr::bind_cols(data_old[[.x]], tibble::tribble(~old, 1))))) %>%
-  dplyr::filter(is.na(old) | is.na(new))
-
-ancestors <- datimutils::getOrgUnits(deltas$psnu_uid, fields = "ancestors[name]")
-deltas <- dplyr::mutate(deltas,
-                        psnu = datimutils::getOrgUnits(psnu_uid),
-                        ou = purrr::map_chr(ancestors, purrr::pluck, 1, 3),
-                        snu1 = purrr::map_chr(ancestors, purrr::pluck, 1, 4, .default = NA_character_))
+deltas <- diffSnuximModels(
+  data_old,
+  data,
+  full_diff = FALSE
+)
 
 print(paste0("The difference between the older model and the new model is: ", nrow(deltas)))
+
+
+# MANUAL COMPARISON ARCHIVAL CODE -----
+# data <- readr::read_rds(file.choose())
+# data_old <- readr::read_rds(file.choose())
+#
+#
+# # # data_old = data_old$lZsCb6y0KDX
+#
+# data_old <- setNames(data_old, country_details$id)
+# #
+#  non_nulls <- purrr::map_lgl(names(data),
+#                              ~ !is.null(data[[.x]]) || !is.null(data_old[[.x]]))
+#  names <-  names(data)[non_nulls]
+# #
+#  purrr::map(names, ~try(dplyr::all_equal(data[[.x]], data_old[[.x]]))) %>%
+#    setNames(datimutils::getOrgUnits(names))
+# #
+#  deltas <- purrr::map_df(names, ~try(dplyr::full_join(
+#    dplyr::bind_cols(data[[.x]], tibble::tribble(~new, 1)),
+#    dplyr::bind_cols(data_old[[.x]], tibble::tribble(~old, 1))))) %>%
+#    dplyr::filter(is.na(old) | is.na(new))
+# #
+#  ancestors <- datimutils::getOrgUnits(deltas$psnu_uid, fields = "ancestors[name]")
+#  deltas <- dplyr::mutate(deltas,
+#                          psnu = datimutils::getOrgUnits(psnu_uid),
+#                          ou = purrr::map_chr(ancestors, purrr::pluck, 1, 3),
+#                          snu1 = purrr::map_chr(ancestors, purrr::pluck, 1, 4, .default = NA_character_))
+#
+# print(paste0("The difference between the older model and the new model is: ", nrow(deltas)))
+
+
 
 #
 # if (cop_year == 2021){

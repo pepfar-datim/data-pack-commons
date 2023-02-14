@@ -24,6 +24,31 @@ translateDims <- function(dimensions_df) {
 }
 
 #' @export
+#' @title Translate Filters
+#'
+#' @description takes a filters data frame and translates it into a list item for input to get_analytics
+#' @param filters_df a dimensions data frame.
+#' @return  List of dimensions for the analytics call to datimutils::getAnalytics
+#'
+translateFils <- function(dimensions_df) {
+
+  dims <- dimensions_df %>% select(dim_uid) %>% unique()
+
+  res <- dims$dim_uid %>% lapply(function(uid) {
+    # prepare dim item uids and dim
+    dim_uid <- sprintf("'%s'", uid)
+    dim_item_uids <- toString(sprintf("'%s'", dimensions_df[dimensions_df$dim_uid == uid, ]$dim_item_uid))
+
+    # prepare param to pass
+    # we pre-evaluate so that the api params are set for passing
+    res <- paste(dim_uid, "%.f%", "c(", dim_item_uids, ")")
+    res <- eval(parse(text = res))
+
+  })
+  return(res)
+}
+
+#' @export
 #' @title StackPrefixedCols(data, prefixes)
 #'
 #' @description Takes columns from data with specified prefixes and stacks them based on the unprefixed
@@ -153,4 +178,84 @@ MapDimToOptions <- function(data, items_to_options, allocate) {
     joined_data %>%
       RenameDimensionColumns(cop_category)
   }
+}
+
+#' @export
+#' @title diffSnuximModels(model_old, model_new, full_diff = TRUE)
+#'
+#' @description A function that compares old and new snuxim models
+#' @param model_old list - snuxim model
+#' @param model_new list - snuxim model
+#' @param ancestors_data list - optional ancestor data, mainly for testing
+#' @param data_psnu character vector of psnu data, mainly for testing
+#' @param full_diff If TRUE compares model difference fully
+#' @return deltas representing difference in data of both models
+#'
+diffSnuximModels <- function(model_old, model_new,
+                             data_ancestors = NULL,
+                             data_psnu = NULL,
+                             full_diff = TRUE,
+                             d2_session = dynGet("d2_default_session",
+                                                 inherits = TRUE)
+) {
+
+  # only include countries present in both files
+  if (full_diff) {
+    country_details <- dplyr::union(names(model_old),
+                                    names(model_new))
+  } else {
+    country_details <- dplyr::intersect(names(model_old),
+                                        names(model_new))
+  }
+
+  # bind list item rows and add relevant columns
+  model_old_filtered <- dplyr::bind_rows(model_old[country_details]) %>%
+    dplyr::filter(!is.na(value)) %>%
+    dplyr::mutate(value = round(value, 5),
+                  percent = round(percent, 5)) %>%
+    rename(value.old = value,
+           percent.old = percent)
+  #dplyr::mutate(value = round(value, 2)) %>%
+  #dplyr::mutate(old = 1)
+
+  model_new_filtered <- dplyr::bind_rows(model_new[country_details]) %>%
+    dplyr::filter(!is.na(value)) %>%
+    dplyr::mutate(value = round(value, 5),
+                  percent = round(percent, 5)) %>%
+    rename(value.new = value,
+           percent.new = percent)
+  #dplyr::mutate(value = round(value, 2)) %>%
+  #dplyr::mutate(old = 1)
+  deltas  <-  dplyr::full_join(model_new_filtered, model_old_filtered) %>%
+    dplyr::filter(value.new != value.old |
+                    percent.new != percent.old |
+                    is.na(value.new) |
+                    is.na(value.old) |
+                    is.na(percent.new) |
+                    is.na(percent.old)
+    )
+
+  # add other columns
+  if (!is.null(data_ancestors)) {
+    ancestors <- data_ancestors
+  } else {
+    ancestors <- datimutils::getOrgUnits(deltas$psnu_uid,
+                                         fields = "ancestors[name]",
+                                         d2_session = d2_session)
+  }
+
+  if (!is.null(data_psnu)) {
+    deltas <- dplyr::mutate(deltas,
+                            psnu = data_psnu,
+                            ou = purrr::map_chr(ancestors, purrr::pluck, 1, 3),
+                            snu1 = purrr::map_chr(ancestors, purrr::pluck, 1, 4, .default = NA_character_))
+  } else {
+    deltas <- dplyr::mutate(deltas,
+                            psnu = datimutils::getOrgUnits(psnu_uid,
+                                                           d2_session = d2_session),
+                            ou = purrr::map_chr(ancestors, purrr::pluck, 1, 3),
+                            snu1 = purrr::map_chr(ancestors, purrr::pluck, 1, 4, .default = NA_character_))
+  }
+
+  return(deltas)
 }

@@ -163,7 +163,7 @@ datimutils::loginToDATIM(paste0(Sys.getenv("SECRETS_FOLDER"),
                                 "datim.json"))
 
 wd <- getwd()
-setwd("~/Documents/GitHub/data-pack-commons")
+# setwd("~/Documents/GitHub/data-pack-commons")
 
 dim_item_sets <- readr::read_csv("./data-raw/model_calculations/dimension_item_sets.csv",
                                  col_types = readr::cols(.default = "c", sort_order = "d", weight = "d"),
@@ -183,28 +183,28 @@ data_required <-
 
 ValidateDataRequired(data_required)
 
-Map22Tto23T <-
-  readr::read_csv("./data-raw/snu_x_im_distribution_configuration/22Tto23TMap.csv",
+Map23Tto24T <-
+  readr::read_csv("./data-raw/snu_x_im_distribution_configuration/23Tto24TMap.csv",
                   col_types = readr::cols(.default = "c"),
                   na = c("NA"))
 
-ValidateMapT_1toT(Map22Tto23T, dim_item_sets)
+ValidateMapT_1toT(Map23Tto24T, dim_item_sets)
 
 dplyr::all_equal(datapackcommons::data_required, data_required)
-dplyr::all_equal(datapackcommons::Map22Tto23T, Map22Tto23T)
+dplyr::all_equal(datapackcommons::Map23Tto24T, Map23Tto24T)
 dplyr::all_equal(datapackcommons::dim_item_sets, dim_item_sets)
 dr_dif_removed <- dplyr::anti_join(datapackcommons::data_required, data_required)
-map_dif_removed <- dplyr::anti_join(datapackcommons::Map22Tto23T, Map22Tto23T)
+map_dif_removed <- dplyr::anti_join(datapackcommons::Map23Tto24T, Map23Tto24T)
 dim_dif_removed <- dplyr::anti_join(datapackcommons::dim_item_sets, dim_item_sets)
 dr_dif_added <- dplyr::anti_join(data_required,
                                  datapackcommons::data_required)
-map_dif_added <- dplyr::anti_join(Map22Tto23T,
-                                  datapackcommons::Map22Tto23T)
+map_dif_added <- dplyr::anti_join(Map23Tto24T,
+                                  datapackcommons::Map23Tto24T)
 dim_dif_added <- dplyr::anti_join(dim_item_sets,
                                   datapackcommons::dim_item_sets)
 
 usethis::use_data(dim_item_sets, overwrite = TRUE, compress = "gzip")
 usethis::use_data(data_required, overwrite = TRUE, compress = "gzip")
-usethis::use_data(Map22Tto23T, overwrite = TRUE, compress = "gzip")
+usethis::use_data(Map23Tto24T, overwrite = TRUE, compress = "gzip")
 
 setwd(wd)
