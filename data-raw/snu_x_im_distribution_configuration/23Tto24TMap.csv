@@ -1,4 +1,4 @@
-﻿indicator_code,dx,technical_area,technical_area_uid,num_or_den,num_or_den_uid,disagg_type,disagg_type_uid,pe,age_set,sex_set,kp_set,other_disagg,allocate
+indicator_code,dx,technical_area,technical_area_uid,num_or_den,num_or_den_uid,disagg_type,disagg_type_uid,pe,age_set,sex_set,kp_set,other_disagg,allocate
 GEND_GBV.PE.T,DE_GROUP-OuKFZzVk6gr,GEND_GBV,vw3VoiA4D0s,Numerator,Som9NRMQqV7,ViolenceServiceType,QEpxdKlM3zh,2022Oct,NA,NA,NA,vt_pe,distribute
 GEND_GBV.S.T,DE_GROUP-OuKFZzVk6gr,GEND_GBV,vw3VoiA4D0s,Numerator,Som9NRMQqV7,ViolenceServiceType,QEpxdKlM3zh,2022Oct,NA,NA,NA,vt_sv,distribute
 HTS_INDEX_COM.New.Neg.T,DE_GROUP-OuKFZzVk6gr,HTS_INDEX,CUblPgOMGaT,Numerator,Som9NRMQqV7,IndexMod/Age/Sex/Result,xds87opkbem,2022Oct,fy24_age_bands,F/M,NA,tss_NewNeg,distribute
@@ -97,6 +97,5 @@ HTS_TST.SNS.Neg.T,DE_GROUP-TXAVaM4oYMd,HTS_TST,f5IPTM7mieH,Numerator,Som9NRMQqV7
 HTS_TST.ActiveOther.Pos.T,DE_GROUP-TXAVaM4oYMd,HTS_TST,f5IPTM7mieH,Numerator,Som9NRMQqV7,OtherPITC/Age/Sex/Result,E3VaSq4JOzd,2023Oct,fy24_age_bands,F/M,NA,NA,distribute
 HTS_TST.ActiveOther.Neg.T,DE_GROUP-TXAVaM4oYMd,HTS_TST,f5IPTM7mieH,Numerator,Som9NRMQqV7,OtherPITC/Age/Sex/Result,E3VaSq4JOzd,2023Oct,fy24_age_bands,F/M,NA,NA,distribute
 HTS_RECENT.T,DE_GROUP-TXAVaM4oYMd,HTS_RECENT,twyHxdQVjMC,Numerator,Som9NRMQqV7,VMMC/Age/Sex/HIVStatus,mCtbMQYjHjj,2023Oct,fy24_age_bands,F/M,NA,NA,distribute
-HTS_TST.Other.Pos.T,DE_GROUP-TXAVaM4oYMd,HTS_TST,f5IPTM7mieH,Numerator,Som9NRMQqV7,Age/Sex/Result,E3VaSq4JOzd,2023Oct,fy24_age_bands,F/M,NA,NA,distribute
-HTS_TST.Other.Neg.T,DE_GROUP-TXAVaM4oYMd,HTS_TST,f5IPTM7mieH,Numerator,Som9NRMQqV7,Age/Sex/Result,E3VaSq4JOzd,2023Oct,fy24_age_bands,F/M,NA,NA,distribute
-PrEP_CT.Neg.T,DE_GROUP-TXAVaM4oYMd,PrEP_CT,fRWHMVd6Vq5,Numerator,Som9NRMQqV8,Age/Sex/HIVStatus,pxz2gGSIQhG,2023Oct,fy24_age_bands,F/M,NA,NA,distribute
+HTS_TST.Other.Pos.T,DE_GROUP-TXAVaM4oYMd,HTS_TST,f5IPTM7mieH,Numerator,Som9NRMQqV7,OtherPITC/Age/Sex/Result,E3VaSq4JOzd,2023Oct,fy24_age_bands,F/M,NA,NA,distribute
+HTS_TST.Other.Neg.T,DE_GROUP-TXAVaM4oYMd,HTS_TST,f5IPTM7mieH,Numerator,Som9NRMQqV7,OtherPITC/Age/Sex/Result,E3VaSq4JOzd,2023Oct,fy24_age_bands,F/M,NA,NA,distribute
