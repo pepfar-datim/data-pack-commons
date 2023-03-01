@@ -1,4 +1,4 @@
-﻿indicator_code,dx,technical_area,technical_area_uid,num_or_den,num_or_den_uid,disagg_type,disagg_type_uid,pe,age_set,sex_set,kp_set,other_disagg,allocate
+indicator_code,dx,technical_area,technical_area_uid,num_or_den,num_or_den_uid,disagg_type,disagg_type_uid,pe,age_set,sex_set,kp_set,other_disagg,allocate
 GEND_GBV.PE.T,DE_GROUP-OuKFZzVk6gr,GEND_GBV,vw3VoiA4D0s,Numerator,Som9NRMQqV7,ViolenceServiceType,QEpxdKlM3zh,2022Oct,NA,NA,NA,vt_pe,distribute
 GEND_GBV.S.T,DE_GROUP-OuKFZzVk6gr,GEND_GBV,vw3VoiA4D0s,Numerator,Som9NRMQqV7,ViolenceServiceType,QEpxdKlM3zh,2022Oct,NA,NA,NA,vt_sv,distribute
 HTS_INDEX_COM.New.Neg.T,DE_GROUP-OuKFZzVk6gr,HTS_INDEX,CUblPgOMGaT,Numerator,Som9NRMQqV7,IndexMod/Age/Sex/Result,xds87opkbem,2022Oct,fy24_age_bands,F/M,NA,tss_NewNeg,distribute
@@ -91,11 +91,11 @@ CXCA_SCRN.T,DE_GROUP-OuKFZzVk6gr,CXCA_SCRN,qOgXk080fJH,Numerator,Som9NRMQqV7,Age
 OVC_SERV.DREAMS.T,DE_GROUP-OuKFZzVk6gr,OVC_SERV,RxyNwEV3oQf,Numerator,Som9NRMQqV7,Age/Sex/DREAMS,cCTvqWoHxSk,2022Oct,<01-18+ (OVC & Caregivers),F,NA,NA,distribute
 PrEP_CT.TestResult.T,DE_GROUP-OuKFZzVk6gr,PrEP_CT,fRWHMVd6Vq5,Numerator,Som9NRMQqV7,Age/Sex,Qbz6SrpmJ1y,2022Oct,fy24_age_bands,F/M,NA,NA,distribute
 HTS.Index.Pos.T,DE_GROUP-OuKFZzVk6gr,HTS_INDEX,CUblPgOMGaT,Numerator,Som9NRMQqV7,Index/Age/Sex/Result;IndexMod/Age/Sex/Result,zzNslrLngKi;xds87opkbem,2022Oct,fy24_age_bands,F/M,NA,tss_NewPos,distribute
-HTS.Index.Neg.T,DE_GROUP-OuKFZzVk6gr,HTS_INDEX,CUblPgOMGaT,Numerator,Som9NRMQqV7,Index/Age/Sex/Result,zzNslrLngKi,2022Oct,fy24_age_bands,F/M,NA,NA,distribute
+HTS.Index.Neg.T,DE_GROUP-OuKFZzVk6gr,HTS_INDEX,CUblPgOMGaT,Numerator,Som9NRMQqV7,Index/Age/Sex/Result;IndexMod/Age/Sex/Result,zzNslrLngKi;xds87opkbem,2022Oct,fy24_age_bands,F/M,NA,tss_NewNeg,distribute
 HTS_TST.SNS.Pos.T,DE_GROUP-OuKFZzVk6gr,HTS_TST,f5IPTM7mieH,Numerator,Som9NRMQqV7,VMMC/Age/Sex/HIVStatus,mCtbMQYjHjj,2022Oct,fy24_age_bands,F/M,NA,NA,distribute
 HTS_TST.SNS.Neg.T,DE_GROUP-OuKFZzVk6gr,HTS_TST,f5IPTM7mieH,Numerator,Som9NRMQqV7,VMMC/Age/Sex/HIVStatus,mCtbMQYjHjj,2022Oct,fy24_age_bands,F/M,NA,NA,distribute
-HTS_TST.ActiveOther.Pos.T,DE_GROUP-OuKFZzVk6gr,HTS_TST,f5IPTM7mieH,Numerator,Som9NRMQqV7,OtherPITC/Age/Sex/Result,E3VaSq4JOzd,2022Oct,fy24_age_bands,F/M,NA,NA,distribute
-HTS_TST.ActiveOther.Neg.T,DE_GROUP-OuKFZzVk6gr,HTS_TST,f5IPTM7mieH,Numerator,Som9NRMQqV7,OtherPITC/Age/Sex/Result,E3VaSq4JOzd,2022Oct,fy24_age_bands,F/M,NA,NA,distribute
-HTS_RECENT.T,DE_GROUP-OuKFZzVk6gr,HTS_RECENT,twyHxdQVjMC,Numerator,Som9NRMQqV7,VMMC/Age/Sex/HIVStatus,mCtbMQYjHjj,2022Oct,fy24_age_bands,F/M,NA,NA,distribute
-HTS_TST.Other.Pos.T,DE_GROUP-OuKFZzVk6gr,HTS_TST,f5IPTM7mieH,Numerator,Som9NRMQqV7,OtherPITC/Age/Sex/Result,E3VaSq4JOzd,2022Oct,fy24_age_bands,F/M,NA,NA,distribute
-HTS_TST.Other.Neg.T,DE_GROUP-OuKFZzVk6gr,HTS_TST,f5IPTM7mieH,Numerator,Som9NRMQqV7,OtherPITC/Age/Sex/Result,E3VaSq4JOzd,2022Oct,fy24_age_bands,F/M,NA,NA,distribute
+HTS_TST.ActiveOther.Pos.T,DE_GROUP-OuKFZzVk6gr,HTS_TST,f5IPTM7mieH,Numerator,Som9NRMQqV7,OtherMod/Age Aggregated/Sex/Result;MobileMod/Age/Sex/Result,cYRowDkVEpl;Qr9eyrVLHSg,2022Oct,fy24_age_bands,F/M,NA,tss_Pos,distribute
+HTS_TST.ActiveOther.Neg.T,DE_GROUP-OuKFZzVk6gr,HTS_TST,f5IPTM7mieH,Numerator,Som9NRMQqV7,OtherMod/Age Aggregated/Sex/Result;MobileMod/Age/Sex/Result,cYRowDkVEpl;Qr9eyrVLHSg,2022Oct,fy24_age_bands,F/M,NA,tss_Neg,distribute
+HTS_RECENT.T,DE_GROUP-OuKFZzVk6gr,HTS_RECENT,twyHxdQVjMC,Numerator,Som9NRMQqV7,IndexMod/Age/Sex/HIVStatus;Index/Age/Sex/HIVStatus;Emergency Ward/Age/Sex/HIVStatus;Inpat/Age/Sex/HIVStatus;MobileMod/Age/Sex/HIVStatus;OtherMod/Age/Sex/HIVStatus;OtherPITC/Age/Sex/HIVStatus;PMTCT PostANC/Age/Sex/HIVStatus;STI Clinic/Age/Sex/HIVStatus;VCT/Age/Sex/HIVStatus;KeyPop/HIVStatus;PMTCT ANC/Age/Sex/HIVStatus;TBClinic/Age/Sex/HIVStatus;VMMC/Age/Sex/HIVStatus,cnlEjFkl5UZ;Tpc0Ztxae9H;lJQyt3PjrVy;CEcYYCkTncR;EVwSAwSEfTg;G6QgzwFMWSP;Y3aCLwI6IU3;c60fuhOWPu4;WGV3YTTqrZ3;vYZLPZAuv8A;oLVJbdHt6ou;FazeYvGkStI;PcsTdqSq0Id;mCtbMQYjHjj,2022Oct,fy24_age_bands,F/M,NA,tss_Pos,distribute
+HTS_TST.Other.Pos.T,DE_GROUP-OuKFZzVk6gr,HTS_TST,f5IPTM7mieH,Numerator,Som9NRMQqV7,Inpat/Age/Sex/Result;Emergency Ward/Age/Sex/Result;OtherPITC/Age/Sex/Result;VCT/Age/Sex/Result;Pediatric/Age/Sex/Result;Malnutrition/Age/Sex/Result,p6j1mfN4rjP;iPfNX6Ylqp1;E3VaSq4JOzd;dcaYk7TXk4E;iFlQUEQcsfZ;jEpJPF6IVVB,2022Oct,fy24_age_bands,F/M,NA,tss_Pos,distribute
+HTS_TST.Other.Neg.T,DE_GROUP-OuKFZzVk6gr,HTS_TST,f5IPTM7mieH,Numerator,Som9NRMQqV7,Inpat/Age/Sex/Result;Emergency Ward/Age/Sex/Result;OtherPITC/Age/Sex/Result;VCT/Age/Sex/Result;Pediatric/Age/Sex/Result;Malnutrition/Age/Sex/Result,p6j1mfN4rjP;iPfNX6Ylqp1;E3VaSq4JOzd;dcaYk7TXk4E;iFlQUEQcsfZ;jEpJPF6IVVB,2022Oct,fy24_age_bands,F/M,NA,tss_Neg,distribute
