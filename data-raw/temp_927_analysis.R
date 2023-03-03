@@ -47,7 +47,7 @@ temp_hts_tst <- temp %>% filter(
 )
 sum(temp_hts_tst$total)
 #HTS_TST
-# 47,165,147 current total see pivot table in ticket
+# 32,491,447 current total see pivot table in ticket
 
 
 # hts recent ----
@@ -72,6 +72,28 @@ sum(temp_prep_ct$total)
 
 
 
+# what if we do an older baseline against the fresh model? ----
 
-temp_hts_recent <- temp[grepl("HTS_RECENT",temp$indicator_code),]
-sum(temp_hts_recent$total)
+baseline_model <- readr::read_rds(file.choose()) # PSNUxIM_DP746_2023-02-22_prod_commit_ 4328224.rds
+latest_model <- readr::read_rds(file.choose())  # PSNUxIM_COP23_dp746_5921214_prod_2023-03-02.rds
+
+# deltas to look at
+deltas <- diffSnuximModels(
+  baseline_model,
+  latest_model,
+  full_diff = TRUE
+)
+
+temp <- dplyr::group_by(deltas, indicator_code) %>%
+  dplyr::summarise(total = sum(value.new, na.rm = TRUE))
+
+# pull all hts recent indicators
+temp_hts_recent <- temp[grepl("HTS_RECENT", temp$indicator_code), ]
+
+# now sum up all HTS_RECENT except HTS_RECENT.T since that should
+# replace the rest
+old_hts_recent <- temp_hts_recent[!grepl("\\HTS_RECENT.T\\b", temp_hts_recent$indicator_code), ]
+sum(old_hts_recent$total)
+
+# just hts recent
+sum(temp_hts_recent[grepl("\\HTS_RECENT.T\\b", temp_hts_recent$indicator_code), ]$total)
