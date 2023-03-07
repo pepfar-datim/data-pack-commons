@@ -97,3 +97,52 @@ sum(old_hts_recent$total)
 
 # just hts recent
 sum(temp_hts_recent[grepl("\\HTS_RECENT.T\\b", temp_hts_recent$indicator_code), ]$total)
+
+
+# using direct aggregation -----
+
+# where data is the psnuxim model we want to use
+#  check hts_recent in which data is the psnuxim model
+direct_agg <-
+  data %>%
+  dplyr::bind_rows() %>%
+  dplyr::group_by(
+    indicator_code,
+
+  ) %>%
+  summarise(
+    total = sum(value, na.rm = TRUE)
+  )
+direct_agg_hts_recent <- direct_agg %>% filter(indicator_code == "HTS_RECENT.T")
+sum(direct_agg_hts_recent$total)
+
+
+direct_agg_hts_tst_other <- direct_agg %>% filter(
+  indicator_code %in% c(
+    "HTS_TST.Other.Pos.T",
+    "HTS_TST.Other.Neg.T"
+  )
+)
+
+sum(direct_agg_hts_tst_other$total)
+
+
+direct_agg_hts_index <- direct_agg %>% filter(
+  indicator_code %in% c(
+    "HTS.Index.Pos.T",
+    "HTS.Index.Neg.T"
+  )
+)
+
+direct_agg_hts_active <- direct_agg %>% filter(
+  indicator_code %in% c(
+    "HTS_TST.ActiveOther.Pos.T",
+    "HTS_TST.ActiveOther.Neg.T"
+  )
+)
+
+direct_agg_prepct <- direct_agg %>% filter(
+  indicator_code %in% c(
+    "PrEP_CT.TestResult.T"
+  )
+)
