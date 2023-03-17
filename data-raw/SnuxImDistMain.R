@@ -369,7 +369,7 @@ deltas <- diffSnuximModels(
 
 print(paste0("The difference between the older model and the new model is: ", nrow(deltas)))
 
-#
+
 # if (cop_year == 2021){
 #   readr::write_rds(data,
 #                    paste0("/Users/sam/COP data/PSNUxIM_COP21_", lubridate::today(), ".rds"),
@@ -393,10 +393,8 @@ print(paste0("The difference between the older model and the new model is: ", nr
 #   readr::write_rds(data,
 #                    "/Users/sam/COP data/psnuxim_model_data_23.rds",
 #                    compress = c("gz"))
-#   file_name <- "psnuxim_model_data_22.rds"
+#   file_name <- "psnuxim_model_data_23.rds"
 # }
-
-
 #
 # Sys.setenv(
 #   AWS_PROFILE = "datapack-testing",
@@ -441,24 +439,3 @@ print(paste0("The difference between the older model and the new model is: ", nr
 # s3$list_objects_v2(Bucket = Sys.getenv("AWS_S3_BUCKET"),
 #                    Prefix = paste0("support_files/", file_name)) %>%
 #   purrr::pluck("Contents", 1, "LastModified")
-
-# dreams districts useful for filtering dreams in case
-# dreams_districts <- c(
-#   "Botswana",
-#   "Cote d'Ivoire",
-#   "Eswatini",
-#   "Kenya",
-#   "Lesotho",
-#   "Malawi",
-#   "Mozambique",
-#   "Namibia",
-#   "Rwanda",
-#   "South Africa",
-#   "South Sudan",
-#   "Tanzania",
-#   "Uganda",
-#   "Zambia",
-#   "Zimbabwe",
-#   "Haiti"
-#
-# )
