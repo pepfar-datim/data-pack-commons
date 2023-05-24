@@ -11,7 +11,7 @@ library(datapackcommons)
 library(datimutils)
 library(dplyr)
 datimutils::loginToDATIM(paste0(Sys.getenv("SECRETS_FOLDER"), "datim.json")) # added for a different config access
-cop_year <- 2022
+cop_year <- 2023
 
 # FUNCTIONS -------------------------------------------------------------------
 
@@ -130,10 +130,14 @@ getMechsList <- function(cop_year,
                          d2_session = dynGet("d2_default_session",
                                              inherits = TRUE)) {
   assertthat::assert_that(cop_year %in% c(2021,
-                                          2022))
+                                          2022,
+                                          2023))
+  if (cop_year == 2023) #{cop_year = 2022} # temporary code to get mechs for last year for initial cop23 dev
+    # Wed Feb 22 13:29:39 2023 We should probably remove line 136 now.
   de_group <- dplyr::case_when(
     cop_year == 2021 ~ "WTq0quAW1mf", #"2021 MER Targets"
-    cop_year == 2022 ~ "QjkuCJf6lCs"  #"2022 MER Targets"
+    cop_year == 2022 ~ "QjkuCJf6lCs",  #"2022 MER Targets",
+    cop_year == 2023 ~ "OuKFZzVk6gr"  #"2023 MER Targets"
   )
 
   mechs <- datimutils::getAnalytics(
@@ -337,12 +341,14 @@ mechs <-  getMechsList(cop_year)
 
 fy_map <-  switch(as.character(cop_year),
                   "2021" = datapackcommons::Map21Tto22T,
-                  "2022" = datapackcommons::Map22Tto23T)
+                  "2022" = datapackcommons::Map22Tto23T,
+                  "2023" = datapackcommons::Map23Tto24T)
 
 # pull list of countries to iterate through
 country_details <-  datimutils::getOrgUnitGroups("Country", name, fields = "organisationUnits[name,id]") %>%
   dplyr::arrange(name) %>%
-  select(country_name = name, id)
+  select(country_name = name, id) #%>%
+#  dplyr::filter(country_name == "South Africa")
 
 # start process of collecting api data for every country
 data <-  country_details[["id"]] %>%
@@ -358,44 +364,12 @@ data_old <- readr::read_rds(file.choose())
 deltas <- diffSnuximModels(
   data_old,
   data,
-  full_diff = FALSE
+  full_diff = TRUE
 )
 
 print(paste0("The difference between the older model and the new model is: ", nrow(deltas)))
 
 
-# MANUAL COMPARISON ARCHIVAL CODE -----
-# data <- readr::read_rds(file.choose())
-# data_old <- readr::read_rds(file.choose())
-#
-#
-# # # data_old = data_old$lZsCb6y0KDX
-#
-# data_old <- setNames(data_old, country_details$id)
-# #
-#  non_nulls <- purrr::map_lgl(names(data),
-#                              ~ !is.null(data[[.x]]) || !is.null(data_old[[.x]]))
-#  names <-  names(data)[non_nulls]
-# #
-#  purrr::map(names, ~try(dplyr::all_equal(data[[.x]], data_old[[.x]]))) %>%
-#    setNames(datimutils::getOrgUnits(names))
-# #
-#  deltas <- purrr::map_df(names, ~try(dplyr::full_join(
-#    dplyr::bind_cols(data[[.x]], tibble::tribble(~new, 1)),
-#    dplyr::bind_cols(data_old[[.x]], tibble::tribble(~old, 1))))) %>%
-#    dplyr::filter(is.na(old) | is.na(new))
-# #
-#  ancestors <- datimutils::getOrgUnits(deltas$psnu_uid, fields = "ancestors[name]")
-#  deltas <- dplyr::mutate(deltas,
-#                          psnu = datimutils::getOrgUnits(psnu_uid),
-#                          ou = purrr::map_chr(ancestors, purrr::pluck, 1, 3),
-#                          snu1 = purrr::map_chr(ancestors, purrr::pluck, 1, 4, .default = NA_character_))
-#
-# print(paste0("The difference between the older model and the new model is: ", nrow(deltas)))
-
-
-
-#
 # if (cop_year == 2021){
 #   readr::write_rds(data,
 #                    paste0("/Users/sam/COP data/PSNUxIM_COP21_", lubridate::today(), ".rds"),
@@ -412,6 +386,14 @@ print(paste0("The difference between the older model and the new model is: ", nr
 #                    "/Users/sam/COP data/psnuxim_model_data_22.rds",
 #                    compress = c("gz"))
 #   file_name <- "psnuxim_model_data_22.rds"
+# } else if (cop_year == 2023){
+#   readr::write_rds(data,
+#                    paste0("/Users/sam/COP data/PSNUxIM_COP23_", lubridate::today(), ".rds"),
+#                    compress = c("gz"))
+#   readr::write_rds(data,
+#                    "/Users/sam/COP data/psnuxim_model_data_23.rds",
+#                    compress = c("gz"))
+#   file_name <- "psnuxim_model_data_23.rds"
 # }
 #
 # Sys.setenv(
