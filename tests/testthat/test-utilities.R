@@ -149,7 +149,12 @@ test_that("MapDimToOptions", {
 })
 
 library(dplyr)
+
+httptest::use_mock_api()
 test_that("Can compare psnuxim model data", {
+
+  play230 <- list(base_url = "https://play.dhis2.org/2.30/",
+                            handle = httr::handle("https://play.dhis2.org/2.30/"))
 
   # list of countries lets say of new model pulled
   country_details <-
@@ -181,19 +186,20 @@ test_that("Can compare psnuxim model data", {
     )
   )
 
-  ancestors_data <- list(
-    tribble(
-      ~name,
-      "Global", "Africa", "Angola"
-    )
-  )
+   ancestors_data <- list(
+     tribble(
+       ~name,
+       "Global", "Africa", "Angola"
+     )
+   )
 
   # PARTIAL DIFF, ONLY SAME COUNTRIES ----
   partial_deltas <- diffSnuximModels(
     model_old = old_model,
     model_new = new_model,
-    data_ancestors = ancestors_data,
-    data_psnu = c("_Military Angola"),
+    #data_ancestors = ancestors_data,
+    #data_psnu = c("_Military Angola"),
+    d2_session = play230,
     full_diff = FALSE)
 
   testthat::expect_equal(nrow(partial_deltas), 1)
@@ -214,9 +220,11 @@ test_that("Can compare psnuxim model data", {
    total_diff <- diffSnuximModels(
      model_old = old_model,
      model_new = new_model,
-     data_ancestors = ancestors_data,
-     data_psnu = c("_Military Angola", "Lupane"),
+     #data_ancestors = ancestors_data,
+     #data_psnu = c("_Military Angola", "Lupane"),
+     d2_session = play230,
      full_diff = TRUE)
    testthat::expect_equal(nrow(total_diff), 2)
 
 })
+

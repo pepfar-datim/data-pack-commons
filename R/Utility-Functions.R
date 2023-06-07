@@ -186,14 +186,11 @@ MapDimToOptions <- function(data, items_to_options, allocate) {
 #' @description A function that compares old and new snuxim models
 #' @param model_old list - snuxim model
 #' @param model_new list - snuxim model
-#' @param ancestors_data list - optional ancestor data, mainly for testing
-#' @param data_psnu character vector of psnu data, mainly for testing
 #' @param full_diff If TRUE compares model difference fully
 #' @return deltas representing difference in data of both models
 #'
-diffSnuximModels <- function(model_old, model_new,
-                             data_ancestors = NULL,
-                             data_psnu = NULL,
+diffSnuximModels <- function(model_old,
+                             model_new,
                              full_diff = TRUE,
                              d2_session = dynGet("d2_default_session",
                                                  inherits = TRUE)
@@ -236,26 +233,18 @@ diffSnuximModels <- function(model_old, model_new,
     )
 
   # add other columns
-  if (!is.null(data_ancestors)) {
-    ancestors <- data_ancestors
-  } else {
-    ancestors <- datimutils::getOrgUnits(deltas$psnu_uid,
-                                         fields = "ancestors[name]",
-                                         d2_session = d2_session)
-  }
+  ancestors <- lapply(
+    datimutils::getOrgUnits(deltas$psnu_uid,
+                            fields = "ancestors[name]",
+                            d2_session = d2_session),
+    tibble::as_tibble
+  )
 
-  if (!is.null(data_psnu)) {
-    deltas <- dplyr::mutate(deltas,
-                            psnu = data_psnu,
-                            ou = purrr::map_chr(ancestors, purrr::pluck, 1, 3),
-                            snu1 = purrr::map_chr(ancestors, purrr::pluck, 1, 4, .default = NA_character_))
-  } else {
-    deltas <- dplyr::mutate(deltas,
-                            psnu = datimutils::getOrgUnits(psnu_uid,
-                                                           d2_session = d2_session),
-                            ou = purrr::map_chr(ancestors, purrr::pluck, 1, 3),
-                            snu1 = purrr::map_chr(ancestors, purrr::pluck, 1, 4, .default = NA_character_))
-  }
+  deltas <- dplyr::mutate(deltas,
+                          psnu = datimutils::getOrgUnits(deltas$psnu_uid,
+                                                         d2_session = d2_session),
+                          ou = purrr::map_chr(ancestors, purrr::pluck, 1, 3),
+                          snu1 = purrr::map_chr(ancestors, purrr::pluck, 1, 4, .default = NA_character_))
 
   return(deltas)
 }
