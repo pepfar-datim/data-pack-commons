@@ -10,6 +10,7 @@ require(lubridate)
 require(rlang)
 require(assertthat)
 require(foreach)
+library(keyring)
 
 cop_year <- 2023
 
