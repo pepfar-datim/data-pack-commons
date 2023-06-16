@@ -16,7 +16,7 @@ cop_year <- 2023
 
 # login to datim
 datimutils::loginToDATIM(paste0(Sys.getenv("SECRETS_FOLDER"),
-                                "datim.json"))
+                                "triage.json"))
 
 # Countries to include in model, usually all
 # Turkmenistan has no planning/priortization level
