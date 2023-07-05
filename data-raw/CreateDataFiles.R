@@ -183,28 +183,28 @@ data_required <-
 
 ValidateDataRequired(data_required)
 
-Map23Tto24T <-
-  readr::read_csv("./data-raw/snu_x_im_distribution_configuration/23Tto24TMap.csv",
+Map24Tto25T <-
+  readr::read_csv("./data-raw/snu_x_im_distribution_configuration/24Tto25TMap.csv",
                   col_types = readr::cols(.default = "c"),
                   na = c("NA"))
 
-ValidateMapT_1toT(Map23Tto24T, dim_item_sets)
+ValidateMapT_1toT(Map24Tto25T, dim_item_sets)
 
 dplyr::all_equal(datapackcommons::data_required, data_required)
-dplyr::all_equal(datapackcommons::Map23Tto24T, Map23Tto24T)
+dplyr::all_equal(datapackcommons::Map24Tto25T, Map24Tto25T)
 dplyr::all_equal(datapackcommons::dim_item_sets, dim_item_sets)
 dr_dif_removed <- dplyr::anti_join(datapackcommons::data_required, data_required)
-map_dif_removed <- dplyr::anti_join(datapackcommons::Map23Tto24T, Map23Tto24T)
+map_dif_removed <- dplyr::anti_join(datapackcommons::Map24Tto25T, Map24Tto25T)
 dim_dif_removed <- dplyr::anti_join(datapackcommons::dim_item_sets, dim_item_sets)
 dr_dif_added <- dplyr::anti_join(data_required,
                                  datapackcommons::data_required)
-map_dif_added <- dplyr::anti_join(Map23Tto24T,
-                                  datapackcommons::Map23Tto24T)
+map_dif_added <- dplyr::anti_join(Map24Tto25T,
+                                  datapackcommons::Map24Tto25T)
 dim_dif_added <- dplyr::anti_join(dim_item_sets,
                                   datapackcommons::dim_item_sets)
 
 usethis::use_data(dim_item_sets, overwrite = TRUE, compress = "gzip")
 usethis::use_data(data_required, overwrite = TRUE, compress = "gzip")
-usethis::use_data(Map23Tto24T, overwrite = TRUE, compress = "gzip")
+usethis::use_data(Map24Tto25T, overwrite = TRUE, compress = "gzip")
 
 setwd(wd)
