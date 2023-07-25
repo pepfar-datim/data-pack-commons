@@ -160,7 +160,7 @@ ValidateMapT_1toT <- function(t_1_to_t, dim_item_sets) {
   }
 
 datimutils::loginToDATIM(paste0(Sys.getenv("SECRETS_FOLDER"),
-                                "coptest.json"))
+                                "datim.json"))
 
 wd <- getwd()
 # setwd("~/Documents/GitHub/data-pack-commons")
