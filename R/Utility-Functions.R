@@ -259,3 +259,108 @@ diffSnuximModels <- function(model_old, model_new,
 
   return(deltas)
 }
+
+#' @export
+#' @title diffDataEntryForm(uid_a, uid_b)
+#'
+#' @description A function that compares two data entry forms based on uid inputs
+#' that access sqlviews
+#' @param dataset_a a dataset uid
+#' @param dataset_b a dataset uid
+#' @param d2_session a d2_session
+#' @return a list of all three differences
+#'
+diffDataEntryForm <- function(
+    uid_a,
+    uid_b,
+    d2_session = dynGet("d2_default_session", inherits = TRUE)
+) {
+
+
+  # pull the sql views
+  a <-  datimutils::getSqlView(sql_view_uid = "DotdxKrNZxG",
+                             variable_keys = c("dataSets"),
+                             variable_values = c(uid_a)) %>%
+        dplyr::rename("A.dataset" = "dataset")
+
+
+  b <- datimutils::getSqlView(sql_view_uid = "DotdxKrNZxG",
+                                variable_keys = c("dataSets"),
+                                variable_values = c(uid_b)) %>%
+      dplyr::rename("B.dataset" = "dataset")
+
+  # run the diff
+  res <- diffDataFrames(
+    a,
+    b
+  )
+
+  return(res)
+
+}
+
+#' @export
+#' @title diffDataFrames(dataframe_a, dataframe_b)
+#'
+#' @description A function that compares two dataframes and returns a list
+#' combination of joins between those two dataframes
+#' @param dataset_a a dataframe
+#' @param dataset_b a dataframe
+#' @return a list of all three differences
+#'
+diffDataFrames <- function(
+  dataframe_a,
+  dataframe_b
+  ) {
+
+  # ensure data frames are present as params
+  if (is.null(dataframe_a) || is.null(dataframe_b)) {
+    stop("one or both of your dataframe values are empty!")
+  }
+
+  # ensure the class of the objects going in
+  if (!is.data.frame(dataframe_a) || !is.data.frame(dataframe_b)) {
+    stop("one or both of these are not dataframes!")
+  }
+
+  # ensure names of the data frames are the same
+  # filter out dataset column so as not to trip error
+  if (!identical(names(dataframe_a)[!grepl("dataset", names(dataframe_a))],
+                names(dataframe_b)[!grepl("dataset", names(dataframe_b))])
+     ) {
+    stop("your dataframes seem to have different names!")
+  }
+
+  # in a but not b
+  a_not_b <- tryCatch({
+    dplyr::anti_join(dataframe_a, dataframe_b)
+  }, error = function(e) {
+    return(NULL)
+  })
+
+  # in b but not a
+  b_not_a <- tryCatch({
+    dplyr::anti_join(dataframe_b, dataframe_a)
+  }, error = function(e) {
+    return(NULL)
+  })
+
+  # in a and b
+  a_and_b <- tryCatch({
+    dplyr::inner_join(dataframe_a, dataframe_b)
+  }, error = function(e) {
+    print(e)
+    return(NULL)
+  })
+
+  # list
+  diff_list <-
+    list(
+      "a_not_b" = a_not_b,
+      "b_not_a" = b_not_a,
+      "a_and_b" = a_and_b
+    )
+
+  return(diff_list)
+
+}

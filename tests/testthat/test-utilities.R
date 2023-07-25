@@ -148,6 +148,7 @@ test_that("MapDimToOptions", {
   testthat::expect_equal(sample_data, joined_no_items_to_options)
 })
 
+# test psnuxim model differences ----
 library(dplyr)
 test_that("Can compare psnuxim model data", {
 
@@ -218,5 +219,92 @@ test_that("Can compare psnuxim model data", {
      data_psnu = c("_Military Angola", "Lupane"),
      full_diff = TRUE)
    testthat::expect_equal(nrow(total_diff), 2)
+
+})
+
+# test data entry form differences ----
+
+test_that("Can compare dataframes", {
+
+  # form a
+  a <-
+    data.frame(
+      A.dataset = c(1, 2, 3, 4, 5, 6, 7),
+      y = c("A", "B", "C", "D", "E", "F", "G")
+    )
+
+  # form b
+  b <-
+    data.frame(
+      B.dataset = c(8, 9, 10, 4, 5, 6, 7),
+      z = c("H", "I", "J", "D", "E", "F", "G")
+    )
+
+  d <- list()
+
+  # test dataframe stop error if param is empty
+  testthat::expect_error(
+    diffDataFrames(
+      dataframe_a = NULL,
+      dataframe_b = b
+    ),
+    "one or both of your dataframe values are empty!"
+  )
+
+  # test dataframe stop error
+  testthat::expect_error(
+    diffDataFrames(
+      dataframe_a = d,
+      dataframe_b = b
+    ),
+    "one or both of these are not dataframes!"
+  )
+
+  # test stop error if names are unequal
+  testthat::expect_error(
+    diffDataFrames(
+      dataframe_a = a,
+      dataframe_b = b
+    ),
+    "your dataframes seem to have different names!"
+  )
+
+  # test positive list result
+  names(b)[names(b) == "z"] <- "y"
+  res <- diffDataFrames(
+    dataframe_a = a,
+    dataframe_b = b
+  )
+
+  # test output is as expected
+  testthat::expect_equal(
+    res,
+    list(
+      "a_not_b" =
+        data.frame(
+          A.dataset = c(1, 2, 3),
+          y = c("A", "B", "C")
+        ),
+      "b_not_a" =
+        data.frame(
+          B.dataset = c(8, 9, 10),
+          y = c("H", "I", "J")
+        ),
+      "a_and_b" =
+        data.frame(
+          A.dataset = c(4, 5, 6, 7),
+          y = c("D", "E", "F", "G"),
+          B.dataset = c(4, 5, 6, 7)
+        )
+    )
+  )
+
+  # test return null when join fails
+  a$y <- c(6, 7, 1, 3, 5, 6, 8) # num vals crash join
+  res <- diffDataFrames(
+    dataframe_a = a,
+    dataframe_b = b
+  )
+  testthat::expect_null(unique(res)[[1]])
 
 })
