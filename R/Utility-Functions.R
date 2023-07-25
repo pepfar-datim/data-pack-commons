@@ -186,14 +186,11 @@ MapDimToOptions <- function(data, items_to_options, allocate) {
 #' @description A function that compares old and new snuxim models
 #' @param model_old list - snuxim model
 #' @param model_new list - snuxim model
-#' @param ancestors_data list - optional ancestor data, mainly for testing
-#' @param data_psnu character vector of psnu data, mainly for testing
 #' @param full_diff If TRUE compares model difference fully
 #' @return deltas representing difference in data of both models
 #'
-diffSnuximModels <- function(model_old, model_new,
-                             data_ancestors = NULL,
-                             data_psnu = NULL,
+diffSnuximModels <- function(model_old,
+                             model_new,
                              full_diff = TRUE,
                              d2_session = dynGet("d2_default_session",
                                                  inherits = TRUE)
@@ -236,26 +233,123 @@ diffSnuximModels <- function(model_old, model_new,
     )
 
   # add other columns
-  if (!is.null(data_ancestors)) {
-    ancestors <- data_ancestors
-  } else {
-    ancestors <- datimutils::getOrgUnits(deltas$psnu_uid,
-                                         fields = "ancestors[name]",
-                                         d2_session = d2_session)
-  }
+  ancestors <- lapply(
+    datimutils::getOrgUnits(deltas$psnu_uid,
+                            fields = "ancestors[name]",
+                            d2_session = d2_session),
+    tibble::as_tibble
+  )
 
-  if (!is.null(data_psnu)) {
-    deltas <- dplyr::mutate(deltas,
-                            psnu = data_psnu,
-                            ou = purrr::map_chr(ancestors, purrr::pluck, 1, 3),
-                            snu1 = purrr::map_chr(ancestors, purrr::pluck, 1, 4, .default = NA_character_))
-  } else {
-    deltas <- dplyr::mutate(deltas,
-                            psnu = datimutils::getOrgUnits(psnu_uid,
-                                                           d2_session = d2_session),
-                            ou = purrr::map_chr(ancestors, purrr::pluck, 1, 3),
-                            snu1 = purrr::map_chr(ancestors, purrr::pluck, 1, 4, .default = NA_character_))
-  }
+  deltas <- dplyr::mutate(deltas,
+                          psnu = datimutils::getOrgUnits(deltas$psnu_uid,
+                                                         d2_session = d2_session),
+                          ou = purrr::map_chr(ancestors, purrr::pluck, 1, 3),
+                          snu1 = purrr::map_chr(ancestors, purrr::pluck, 1, 4, .default = NA_character_))
 
   return(deltas)
+}
+
+#' @export
+#' @title diffDataEntryForm(uid_a, uid_b)
+#'
+#' @description A function that compares two data entry forms based on uid inputs
+#' that access sqlviews
+#' @param dataset_a a dataset uid
+#' @param dataset_b a dataset uid
+#' @param d2_session a d2_session
+#' @return a list of all three differences
+#'
+diffDataEntryForm <- function(
+    uid_a,
+    uid_b,
+    d2_session = dynGet("d2_default_session", inherits = TRUE)
+) {
+
+
+  # pull the sql views
+  a <-  datimutils::getSqlView(sql_view_uid = "DotdxKrNZxG",
+                             variable_keys = c("dataSets"),
+                             variable_values = c(uid_a)) %>%
+        dplyr::rename("A.dataset" = "dataset")
+
+
+  b <- datimutils::getSqlView(sql_view_uid = "DotdxKrNZxG",
+                                variable_keys = c("dataSets"),
+                                variable_values = c(uid_b)) %>%
+      dplyr::rename("B.dataset" = "dataset")
+
+  # run the diff
+  res <- diffDataFrames(
+    a,
+    b
+  )
+
+  return(res)
+
+}
+
+#' @export
+#' @title diffDataFrames(dataframe_a, dataframe_b)
+#'
+#' @description A function that compares two dataframes and returns a list
+#' combination of joins between those two dataframes
+#' @param dataset_a a dataframe
+#' @param dataset_b a dataframe
+#' @return a list of all three differences
+#'
+diffDataFrames <- function(
+  dataframe_a,
+  dataframe_b
+  ) {
+
+  # ensure data frames are present as params
+  if (is.null(dataframe_a) || is.null(dataframe_b)) {
+    stop("one or both of your dataframe values are empty!")
+  }
+
+  # ensure the class of the objects going in
+  if (!is.data.frame(dataframe_a) || !is.data.frame(dataframe_b)) {
+    stop("one or both of these are not dataframes!")
+  }
+
+  # ensure names of the data frames are the same
+  # filter out dataset column so as not to trip error
+  if (!identical(names(dataframe_a)[!grepl("dataset", names(dataframe_a))],
+                names(dataframe_b)[!grepl("dataset", names(dataframe_b))])
+     ) {
+    stop("your dataframes seem to have different names!")
+  }
+
+  # in a but not b
+  a_not_b <- tryCatch({
+    dplyr::anti_join(dataframe_a, dataframe_b)
+  }, error = function(e) {
+    return(NULL)
+  })
+
+  # in b but not a
+  b_not_a <- tryCatch({
+    dplyr::anti_join(dataframe_b, dataframe_a)
+  }, error = function(e) {
+    return(NULL)
+  })
+
+  # in a and b
+  a_and_b <- tryCatch({
+    dplyr::inner_join(dataframe_a, dataframe_b)
+  }, error = function(e) {
+    print(e)
+    return(NULL)
+  })
+
+  # list
+  diff_list <-
+    list(
+      "a_not_b" = a_not_b,
+      "b_not_a" = b_not_a,
+      "a_and_b" = a_and_b
+    )
+
+  return(diff_list)
+
 }
