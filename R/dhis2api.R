@@ -145,6 +145,7 @@ GetData_DataPack <- function(parameters,
   if (!(parameters$dx_id %in% c("zPTqc4v5GAK", # FY21 Results AGYW_PREV Total D
                                 "r4zbW3owX9n", #IMPATT.PRIORITY_SNU (N, SUBNAT) TARGET:
                                 "uWfP6tHu3ao", # FY22 Results AGYW_PREV Total D
+                                "BVhkc1rPgFW", # FY23 Results AGYW_PREV Total D
                                 "NbVyANRjRTS" # COP22 Targets AGYW_PREV BEGUN
                                 ))) {
 
