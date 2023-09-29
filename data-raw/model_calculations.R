@@ -11,7 +11,7 @@ require(rlang)
 require(assertthat)
 require(foreach)
 
-cop_year <- 2023
+cop_year <- 2024
 
 # login to datim
 datimutils::loginToDATIM(paste0(Sys.getenv("SECRETS_FOLDER"),
