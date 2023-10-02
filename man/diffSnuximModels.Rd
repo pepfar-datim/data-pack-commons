@@ -7,8 +7,6 @@
 diffSnuximModels(
   model_old,
   model_new,
-  data_ancestors = NULL,
-  data_psnu = NULL,
   full_diff = TRUE,
   d2_session = dynGet("d2_default_session", inherits = TRUE)
 )
@@ -18,11 +16,7 @@ diffSnuximModels(
 
 \item{model_new}{list - snuxim model}
 
-\item{data_psnu}{character vector of psnu data, mainly for testing}
-
 \item{full_diff}{If TRUE compares model difference fully}
-
-\item{ancestors_data}{list - optional ancestor data, mainly for testing}
 }
 \value{
 deltas representing difference in data of both models

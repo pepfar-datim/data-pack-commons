@@ -1,0 +1,19 @@
+{
+    "organisationUnits": [
+        {
+            "name": "_Military Angola",
+            "id": "bSwiBL5Y4SW",
+            "ancestors": [
+                {
+                    "name": "Global"
+                },
+                {
+                    "name": "Africa"
+                },
+                {
+                    "name": "Angola"
+                }
+            ]
+        }
+    ]
+}

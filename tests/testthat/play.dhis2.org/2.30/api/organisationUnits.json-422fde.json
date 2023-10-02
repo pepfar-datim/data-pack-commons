@@ -1,0 +1,37 @@
+{
+    "organisationUnits": [
+        {
+            "name": "Lupane",
+            "id": "a3zBlSiF0wB",
+            "ancestors": [
+                {
+                    "name": "Global"
+                },
+                {
+                    "name": "Africa"
+                },
+                {
+                    "name": "Zimbabwe"
+                },
+                {
+                    "name": "Matabeleland North"
+                }
+            ]
+        },
+        {
+            "name": "_Military Angola",
+            "id": "bSwiBL5Y4SW",
+            "ancestors": [
+                {
+                    "name": "Global"
+                },
+                {
+                    "name": "Africa"
+                },
+                {
+                    "name": "Angola"
+                }
+            ]
+        }
+    ]
+}
