@@ -11,7 +11,7 @@ require(rlang)
 require(assertthat)
 require(foreach)
 
-cop_year <- 2023
+cop_year <- 2024
 
 # login to datim
 datimutils::loginToDATIM(paste0(Sys.getenv("SECRETS_FOLDER"),
@@ -360,14 +360,15 @@ deltas <- diffDataPackModels(file.choose() %>% readr::read_rds(),
      flattenDataPackModel_21(cop_data),
      full_diff = TRUE)
 
-# output_location <- "~/COP data/COP22 Update/"
-# save flattened version manually update date and version
+# # output_location <- "~/COP data/COP24 Update/"
+# # save flattened version manually update date and version
+# file_name_base = paste0("model_data_pack_input_24_", lubridate::today(), "_de3d50e")
 # saveRDS(flattenDataPackModel_21(cop_data),
-#         file = paste0(output_location,"model_data_pack_input_22_20220510_1_flat.rds"))
-# save flattened version to send to S3
-# saveRDS(flattenDataPackModel_21(cop_data), file = paste0(output_location,"datapack_model_data.rds"))
-# save flattened version manually update date and version
-# saveRDS(cop_data, file = paste0(output_location,"model_data_pack_input_22_20220510_1.rds"))
+#         file = paste0(output_location,file_name_base, "_flat.rds"))
+# # save flattened version to send to S3
+#  saveRDS(flattenDataPackModel_21(cop_data), file = paste0(output_location,"datapack_model_data.rds"))
+# # save flattened version manually update date and version
+#  saveRDS(cop_data, file = paste0(output_location,file_name_base, ".rds"))
 
 
 # Sys.setenv(
