@@ -196,6 +196,8 @@ Note that while the code above may show indicators which are missing, this does 
 Once we know all indicator are present we can move on to checking the age/sex/kp disaggs. There is a handy function in the package `checkModelDisagg` to help us isolate problem areas. Below is an example analysis that looks at age disaggs to identify a missing disagg value present in the schema but missing in the model:
 
 ```{r, eval=FALSE}
+
+# analysis of age disaags missing in model data ----
 your_model <- readRDS("your model...")
 binded_model <- rbindlist(your_model)
 
@@ -239,7 +241,64 @@ binded_model %>% filter(indicator_code == "HTS_TST.Pos.Total_With_HEI.T_1") %>%
 #[1] "A9ddhoPWEUn" "p3kqRd8LE4a" "I0g0vpEQ3UB" "Sga7ddy3GYG" "TpXlQcoXGZF" "jcGQdcpPSJP"
 ```
 
-So we can see that in this case sMBMO5xAq5T is indeed missing from the model and this must be investigated.
+So we can see that in this case `sMBMO5xAq5T` is indeed missing from the model and this must be investigated.
+
+Another use case for this function is searching for data in the model that is not present in the schema. Below we pull flagged records and pivot the table to get an easily sortable result:
+
+```{r, eval=F}
+
+# analysis of extra model age disaggs not in schema ----
+extra_mod_disaggs <- res %>% 
+  filter(grepl("BUT", msg)) %>% 
+  separate(msg,into=c("msg1", "ids"), 
+           sep="\\:", convert = TRUE, extra = "merge")
+
+nmax <- max(stringr::str_count(extra_mod_disaggs$ids, "\\,")) + 1
+
+extra_mod_disaggs_p <- 
+  extra_mod_disaggs %>% 
+  separate(ids, paste0("col", seq_len(nmax)), sep = "\\,", fill = "right") %>%
+  select(-msg1) %>%
+  pivot_longer(-indicator_code) %>%
+  na.omit() %>%
+  arrange(indicator_code) %>%
+  mutate(value = trimws(value))
+  
+extra_mod_disaggs_p
+
+#  A tibble: 23 × 3
+#    indicator_code            name  value      
+#    <chr>                     <chr> <chr>      
+#  1 CXCA_SCRN.R               col1  p3kqRd8LE4a
+#  2 CXCA_SCRN.R               col2  TpXlQcoXGZF
+#  3 CXCA_SCRN.R               col3  A9ddhoPWEUn
+#  4 CXCA_SCRN.R               col4  jcGQdcpPSJP
+#  5 CXCA_SCRN.R               col5  sMBMO5xAq5T
+#  6 CXCA_SCRN.Rt.R            col1  p3kqRd8LE4a
+#  7 CXCA_SCRN.Rt.R            col2  TpXlQcoXGZF
+#  8 HTS.Index.Pos.Yield       col1  sMBMO5xAq5T
+#  9 HTS_TST.ActiveOther.Yield col1  sMBMO5xAq5T
+# 10 HTS_TST.Other.Yield       col1  sMBMO5xAq5T
+# … with 13 more rows
+# ℹ Use `print(n = ...)` to see more rows
+
+# quick sanity check for an example like CXCA_SCRN.R 
+filter(datapackr::cop24_data_pack_schema,
+       (dataset == "mer" & col_type == "past") |
+         (dataset == "datapack" & col_type == "calculation")) %>%
+  filter(indicator_code == "CXCA_SCRN.R") %>%
+  pull(valid_ages)
+
+# [[1]]
+# # A tibble: 2 × 2
+#   name  id         
+#   <chr> <chr>      
+# 1 25-34 I0g0vpEQ3UB
+# 2 35-49 Sga7ddy3GYG
+
+```
+
+So we can see in this case the schema calls for two disaggregations for `CXCA_SCRN.R` but the model is showing more disaggregations.
 
 ## Key Files/Directories
 ```{r, echo = FALSE}

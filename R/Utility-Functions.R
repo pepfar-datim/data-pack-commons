@@ -392,27 +392,28 @@ checkModelDisagg = function(model, disagg) {
       # keep all model data for that indicator where there are values
       model <- model %>%
         filter(indicator_code == indicator_c) %>%
-        select(mod_id_val, value) %>%
-        filter_at(vars(value), all_vars(!is.na(.)))
+        filter_at(vars(mod_id_val), all_vars(!is.na(.))) %>%
+        select(mod_id_val, value)
 
       # keep the indicator data for the schema
       schema <-
         datapackr::cop24_data_pack_schema  %>%
         filter(indicator_code ==  indicator_c)
 
-      # are there schema age disaggs?
-      if(
-        all(is.na(schema[[sch_id_val]][[1]]))
-      ) {
-        msg <- paste0("no ", disagg ," disaggs in schema")
+      # MATCH: there are no schema age disaggs AND no model data
+      if ( all(is.na(schema[[sch_id_val]][[1]])) & NROW(model) < 1 )  {
 
-        # there are no schema age disaggs but they exist in the model
-      } else if ( all(is.na(schema[[sch_id_val]][[1]])) & nrow(model > 0) ) {
+        #msg <- paste0("no ", disagg ," disaggs in schema and no disagg for model ", mod_id_val)
+        msg <- paste0("model matches ", disagg , " schema")
 
-        msg <- paste0("no ", disagg, " disaggs in schema but in model")
+      # NO MATCH: there are no schema age disaggs BUT they exist in the model
+      } else if ( all(is.na(schema[[sch_id_val]][[1]])) & NROW(model) > 0 ) {
 
-        # there are schema age disaggs and there is model data
-      } else if ( !is.na(all(is.na(schema[[sch_id_val]][[1]]))) & nrow(model) > 0 ) {
+        msg <- paste0("no ", disagg, " disaggs in schema BUT something in model")
+
+      # POTENTIAL MATCH: there are schema age disaggs and there is model data
+      # we now check to understand the nature of the data match
+      } else if ( !is.na(all(is.na(schema[[sch_id_val]][[1]]))) & NROW(model) > 0 ) {
 
         # here we check the model is not missing anything from the schema
         s <- dplyr::anti_join(
@@ -426,27 +427,25 @@ checkModelDisagg = function(model, disagg) {
           schema[[sch_id_val]][[1]] %>% distinct(id) %>% arrange()
         )
 
-        msg1 <- if(nrow(s) < 1) {
+        msg1 <- if(NROW(s) < 1) {
           paste0("model matches ", disagg , " schema")
         } else {
           paste0("model missing: ", paste0(unique(s$id), collapse = ","))
         }
 
-        msg2 <- if(nrow(m) > 1) {
-          paste0("model showing extra ", disagg , " disaggs: ", paste0(unique(m$id), collapse = ","))
+        msg2 <- if(NROW(m) > 0) {
+          paste0("BUT model showing extra ", disagg , " disaggs: ", paste0(unique(m$id), collapse = ","))
         }
 
-        msg <- trimws(paste(msg1, msg2))
+        if(exists("msg2")) {
+          msg <- trimws(paste(msg1, msg2))
+        } else {
+          msg <- trimws(msg1)
+        }
 
-        # there is no model data or data is missing
-      } else if ( nrow(model) < 1 ) {
-
-        msg <- "no model data OR missing data"
-
-        # there is some other issue to look into
       } else {
 
-        msg <- "something else"
+        msg <- "data in model is most likely NA"
 
       }
 

@@ -328,25 +328,25 @@ test_that("can check model disaggs against schema", {
     "model matches age schema"
   )
 
-  # test there is no model data OR missing data
+  # model matches age schema BUT model showing extra age disaggs: sMBMO5xAq5T
   faux_model <-
     tribble(
       ~indicator_code, ~period, ~psnu_uid, ~age_option_uid, ~sex_option_uid, ~kp_option_uid, ~value,
-      "PMTCT_STAT.D.T_1", "2023Oct", "Yhf4p9zEkYl", "p3kqRd8LE4a", "Z1EnpTPaUfq", NA, NA,
+      "PMTCT_STAT.D.T_1", "2023Oct", "Yhf4p9zEkYl", "p3kqRd8LE4a", "Z1EnpTPaUfq", NA, 44,
+      "PMTCT_STAT.D.T_1", "2023Oct", "Yhf4p9zEkYl", "jcGQdcpPSJP", "Z1EnpTPaUfq", NA, 74,
+      "PMTCT_STAT.D.T_1", "2023Oct", "Yhf4p9zEkYl", "I0g0vpEQ3UB", "Z1EnpTPaUfq", NA, 43,
+      "PMTCT_STAT.D.T_1", "2023Oct", "Yhf4p9zEkYl", "Sga7ddy3GYG", "Z1EnpTPaUfq", NA, 3,
+      "PMTCT_STAT.D.T_1", "2023Oct", "Yhf4p9zEkYl", "TpXlQcoXGZF", "Z1EnpTPaUfq", NA, 2,
+      "PMTCT_STAT.D.T_1", "2023Oct", "Yhf4p9zEkYl", "RpQlocoXGZF", "Z1EnpTPaUfq", NA, 2,
     )
-  res <- checkModelDisagg(faux_model, "age")
 
-  # NA values are evaliuated as missing disagg data
+  res <- checkModelDisagg(faux_model, "age")
   testthat::expect_equal(
     res %>% filter(indicator_code == "PMTCT_STAT.D.T_1") %>% pull(msg),
-    "no model data OR missing data"
+    "model matches age schema BUT model showing extra age disaggs: RpQlocoXGZF"
   )
 
-  # a random other indicator not present in faux model trips error
-  testthat::expect_equal(
-    res %>% filter(indicator_code == "TX_NEW.R") %>% pull(msg),
-    "no model data OR missing data"
-  )
+
 
 })
 
