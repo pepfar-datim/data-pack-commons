@@ -195,7 +195,6 @@ test_that("Can compare psnuxim model data", {
     full_diff = FALSE)
 
   testthat::expect_equal(nrow(partial_deltas), 1)
-  rm(ancestors_data)
 
   # FULL DIFF, ALL COUNTRIES ----
    total_diff <- diffSnuximModels(
@@ -291,5 +290,81 @@ test_that("Can compare dataframes", {
     dataframe_b = b
   )
   testthat::expect_null(unique(res)[[1]])
+
+})
+
+test_that("can check model disaggs against schema", {
+
+  # test stop on invalid disagg
+  testthat::expect_error(checkModelDisagg(faux_model, "foo"))
+
+  # test can identify disaggs in model but not in schema
+  faux_model <-
+    tribble(
+      ~indicator_code, ~period, ~psnu_uid, ~age_option_uid, ~sex_option_uid, ~kp_option_uid, ~value,
+      "PMTCT_STAT.D.T_1", "2023Oct", "Yhf4p9zEkYl", "p3kqRd8LE4a", "Z1EnpTPaUfq", NA, 4374,
+    )
+
+  res <- checkModelDisagg(faux_model, "age")
+  testthat::expect_equal(
+    res %>% filter(indicator_code == "PMTCT_STAT.D.T_1") %>% pull(msg),
+    "model missing: jcGQdcpPSJP,I0g0vpEQ3UB,Sga7ddy3GYG,TpXlQcoXGZF"
+  )
+
+  # test model matches schema
+  faux_model <-
+    tribble(
+      ~indicator_code, ~period, ~psnu_uid, ~age_option_uid, ~sex_option_uid, ~kp_option_uid, ~value,
+      "PMTCT_STAT.D.T_1", "2023Oct", "Yhf4p9zEkYl", "p3kqRd8LE4a", "Z1EnpTPaUfq", NA, 44,
+      "PMTCT_STAT.D.T_1", "2023Oct", "Yhf4p9zEkYl", "jcGQdcpPSJP", "Z1EnpTPaUfq", NA, 74,
+      "PMTCT_STAT.D.T_1", "2023Oct", "Yhf4p9zEkYl", "I0g0vpEQ3UB", "Z1EnpTPaUfq", NA, 43,
+      "PMTCT_STAT.D.T_1", "2023Oct", "Yhf4p9zEkYl", "Sga7ddy3GYG", "Z1EnpTPaUfq", NA, 3,
+      "PMTCT_STAT.D.T_1", "2023Oct", "Yhf4p9zEkYl", "TpXlQcoXGZF", "Z1EnpTPaUfq", NA, 2,
+    )
+
+  res <- checkModelDisagg(faux_model, "age")
+  testthat::expect_equal(
+    res %>% filter(indicator_code == "PMTCT_STAT.D.T_1") %>% pull(msg),
+    "model matches age schema"
+  )
+
+  # test there is no model data OR missing data
+  faux_model <-
+    tribble(
+      ~indicator_code, ~period, ~psnu_uid, ~age_option_uid, ~sex_option_uid, ~kp_option_uid, ~value,
+      "PMTCT_STAT.D.T_1", "2023Oct", "Yhf4p9zEkYl", "p3kqRd8LE4a", "Z1EnpTPaUfq", NA, NA,
+    )
+  res <- checkModelDisagg(faux_model, "age")
+
+  # NA values are evaliuated as missing disagg data
+  testthat::expect_equal(
+    res %>% filter(indicator_code == "PMTCT_STAT.D.T_1") %>% pull(msg),
+    "no model data OR missing data"
+  )
+
+  # a random other indicator not present in faux model trips error
+  testthat::expect_equal(
+    res %>% filter(indicator_code == "TX_NEW.R") %>% pull(msg),
+    "no model data OR missing data"
+  )
+
+})
+
+test_that("can check for missing data", {
+
+  faux_model <-
+    tribble(
+      ~indicator_code, ~period, ~psnu_uid, ~age_option_uid, ~sex_option_uid, ~kp_option_uid, ~value,
+      "PMTCT_STAT.D.T_1", "2023Oct", "Yhf4p9zEkYl", "p3kqRd8LE4a", "Z1EnpTPaUfq", NA, 44,
+      "PMTCT_STAT.D.T_1", "2023Oct", "Yhf4p9zEkYl", "jcGQdcpPSJP", "Z1EnpTPaUfq", NA, 74,
+      "PMTCT_STAT.D.T_1", "2023Oct", "Yhf4p9zEkYl", "I0g0vpEQ3UB", "Z1EnpTPaUfq", NA, 43,
+      "PMTCT_STAT.D.T_1", "2023Oct", "Yhf4p9zEkYl", "Sga7ddy3GYG", "Z1EnpTPaUfq", NA, 3,
+      "PMTCT_STAT.D.T_1", "2023Oct", "Yhf4p9zEkYl", "TpXlQcoXGZF", "Z1EnpTPaUfq", NA, 2,
+    )
+
+  res <- checkMissingIndicators(faux_model)
+
+  testthat::expect_equal(res %>% filter(indicator_code == "PMTCT_STAT.D.T_1") %>% pull(row_count), 5)
+  testthat::expect_equal(res %>% filter(indicator_code == "TX_NEW.R") %>% pull(row_count), 0)
 
 })

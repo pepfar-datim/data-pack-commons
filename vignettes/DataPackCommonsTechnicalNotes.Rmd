@@ -174,6 +174,72 @@ Consider the PMTCT tab of the datapack
 
 Replicate vs distribute We never distribute 
 
+For example below we can use the following function `checkMissingIndicators` to isolate indicator_codes present in the schema but missing a datpapack model:
+
+```{r}
+
+you_model <- readRDS("your model ...")
+
+# which indicators don't show up in the model?
+missing_model_data <- checkMissingIndicators(model = your_model) %>% filter(row_count < 1)
+unique(missing_model_data$indicator_code)
+
+#[1] "HTS_TST.KP.Pos.Yield.T"
+
+# pull schema data for missing indicator to understand more
+missing_data <- datapackr::cop24_data_pack_schema %>%
+  filter(indicator_code %in% unique(missing_model_data$indicator_code))
+```
+
+Note that while the code above may show indicators which are missing, this does not mean they need to be added, check previous years to make sure there is already a reason for a missing indicator, in this case `HTS_TST.KP.Pos.Yield.T` is noted as an indicator_code we did not currently need to add. 
+
+Once we know all indicator are present we can move on to checking the age/sex/kp disaggs. There is a handy function in the package `checkModelDisagg` to help us isolate problem areas. Below is an example analysis that looks at age disaggs to identify a missing disagg value present in the schema but missing in the model:
+
+```{r}
+your_model <- readRDS("your model...")
+binded_model <- rbindlist(your_model)
+
+# run disagg function
+res <- checkModelDisagg(binded_model, "age")
+
+# lets assume the report res shows HTS_TST.Pos.Total_With_HEI.T_1 is showing a missing
+# id in age that is present in schema but not in model
+
+# check missing model data reported
+res %>% filter(indicator_code == "HTS_TST.Pos.Total_With_HEI.T_1")
+
+#                   indicator_code                        msg
+#1: HTS_TST.Pos.Total_With_HEI.T_1 model missing: sMBMO5xAq5T
+
+# check schema to make sure
+filter(datapackr::cop24_data_pack_schema,
+       (dataset == "mer" & col_type == "past") |
+         (dataset == "datapack" & col_type == "calculation")) %>%
+  filter(indicator_code == "HTS_TST.Pos.Total_With_HEI.T_1") %>%
+  pull(valid_ages)
+
+#[[1]]
+# A tibble: 7 × 2
+#  name  id         
+#  <chr> <chr>      
+#1 <01   sMBMO5xAq5T
+#2 01-09 A9ddhoPWEUn
+#3 10-14 jcGQdcpPSJP
+#4 15-24 p3kqRd8LE4a
+#5 25-34 I0g0vpEQ3UB
+#6 35-49 Sga7ddy3GYG
+#7 50+   TpXlQcoXGZF
+
+# check in model
+binded_model %>% filter(indicator_code == "HTS_TST.Pos.Total_With_HEI.T_1") %>%
+  select(indicator_code, age_option_uid, value) %>%
+  distinct(age_option_uid) %>%
+  pull(age_option_uid)
+
+#[1] "A9ddhoPWEUn" "p3kqRd8LE4a" "I0g0vpEQ3UB" "Sga7ddy3GYG" "TpXlQcoXGZF" "jcGQdcpPSJP"
+```
+
+So we can see that in this case sMBMO5xAq5T is indeed missing from the model and this must be investigated.
 
 ## Key Files/Directories
 ```{r, echo = FALSE}

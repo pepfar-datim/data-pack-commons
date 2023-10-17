@@ -353,3 +353,141 @@ diffDataFrames <- function(
   return(diff_list)
 
 }
+
+#' @export
+#' @title checkModelDisagg(model, disagg)
+#'
+#' @description A function that checks the model against schema
+#' @param model a datapack model
+#' @param disagg a disagg type
+#' @return a data frame with the indicator code and a msg for investigation
+#'
+checkModelDisagg = function(model, disagg) {
+
+  if( !disagg %in% c("age", "sex", "kp") ) {
+    stop("you have not entered a valid kp!")
+  }
+
+  if(disagg == "age") {
+    mod_id_val <- "age_option_uid"
+    sch_id_val <- "valid_ages"
+  } else if (disagg == "sex") {
+    mod_id_val <- "sex_option_uid"
+    sch_id_val <- "valid_sexes"
+  } else {
+    mod_id_val <- "kp_option_uid"
+    sch_id_val <- "valid_kps"
+  }
+
+  valid_schema_indicators <-
+    filter(datapackr::cop24_data_pack_schema,
+           (dataset == "mer" & col_type == "past") |
+             (dataset == "datapack" & col_type == "calculation")) %>%
+    select(indicator_code, col_type, period) %>%
+    distinct()
+
+  res <-
+    lapply(valid_schema_indicators$indicator_code, function(indicator_c){
+
+      # keep all model data for that indicator where there are values
+      model <- model %>%
+        filter(indicator_code == indicator_c) %>%
+        select(mod_id_val, value) %>%
+        filter_at(vars(value), all_vars(!is.na(.)))
+
+      # keep the indicator data for the schema
+      schema <-
+        datapackr::cop24_data_pack_schema  %>%
+        filter(indicator_code ==  indicator_c)
+
+      # are there schema age disaggs?
+      if(
+        all(is.na(schema[[sch_id_val]][[1]]))
+      ) {
+        msg <- paste0("no ", disagg ," disaggs in schema")
+
+        # there are no schema age disaggs but they exist in the model
+      } else if ( all(is.na(schema[[sch_id_val]][[1]])) & nrow(model > 0) ) {
+
+        msg <- paste0("no ", disagg, " disaggs in schema but in model")
+
+        # there are schema age disaggs and there is model data
+      } else if ( !is.na(all(is.na(schema[[sch_id_val]][[1]]))) & nrow(model) > 0 ) {
+
+        # here we check the model is not missing anything from the schema
+        s <- dplyr::anti_join(
+          schema[[sch_id_val]][[1]] %>% distinct(id) %>% arrange(),
+          as_tibble(model) %>% arrange() %>% select(id = mod_id_val)
+        )
+
+        # and here we check if the model is showing disaggs not in the schema
+        m <- dplyr::anti_join(
+          as_tibble(model) %>% arrange() %>% select(id = mod_id_val),
+          schema[[sch_id_val]][[1]] %>% distinct(id) %>% arrange()
+        )
+
+        msg1 <- if(nrow(s) < 1) {
+          paste0("model matches ", disagg , " schema")
+        } else {
+          paste0("model missing: ", paste0(s$id, collapse = ","))
+        }
+
+        msg2 <- if(nrow(m) > 1) {
+          paste0("model showing extra ", disagg , " disaggs: ", paste0(m$id, collapse = ","))
+        }
+
+        msg <- trimws(paste(msg1, msg2))
+
+        # there is no model data or data is missing
+      } else if ( nrow(model) < 1 ) {
+
+        msg <- "no model data OR missing data"
+
+        # there is some other issue to look into
+      } else {
+
+        msg <- "something else"
+
+      }
+
+      res_f <- tibble(
+        indicator_code = indicator_c,
+        msg = list(msg)
+      )
+
+    })
+
+  res %>% rbindlist() %>% arrange(msg) %>% mutate(msg = unlist(msg))
+
+}
+
+#' @export
+#' @title checkMissingIndicators(model)
+#'
+#' @description A function that returns missing indicators in schema not in model
+#' @param model a datapack model
+#' @return a data frame with the indicator code and a row count for exisitng data in model
+#'
+checkMissingIndicators = function(model) {
+
+  valid_schema_indicators <-
+    filter(datapackr::cop24_data_pack_schema,
+           (dataset == "mer" & col_type == "past") |
+             (dataset == "datapack" & col_type == "calculation")) %>%
+    select(indicator_code, col_type, period) %>%
+    distinct()
+
+  # report data row count for all indicators
+  model_report <-
+    lapply(valid_schema_indicators$indicator_code, function(indicator) {
+
+      indicator_data <- model %>% filter(indicator_code == indicator)
+
+      data.frame(
+        indicator_code = indicator,
+        row_count = nrow(indicator_data)
+      )
+
+    }) %>% rbindlist()
+
+}
