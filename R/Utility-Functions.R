@@ -429,11 +429,11 @@ checkModelDisagg = function(model, disagg) {
         msg1 <- if(nrow(s) < 1) {
           paste0("model matches ", disagg , " schema")
         } else {
-          paste0("model missing: ", paste0(s$id, collapse = ","))
+          paste0("model missing: ", paste0(unique(s$id), collapse = ","))
         }
 
         msg2 <- if(nrow(m) > 1) {
-          paste0("model showing extra ", disagg , " disaggs: ", paste0(m$id, collapse = ","))
+          paste0("model showing extra ", disagg , " disaggs: ", paste0(unique(m$id), collapse = ","))
         }
 
         msg <- trimws(paste(msg1, msg2))
