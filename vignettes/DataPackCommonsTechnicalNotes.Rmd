@@ -176,7 +176,7 @@ Replicate vs distribute We never distribute
 
 For example below we can use the following function `checkMissingIndicators` to isolate indicator_codes present in the schema but missing a datpapack model:
 
-```{r}
+```{r, eval=FALSE}
 
 you_model <- readRDS("your model ...")
 
@@ -195,7 +195,7 @@ Note that while the code above may show indicators which are missing, this does 
 
 Once we know all indicator are present we can move on to checking the age/sex/kp disaggs. There is a handy function in the package `checkModelDisagg` to help us isolate problem areas. Below is an example analysis that looks at age disaggs to identify a missing disagg value present in the schema but missing in the model:
 
-```{r}
+```{r, eval=FALSE}
 your_model <- readRDS("your model...")
 binded_model <- rbindlist(your_model)
 
