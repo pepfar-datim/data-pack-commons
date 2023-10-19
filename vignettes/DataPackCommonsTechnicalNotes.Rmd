@@ -174,24 +174,42 @@ Consider the PMTCT tab of the datapack
 
 Replicate vs distribute We never distribute 
 
-For example below we can use the following function `checkMissingIndicators` to isolate indicator_codes present in the schema but missing a datpapack model:
+We can look at indicators present and missing in both the schema and model:
 
 ```{r, eval=FALSE}
 
-you_model <- readRDS("your model ...")
+your_model <- readRDS("...your_model")
+binded_model <- rbindlist(your_model)
 
-# which indicators don't show up in the model?
-missing_model_data <- checkMissingIndicators(model = your_model) %>% filter(row_count < 1)
-unique(missing_model_data$indicator_code)
+valid_schema_indicators <- 
+  filter(datapackr::cop24_data_pack_schema,
+         (dataset == "mer" & col_type == "past") |
+           (dataset == "datapack" & col_type == "calculation")) %>%
+  select(indicator_code) %>%
+  distinct()
 
-#[1] "HTS_TST.KP.Pos.Yield.T"
+# indicators in schema not in model
+dplyr::anti_join(
+  valid_schema_indicators,
+  binded_model,
+  by = "indicator_code"
+)
 
-# pull schema data for missing indicator to understand more
-missing_data <- datapackr::cop24_data_pack_schema %>%
-  filter(indicator_code %in% unique(missing_model_data$indicator_code))
+#           indicator_code
+# 1 HTS_TST.KP.Pos.Yield.T
+
+# indicators in model not in schema
+dplyr::anti_join(
+  binded_model %>% select(indicator_code),
+  valid_schema_indicators,
+  by = "indicator_code"
+) %>% distinct()
+
+#             indicator_code
+# 1: IMPATT.PRIORITY_SNU.T_1
 ```
 
-Note that while the code above may show indicators which are missing, this does not mean they need to be added, check previous years to make sure there is already a reason for a missing indicator, in this case `HTS_TST.KP.Pos.Yield.T` is noted as an indicator_code we did not currently need to add. 
+Note that while the code above may show indicators which are missing, this does not mean they need to be added, check previous years to make sure there is already a reason for a missing indicator, in this case `HTS_TST.KP.Pos.Yield.T` is noted as an indicator_code we did not currently need to add to the model. 
 
 Once we know all indicator are present we can move on to checking the age/sex/kp disaggs. There is a handy function in the package `checkModelDisagg` to help us isolate problem areas. Below is an example analysis that looks at age disaggs to identify a missing disagg value present in the schema but missing in the model:
 
@@ -243,7 +261,42 @@ binded_model %>% filter(indicator_code == "HTS_TST.Pos.Total_With_HEI.T_1") %>%
 
 So we can see that in this case `sMBMO5xAq5T` is indeed missing from the model and this must be investigated.
 
-Another use case for this function is searching for data in the model that is not present in the schema. Below we pull flagged records and pivot the table to get an easily sortable result:
+In addition to searching for the missing age_option_id in the case above, wee can group model output data and validate the data against the pivot tables in the DATIM. Below we summarize the age_option_uid data for matching against DATIM; note `<1` is missing which is the category option id we flagged in the previous code chunk:
+
+```{r, eval = F}
+age_names <- 
+filter(datapackr::cop24_data_pack_schema,
+       (dataset == "mer" & col_type == "past") |
+         (dataset == "datapack" & col_type == "calculation")) %>%
+  filter(indicator_code == "HTS_TST.Pos.Total_With_HEI.T_1") %>%
+  select(valid_ages)
+
+age_names <- age_names[[1]][[1]] %>%
+  rename(age_option_uid = id)
+
+binded_model %>% filter(indicator_code == "HTS_TST.Pos.Total_With_HEI.T_1") %>%
+  select(indicator_code, period, age_option_uid, value) %>%
+  group_by(age_option_uid, period) %>%
+  summarise(total = sum(value)) %>%
+  inner_join(
+    age_names
+  ) %>%
+  select(name, age_option_uid, period, total) %>%
+  arrange(name)
+
+# A tibble: 6 × 4
+# Groups:   age_option_uid [6]
+#   name  age_option_uid period   total
+#   <chr> <chr>          <chr>    <dbl>
+# 1 01-09 A9ddhoPWEUn    2023Oct  83086
+# 2 10-14 jcGQdcpPSJP    2023Oct  42269
+# 3 15-24 p3kqRd8LE4a    2023Oct 216867
+# 4 25-34 I0g0vpEQ3UB    2023Oct 391622
+# 5 35-49 Sga7ddy3GYG    2023Oct 680880
+# 6 50+   TpXlQcoXGZF    2023Oct 408372
+```
+
+Another use case for this function is searching for data in the model that is not present in the schema; datapack model generation does not care if there is extra data in the model as it only keeps what's needed from the schema, but below we pull flagged records and pivot the table to get an easily sortable result:
 
 ```{r, eval=F}
 

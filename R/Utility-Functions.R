@@ -383,7 +383,7 @@ checkModelDisagg = function(model, disagg) {
     filter(datapackr::cop24_data_pack_schema,
            (dataset == "mer" & col_type == "past") |
              (dataset == "datapack" & col_type == "calculation")) %>%
-    select(indicator_code, col_type, period) %>%
+    select(indicator_code, col_type) %>%
     distinct()
 
   res <-
@@ -457,36 +457,5 @@ checkModelDisagg = function(model, disagg) {
     })
 
   res %>% rbindlist() %>% arrange(msg) %>% mutate(msg = unlist(msg))
-
-}
-
-#' @export
-#' @title checkMissingIndicators(model)
-#'
-#' @description A function that returns missing indicators in schema not in model
-#' @param model a datapack model
-#' @return a data frame with the indicator code and a row count for exisitng data in model
-#'
-checkMissingIndicators = function(model) {
-
-  valid_schema_indicators <-
-    filter(datapackr::cop24_data_pack_schema,
-           (dataset == "mer" & col_type == "past") |
-             (dataset == "datapack" & col_type == "calculation")) %>%
-    select(indicator_code, col_type, period) %>%
-    distinct()
-
-  # report data row count for all indicators
-  model_report <-
-    lapply(valid_schema_indicators$indicator_code, function(indicator) {
-
-      indicator_data <- model %>% filter(indicator_code == indicator)
-
-      data.frame(
-        indicator_code = indicator,
-        row_count = nrow(indicator_data)
-      )
-
-    }) %>% rbindlist()
 
 }

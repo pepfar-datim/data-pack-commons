@@ -349,22 +349,3 @@ test_that("can check model disaggs against schema", {
 
 
 })
-
-test_that("can check for missing data", {
-
-  faux_model <-
-    tribble(
-      ~indicator_code, ~period, ~psnu_uid, ~age_option_uid, ~sex_option_uid, ~kp_option_uid, ~value,
-      "PMTCT_STAT.D.T_1", "2023Oct", "Yhf4p9zEkYl", "p3kqRd8LE4a", "Z1EnpTPaUfq", NA, 44,
-      "PMTCT_STAT.D.T_1", "2023Oct", "Yhf4p9zEkYl", "jcGQdcpPSJP", "Z1EnpTPaUfq", NA, 74,
-      "PMTCT_STAT.D.T_1", "2023Oct", "Yhf4p9zEkYl", "I0g0vpEQ3UB", "Z1EnpTPaUfq", NA, 43,
-      "PMTCT_STAT.D.T_1", "2023Oct", "Yhf4p9zEkYl", "Sga7ddy3GYG", "Z1EnpTPaUfq", NA, 3,
-      "PMTCT_STAT.D.T_1", "2023Oct", "Yhf4p9zEkYl", "TpXlQcoXGZF", "Z1EnpTPaUfq", NA, 2,
-    )
-
-  res <- checkMissingIndicators(faux_model)
-
-  testthat::expect_equal(res %>% filter(indicator_code == "PMTCT_STAT.D.T_1") %>% pull(row_count), 5)
-  testthat::expect_equal(res %>% filter(indicator_code == "TX_NEW.R") %>% pull(row_count), 0)
-
-})
