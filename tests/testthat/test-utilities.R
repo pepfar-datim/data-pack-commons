@@ -293,59 +293,62 @@ test_that("Can compare dataframes", {
 
 })
 
-test_that("can check model disaggs against schema", {
+test_that("can create schema report", {
 
-  # test stop on invalid disagg
-  testthat::expect_error(checkModelDisagg(faux_model, "foo"))
 
-  # test can identify disaggs in model but not in schema
+  # test cop year validity
   faux_model <-
     tribble(
       ~indicator_code, ~period, ~psnu_uid, ~age_option_uid, ~sex_option_uid, ~kp_option_uid, ~value,
-      "PMTCT_STAT.D.T_1", "2023Oct", "Yhf4p9zEkYl", "p3kqRd8LE4a", "Z1EnpTPaUfq", NA, 4374,
+      "PMTCT_STAT.D.T_1", "2024Oct", "Yhf4p9zEkYl", "p3kqRd8LE4a", "Z1EnpTPaUfq", NA, 4374,
+      "PMTCT_STAT.N.New.Yield.R", "2023Oct", "Yhf4p9zEkYl", "p3kqRd8LE4a", "Z1EnpTPaUfq", NA, 0.0140
     )
 
-  res <- checkModelDisagg(faux_model, "age")
-  testthat::expect_equal(
-    res %>% filter(indicator_code == "PMTCT_STAT.D.T_1") %>% pull(msg),
-    "model missing: jcGQdcpPSJP,I0g0vpEQ3UB,Sga7ddy3GYG,TpXlQcoXGZF"
+  testthat::expect_error(
+    createDissagReport(model = faux_model, cop_year = 2024),
+    "the model input does not match the cop year!"
   )
 
-  # test model matches schema
+  # test correct schema
   faux_model <-
     tribble(
       ~indicator_code, ~period, ~psnu_uid, ~age_option_uid, ~sex_option_uid, ~kp_option_uid, ~value,
-      "PMTCT_STAT.D.T_1", "2023Oct", "Yhf4p9zEkYl", "p3kqRd8LE4a", "Z1EnpTPaUfq", NA, 44,
-      "PMTCT_STAT.D.T_1", "2023Oct", "Yhf4p9zEkYl", "jcGQdcpPSJP", "Z1EnpTPaUfq", NA, 74,
-      "PMTCT_STAT.D.T_1", "2023Oct", "Yhf4p9zEkYl", "I0g0vpEQ3UB", "Z1EnpTPaUfq", NA, 43,
-      "PMTCT_STAT.D.T_1", "2023Oct", "Yhf4p9zEkYl", "Sga7ddy3GYG", "Z1EnpTPaUfq", NA, 3,
-      "PMTCT_STAT.D.T_1", "2023Oct", "Yhf4p9zEkYl", "TpXlQcoXGZF", "Z1EnpTPaUfq", NA, 2,
+      "PMTCT_STAT.D.T_1", "2024Oct", "Yhf4p9zEkYl", "p3kqRd8LE4a", "Z1EnpTPaUfq", NA, 4374,
+      "PMTCT_STAT.N.New.Yield.R", "2023Oct", "Yhf4p9zEkYl", "p3kqRd8LE4a", "Z1EnpTPaUfq", NA, 0.0140
     )
 
-  res <- checkModelDisagg(faux_model, "age")
-  testthat::expect_equal(
-    res %>% filter(indicator_code == "PMTCT_STAT.D.T_1") %>% pull(msg),
-    "model matches age schema"
+  testthat::expect_error(
+    createDissagReport(model = faux_model, cop_year = 2025),
+    "cop year for schema supplied is not supported!"
   )
 
-  # model matches age schema BUT model showing extra age disaggs: sMBMO5xAq5T
+  # test can report missing age option and proper list output
   faux_model <-
     tribble(
       ~indicator_code, ~period, ~psnu_uid, ~age_option_uid, ~sex_option_uid, ~kp_option_uid, ~value,
-      "PMTCT_STAT.D.T_1", "2023Oct", "Yhf4p9zEkYl", "p3kqRd8LE4a", "Z1EnpTPaUfq", NA, 44,
-      "PMTCT_STAT.D.T_1", "2023Oct", "Yhf4p9zEkYl", "jcGQdcpPSJP", "Z1EnpTPaUfq", NA, 74,
-      "PMTCT_STAT.D.T_1", "2023Oct", "Yhf4p9zEkYl", "I0g0vpEQ3UB", "Z1EnpTPaUfq", NA, 43,
-      "PMTCT_STAT.D.T_1", "2023Oct", "Yhf4p9zEkYl", "Sga7ddy3GYG", "Z1EnpTPaUfq", NA, 3,
-      "PMTCT_STAT.D.T_1", "2023Oct", "Yhf4p9zEkYl", "TpXlQcoXGZF", "Z1EnpTPaUfq", NA, 2,
-      "PMTCT_STAT.D.T_1", "2023Oct", "Yhf4p9zEkYl", "RpQlocoXGZF", "Z1EnpTPaUfq", NA, 2,
+      "PMTCT_STAT.D.T_1", "2023Oct", "Yhf4p9zEkYl", "p3kqRd8LE4a", "Z1EnpTPaUfq", NA, 4371,
+      "PMTCT_STAT.D.T_1", "2023Oct", "Yhf4p9zEkYl", "I0g0vpEQ3UB", "Z1EnpTPaUfq", NA, 4057,
+      "PMTCT_STAT.D.T_1", "2023Oct", "Yhf4p9zEkYl", "Sga7ddy3GYG", "Z1EnpTPaUfq", NA, 920,
+      "PMTCT_STAT.D.T_1", "2023Oct", "wr3nbmlplbm", "p3kqRd8LE4a", "Z1EnpTPaUfq", NA, 2457
     )
 
-  res <- checkModelDisagg(faux_model, "age")
-  testthat::expect_equal(
-    res %>% filter(indicator_code == "PMTCT_STAT.D.T_1") %>% pull(msg),
-    "model matches age schema BUT model showing extra age disaggs: RpQlocoXGZF"
-  )
+  res <- createDissagReport(model = faux_model, cop_year = 2024)
+  testthat::expect_false(res$mismatched_report_uniques$age_match, FALSE)
+  testthat::expect_equal(res$mismatched_report_uniques$age[[1]], "MODEL MISSING: jcGQdcpPSJP,TpXlQcoXGZF")
+  testthat::expect_equal(length(res), 3)
 
+  # test can report missing sex and age option
+  faux_model <-
+    tribble(
+      ~indicator_code, ~period, ~psnu_uid, ~age_option_uid, ~sex_option_uid, ~kp_option_uid, ~value,
+      "TB_STAT.D.T_1", "2023Oct", "Yhf4p9zEkYl", "A9ddhoPWEUn", "Z1EnpTPaUfq", NA, 17,
+      "TB_STAT.D.T_1", "2023Oct", "Yhf4p9zEkYl", "p3kqRd8LE4a", "Z1EnpTPaUfq", NA, 68
+    )
+  res <- createDissagReport(model = faux_model, cop_year = 2024)
+  testthat::expect_false(res$mismatched_report_uniques$age_match, FALSE)
+  testthat::expect_false(res$mismatched_report_uniques$sex_match, FALSE)
+  testthat::expect_equal(res$mismatched_report_uniques$age[[1]], "MODEL MISSING: jcGQdcpPSJP,I0g0vpEQ3UB,Sga7ddy3GYG,TpXlQcoXGZF")
+  testthat::expect_equal(res$mismatched_report_uniques$sex[[1]], "MODEL MISSING: Qn0I5FbKQOA")
 
 
 })
