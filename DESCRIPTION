@@ -31,7 +31,8 @@ Imports:
     tibble,
     tidyr,
     datimutils,
-    datapackr
+    datapackr,
+    data.table
 Suggests: 
     doMC,
     httptest,
