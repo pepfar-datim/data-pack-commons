@@ -402,7 +402,7 @@ createDissagReport <- function(model, cop_year) {
           valid_k = ifelse(isFALSE(all(is.na(valid_kps[[1]]))), trimws( paste(sort( valid_kps[[1]]$id ), collapse = ", ") ), NA)
         )
 
-    }) %>% rbindlist()
+    }) %>% data.table::rbindlist()
 
   # join model data against the valid schema
   model_schema_joined <-
@@ -429,7 +429,7 @@ createDissagReport <- function(model, cop_year) {
         mutate(sex_match = ifelse( identical(model_s, valid_s) | is.na(model_s == valid_s), TRUE, FALSE) ) %>%
         mutate(kp_match = ifelse( identical(model_k, valid_k) | is.na(model_k == valid_k), TRUE, FALSE) )
 
-    }) %>% rbindlist()
+    }) %>% data.table::rbindlist()
 
   # filter out the mismatched for visual check
   mismatched <- model_schema_joined_e %>% filter(age_match == FALSE | sex_match == FALSE | kp_match == FALSE) %>%
@@ -501,7 +501,7 @@ createDissagReport <- function(model, cop_year) {
         msg = msg
       )
 
-    }) %>% rbindlist()
+    }) %>% data.table::rbindlist()
 
   }
 
@@ -509,7 +509,7 @@ createDissagReport <- function(model, cop_year) {
   disagg_msgs <-
     lapply(c("age", "sex", "kp"), function(y){
       checkDisagg(model = model_schema_joined_e, schema = valid_schema_indicators, disagg = y)
-    }) %>% rbindlist()
+    }) %>% data.table::rbindlist()
 
   # spread to merge
   disagg_msgs_w <-
