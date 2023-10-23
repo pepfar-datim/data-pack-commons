@@ -23,12 +23,12 @@ d2_default_session <-
                                     "datim.json"))
   },
   # if error attempt login with manual entry of username and password
-  error=function(e) {
+  error = function(e) {
     message(e)
     message("failed to grab credentials, enter username first, then password manually ...")
     datimutils::loginToDATIM(
-      username = scan(what=character(),nmax=1),
-      password = scan(what=character(),nmax=1),
+      username = scan(what = character(), nmax = 1),
+      password = scan(what = character(), nmax = 1),
       base_url = "https://www.datim.org/"
     )
     return(d2_default_session)

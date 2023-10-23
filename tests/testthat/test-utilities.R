@@ -347,8 +347,14 @@ test_that("can create schema report", {
   res <- createDissagReport(model = faux_model, cop_year = 2024)
   testthat::expect_false(res$mismatched_report_uniques$age_match, FALSE)
   testthat::expect_false(res$mismatched_report_uniques$sex_match, FALSE)
-  testthat::expect_equal(res$mismatched_report_uniques$age[[1]], "MODEL MISSING: jcGQdcpPSJP,I0g0vpEQ3UB,Sga7ddy3GYG,TpXlQcoXGZF")
-  testthat::expect_equal(res$mismatched_report_uniques$sex[[1]], "MODEL MISSING: Qn0I5FbKQOA")
+  testthat::expect_equal(
+    res$mismatched_report_uniques$age[[1]],
+    "MODEL MISSING: jcGQdcpPSJP,I0g0vpEQ3UB,Sga7ddy3GYG,TpXlQcoXGZF"
+    )
+  testthat::expect_equal(
+    res$mismatched_report_uniques$sex[[1]],
+    "MODEL MISSING: Qn0I5FbKQOA"
+    )
 
 
 })

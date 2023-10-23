@@ -181,7 +181,7 @@ We can look at indicators present and missing in both the schema and model:
 your_model <- readRDS("...your_model")
 binded_model <- rbindlist(your_model)
 
-valid_schema_indicators <- 
+valid_schema_indicators <-
   filter(datapackr::cop24_data_pack_schema,
          (dataset == "mer" & col_type == "past") |
            (dataset == "datapack" & col_type == "calculation")) %>%
@@ -203,7 +203,8 @@ dplyr::anti_join(
   binded_model %>% select(indicator_code),
   valid_schema_indicators,
   by = "indicator_code"
-) %>% distinct()
+) %>%
+  distinct()
 
 #             indicator_code
 # 1: IMPATT.PRIORITY_SNU.T_1
@@ -223,22 +224,22 @@ binded_model <- rbindlist(your_model)
 res <- createDissagReport(binded_model, cop_year = 2024)
 
 # look for any missing values in disaggs
-res$mismatched_report_uniques %>% 
+res$mismatched_report_uniques %>%
   select(indicator_code, sex, age, kp) %>%
   filter(grepl("MISSING", age) | grepl("MISSING", sex) | grepl("MISSING", kp))
 
 #                   indicator_code sex                        age kp
-#1: HTS_TST.Pos.Total_With_HEI.T_1     MODEL MISSING: sMBMO5xAq5T 
+#1: HTS_TST.Pos.Total_With_HEI.T_1     MODEL MISSING: sMBMO5xAq5T
 
 # we can double check visually the indicators
 res$mismatched_report_uniques %>%
   filter(indicator_code == "HTS_TST.Pos.Total_With_HEI.T_1") %>%
-  select(indicator_code, valid_a, model_a)
+  select(valid_a, model_a)
 
-#                   indicator_code                                                                                   valid_a
-# 1: HTS_TST.Pos.Total_With_HEI.T_1 A9ddhoPWEUn, I0g0vpEQ3UB, jcGQdcpPSJP, p3kqRd8LE4a, Sga7ddy3GYG, sMBMO5xAq5T, TpXlQcoXGZF
-#                                                                         model_a
-# 1: A9ddhoPWEUn, I0g0vpEQ3UB, jcGQdcpPSJP, p3kqRd8LE4a, Sga7ddy3GYG, TpXlQcoXGZF
+# valid_a
+#A9ddhoPWEUn, I0g0vpEQ3UB, jcGQdcpPSJP, p3kqRd8LE4a, Sga7ddy3GYG, sMBMO5xAq5T, TpXlQcoXGZF
+# model_a
+#A9ddhoPWEUn, I0g0vpEQ3UB, jcGQdcpPSJP, p3kqRd8LE4a, Sga7ddy3GYG, TpXlQcoXGZF
 ```
 
 So we can see that in this case `sMBMO5xAq5T` is indeed missing from the model.
@@ -246,7 +247,7 @@ So we can see that in this case `sMBMO5xAq5T` is indeed missing from the model.
 In addition to searching for the missing age_option_id in the case above, wee can group model output data and validate the data against the pivot tables in the DATIM. Below we summarize the age_option_uid data for matching against DATIM; note `<1` is missing which is the category option id we flagged in the previous code chunk:
 
 ```{r, eval = F}
-age_names <- 
+age_names <-
 filter(datapackr::cop24_data_pack_schema,
        (dataset == "mer" & col_type == "past") |
          (dataset == "datapack" & col_type == "calculation")) %>%
@@ -256,7 +257,8 @@ filter(datapackr::cop24_data_pack_schema,
 age_names <- age_names[[1]][[1]] %>%
   rename(age_option_uid = id)
 
-binded_model %>% filter(indicator_code == "HTS_TST.Pos.Total_With_HEI.T_1") %>%
+binded_model %>%
+  filter(indicator_code == "HTS_TST.Pos.Total_With_HEI.T_1") %>%
   select(indicator_code, period, age_option_uid, value) %>%
   group_by(age_option_uid, period) %>%
   summarise(total = sum(value)) %>%

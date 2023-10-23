@@ -365,22 +365,22 @@ diffDataFrames <- function(
 createDissagReport <- function(model, cop_year) {
 
   print(paste0("report build for fy: ", cop_year))
-  adj_model_fy <- max(as.numeric(substr(unique(model[!is.na(model$period),]$period), 1, 4))) + 1
+  adj_model_fy <- max(as.numeric(substr(unique(model[!is.na(model$period), ]$period), 1, 4))) + 1
 
   # check cop year is valid against the model
-  if ( adj_model_fy != cop_year ) {
+  if (adj_model_fy != cop_year) {
     stop("the model input does not match the cop year!")
   }
 
   # what are the valid datapack indicators
-  if(cop_year == 2024) {
+  if (cop_year == 2024) {
     valid_schema_indicators <-
       filter(datapackr::cop24_data_pack_schema,
              (dataset == "mer" & col_type == "past") |
                (dataset == "datapack" & col_type == "calculation")) %>%
       select(indicator_code, valid_ages, valid_sexes, valid_kps) %>%
       distinct()
-  } else if(cop_year == 2023) {
+  } else if (cop_year == 2023) {
     valid_schema_indicators <-
       filter(datapackr::cop23_data_pack_schema,
              (dataset == "mer" & col_type == "past") |
@@ -393,21 +393,25 @@ createDissagReport <- function(model, cop_year) {
 
   # spread schema data visually
   valid_schema_indicators <-
-    lapply(1:nrow(valid_schema_indicators), function(y) {
+    lapply(seq_len(nrow(valid_schema_indicators)), function(y) {
 
-      valid_schema_indicators[y,] %>%
+      valid_schema_indicators[y, ] %>%
         mutate(
-          valid_a = ifelse(isFALSE(all(is.na(valid_ages[[1]]))), paste(sort( valid_ages[[1]]$id ), collapse = ", "), NA),
-          valid_s = ifelse(isFALSE(all(is.na(valid_sexes[[1]]))), paste(sort (valid_sexes[[1]]$id ), collapse = ", "), NA),
-          valid_k = ifelse(isFALSE(all(is.na(valid_kps[[1]]))), trimws( paste(sort( valid_kps[[1]]$id ), collapse = ", ") ), NA)
+          valid_a = ifelse(isFALSE(all(is.na(valid_ages[[1]]))),
+                           paste(sort(valid_ages[[1]]$id), collapse = ", "), NA),
+          valid_s = ifelse(isFALSE(all(is.na(valid_sexes[[1]]))),
+                           paste(sort(valid_sexes[[1]]$id), collapse = ", "), NA),
+          valid_k = ifelse(isFALSE(all(is.na(valid_kps[[1]]))),
+                           trimws(paste(sort(valid_kps[[1]]$id), collapse = ", ")), NA)
         )
 
-    }) %>% data.table::rbindlist()
+    }) %>%
+    data.table::rbindlist()
 
   # join model data against the valid schema
   model_schema_joined <-
     model %>%
-    group_by(indicator_code, age_option_uid, sex_option_uid,kp_option_uid) %>%
+    group_by(indicator_code, age_option_uid, sex_option_uid, kp_option_uid) %>%
     summarise(value = sum(value)) %>%
     inner_join(
       valid_schema_indicators %>% select(indicator_code, valid_ages, valid_sexes, valid_kps, valid_a, valid_s, valid_k)
@@ -418,22 +422,24 @@ createDissagReport <- function(model, cop_year) {
   model_schema_joined_e <-
     lapply(unique(model_schema_joined$indicator_code), function(y) {
 
-      q = model_schema_joined %>% filter(indicator_code == y)
+      q <- model_schema_joined %>% filter(indicator_code == y)
 
-      u = q %>%
-        mutate(model_a = paste( sort(unique(q$age_option_uid)), collapse = ", " ) ) %>%
-        mutate(model_s = paste( sort(unique(q$sex_option_uid)), collapse = ", " ) ) %>%
-        mutate(model_k = trimws (paste( sort(unique(q$kp_option_uid)), collapse = ", " ) ) ) %>%
+      u <- q %>%
+        mutate(model_a = paste(sort(unique(q$age_option_uid)), collapse = ", ")) %>%
+        mutate(model_s = paste(sort(unique(q$sex_option_uid)), collapse = ", ")) %>%
+        mutate(model_k = trimws(paste(sort(unique(q$kp_option_uid)), collapse = ", "))) %>%
         mutate(model_k = ifelse(model_k == "", NA, model_k)) %>%
-        mutate(age_match = ifelse( identical(model_a, valid_a) | is.na(model_a == valid_a), TRUE, FALSE) ) %>%
-        mutate(sex_match = ifelse( identical(model_s, valid_s) | is.na(model_s == valid_s), TRUE, FALSE) ) %>%
-        mutate(kp_match = ifelse( identical(model_k, valid_k) | is.na(model_k == valid_k), TRUE, FALSE) )
+        mutate(age_match = ifelse(identical(model_a, valid_a) | is.na(model_a == valid_a), TRUE, FALSE)) %>%
+        mutate(sex_match = ifelse(identical(model_s, valid_s) | is.na(model_s == valid_s), TRUE, FALSE)) %>%
+        mutate(kp_match = ifelse(identical(model_k, valid_k) | is.na(model_k == valid_k), TRUE, FALSE))
 
-    }) %>% data.table::rbindlist()
+    }) %>%
+    data.table::rbindlist()
 
   # filter out the mismatched for visual check
-  mismatched <- model_schema_joined_e %>% filter(age_match == FALSE | sex_match == FALSE | kp_match == FALSE) %>%
-    distinct(indicator_code, .keep_all = T)
+  mismatched <- model_schema_joined_e %>%
+    filter(age_match == FALSE | sex_match == FALSE | kp_match == FALSE) %>%
+    distinct(indicator_code, .keep_all = TRUE)
 
   # function for checking mismatch specifics
   checkDisagg <- function(model, schema, disagg) {
@@ -441,11 +447,11 @@ createDissagReport <- function(model, cop_year) {
     # where there is a mismatch what is that mismatch?
     lapply(unique(model$indicator_code), function(indicator_c) {
 
-      if( !disagg %in% c("age", "sex", "kp") ) {
+      if (!disagg %in% c("age", "sex", "kp")) {
         stop("you have not entered a valid kp!")
       }
 
-      if(disagg == "age") {
+      if (disagg == "age") {
         mod_id_val <- "age_option_uid"
         sch_id_val <- "valid_ages"
       } else if (disagg == "sex") {
@@ -471,23 +477,20 @@ createDissagReport <- function(model, cop_year) {
         as_tibble(model) %>% arrange() %>% select(id = mod_id_val)
       )
 
-      #print(indicator_c)
-      #print(s)
-
       # in model not in schema
       m <- dplyr::anti_join(
         as_tibble(model) %>% arrange() %>% select(id = mod_id_val),
         schema[[sch_id_val]][[1]] %>% distinct(id) %>% arrange()
       )
 
-      msg1 <- if(NROW(s) > 0) {
+      msg1 <- if (NROW(s) > 0) {
         paste0("MODEL MISSING: ", paste0(unique(s$id), collapse = ","))
       } else {
         paste0("")
       }
 
-      msg2 <- if(NROW(m) > 0) {
-        paste0("model has extra ", disagg , " disaggs: ", paste0(unique(m$id), collapse = ","))
+      msg2 <- if (NROW(m) > 0) {
+        paste0("model has extra ", disagg, " disaggs: ", paste0(unique(m$id), collapse = ","))
       } else {
         paste0("")
       }
@@ -501,17 +504,19 @@ createDissagReport <- function(model, cop_year) {
         msg = msg
       )
 
-    }) %>% data.table::rbindlist()
+    }) %>%
+      data.table::rbindlist()
 
   }
 
   # loop through different dissag types to check match
   disagg_msgs <-
-    lapply(c("age", "sex", "kp"), function(y){
+    lapply(c("age", "sex", "kp"), function(y) {
       checkDisagg(model = model_schema_joined_e, schema = valid_schema_indicators, disagg = y)
-    }) %>% data.table::rbindlist()
+    }) %>%
+    data.table::rbindlist()
 
-  # spread to merge
+  #spread to merge
   disagg_msgs_w <-
     tidyr::pivot_wider(
       disagg_msgs,
@@ -521,20 +526,20 @@ createDissagReport <- function(model, cop_year) {
     )
 
   # unique mismatched data frame
-  f_mismatched_u = left_join(
+  f_mismatched_u <- left_join(
     mismatched,
     disagg_msgs_w
   )
 
   # full mismatched data frame
-  f_mismatched_a =
+  f_mismatched_a <-
     left_join(
       model_schema_joined_e %>% filter(age_match == FALSE | sex_match == FALSE | kp_match == FALSE),
       disagg_msgs_w
     )
 
   # raw full data
-  f_all =
+  f_all <-
     left_join(
       model_schema_joined_e,
       disagg_msgs_w
