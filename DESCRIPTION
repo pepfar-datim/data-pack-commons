@@ -14,7 +14,8 @@ Description: Generates data models for PEFPAR Data Packs and
     OPU Data Pack tools.
 URL: https://github.com/pepfar-datim/data-pack-commons
 Depends: R (>= 4.1.0)
-Imports: assertthat,
+Imports: 
+    assertthat,
     dplyr,
     glue,
     httr,
@@ -29,7 +30,8 @@ Imports: assertthat,
     stringr,
     tibble,
     tidyr,
-    datimutils
+    datimutils,
+    datapackr
 Suggests: 
     doMC,
     httptest,
