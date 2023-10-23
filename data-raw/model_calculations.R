@@ -14,8 +14,25 @@ require(foreach)
 cop_year <- 2024
 
 # login to datim
-datimutils::loginToDATIM(paste0(Sys.getenv("SECRETS_FOLDER"),
-                                "datim.json"))
+# for server you will have to run this block initially
+# and enter username and password manually
+d2_default_session <-
+  tryCatch(
+  {
+    datimutils::loginToDATIM(paste0(Sys.getenv("SECRETS_FOLDER"),
+                                    "datim.json"))
+  },
+  # if error attempt login with manual entry of username and password
+  error=function(e) {
+    message(e)
+    message("failed to grab credentials, enter username first, then password manually ...")
+    datimutils::loginToDATIM(
+      username = scan(what=character(),nmax=1),
+      password = scan(what=character(),nmax=1),
+      base_url = "https://www.datim.org/"
+    )
+    return(d2_default_session)
+  })
 
 # Countries to include in model, usually all
 # Turkmenistan has no planning/priortization level
