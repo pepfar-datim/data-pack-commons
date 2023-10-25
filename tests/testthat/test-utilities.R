@@ -358,3 +358,17 @@ test_that("can create schema report", {
 
 
 })
+
+test_that("Can pivot schema long way", {
+
+  # test cop years not supported
+  testthat::expect_error(
+    pivotSchemaCombos(cop_year = 2022),
+    "cop year not supported!"
+  )
+  testthat::expect_error(
+    pivotSchemaCombos(cop_year = 2025),
+    "cop year not supported!"
+  )
+
+})

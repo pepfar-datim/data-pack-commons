@@ -212,37 +212,49 @@ dplyr::anti_join(
 
 Note that while the code above may show indicators which are missing, this does not mean they need to be added, check previous years to make sure there is already a reason for a missing indicator, in this case `HTS_TST.KP.Pos.Yield.T` is noted as an indicator_code we did not currently need to add to the model. 
 
-Once we know all indicator are present we can move on to checking the age/sex/kp disaggs. There is a handy function in the package `createDisaggReport` to help us isolate problem areas. Below is an example analysis that looks at age disaggs to identify a missing disagg value present in the schema but missing in the model (results are included hashed as model and schema may change):
+Once we know all indicator are present we can move on to checking the age/sex/kp disaggs. There is a handy function in the package `pivotSchemaCombos` to help us isolate problem areas. Below is an example analysis that extracts all possible schema combos and checks the model to identify ones missing data in the model (results are included hashed as model and schema may change):
 
 ```{r, eval=FALSE}
 
 # analysis of age disaags missing in model data ----
 your_model <- readRDS("your model...")
-binded_model <- rbindlist(your_model)
+binded_model <- bind_rows(your_model)
 
-# run disagg function
-res <- createDissagReport(binded_model, cop_year = 2024)
+# label model data as present based on value
+binded_model_e <-
+  binded_model %>%
+  mutate(
+    has_data = ifelse(!is.na(value), TRUE, FALSE)
+  ) %>%
+  mutate(has_data = replace(has_data, value == 0, FALSE))
 
-# look for any missing values in disaggs
-res$mismatched_report_uniques %>%
-  select(indicator_code, sex, age, kp) %>%
-  filter(grepl("MISSING", age) | grepl("MISSING", sex) | grepl("MISSING", kp))
+# pivot schema disaggs
+valid_schema_combos <- pivotSchemaCombos(cop_year = 2024)
+head(valid_schema_combos)
 
-#                   indicator_code sex                        age kp
-#1: HTS_TST.Pos.Total_With_HEI.T_1     MODEL MISSING: sMBMO5xAq5T
+#  indicator_code               valid_ages valid_sexes valid_kps age_option_uid sex_option_uid kp_option_uid
+#   <chr>                        <chr>      <chr>       <chr>     <chr>          <chr>          <chr>
+# 1 HTS_TST.Pos.Total_With_HEI.R <01        Female      NA        sMBMO5xAq5T    Z1EnpTPaUfq    NA
+# 2 HTS_TST.Pos.Total_With_HEI.R <01        Male        NA        sMBMO5xAq5T    Qn0I5FbKQOA    NA
+# 3 HTS_TST.Pos.Total_With_HEI.R 01-09      Female      NA        A9ddhoPWEUn    Z1EnpTPaUfq    NA
+# 4 HTS_TST.Pos.Total_With_HEI.R 01-09      Male        NA        A9ddhoPWEUn    Qn0I5FbKQOA    NA
+# 5 HTS_TST.Pos.Total_With_HEI.R 10-14      Female      NA        jcGQdcpPSJP    Z1EnpTPaUfq    NA
+# 6 HTS_TST.Pos.Total_With_HEI.R 10-14      Male        NA        jcGQdcpPSJP    Qn0I5FbKQOA    NA
 
-# we can double check visually the indicators
-res$mismatched_report_uniques %>%
-  filter(indicator_code == "HTS_TST.Pos.Total_With_HEI.T_1") %>%
-  select(valid_a, model_a)
+#View(valid_schema_combos)
 
-# valid_a
-#A9ddhoPWEUn, I0g0vpEQ3UB, jcGQdcpPSJP, p3kqRd8LE4a, Sga7ddy3GYG, sMBMO5xAq5T, TpXlQcoXGZF
-# model_a
-#A9ddhoPWEUn, I0g0vpEQ3UB, jcGQdcpPSJP, p3kqRd8LE4a, Sga7ddy3GYG, TpXlQcoXGZF
+# combos in schema not in the data?
+missing_schema_combos <- anti_join(
+  valid_schema_combos,
+  binded_model_e %>%
+    filter(has_data == TRUE) %>%
+    select(-value, -psnu_uid, -period) %>%
+    distinct()
+)
+
 ```
 
-So we can see that in this case `sMBMO5xAq5T` is indeed missing from the model.
+Using the pivoted schema combos we can run an `anti_join` against the model data that is valid to see what combos are missing.
 
 In addition to searching for the missing age_option_id in the case above, wee can group model output data and validate the data against the pivot tables in the DATIM. Below we summarize the age_option_uid data for matching against DATIM; note `<1` is missing which is the category option id we flagged in the previous code chunk:
 

@@ -364,7 +364,6 @@ diffDataFrames <- function(
 #'
 createDissagReport <- function(model, cop_year) {
 
-  print(paste0("report build for fy: ", cop_year))
   adj_model_fy <- max(as.numeric(substr(unique(model[!is.na(model$period), ]$period), 1, 4))) + 1
 
   # check cop year is valid against the model
@@ -552,4 +551,78 @@ createDissagReport <- function(model, cop_year) {
     "raw_report" = f_all
   )
 
+}
+
+#' @export
+#' @title pivotSchemaCombos(cop_year)
+#'
+#' @description grabs the pertinent schema and pivots data long
+#' @param cop_year the specific cop year for the schema
+#' @param schema optional param if you wish to enter a manual schema
+#' @return a pivoted schema
+#'
+
+pivotSchemaCombos <- function(schema = NULL, cop_year = NULL) {
+
+  # choose the right schema
+  if (is.null(cop_year) && is.null(schema)) {
+
+    stop("you must enter a cop year or a schema!")
+
+  } else if (is.null(cop_year) && !is.null(schema)) {
+
+    valid_schema_indicators <- schema
+
+  } else if (cop_year == 2024) {
+
+    valid_schema_indicators <-
+      filter(datapackr::cop24_data_pack_schema,
+             (dataset == "mer" & col_type == "past") |
+               (dataset == "datapack" & col_type == "calculation")) %>%
+      select(indicator_code, valid_ages, valid_sexes, valid_kps) %>%
+      distinct()
+
+
+  } else if (cop_year == 2023) {
+
+    valid_schema_indicators <-
+      filter(datapackr::cop23_data_pack_schema,
+             (dataset == "mer" & col_type == "past") |
+               (dataset == "datapack" & col_type == "calculation")) %>%
+      select(indicator_code, valid_ages, valid_sexes, valid_kps) %>%
+      distinct()
+
+  } else if (cop_year < 2023 || cop_year > 2024) {
+
+    stop("cop year not supported!")
+
+  }
+
+  # extract combos from nested lists
+  valid_schema_combos <-
+    lapply(unique(valid_schema_indicators$indicator_code), function(y) {
+
+
+      q <- valid_schema_indicators %>%
+        filter(
+          indicator_code == y
+        )
+
+      combos <-
+        tidyr::crossing(
+          q$valid_ages[[1]] %>%
+            rename(valid_ages = name, age_option_uid = id) %>%
+            select(valid_ages, age_option_uid),
+          q$valid_sexes[[1]] %>%
+            rename(valid_sexes = name, sex_option_uid = id) %>%
+            select(valid_sexes, sex_option_uid),
+          q$valid_kps[[1]] %>%
+            rename(valid_kps = name, kp_option_uid = id) %>%
+            select(valid_kps, kp_option_uid)
+        ) %>%
+        mutate(indicator_code = q$indicator_code[1]) %>%
+        select(indicator_code, valid_ages, valid_sexes, valid_kps, age_option_uid, sex_option_uid, kp_option_uid)
+
+    }) %>%
+    dplyr::bind_rows()
 }
