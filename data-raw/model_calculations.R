@@ -249,7 +249,7 @@ diffDataPackModels <- function(model_old,
   ancestors <- datimutils::getOrgUnits(deltas$psnu_uid, fields = "ancestors[name]")
   deltas <- dplyr::mutate(deltas,
                           psnu = datimutils::getOrgUnits(psnu_uid),
-                          ou = purrr::map_chr(ancestors, purrr::pluck, 1, 3),
+                          ou = purrr::map_chr(ancestors, purrr::pluck, 1, 3, .default = NA_character_),
                           snu1 = purrr::map_chr(ancestors, purrr::pluck, 1, 4, .default = NA_character_))
 
 # convert some uids to names for readability of diff

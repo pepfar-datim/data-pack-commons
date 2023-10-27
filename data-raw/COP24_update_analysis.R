@@ -11,7 +11,8 @@ library(dplyr)
 # try datim
 datimutils::loginToDATIM(paste0(Sys.getenv("SECRETS_FOLDER"), "datim.json"))
 
-baseline <- readRDS("/Users/faustolopezbao/Desktop/datapack_testing/model_data_pack_input_24_2023-10-24_d98a330_flat.rds")
+baseline <-
+  readRDS("/Users/faustolopezbao/Desktop/datapack_testing/model_data_pack_input_24_2023-10-24_d98a330_flat.rds")
 new <- readRDS("/Users/faustolopezbao/Desktop/datapack_testing/latestmodel.rds")
 
 deltas <- diffDataPackModels(baseline, new, full_diff = TRUE)
@@ -35,15 +36,18 @@ deltas <- diffDataPackModels(baseline, new, full_diff = TRUE)
 # if the response is null from datim return the psnuid
 res <-
   lapply(unique(deltas_rec$psnu_uid), function(y) {
-    if(is.null(datimutils::getOrgUnits(y))) {
+    if (is.null(datimutils::getOrgUnits(y))) {
       data.frame(y)
     }
   }) %>% bind_rows()
 
 unique(res$y)
-#[1] "fLUGXJpcbBG" "c5vciSlu23e" "dych0G4cSKX" "uKySbK9FbCs" "cvUxg9nGhyT" "fxRKUvibHKO" "P4Jy185ZPvd" "fS7IEqWT2nt" "cRFfhS2VNIx" "VBuhjzBhFbO" "b6YghAVB7z3"
-#[12] "QqwsdoP7fCj" "MaAYvJxPzx8" "S2OIBRCLpKW" "SY4mkHZ9v6Q" "jnRxemaD4Ho" "OnS7zv4sovx" "ssnTVZrwRTw" "mNVEj1DdEMV" "gzzURYR2joc" "TRSvGymYp6f" "NRqNrURtame"
-#[23] "VB2yM4524e2" "NTHFO92QWFd" "uTLfZeYvEy7" "OzeDEb1NGx8" "rO9Ezo9ZBQ2" "WitpKwqvSx5" "JizHkcQs67Z" "KLtCjjVJH1l" "kqENDKBOnAR" "y3BAMl7ya5g" "axeGa2g5J8K"
+#[1] "fLUGXJpcbBG" "c5vciSlu23e" "dych0G4cSKX" "uKySbK9FbCs" "cvUxg9nGhyT" "fxRKUvibHKO"
+#"P4Jy185ZPvd" "fS7IEqWT2nt" "cRFfhS2VNIx" "VBuhjzBhFbO" "b6YghAVB7z3"
+#[12] "QqwsdoP7fCj" "MaAYvJxPzx8" "S2OIBRCLpKW" "SY4mkHZ9v6Q" "jnRxemaD4Ho" "OnS7zv4sovx"
+#"ssnTVZrwRTw" "mNVEj1DdEMV" "gzzURYR2joc" "TRSvGymYp6f" "NRqNrURtame"
+#[23] "VB2yM4524e2" "NTHFO92QWFd" "uTLfZeYvEy7" "OzeDEb1NGx8" "rO9Ezo9ZBQ2" "WitpKwqvSx5"
+#"JizHkcQs67Z" "KLtCjjVJH1l" "kqENDKBOnAR" "y3BAMl7ya5g" "axeGa2g5J8K"
 #[34] "R3kINuTnXKu" "a1pbWIff3gO" "liBgJGTTwku" "MvS2br5FWRN" "tsUYbG4USw7" "lWlJCv6bQAA"
 
 
@@ -58,14 +62,15 @@ length(psnus_exist$uid) == length(unique(res$y))
 # try coptest
 datimutils::loginToDATIM(paste0(Sys.getenv("SECRETS_FOLDER"), "coptest.json"))
 
-baseline <- readRDS("/Users/faustolopezbao/Desktop/datapack_testing/model_data_pack_input_24_2023-10-24_d98a330_flat.rds")
+baseline <-
+  readRDS("/Users/faustolopezbao/Desktop/datapack_testing/model_data_pack_input_24_2023-10-24_d98a330_flat.rds")
 new <- readRDS("/Users/faustolopezbao/Desktop/datapack_testing/latestmodel.rds")
 
 deltas <- diffDataPackModels(baseline, new, full_diff = TRUE)
 
 res <-
   lapply(unique(deltas_rec$psnu_uid), function(y) {
-    if(is.null(datimutils::getOrgUnits(y))) {
+    if (is.null(datimutils::getOrgUnits(y))) {
       data.frame(y)
     }
   }) %>% bind_rows()
@@ -92,7 +97,7 @@ valid_schema_indicators <-
   distinct()
 
 valid_schema_combos <-
-  lapply(unique(valid_schema_indicators$indicator_code), function(y){
+  lapply(unique(valid_schema_indicators$indicator_code), function(y) {
 
     q <- valid_schema_indicators %>%
       filter(
@@ -108,7 +113,8 @@ valid_schema_combos <-
       mutate(indicator_code = q$indicator_code[1]) %>%
       select(indicator_code, valid_ages, valid_sexes, valid_kps, age_option_uid, sex_option_uid, kp_option_uid)
 
-  }) %>% dplyr::bind_rows()
+  }) %>%
+  dplyr::bind_rows()
 #View(valid_schema_combos)
 
 # validate model data against schema combos ----
@@ -149,7 +155,7 @@ valid_schema_indicators <-
   distinct()
 
 valid_schema_combos <-
-  lapply(unique(valid_schema_indicators$indicator_code), function(y){
+  lapply(unique(valid_schema_indicators$indicator_code), function(y) {
 
     q <- valid_schema_indicators %>%
       filter(
@@ -165,7 +171,8 @@ valid_schema_combos <-
       mutate(indicator_code = q$indicator_code[1]) %>%
       select(indicator_code, valid_ages, valid_sexes, valid_kps, age_option_uid, sex_option_uid, kp_option_uid)
 
-  }) %>% dplyr::bind_rows()
+  }) %>%
+  dplyr::bind_rows()
 #View(valid_schema_combos)
 
 # validate model data against schema combos ----
@@ -189,4 +196,3 @@ View(
       distinct()
   )
 )
-
