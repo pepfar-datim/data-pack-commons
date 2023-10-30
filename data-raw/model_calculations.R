@@ -277,6 +277,15 @@ diffDataPackModels <- function(model_old,
     deltas <- dplyr::bind_rows(deltas_split)
   }
 
+  # pull latest modification for that ou
+  deltas <- dplyr::left_join(
+    deltas,
+    unique(countries) %>%
+      datimutils::getOrgUnits(., fields = c("displayName", "lastUpdated", "id")) %>%
+      as_tibble() %>%
+      select(ou = displayName, ou_id = id, display_name = displayName, last_updated_on_datim = lastUpdated)
+  )
+
   return(deltas)
 }
 
