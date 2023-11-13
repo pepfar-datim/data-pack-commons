@@ -371,9 +371,10 @@ deltas <- diff$deltas
 delta_summary <-  dplyr::group_by(deltas, indicator_code, ou) %>% dplyr::summarise(count_delta = dplyr::n())
 indicators_w_delta <- deltas$indicator_code %>% unique()
 
-matched_summary <- dplyr::group_by(diff$matched, indicator_code, ou) %>% dplyr::summarise(count_matched = dplyr::n(),
-                                                                                          sum_matches = sum(value.old,
-                                                                                                            na.rm = TRUE))
+matched_summary <- dplyr::group_by(diff$matched, indicator_code, ou) %>%
+  dplyr::summarise(count_matched = dplyr::n(),
+                   sum_matches = sum(value.old,
+                                     na.rm = TRUE))
 summary <- dplyr::full_join(delta_summary, matched_summary) %>%
   dplyr::filter(indicator_code %in% indicators_w_delta)
 
