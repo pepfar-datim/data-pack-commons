@@ -363,8 +363,8 @@ print(lubridate::now())
 # compare with another model version
 
 diff <- diffDataPackModels(model_old = file.choose() %>% readr::read_rds()
-                           # , model_new = flattenDataPackModel_21(cop_data)
-                           , model_new = file.choose() %>% readr::read_rds()
+                           , model_new = flattenDataPackModel_21(cop_data)
+                           # , model_new = file.choose() %>% readr::read_rds()
                            , full_diff = TRUE)
 
 deltas <- diff$deltas
@@ -376,7 +376,9 @@ matched_summary <- dplyr::group_by(diff$matched, indicator_code, ou) %>%
                    sum_matches = sum(value.old,
                                      na.rm = TRUE))
 summary <- dplyr::full_join(delta_summary, matched_summary) %>%
-  dplyr::filter(indicator_code %in% indicators_w_delta)
+  dplyr::filter(indicator_code %in% indicators_w_delta) %>%
+  dplyr::arrange(indicator_code)
+
 
 
 # # output_location <- "~/COP data/COP24 Update/"
