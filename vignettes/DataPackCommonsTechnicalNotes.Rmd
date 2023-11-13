@@ -174,6 +174,87 @@ Consider the PMTCT tab of the datapack
 
 Replicate vs distribute We never distribute 
 
+We can look at indicators present and missing in both the schema and model:
+
+```{r, eval=FALSE}
+
+your_model <- readRDS("...your_model")
+binded_model <- dplyr::bind_rows(your_model)
+
+valid_schema_indicators <-
+  filter(datapackr::cop24_data_pack_schema,
+         (dataset == "mer" & col_type == "past") |
+           (dataset == "datapack" & col_type == "calculation")) %>%
+  select(indicator_code) %>%
+  distinct()
+
+# indicators in schema not in model
+dplyr::anti_join(
+  valid_schema_indicators,
+  binded_model,
+  by = "indicator_code"
+)
+
+#           indicator_code
+# 1 HTS_TST.KP.Pos.Yield.T
+
+# indicators in model not in schema
+dplyr::anti_join(
+  binded_model %>% select(indicator_code),
+  valid_schema_indicators,
+  by = "indicator_code"
+) %>%
+  distinct()
+
+#             indicator_code
+# 1: IMPATT.PRIORITY_SNU.T_1
+```
+
+Note that while the code above may show indicators which are missing, this does not mean they need to be added, check previous years to make sure there is already a reason for a missing indicator, in this case `HTS_TST.KP.Pos.Yield.T` is noted as an indicator_code we did not currently need to add to the model. 
+
+Once we know all indicator are present we can move on to checking the age/sex/kp disaggs. There is a handy function in the package `pivotSchemaCombos` to help us isolate problem areas. Below is an example analysis that extracts all possible schema combos and checks the model to identify ones missing data in the model (results are included hashed as model and schema may change):
+
+```{r, eval=FALSE}
+
+# analysis of age disaags missing in model data ----
+your_model <- readRDS("your model...")
+binded_model <- bind_rows(your_model)
+
+# label model data as present based on value
+binded_model_e <-
+  binded_model %>%
+  mutate(
+    has_data = ifelse(!is.na(value), TRUE, FALSE)
+  ) %>%
+  mutate(has_data = replace(has_data, value == 0, FALSE))
+
+# pivot schema disaggs
+valid_schema_combos <- pivotSchemaCombos(cop_year = 2024)
+head(valid_schema_combos)
+
+#  indicator_code               valid_ages valid_sexes valid_kps age_option_uid sex_option_uid kp_option_uid
+#   <chr>                        <chr>      <chr>       <chr>     <chr>          <chr>          <chr>
+# 1 HTS_TST.Pos.Total_With_HEI.R <01        Female      NA        sMBMO5xAq5T    Z1EnpTPaUfq    NA
+# 2 HTS_TST.Pos.Total_With_HEI.R <01        Male        NA        sMBMO5xAq5T    Qn0I5FbKQOA    NA
+# 3 HTS_TST.Pos.Total_With_HEI.R 01-09      Female      NA        A9ddhoPWEUn    Z1EnpTPaUfq    NA
+# 4 HTS_TST.Pos.Total_With_HEI.R 01-09      Male        NA        A9ddhoPWEUn    Qn0I5FbKQOA    NA
+# 5 HTS_TST.Pos.Total_With_HEI.R 10-14      Female      NA        jcGQdcpPSJP    Z1EnpTPaUfq    NA
+# 6 HTS_TST.Pos.Total_With_HEI.R 10-14      Male        NA        jcGQdcpPSJP    Qn0I5FbKQOA    NA
+
+#View(valid_schema_combos)
+
+# combos in schema not in the data?
+missing_schema_combos <- anti_join(
+  valid_schema_combos,
+  binded_model_e %>%
+    filter(has_data == TRUE) %>%
+    select(-value, -psnu_uid, -period) %>%
+    distinct()
+)
+
+```
+
+Using the pivoted schema combos we can run an `anti_join` against the model data that is valid to see what combos are missing from the model output.
 
 ## Key Files/Directories
 ```{r, echo = FALSE}
