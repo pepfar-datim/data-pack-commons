@@ -140,7 +140,7 @@ joined_all_uniq <- joined_all[!duplicated(joined_all$dataelement), ]
 
 
 
-#### start DP-929 (NEED COP24 EQUIVALENT TICKET?)
+#### start DP-929 (NEED COP24 EQUIVALENT TICKET)
 
 library(magrittr)
 library(datimutils)
