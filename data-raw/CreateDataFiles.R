@@ -203,7 +203,38 @@ map_dif_added <- dplyr::anti_join(Map24Tto25T,
 dim_dif_added <- dplyr::anti_join(dim_item_sets,
                                   datapackcommons::dim_item_sets)
 
-usethis::use_data(dim_item_sets, overwrite = TRUE, compress = "gzip")
+# check that all required model sets are present in dim items
+used_model_sets <- c(data_required$A.age_set,
+                  data_required$B.age_set,
+                  data_required$A.sex_set,
+                  data_required$B.sex_set,
+                  data_required$A.kp_set,
+                  data_required$B.kp_set,
+                  data_required$A.other_disagg_set,
+                  data_required$B.other_disagg_set,
+                  Map23Tto24T$age_set,
+                  Map23Tto24T$sex_set,
+                  Map23Tto24T$kp_set,
+                  Map23Tto24T$other_disagg,
+                  Map22Tto23T$age_set,
+                  Map22Tto23T$sex_set,
+                  Map22Tto23T$kp_set,
+                  Map22Tto23T$other_disagg) %>%
+  na.omit() %>%
+  unique()
+
+model_set_diff <-
+  used_model_sets %>%
+    dplyr::setdiff(
+      dim_item_sets$model_sets %>% unique()
+    )
+
+# stop writing of dim items if missing model sets
+if (length(model_set_diff) > 0) {
+  stop("You are missing model sets in dim items that are required!")
+} else {
+  usethis::use_data(dim_item_sets, overwrite = TRUE, compress = "gzip")
+}
 usethis::use_data(data_required, overwrite = TRUE, compress = "gzip")
 usethis::use_data(Map24Tto25T, overwrite = TRUE, compress = "gzip")
 

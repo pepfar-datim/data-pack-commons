@@ -225,15 +225,21 @@ diffDataPackModels <- function(model_old,
     rename(value.new = value) %>%
     dplyr::select(-period)
 
-  deltas  <-  full_join(model_old_filtered, model_new_filtered) %>%
-    dplyr::mutate(diff = value.new - value.old) %>%
+diff <- full_join(model_old_filtered, model_new_filtered) %>%
+  dplyr::mutate(diff = value.new - value.old)
+
+ancestors <- datimutils::getOrgUnits(diff$psnu_uid, fields = "ancestors[name]")
+diff <- dplyr::mutate(diff,
+                        psnu = datimutils::getOrgUnits(psnu_uid),
+                        ou = purrr::map_chr(ancestors, purrr::pluck, 1, 3, .default = NA_character_),
+                        snu1 = purrr::map_chr(ancestors, purrr::pluck, 1, 4, .default = NA_character_))
+
+  deltas  <-  diff %>%
     filter(value.new != value.old |
              is.na(value.new) | is.na(value.old))
-  ancestors <- datimutils::getOrgUnits(deltas$psnu_uid, fields = "ancestors[name]")
-  deltas <- dplyr::mutate(deltas,
-                          psnu = datimutils::getOrgUnits(psnu_uid),
-                          ou = purrr::map_chr(ancestors, purrr::pluck, 1, 3),
-                          snu1 = purrr::map_chr(ancestors, purrr::pluck, 1, 4, .default = NA_character_))
+
+  matched  <-  diff %>%
+    filter(value.new == value.old)
 
 # convert some uids to names for readability of diff
 # Thrice repeated code could be a function, but passing column name to the function
@@ -260,7 +266,7 @@ diffDataPackModels <- function(model_old,
     deltas <- dplyr::bind_rows(deltas_split)
   }
 
-  return(deltas)
+  return(list(deltas = deltas, matched = matched))
 }
 
 # initialize cop_data list for the model
@@ -356,9 +362,24 @@ print(lubridate::now())
 
 # compare with another model version
 
-deltas <- diffDataPackModels(file.choose() %>% readr::read_rds(),
-     flattenDataPackModel_21(cop_data),
-     full_diff = TRUE)
+diff <- diffDataPackModels(model_old = file.choose() %>% readr::read_rds()
+                           , model_new = flattenDataPackModel_21(cop_data)
+                           # , model_new = file.choose() %>% readr::read_rds()
+                           , full_diff = TRUE)
+
+deltas <- diff$deltas
+delta_summary <-  dplyr::group_by(deltas, indicator_code, ou) %>% dplyr::summarise(count_delta = dplyr::n())
+indicators_w_delta <- deltas$indicator_code %>% unique()
+
+matched_summary <- dplyr::group_by(diff$matched, indicator_code, ou) %>%
+  dplyr::summarise(count_matched = dplyr::n(),
+                   sum_matches = sum(value.old,
+                                     na.rm = TRUE))
+summary <- dplyr::full_join(delta_summary, matched_summary) %>%
+  dplyr::filter(indicator_code %in% indicators_w_delta) %>%
+  dplyr::arrange(indicator_code)
+
+
 
 # # output_location <- "~/COP data/COP24 Update/"
 # # save flattened version manually update date and version
