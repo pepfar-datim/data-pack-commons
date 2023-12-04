@@ -342,7 +342,9 @@ mechs <-  getMechsList(cop_year)
 fy_map <-  switch(as.character(cop_year),
                   "2021" = datapackcommons::Map21Tto22T,
                   "2022" = datapackcommons::Map22Tto23T,
-                  "2023" = datapackcommons::Map23Tto24T)
+                  "2023" = datapackcommons::Map23Tto24T#,
+                  #"2024" = datapackcommons::Map24Tto25T
+                  )
 
 # pull list of countries to iterate through
 country_details <-  datimutils::getOrgUnitGroups("Country", name, fields = "organisationUnits[name,id]") %>%

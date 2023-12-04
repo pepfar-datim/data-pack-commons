@@ -1,7 +1,7 @@
 Package: datapackcommons
 Type: Package
 Title: Common Utilities for with with the PEPFAR DataPack
-Version: 3.1.0
+Version: 4.0.0
 Authors@R: c(
     person("Sam", "Garman", email = "sgarman@baosystems.com",
         role = c("aut", "cre")),
