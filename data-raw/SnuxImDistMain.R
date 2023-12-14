@@ -11,7 +11,7 @@ library(datapackcommons)
 library(datimutils)
 library(dplyr)
 datimutils::loginToDATIM(paste0(Sys.getenv("SECRETS_FOLDER"), "datim.json")) # added for a different config access
-cop_year <- 2023
+cop_year <- 2024
 
 # FUNCTIONS -------------------------------------------------------------------
 
@@ -131,13 +131,15 @@ getMechsList <- function(cop_year,
                                              inherits = TRUE)) {
   assertthat::assert_that(cop_year %in% c(2021,
                                           2022,
-                                          2023))
-  if (cop_year == 2023) #{cop_year = 2022} # temporary code to get mechs for last year for initial cop23 dev
+                                          2023,
+                                          2024))
+  #if (cop_year == 2023) #{cop_year = 2022} # temporary code to get mechs for last year for initial cop23 dev
     # Wed Feb 22 13:29:39 2023 We should probably remove line 136 now.
   de_group <- dplyr::case_when(
     cop_year == 2021 ~ "WTq0quAW1mf", #"2021 MER Targets"
     cop_year == 2022 ~ "QjkuCJf6lCs",  #"2022 MER Targets",
-    cop_year == 2023 ~ "OuKFZzVk6gr"  #"2023 MER Targets"
+    cop_year == 2023 ~ "OuKFZzVk6gr",  #"2023 MER Targets",
+    cop_year == 2024 ~ "TXAVaM4oYMd",  #"2024 MER Targets",
   )
 
   mechs <- datimutils::getAnalytics(
@@ -342,8 +344,8 @@ mechs <-  getMechsList(cop_year)
 fy_map <-  switch(as.character(cop_year),
                   "2021" = datapackcommons::Map21Tto22T,
                   "2022" = datapackcommons::Map22Tto23T,
-                  "2023" = datapackcommons::Map24Tto25T#,
-                  #"2024" = datapackcommons::Map24Tto25T
+                  "2023" = datapackcommons::Map23Tto24T,
+                  "2024" = datapackcommons::Map24Tto25T
                   )
 
 # pull list of countries to iterate through
