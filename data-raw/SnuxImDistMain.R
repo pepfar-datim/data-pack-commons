@@ -356,7 +356,10 @@ country_details <-  datimutils::getOrgUnitGroups("Country", name, fields = "orga
 
 # start process of collecting api data for every country
 data <-  country_details[["id"]] %>%
-  purrr::map(process_country, mechs, fy_map) %>%
+  purrr::map(process_country, mechs, fy_map, .progress = list(
+    type = "iterator",
+    format = "Calculating {cli::pb_bar} {cli::pb_percent}",
+    clear = TRUE)) %>%
   setNames(country_details$id)
 
 #data$ODOymOOWyl0 <- process_country("ODOymOOWyl0", mechs)

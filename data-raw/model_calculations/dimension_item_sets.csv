@@ -213,65 +213,45 @@ co,Category option combo,PmGMM8uFjo7,other_disagg," Male, Routine, Positive, 25-
 co,Category option combo,Y2sOpOmAsEH,other_disagg," Male, Routine, Positive, 35-49",Routine,rGptWqlhaVU,12,1.0000,ti_routine_cop24,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,ti_routine_cop24
 co,Category option combo,UHZOTJlEKQe,other_disagg," Male, Routine, Positive, 50+",Routine,rGptWqlhaVU,13,1.0000,ti_routine_cop24,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,ti_routine_cop24
 co,Category option combo,j2OQc8aQSmD,other_disagg," Male, Routine, Positive, <1",Routine,rGptWqlhaVU,14,1.0000,ti_routine_cop24,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,ti_routine_cop24
-co,Category option combo,dUCNvz8ByrS,other_disagg," FSW, Positive",Routine,rGptWqlhaVU,15,1.0000,ti_routine_cop24,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,ti_routine_cop24
-co,Category option combo,wbJ9Nh2jqUG,other_disagg," MSM, Positive",Routine,rGptWqlhaVU,16,1.0000,ti_routine_cop24,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,ti_routine_cop24
-co,Category option combo,FyhQbdBMM1p,other_disagg," PWID, Positive",Routine,rGptWqlhaVU,17,1.0000,ti_routine_cop24,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,ti_routine_cop24
-co,Category option combo,VCEoYHLyTxk,other_disagg," People in prisons and other enclosed settings, Positive",Routine,rGptWqlhaVU,18,1.0000,ti_routine_cop24,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,ti_routine_cop24
-co,Category option combo,fCiy8R7Dv9x,other_disagg," TG, Positive",Routine,rGptWqlhaVU,19,1.0000,ti_routine_cop24,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,ti_routine_cop24
-co,Category option combo,zTVR8bDVfQS,other_disagg," Female, Routine, Positive, 1-9",Routine,rGptWqlhaVU,20,1.0000,ti_routine_cop24,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,ti_routine_cop24
-co,Category option combo,Zi54FPun6Vk,other_disagg," Female, Routine, Positive, 10-14",Routine,rGptWqlhaVU,21,1.0000,ti_routine_cop24,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,ti_routine_cop24
-co,Category option combo,T3VBaUubXKd,other_disagg," Female, Routine, Positive, 15-24",Routine,rGptWqlhaVU,22,1.0000,ti_routine_cop24,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,ti_routine_cop24
-co,Category option combo,fhILECF10oc,other_disagg," Female, Routine, Positive, 25-34",Routine,rGptWqlhaVU,23,1.0000,ti_routine_cop24,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,ti_routine_cop24
-co,Category option combo,PtCAvXLn3aI,other_disagg," Female, Routine, Positive, 35-49",Routine,rGptWqlhaVU,24,1.0000,ti_routine_cop24,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,ti_routine_cop24
-co,Category option combo,O5ebnsmhLnJ,other_disagg," Female, Routine, Positive, 50+",Routine,rGptWqlhaVU,25,1.0000,ti_routine_cop24,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,ti_routine_cop24
-co,Category option combo,UocOb3kKHPl,other_disagg," Female, Routine, Positive, <1",Routine,rGptWqlhaVU,26,1.0000,ti_routine_cop24,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,ti_routine_cop24
-co,Category option combo,IqFLmL9Ml9M,other_disagg," Male, Routine, Positive, 1-9",Routine,rGptWqlhaVU,27,1.0000,ti_routine_cop24,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,ti_routine_cop24
-co,Category option combo,nZPSnZ1yH2j,other_disagg," Male, Routine, Positive, 10-14",Routine,rGptWqlhaVU,28,1.0000,ti_routine_cop24,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,ti_routine_cop24
-co,Category option combo,Xq52sj6kjCI,other_disagg," Male, Routine, Positive, 15-24",Routine,rGptWqlhaVU,29,1.0000,ti_routine_cop24,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,ti_routine_cop24
-co,Category option combo,PmGMM8uFjo7,other_disagg," Male, Routine, Positive, 25-34",Routine,rGptWqlhaVU,30,1.0000,ti_routine_cop24,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,ti_routine_cop24
-co,Category option combo,Y2sOpOmAsEH,other_disagg," Male, Routine, Positive, 35-49",Routine,rGptWqlhaVU,31,1.0000,ti_routine_cop24,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,ti_routine_cop24
-co,Category option combo,UHZOTJlEKQe,other_disagg," Male, Routine, Positive, 50+",Routine,rGptWqlhaVU,32,1.0000,ti_routine_cop24,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,ti_routine_cop24
-co,Category option combo,j2OQc8aQSmD,other_disagg," Male, Routine, Positive, <1",Routine,rGptWqlhaVU,33,1.0000,ti_routine_cop24,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,ti_routine_cop24
-co,Category option combo,dUCNvz8ByrS,other_disagg," FSW, Positive",Routine,rGptWqlhaVU,34,1.0000,ti_routine_cop24,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,ti_routine_cop24
-co,Category option combo,wbJ9Nh2jqUG,other_disagg," MSM, Positive",Routine,rGptWqlhaVU,35,1.0000,ti_routine_cop24,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,ti_routine_cop24
-co,Category option combo,FyhQbdBMM1p,other_disagg," PWID, Positive",Routine,rGptWqlhaVU,36,1.0000,ti_routine_cop24,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,ti_routine_cop24
-co,Category option combo,VCEoYHLyTxk,other_disagg," People in prisons and other enclosed settings, Positive",Routine,rGptWqlhaVU,37,1.0000,ti_routine_cop24,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,ti_routine_cop24
-co,Category option combo,fCiy8R7Dv9x,other_disagg," TG, Positive",Routine,rGptWqlhaVU,38,1.0000,ti_routine_cop24,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,ti_routine_cop24
-co,Category option combo,zTVR8bDVfQS,other_disagg," Female, Routine, Positive, 1-9",Routine,rGptWqlhaVU,39,1.0000,ti_routine_cop24,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,ti_routine_cop24
-co,Category option combo,Zi54FPun6Vk,other_disagg," Female, Routine, Positive, 10-14",Routine,rGptWqlhaVU,40,1.0000,ti_routine_cop24,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,ti_routine_cop24
-co,Category option combo,T3VBaUubXKd,other_disagg," Female, Routine, Positive, 15-24",Routine,rGptWqlhaVU,41,1.0000,ti_routine_cop24,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,ti_routine_cop24
-co,Category option combo,fhILECF10oc,other_disagg," Female, Routine, Positive, 25-34",Routine,rGptWqlhaVU,42,1.0000,ti_routine_cop24,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,ti_routine_cop24
-co,Category option combo,PtCAvXLn3aI,other_disagg," Female, Routine, Positive, 35-49",Routine,rGptWqlhaVU,43,1.0000,ti_routine_cop24,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,ti_routine_cop24
-co,Category option combo,O5ebnsmhLnJ,other_disagg," Female, Routine, Positive, 50+",Routine,rGptWqlhaVU,44,1.0000,ti_routine_cop24,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,ti_routine_cop24
-co,Category option combo,UocOb3kKHPl,other_disagg," Female, Routine, Positive, <1",Routine,rGptWqlhaVU,45,1.0000,ti_routine_cop24,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,ti_routine_cop24
-co,Category option combo,IqFLmL9Ml9M,other_disagg," Male, Routine, Positive, 1-9",Routine,rGptWqlhaVU,46,1.0000,ti_routine_cop24,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,ti_routine_cop24
-co,Category option combo,nZPSnZ1yH2j,other_disagg," Male, Routine, Positive, 10-14",Routine,rGptWqlhaVU,47,1.0000,ti_routine_cop24,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,ti_routine_cop24
-co,Category option combo,Xq52sj6kjCI,other_disagg," Male, Routine, Positive, 15-24",Routine,rGptWqlhaVU,48,1.0000,ti_routine_cop24,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,ti_routine_cop24
-co,Category option combo,PmGMM8uFjo7,other_disagg," Male, Routine, Positive, 25-34",Routine,rGptWqlhaVU,49,1.0000,ti_routine_cop24,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,ti_routine_cop24
-co,Category option combo,Y2sOpOmAsEH,other_disagg," Male, Routine, Positive, 35-49",Routine,rGptWqlhaVU,50,1.0000,ti_routine_cop24,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,ti_routine_cop24
-co,Category option combo,UHZOTJlEKQe,other_disagg," Male, Routine, Positive, 50+",Routine,rGptWqlhaVU,51,1.0000,ti_routine_cop24,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,ti_routine_cop24
-co,Category option combo,j2OQc8aQSmD,other_disagg," Male, Routine, Positive, <1",Routine,rGptWqlhaVU,52,1.0000,ti_routine_cop24,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,ti_routine_cop24
-co,Category option combo,dUCNvz8ByrS,other_disagg," FSW, Positive",Routine,rGptWqlhaVU,53,1.0000,ti_routine_cop24,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,ti_routine_cop24
-co,Category option combo,wbJ9Nh2jqUG,other_disagg," MSM, Positive",Routine,rGptWqlhaVU,54,1.0000,ti_routine_cop24,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,ti_routine_cop24
-co,Category option combo,FyhQbdBMM1p,other_disagg," PWID, Positive",Routine,rGptWqlhaVU,55,1.0000,ti_routine_cop24,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,ti_routine_cop24
-co,Category option combo,VCEoYHLyTxk,other_disagg," People in prisons and other enclosed settings, Positive",Routine,rGptWqlhaVU,56,1.0000,ti_routine_cop24,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,ti_routine_cop24
-co,Category option combo,fCiy8R7Dv9x,other_disagg," TG, Positive",Routine,rGptWqlhaVU,57,1.0000,ti_routine_cop24,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,ti_routine_cop24
-co,Category option combo,zTVR8bDVfQS,other_disagg," Female, Routine, Positive, 1-9",Routine,rGptWqlhaVU,58,1.0000,ti_routine_cop24,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,ti_routine_cop24
-co,Category option combo,Zi54FPun6Vk,other_disagg," Female, Routine, Positive, 10-14",Routine,rGptWqlhaVU,59,1.0000,ti_routine_cop24,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,ti_routine_cop24
-co,Category option combo,T3VBaUubXKd,other_disagg," Female, Routine, Positive, 15-24",Routine,rGptWqlhaVU,60,1.0000,ti_routine_cop24,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,ti_routine_cop24
-co,Category option combo,fhILECF10oc,other_disagg," Female, Routine, Positive, 25-34",Routine,rGptWqlhaVU,61,1.0000,ti_routine_cop24,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,ti_routine_cop24
-co,Category option combo,PtCAvXLn3aI,other_disagg," Female, Routine, Positive, 35-49",Routine,rGptWqlhaVU,62,1.0000,ti_routine_cop24,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,ti_routine_cop24
-co,Category option combo,O5ebnsmhLnJ,other_disagg," Female, Routine, Positive, 50+",Routine,rGptWqlhaVU,63,1.0000,ti_routine_cop24,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,ti_routine_cop24
-co,Category option combo,UocOb3kKHPl,other_disagg," Female, Routine, Positive, <1",Routine,rGptWqlhaVU,64,1.0000,ti_routine_cop24,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,ti_routine_cop24
-co,Category option combo,IqFLmL9Ml9M,other_disagg," Male, Routine, Positive, 1-9",Routine,rGptWqlhaVU,65,1.0000,ti_routine_cop24,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,ti_routine_cop24
-co,Category option combo,nZPSnZ1yH2j,other_disagg," Male, Routine, Positive, 10-14",Routine,rGptWqlhaVU,66,1.0000,ti_routine_cop24,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,ti_routine_cop24
-co,Category option combo,Xq52sj6kjCI,other_disagg," Male, Routine, Positive, 15-24",Routine,rGptWqlhaVU,67,1.0000,ti_routine_cop24,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,ti_routine_cop24
-co,Category option combo,PmGMM8uFjo7,other_disagg," Male, Routine, Positive, 25-34",Routine,rGptWqlhaVU,68,1.0000,ti_routine_cop24,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,ti_routine_cop24
-co,Category option combo,Y2sOpOmAsEH,other_disagg," Male, Routine, Positive, 35-49",Routine,rGptWqlhaVU,69,1.0000,ti_routine_cop24,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,ti_routine_cop24
-co,Category option combo,UHZOTJlEKQe,other_disagg," Male, Routine, Positive, 50+",Routine,rGptWqlhaVU,70,1.0000,ti_routine_cop24,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,ti_routine_cop24
-co,Category option combo,j2OQc8aQSmD,other_disagg," Male, Routine, Positive, <1",Routine,rGptWqlhaVU,71,1.0000,ti_routine_cop24,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,ti_routine_cop24
-co,Category option combo,dUCNvz8ByrS,other_disagg," FSW, Positive",Routine,rGptWqlhaVU,72,1.0000,ti_routine_cop24,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,ti_routine_cop24
-co,Category option combo,wbJ9Nh2jqUG,other_disagg," MSM, Positive",Routine,rGptWqlhaVU,73,1.0000,ti_routine_cop24,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,ti_routine_cop24
-co,Category option combo,FyhQbdBMM1p,other_disagg," PWID, Positive",Routine,rGptWqlhaVU,74,1.0000,ti_routine_cop24,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,ti_routine_cop24
-co,Category option combo,VCEoYHLyTxk,other_disagg," People in prisons and other enclosed settings, Positive",Routine,rGptWqlhaVU,75,1.0000,ti_routine_cop24,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,ti_routine_cop24
-co,Category option combo,fCiy8R7Dv9x,other_disagg," TG, Positive",Routine,rGptWqlhaVU,76,1.0000,ti_routine_cop24,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,ti_routine_cop24
+co,Category option combo,zTVR8bDVfQS,other_disagg," Female, Routine, Positive, 1-9",Routine,rGptWqlhaVU,15,1.0000,ti_routine_cop24,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,ti_routine_cop24
+co,Category option combo,Zi54FPun6Vk,other_disagg," Female, Routine, Positive, 10-14",Routine,rGptWqlhaVU,16,1.0000,ti_routine_cop24,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,ti_routine_cop24
+co,Category option combo,T3VBaUubXKd,other_disagg," Female, Routine, Positive, 15-24",Routine,rGptWqlhaVU,17,1.0000,ti_routine_cop24,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,ti_routine_cop24
+co,Category option combo,fhILECF10oc,other_disagg," Female, Routine, Positive, 25-34",Routine,rGptWqlhaVU,18,1.0000,ti_routine_cop24,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,ti_routine_cop24
+co,Category option combo,PtCAvXLn3aI,other_disagg," Female, Routine, Positive, 35-49",Routine,rGptWqlhaVU,19,1.0000,ti_routine_cop24,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,ti_routine_cop24
+co,Category option combo,O5ebnsmhLnJ,other_disagg," Female, Routine, Positive, 50+",Routine,rGptWqlhaVU,20,1.0000,ti_routine_cop24,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,ti_routine_cop24
+co,Category option combo,UocOb3kKHPl,other_disagg," Female, Routine, Positive, <1",Routine,rGptWqlhaVU,21,1.0000,ti_routine_cop24,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,ti_routine_cop24
+co,Category option combo,IqFLmL9Ml9M,other_disagg," Male, Routine, Positive, 1-9",Routine,rGptWqlhaVU,22,1.0000,ti_routine_cop24,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,ti_routine_cop24
+co,Category option combo,nZPSnZ1yH2j,other_disagg," Male, Routine, Positive, 10-14",Routine,rGptWqlhaVU,23,1.0000,ti_routine_cop24,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,ti_routine_cop24
+co,Category option combo,Xq52sj6kjCI,other_disagg," Male, Routine, Positive, 15-24",Routine,rGptWqlhaVU,24,1.0000,ti_routine_cop24,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,ti_routine_cop24
+co,Category option combo,PmGMM8uFjo7,other_disagg," Male, Routine, Positive, 25-34",Routine,rGptWqlhaVU,25,1.0000,ti_routine_cop24,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,ti_routine_cop24
+co,Category option combo,Y2sOpOmAsEH,other_disagg," Male, Routine, Positive, 35-49",Routine,rGptWqlhaVU,26,1.0000,ti_routine_cop24,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,ti_routine_cop24
+co,Category option combo,UHZOTJlEKQe,other_disagg," Male, Routine, Positive, 50+",Routine,rGptWqlhaVU,27,1.0000,ti_routine_cop24,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,ti_routine_cop24
+co,Category option combo,j2OQc8aQSmD,other_disagg," Male, Routine, Positive, <1",Routine,rGptWqlhaVU,28,1.0000,ti_routine_cop24,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,ti_routine_cop24
+co,Category option combo,zTVR8bDVfQS,other_disagg," Female, Routine, Positive, 1-9",Routine,rGptWqlhaVU,29,1.0000,ti_routine_cop24,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,ti_routine_cop24
+co,Category option combo,Zi54FPun6Vk,other_disagg," Female, Routine, Positive, 10-14",Routine,rGptWqlhaVU,30,1.0000,ti_routine_cop24,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,ti_routine_cop24
+co,Category option combo,T3VBaUubXKd,other_disagg," Female, Routine, Positive, 15-24",Routine,rGptWqlhaVU,31,1.0000,ti_routine_cop24,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,ti_routine_cop24
+co,Category option combo,fhILECF10oc,other_disagg," Female, Routine, Positive, 25-34",Routine,rGptWqlhaVU,32,1.0000,ti_routine_cop24,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,ti_routine_cop24
+co,Category option combo,PtCAvXLn3aI,other_disagg," Female, Routine, Positive, 35-49",Routine,rGptWqlhaVU,33,1.0000,ti_routine_cop24,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,ti_routine_cop24
+co,Category option combo,O5ebnsmhLnJ,other_disagg," Female, Routine, Positive, 50+",Routine,rGptWqlhaVU,34,1.0000,ti_routine_cop24,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,ti_routine_cop24
+co,Category option combo,UocOb3kKHPl,other_disagg," Female, Routine, Positive, <1",Routine,rGptWqlhaVU,35,1.0000,ti_routine_cop24,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,ti_routine_cop24
+co,Category option combo,IqFLmL9Ml9M,other_disagg," Male, Routine, Positive, 1-9",Routine,rGptWqlhaVU,36,1.0000,ti_routine_cop24,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,ti_routine_cop24
+co,Category option combo,nZPSnZ1yH2j,other_disagg," Male, Routine, Positive, 10-14",Routine,rGptWqlhaVU,37,1.0000,ti_routine_cop24,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,ti_routine_cop24
+co,Category option combo,Xq52sj6kjCI,other_disagg," Male, Routine, Positive, 15-24",Routine,rGptWqlhaVU,38,1.0000,ti_routine_cop24,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,ti_routine_cop24
+co,Category option combo,PmGMM8uFjo7,other_disagg," Male, Routine, Positive, 25-34",Routine,rGptWqlhaVU,39,1.0000,ti_routine_cop24,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,ti_routine_cop24
+co,Category option combo,Y2sOpOmAsEH,other_disagg," Male, Routine, Positive, 35-49",Routine,rGptWqlhaVU,40,1.0000,ti_routine_cop24,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,ti_routine_cop24
+co,Category option combo,UHZOTJlEKQe,other_disagg," Male, Routine, Positive, 50+",Routine,rGptWqlhaVU,41,1.0000,ti_routine_cop24,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,ti_routine_cop24
+co,Category option combo,j2OQc8aQSmD,other_disagg," Male, Routine, Positive, <1",Routine,rGptWqlhaVU,42,1.0000,ti_routine_cop24,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,ti_routine_cop24
+co,Category option combo,zTVR8bDVfQS,other_disagg," Female, Routine, Positive, 1-9",Routine,rGptWqlhaVU,43,1.0000,ti_routine_cop24,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,ti_routine_cop24
+co,Category option combo,Zi54FPun6Vk,other_disagg," Female, Routine, Positive, 10-14",Routine,rGptWqlhaVU,44,1.0000,ti_routine_cop24,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,ti_routine_cop24
+co,Category option combo,T3VBaUubXKd,other_disagg," Female, Routine, Positive, 15-24",Routine,rGptWqlhaVU,45,1.0000,ti_routine_cop24,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,ti_routine_cop24
+co,Category option combo,fhILECF10oc,other_disagg," Female, Routine, Positive, 25-34",Routine,rGptWqlhaVU,46,1.0000,ti_routine_cop24,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,ti_routine_cop24
+co,Category option combo,PtCAvXLn3aI,other_disagg," Female, Routine, Positive, 35-49",Routine,rGptWqlhaVU,47,1.0000,ti_routine_cop24,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,ti_routine_cop24
+co,Category option combo,O5ebnsmhLnJ,other_disagg," Female, Routine, Positive, 50+",Routine,rGptWqlhaVU,48,1.0000,ti_routine_cop24,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,ti_routine_cop24
+co,Category option combo,UocOb3kKHPl,other_disagg," Female, Routine, Positive, <1",Routine,rGptWqlhaVU,49,1.0000,ti_routine_cop24,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,ti_routine_cop24
+co,Category option combo,IqFLmL9Ml9M,other_disagg," Male, Routine, Positive, 1-9",Routine,rGptWqlhaVU,50,1.0000,ti_routine_cop24,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,ti_routine_cop24
+co,Category option combo,nZPSnZ1yH2j,other_disagg," Male, Routine, Positive, 10-14",Routine,rGptWqlhaVU,51,1.0000,ti_routine_cop24,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,ti_routine_cop24
+co,Category option combo,Xq52sj6kjCI,other_disagg," Male, Routine, Positive, 15-24",Routine,rGptWqlhaVU,52,1.0000,ti_routine_cop24,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,ti_routine_cop24
+co,Category option combo,PmGMM8uFjo7,other_disagg," Male, Routine, Positive, 25-34",Routine,rGptWqlhaVU,53,1.0000,ti_routine_cop24,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,ti_routine_cop24
+co,Category option combo,Y2sOpOmAsEH,other_disagg," Male, Routine, Positive, 35-49",Routine,rGptWqlhaVU,54,1.0000,ti_routine_cop24,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,ti_routine_cop24
+co,Category option combo,UHZOTJlEKQe,other_disagg," Male, Routine, Positive, 50+",Routine,rGptWqlhaVU,55,1.0000,ti_routine_cop24,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,ti_routine_cop24
+co,Category option combo,j2OQc8aQSmD,other_disagg," Male, Routine, Positive, <1",Routine,rGptWqlhaVU,56,1.0000,ti_routine_cop24,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,ti_routine_cop24
