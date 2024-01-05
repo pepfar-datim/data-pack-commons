@@ -401,7 +401,16 @@ print(paste0("The difference between the older model and the new model is: ", nr
 #                    "/Users/sam/COP data/psnuxim_model_data_23.rds",
 #                    compress = c("gz"))
 #   file_name <- "psnuxim_model_data_23.rds"
+# } else if (cop_year == 2024){
+#   readr::write_rds(data,
+#                    paste0("/Users/sam/COP data/PSNUxIM_COP24_", lubridate::today(), ".rds"),
+#                    compress = c("gz"))
+#   readr::write_rds(data,
+#                    "/Users/sam/COP data/psnuxim_model_data_24.rds",
+#                    compress = c("gz"))
+#   file_name <- "psnuxim_model_data_24.rds"
 # }
+
 #
 # Sys.setenv(
 #   AWS_PROFILE = "datapack-testing",
