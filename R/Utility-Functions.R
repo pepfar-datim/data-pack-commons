@@ -243,7 +243,7 @@ diffSnuximModels <- function(model_old,
   deltas <- dplyr::mutate(deltas,
                           psnu = datimutils::getOrgUnits(deltas$psnu_uid,
                                                          d2_session = d2_session),
-                          ou = purrr::map_chr(ancestors, purrr::pluck, 1, 3),
+                          ou = purrr::map_chr(ancestors, purrr::pluck, 1, 3, .default = NA_character_),
                           snu1 = purrr::map_chr(ancestors, purrr::pluck, 1, 4, .default = NA_character_))
 
   return(deltas)
