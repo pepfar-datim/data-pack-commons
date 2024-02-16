@@ -12,10 +12,21 @@ require(assertthat)
 require(foreach)
 
 cop_year <- 2024
+compare <- TRUE
+posit_server <- TRUE
 
 # login to datim
-datimutils::loginToDATIM(paste0(Sys.getenv("SECRETS_FOLDER"),
-                                "datim.json"))
+if(isTRUE(posit_server)) {
+  datimutils::loginToDATIM(
+    username = Sys.getenv("UN"),
+    password = Sys.getenv("PW"),
+    base_url = Sys.getenv("BASE_URL")
+  )
+} else {
+  datimutils::loginToDATIM(paste0(Sys.getenv("SECRETS_FOLDER"),
+                                  "datim.json"))
+}
+
 
 # Countries to include in model, usually all
 # Turkmenistan has no planning/priortization level
@@ -301,7 +312,7 @@ diff <- dplyr::mutate(diff,
 dim_item_sets <- datapackcommons::dim_item_sets
 
 # for each ou
-for (ou_index in seq_len(NROW(operating_units))) {
+for (ou_index in seq_len(NROW(operating_units[1:4,]))) {
   # start with fresh local copy of data_required.csv
   data_required <-  datapackcommons::data_required
   operating_unit <-  dplyr::slice(operating_units, ou_index)
@@ -361,23 +372,70 @@ for (ou_index in seq_len(NROW(operating_units))) {
 print(lubridate::now())
 
 # compare with another model version
+if(compare == FALSE) {
+  print("done")
+} else {
 
-diff <- diffDataPackModels(model_old = file.choose() %>% readr::read_rds()
-                           , model_new = flattenDataPackModel_21(cop_data)
-                           # , model_new = file.choose() %>% readr::read_rds()
-                           , full_diff = TRUE)
+  Sys.setenv(
+    AWS_PROFILE = "datapack-testing",
+    AWS_S3_BUCKET = "testing.pepfar.data.datapack"
+  )
+  #
+  s3<-paws::s3()
 
-deltas <- diff$deltas
-delta_summary <-  dplyr::group_by(deltas, indicator_code, ou) %>% dplyr::summarise(count_delta = dplyr::n())
-indicators_w_delta <- deltas$indicator_code %>% unique()
+  r<-tryCatch({
+    s3_download<-s3$get_object(Bucket = Sys.getenv("AWS_S3_BUCKET"),
+                               Key = "support_files/datapack_model_data.rds")
 
-matched_summary <- dplyr::group_by(diff$matched, indicator_code, ou) %>%
-  dplyr::summarise(count_matched = dplyr::n(),
-                   sum_matches = sum(value.old,
-                                     na.rm = TRUE))
-summary <- dplyr::full_join(delta_summary, matched_summary) %>%
-  dplyr::filter(indicator_code %in% indicators_w_delta) %>%
-  dplyr::arrange(indicator_code)
+    # Write output to file
+    file_name2 <- "datapack_model_data.rds"
+    writeBin(s3_download$Body, con = file_name2)
+
+    model_old <- s3_download$Body %>% rawConnection() %>% gzcon %>% readRDS
+    print("datapack model read from S3", name = "datapack")
+    TRUE
+  },
+  error = function(err) {
+    print("datpack model could not be read from S3",name = "datapack")
+    print(err, name = "datapack")
+    FALSE
+  })
+
+
+
+  diff <- diffDataPackModels(model_old = model_old#file.choose() %>% readr::read_rds()
+                             , model_new = flattenDataPackModel_21(cop_data)
+                             # , model_new = file.choose() %>% readr::read_rds()
+                             , full_diff = FALSE)
+
+  deltas <- diff$deltas
+  print(paste0("The difference between the older model and the new model is: ", nrow(deltas)))
+  delta_summary <-  dplyr::group_by(deltas, indicator_code, ou) %>% dplyr::summarise(count_delta = dplyr::n())
+  indicators_w_delta <- deltas$indicator_code %>% unique()
+
+  matched_summary <- dplyr::group_by(diff$matched, indicator_code, ou) %>%
+    dplyr::summarise(count_matched = dplyr::n(),
+                     sum_matches = sum(value.old,
+                                       na.rm = TRUE))
+  summary <- dplyr::full_join(delta_summary, matched_summary) %>%
+    dplyr::filter(indicator_code %in% indicators_w_delta) %>%
+    dplyr::arrange(indicator_code)
+
+  # Define the file path
+  file_path <- file_name2
+
+  # Check if the file exists
+  if (file.exists(file_path)) {
+    # Delete the file
+    file.remove(file_path)
+    print("File deleted successfully.")
+  } else {
+    print("File does not exist.")
+  }
+
+
+
+}
 
 
 
@@ -392,10 +450,10 @@ summary <- dplyr::full_join(delta_summary, matched_summary) %>%
 #  saveRDS(cop_data, file = paste0(output_location,file_name_base, ".rds"))
 
 
-# Sys.setenv(
-#   AWS_PROFILE = "datapack-testing",
-#   AWS_S3_BUCKET = "testing.pepfar.data.datapack"
-# )
+ # Sys.setenv(
+ #   AWS_PROFILE = "datapack-testing",
+ #   AWS_S3_BUCKET = "testing.pepfar.data.datapack"
+ # )
 #
 # s3<-paws::s3()
 #

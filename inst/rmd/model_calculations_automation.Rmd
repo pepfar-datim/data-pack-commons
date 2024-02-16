@@ -1,0 +1,49 @@
+---
+title: "Run Datapack Model"
+output: html_document
+date: "2024-02-16"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+```
+
+## Run Script
+
+The following chunk runs the datapack model on the posit server.
+
+```{r run_model, include=TRUE, echo=TRUE, message=FALSE}
+# setup log file to run ------
+
+# create the folder where output will go
+# folder <- paste0("logs/model_calculations/")
+# dir.create(folder, showWarnings = FALSE, recursive = TRUE)
+# 
+# # initiate log recording
+# file_name <- paste0(
+#   folder,
+#   paste0(
+#     "model_calculations_",
+#     Sys.Date(),
+#     ".log"
+#   )
+#   )
+# 
+# con <- file(file_name)
+# sink(con, append=TRUE)
+# sink(file = NULL, append = FALSE, type = c("output", "message"),
+#      split = FALSE)
+# 
+
+source("../../data-raw/model_calculations.R")
+
+# Restore output to console
+# sink() 
+# sink(type="message")
+# 
+# # And look at the log...
+# cat(file_name, sep="\n")
+
+
+```
+
