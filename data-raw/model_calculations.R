@@ -1,6 +1,17 @@
 ### Script Parameters ####################
+cop_year <- 2024
+compare <- TRUE
+posit_server <- TRUE
+
 library(magrittr)
-require(datapackcommons)
+if (isTRUE(posit_server)) {
+  devtools::install_github("https://github.com/pepfar-datim/data-pack-commons",
+                           ref = "prep-automation",
+                           upgrade = FALSE)
+  print("Installed Latest Datapackcommons")
+} else {
+  require(datapackcommons)
+}
 require(datapackr)
 require(datimutils)
 require(magrittr)
@@ -10,10 +21,6 @@ require(lubridate)
 require(rlang)
 require(assertthat)
 require(foreach)
-
-cop_year <- 2024
-compare <- TRUE
-posit_server <- TRUE
 
 # login to datim
 if (isTRUE(posit_server)) {
@@ -404,7 +411,7 @@ if (compare == FALSE) {
 
 
   diff <- diffDataPackModels(model_old = model_old#file.choose() %>% readr::read_rds()
-                             , model_new = flattenDataPackModel_21(cop_data)
+                             , model_new = datapackcommons::flattenDataPackModel_21(cop_data)
                              # , model_new = file.choose() %>% readr::read_rds()
                              , full_diff = FALSE)
 

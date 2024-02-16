@@ -35,7 +35,7 @@ The following chunk runs the datapack model on the posit server.
 #      split = FALSE)
 #
 
-source("../../data-raw/model_calculations.R")
+source("model_calculations.R")
 
 # Restore output to console
 # sink()

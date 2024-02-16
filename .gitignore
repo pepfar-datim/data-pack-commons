@@ -42,3 +42,6 @@ renv/
 packrat/lib*/
 Icon
 mechs.rds
+
+#rsconnet
+data-raw/rsconnect
