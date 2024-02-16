@@ -45,3 +45,4 @@ mechs.rds
 
 #rsconnet
 data-raw/rsconnect
+data-raw/*.html

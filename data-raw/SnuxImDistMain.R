@@ -7,11 +7,33 @@
 
 ### Setup and parameters ###
 
-library(datapackcommons)
+cop_year <- 2024
+compare <- TRUE
+posit_server <- TRUE
+
+if (isTRUE(posit_server)) {
+  devtools::install_github("https://github.com/pepfar-datim/data-pack-commons",
+                           ref = "prep-automation",
+                           upgrade = FALSE)
+  print("Installed Latest Datapackcommons")
+} else {
+  require(datapackcommons)
+}
+
 library(datimutils)
 library(dplyr)
-datimutils::loginToDATIM(paste0(Sys.getenv("SECRETS_FOLDER"), "datim.json")) # added for a different config access
-cop_year <- 2024
+
+# login to datim
+if (isTRUE(posit_server)) {
+  datimutils::loginToDATIM(
+    username = Sys.getenv("UN"),
+    password = Sys.getenv("PW"),
+    base_url = Sys.getenv("BASE_URL")
+  )
+} else {
+  datimutils::loginToDATIM(paste0(Sys.getenv("SECRETS_FOLDER"),
+                                  "datim.json"))
+}
 
 # FUNCTIONS -------------------------------------------------------------------
 
@@ -351,7 +373,8 @@ fy_map <-  switch(as.character(cop_year),
 # pull list of countries to iterate through
 country_details <-  datimutils::getOrgUnitGroups("Country", name, fields = "organisationUnits[name,id]") %>%
   dplyr::arrange(name) %>%
-  select(country_name = name, id) #%>%
+  select(country_name = name, id) %>%
+  slice(1:2)
 #  dplyr::filter(country_name == "South Africa")
 
 # start process of collecting api data for every country
@@ -366,15 +389,68 @@ data <-  country_details[["id"]] %>%
 
 # COMPARE MODELS ---------------------------------------------------------------
 
-data_old <- readr::read_rds(file.choose())
+if (compare == FALSE) {
 
-deltas <- diffSnuximModels(
-  data_old,
-  data,
-  full_diff = TRUE
-)
+  print("done")
 
-print(paste0("The difference between the older model and the new model is: ", nrow(deltas)))
+} else {
+
+  cop_year_end <- substr(cop_year, 3, 4)
+  file_name <- paste0("psnuxim_model_data_",cop_year_end,".rds")
+
+  Sys.setenv(
+    AWS_PROFILE = "datapack-testing",
+    AWS_S3_BUCKET = "testing.pepfar.data.datapack"
+  )
+
+  s3 <- paws::s3()
+
+  r <- tryCatch({
+    s3_download <- s3$get_object(Bucket = Sys.getenv("AWS_S3_BUCKET"),
+                                 Key = paste0(
+                                   "support_files/",
+                                   file_name
+                                   )
+                                 )
+
+    # write output to file
+    writeBin(s3_download$Body, con = file_name)
+
+    # extract data
+    data_old <- s3_download$Body %>% rawConnection() %>% gzcon %>% readRDS
+    print("psnuxim model read from S3", name = "datapack")
+    TRUE
+  },
+  error = function(err) {
+    print("psnuxim model could not be read from S3", name = "datapack")
+    print(err, name = "datapack")
+    FALSE
+  })
+
+  #data_old <- readr::read_rds(file.choose())
+
+  deltas <- diffSnuximModels(
+    data_old,
+    data,
+    full_diff = FALSE
+  )
+
+  print(paste0("The difference between the production PSNXUIM model in TEST S3 and the new model is: ", nrow(deltas)))
+
+  # Check if the file exists
+  if (file.exists(file_name)) {
+    # Delete the file
+    file.remove(file_name)
+    print(paste0(file_name, " LOCALLY deleted successfully."))
+  } else {
+    print(paste0(file_name, "File does not exist."))
+  }
+
+
+
+}
+
+
 
 
 # if (cop_year == 2021){

@@ -1,0 +1,24 @@
+---
+title: "Run Datapack Model"
+output: html_document
+date: "2024-02-16"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+```
+
+## Run Script
+
+The following chunk runs the datapack model on the posit server, this model is run and built with the `data-raw/model_calculations.R` file.
+
+```{r run_model, include=TRUE, echo=TRUE, message=FALSE}
+
+
+paste0("Datapack model started ", as.POSIXlt(Sys.time(), "America/New_York"), " America/NY time")
+source("model_calculations.R")
+paste0("Datapack model ended ", as.POSIXlt(Sys.time(), "America/New_York"), " America/NY time")
+
+
+```
+

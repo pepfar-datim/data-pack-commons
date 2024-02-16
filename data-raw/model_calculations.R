@@ -380,24 +380,32 @@ print(lubridate::now())
 
 # compare with another model version
 if (compare == FALSE) {
+
   print("done")
+
 } else {
+
+  file_name <- "datapack_model_data.rds"
 
   Sys.setenv(
     AWS_PROFILE = "datapack-testing",
     AWS_S3_BUCKET = "testing.pepfar.data.datapack"
   )
-  #
+
   s3 <- paws::s3()
 
   r <- tryCatch({
     s3_download <- s3$get_object(Bucket = Sys.getenv("AWS_S3_BUCKET"),
-                               Key = "support_files/datapack_model_data.rds")
+                               Key = paste0(
+                                 "support_files/",
+                                 file_name
+                                 )
+                               )
 
-    # Write output to file
-    file_name2 <- "datapack_model_data.rds"
-    writeBin(s3_download$Body, con = file_name2)
+    # write output to file
+    writeBin(s3_download$Body, con = file_name)
 
+    # extract data
     model_old <- s3_download$Body %>% rawConnection() %>% gzcon %>% readRDS
     print("datapack model read from S3", name = "datapack")
     TRUE
@@ -416,7 +424,7 @@ if (compare == FALSE) {
                              , full_diff = FALSE)
 
   deltas <- diff$deltas
-  print(paste0("The difference between the older model and the new model is: ", nrow(deltas)))
+  print(paste0("The difference between the production datapack model in TEST S3 and the new model is: ", nrow(deltas)))
   delta_summary <-  dplyr::group_by(deltas, indicator_code, ou) %>% dplyr::summarise(count_delta = dplyr::n())
   indicators_w_delta <- deltas$indicator_code %>% unique()
 
@@ -428,16 +436,13 @@ if (compare == FALSE) {
     dplyr::filter(indicator_code %in% indicators_w_delta) %>%
     dplyr::arrange(indicator_code)
 
-  # Define the file path
-  file_path <- file_name2
-
   # Check if the file exists
-  if (file.exists(file_path)) {
+  if (file.exists(file_name)) {
     # Delete the file
-    file.remove(file_path)
-    print("File deleted successfully.")
+    file.remove(file_name)
+    print(paste0(file_name, " LOCALLY deleted successfully."))
   } else {
-    print("File does not exist.")
+    print(paste0(file_name, "File does not exist."))
   }
 
 
