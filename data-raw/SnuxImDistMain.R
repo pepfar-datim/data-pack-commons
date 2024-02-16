@@ -94,7 +94,7 @@ BuildDimensionList_DataPack <- function(data_element_map_item, dim_item_sets,
     dplyr::transmute(type = "dimension",
                      dim_item_uid = mechanism_uid,
                      dim_uid = "SH885jaRe0o") %>%
-    translateDims(.)
+    datapackcommons::translateDims(.)
 
   # remaining dimensions
   if (mil == FALSE) {

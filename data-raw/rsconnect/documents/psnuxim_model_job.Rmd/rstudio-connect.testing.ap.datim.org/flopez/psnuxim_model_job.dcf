@@ -1,0 +1,12 @@
+name: psnuxim_model_job
+title: psnuxim_model_job
+username: flopez
+account: flopez
+server: rstudio-connect.testing.ap.datim.org
+hostUrl: https://rstudio-connect.testing.ap.datim.org/__api__
+appId: 226
+bundleId: 1948
+url: https://rstudio-connect.testing.ap.datim.org:443/content/1b9b8426-6d9a-440f-bb81-75119ebaae47/
+version: 1
+asMultiple: FALSE
+asStatic: FALSE

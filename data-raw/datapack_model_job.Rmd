@@ -14,10 +14,11 @@ The following chunk runs the datapack model on the posit server, this model is r
 
 ```{r run_model, include=TRUE, echo=TRUE, message=FALSE}
 
-
-paste0("Datapack model started ", as.POSIXlt(Sys.time(), "America/New_York"), " America/NY time")
+start_time <- as.POSIXlt(Sys.time())
+paste0("Datapack model started ", start_time, "America/NY time")
 source("model_calculations.R")
-paste0("Datapack model ended ", as.POSIXlt(Sys.time(), "America/New_York"), " America/NY time")
+end_time <- as.POSIXlt(Sys.time())
+paste0("Datapack model ended ", end_time, " America/NY time")
 
 
 ```

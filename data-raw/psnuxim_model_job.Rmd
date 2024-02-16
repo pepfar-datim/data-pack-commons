@@ -15,9 +15,11 @@ The following chunk runs the PSNUXM model on the posit server, this model is run
 ```{r run_model, include=TRUE, echo=TRUE, message=FALSE}
 
 
-paste0("PSNUXIM model Started ", as.POSIXlt(Sys.time(), "America/New_York"), " America/NY time")
+start_time <- as.POSIXlt(Sys.time())
+paste0("PSNUXIM model started ", start_time, "America/NY time")
 source("SnuxImDistMain.R")
-paste0("PSNUXIM model Ended ", as.POSIXlt(Sys.time(), "America/New_York"), " America/NY time")
+end_time <- as.POSIXlt(Sys.time())
+paste0("PSNUXIM model ended ", end_time, " America/NY time")
 
 
 ```
