@@ -79,7 +79,7 @@ BuildDimensionList_DataPack <- function(data_element_map_item, dim_item_sets,
     dplyr::select(type, dim_item_uid, dim_uid) %>%
     unique()  %>%
     stats::na.omit() %>%
-    translateDims(.)
+    datapackcommons::translateDims(.)
 
   # if mechanisms are null return appended list of dimensions_common and dimensions_disaggs
   if (is.null(mechanisms)) {
