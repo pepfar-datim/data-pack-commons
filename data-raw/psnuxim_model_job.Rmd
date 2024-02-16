@@ -1,0 +1,23 @@
+---
+title: "Run PSNUXIM Model"
+output: html_document
+date: "2024-02-16"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+```
+
+## Run Script
+
+The following chunk runs the PSNUXM model on the posit server, this model is run and built with the `data-raw/SnuxImDistMain.R` file.
+
+```{r run_model, include=TRUE, echo=TRUE, message=FALSE}
+
+
+paste0("PSNUXIM model Started ", as.POSIXlt(Sys.time(), "America/New_York"), " America/NY time")
+source("SnuxImDistMain.R")
+paste0("PSNUXIM model Ended ", as.POSIXlt(Sys.time(), "America/New_York"), " America/NY time")
+
+
+```
