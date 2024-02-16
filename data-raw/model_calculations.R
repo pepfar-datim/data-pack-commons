@@ -16,7 +16,7 @@ compare <- TRUE
 posit_server <- TRUE
 
 # login to datim
-if(isTRUE(posit_server)) {
+if (isTRUE(posit_server)) {
   datimutils::loginToDATIM(
     username = Sys.getenv("UN"),
     password = Sys.getenv("PW"),
@@ -312,7 +312,7 @@ diff <- dplyr::mutate(diff,
 dim_item_sets <- datapackcommons::dim_item_sets
 
 # for each ou
-for (ou_index in seq_len(NROW(operating_units[1:4,]))) {
+for (ou_index in seq_len(NROW(operating_units[1:4, ]))) {
   # start with fresh local copy of data_required.csv
   data_required <-  datapackcommons::data_required
   operating_unit <-  dplyr::slice(operating_units, ou_index)
@@ -372,7 +372,7 @@ for (ou_index in seq_len(NROW(operating_units[1:4,]))) {
 print(lubridate::now())
 
 # compare with another model version
-if(compare == FALSE) {
+if (compare == FALSE) {
   print("done")
 } else {
 
@@ -381,10 +381,10 @@ if(compare == FALSE) {
     AWS_S3_BUCKET = "testing.pepfar.data.datapack"
   )
   #
-  s3<-paws::s3()
+  s3 <- paws::s3()
 
-  r<-tryCatch({
-    s3_download<-s3$get_object(Bucket = Sys.getenv("AWS_S3_BUCKET"),
+  r <- tryCatch({
+    s3_download <- s3$get_object(Bucket = Sys.getenv("AWS_S3_BUCKET"),
                                Key = "support_files/datapack_model_data.rds")
 
     # Write output to file
@@ -396,7 +396,7 @@ if(compare == FALSE) {
     TRUE
   },
   error = function(err) {
-    print("datpack model could not be read from S3",name = "datapack")
+    print("datpack model could not be read from S3", name = "datapack")
     print(err, name = "datapack")
     FALSE
   })

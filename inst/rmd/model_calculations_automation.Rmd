@@ -18,7 +18,7 @@ The following chunk runs the datapack model on the posit server.
 # create the folder where output will go
 # folder <- paste0("logs/model_calculations/")
 # dir.create(folder, showWarnings = FALSE, recursive = TRUE)
-# 
+#
 # # initiate log recording
 # file_name <- paste0(
 #   folder,
@@ -28,22 +28,20 @@ The following chunk runs the datapack model on the posit server.
 #     ".log"
 #   )
 #   )
-# 
+#
 # con <- file(file_name)
 # sink(con, append=TRUE)
 # sink(file = NULL, append = FALSE, type = c("output", "message"),
 #      split = FALSE)
-# 
+#
 
 source("../../data-raw/model_calculations.R")
 
 # Restore output to console
-# sink() 
+# sink()
 # sink(type="message")
-# 
+#
 # # And look at the log...
 # cat(file_name, sep="\n")
-
-
 ```
 
