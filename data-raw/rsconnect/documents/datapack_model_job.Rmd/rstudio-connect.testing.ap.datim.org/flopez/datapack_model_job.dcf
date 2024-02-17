@@ -4,9 +4,9 @@ username: flopez
 account: flopez
 server: rstudio-connect.testing.ap.datim.org
 hostUrl: https://rstudio-connect.testing.ap.datim.org/__api__
-appId: 225
-bundleId: 1947
-url: https://rstudio-connect.testing.ap.datim.org:443/content/4994836d-26d8-49ed-a76d-620431a48feb/
+appId: 235
+bundleId: 1974
+url: https://rstudio-connect.testing.ap.datim.org:443/content/f9bd8b9c-1b6d-40cb-9a41-7e73c328fff8/
 version: 1
-asMultiple: TRUE
+asMultiple: FALSE
 asStatic: FALSE

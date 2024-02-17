@@ -1,25 +1,112 @@
 ---
 title: "Run Datapack Model"
 output: html_document
-date: "2024-02-16"
+resource_files:
+- "rsconnect/documents/datapack_model_job.Rmd/rstudio-connect.testing.ap.datim.org/flopez/datapack_model_job.dcf"
 ---
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = FALSE)
 ```
 
+
 ## Run Script
 
-The following chunk runs the datapack model on the posit server, this model is run and built with the `data-raw/model_calculations.R` file.
+The following chunk runs the datapack model on the posit server, this model is run and built with the `data-raw/model_calculations.R` file. This is just a wrapper, all changes are made to the `model_calculations.R` file. This RMD can be knit locally or run published on posit server.
 
-```{r run_model, include=TRUE, echo=TRUE, message=FALSE}
+### TODO: new datapack model should be dumped into a staging folder in test S3, from there after it is deemed valid, it is moved to sharepoint and testing/prod S3 support_files directory for use in the apps.
+
+```{r run_model, include=TRUE, echo=FALSE, message=FALSE}
 
 start_time <- as.POSIXlt(Sys.time())
-paste0("Datapack model started ", start_time, "America/NY time")
+paste0("Datapack model started ", start_time, " America/NY time")
 source("model_calculations.R")
 end_time <- as.POSIXlt(Sys.time())
 paste0("Datapack model ended ", end_time, " America/NY time")
+print(
+  paste0(
+    "Job run time: ",
+    round(difftime(end_time, start_time, units = "mins"), 2),
+    " mins"
+  )
+)
+
+```
+
+
+## Deltas, NA values, Which OUS and which indicators
+
+if there are deltas below we see which ous and indicators there are deltas for:
+
+``` {r ou_indicators, include = TRUE, echo = TRUE, message = TRUE}
+
+print(unique(deltas$ou))
+print(unique(deltas$indicator_code))
+
+# what types of indicators changed?
+print(table(deltas_summary$indicator_type))
 
 
 ```
 
+New NA values are summarized below (these are usually a sign something is wrong):
+
+```{r nas, echo = T, include=T, message=T}
+
+# what about new na values?
+new_nas <-
+  deltas_summary %>%
+  filter(count_new_nas > 0) %>%
+  pull(indicator_code) %>%
+  unique()
+
+print(new_nas)
+
+```
+
+## Deltas Summary
+
+if there are deltas below is a summary grouped by ou and indicator code with the indicator codes labeled as targets or results - DOWNLOAD FOR ANALYSIS WITH THE CSV BUTTON:
+
+```{r analysis, include=TRUE, echo=TRUE, message=FALSE}
+
+DT::datatable(
+  deltas_summary,
+  rownames = FALSE,
+  filter = "top",
+  extensions = "Buttons",
+  options = list(
+    dom = "Bftrip",
+    buttons = c("csv")
+  )
+)
+
+```
+
+
+## Missing Indicator Combos
+
+Below we mark which combos are IN the datapack schema BUT NOT IN the datapack model (missing combos are not necessarily an issue if they can be explained) - DOWNLOAD FOR ANALYSIS WITH THE CSV BUTTON:
+
+``` {r missing_combos, include = TRUE, echo = TRUE, message = FALSE}
+
+DT::datatable(
+  missing_schema_combos,
+  rownames = FALSE,
+  filter = "top",
+  extensions = "Buttons",
+  options = list(
+    dom = "Bftrip",
+    buttons = c("csv")
+  )
+)
+
+```
+
+
+Below we display the unique missing combo indicators from the above dataframe:
+
+```{r echo = T, include=T, message=T}
+
+unique(missing_schema_combos$indicator_code)
+```

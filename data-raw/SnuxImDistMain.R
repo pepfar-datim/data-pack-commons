@@ -5,25 +5,39 @@
 # NOTES ------------------------------------------------------------------------
 # the following script generates the model for the SNIXUIM distribution
 
-### Setup and parameters ###
-
+### Script Parameters ####################
+# WHEN RUNNING LOCALLY ALWAYS INITIATE CMD+SHIFT+B TO SEE CHANGES
+# these are set whether to run locally or on posit server
 cop_year <- 2024
 compare <- TRUE
 posit_server <- TRUE
+#####
 
+library(dplyr)
+# posit publishing requires a reproducible library and since datapackcommons
+# is not in the renv.lock file it is installed fresh from master since
+# master always represents the valid branch to use
 if (isTRUE(posit_server)) {
   devtools::install_github("https://github.com/pepfar-datim/data-pack-commons",
                            ref = "prep-automation",
                            upgrade = FALSE)
-  print("Installed Latest Datapackcommons")
+
+  # extract installed commit
+  commit <-
+    devtools::package_info("datapackcommons") %>%
+    dplyr::filter(package == "datapackcommons") %>%
+    dplyr::pull(source) %>%
+    stringr::str_extract(., "(?<=@)\\w{7}")
+
+  print(paste0("Installed Latest datapackcommons, using commit: ", commit))
 } else {
   require(datapackcommons)
 }
 
 library(datimutils)
-library(dplyr)
 
 # login to datim
+# if using posit server we pull env vars
 if (isTRUE(posit_server)) {
   datimutils::loginToDATIM(
     username = Sys.getenv("UN"),
@@ -373,8 +387,7 @@ fy_map <-  switch(as.character(cop_year),
 # pull list of countries to iterate through
 country_details <-  datimutils::getOrgUnitGroups("Country", name, fields = "organisationUnits[name,id]") %>%
   dplyr::arrange(name) %>%
-  select(country_name = name, id) %>%
-  slice(1:2)
+  select(country_name = name, id)
 #  dplyr::filter(country_name == "South Africa")
 
 # start process of collecting api data for every country
@@ -387,7 +400,10 @@ data <-  country_details[["id"]] %>%
 
 #data$ODOymOOWyl0 <- process_country("ODOymOOWyl0", mechs)
 
-# COMPARE MODELS ---------------------------------------------------------------
+#### COMPARISON - AUTOMATED ----
+# when compare is set to TRUE we compare this run against the
+# latest production psnuxim model in test S3
+# FOR DEVELOPMENT PURPOSES RUN CODE MANUALLY
 
 if (compare == FALSE) {
 
@@ -395,9 +411,11 @@ if (compare == FALSE) {
 
 } else {
 
+  # file name in S3
   cop_year_end <- substr(cop_year, 3, 4)
-  file_name <- paste0("psnuxim_model_data_",cop_year_end,".rds")
+  file_name <- paste0("psnuxim_model_data_", cop_year_end, ".rds")
 
+  # explicitly set to make sure we are in test
   Sys.setenv(
     AWS_PROFILE = "datapack-testing",
     AWS_S3_BUCKET = "testing.pepfar.data.datapack"
@@ -405,6 +423,8 @@ if (compare == FALSE) {
 
   s3 <- paws::s3()
 
+  # retrieve the production psnuxim model
+  # and decode, error out if there is an issue
   r <- tryCatch({
     s3_download <- s3$get_object(Bucket = Sys.getenv("AWS_S3_BUCKET"),
                                  Key = paste0(
@@ -429,14 +449,17 @@ if (compare == FALSE) {
 
   #data_old <- readr::read_rds(file.choose())
 
-  deltas <- diffSnuximModels(
+  deltas <- datapackcommons::diffSnuximModels(
     data_old,
     data,
-    full_diff = FALSE
+    full_diff = TRUE
   )
 
   print(paste0("The difference between the production PSNXUIM model in TEST S3 and the new model is: ", nrow(deltas)))
 
+  #### CLEANUP ----
+  # using paws s3 we get and dump latest datapack model into our file system
+  # here we make sure to get rid of it locally
   # Check if the file exists
   if (file.exists(file_name)) {
     # Delete the file

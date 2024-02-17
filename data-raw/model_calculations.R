@@ -1,14 +1,28 @@
 ### Script Parameters ####################
+# WHEN RUNNING LOCALLY ALWAYS INITIATE CMD+SHIFT+B TO SEE CHANGES
+# these are set whether to run locally or on posit server
 cop_year <- 2024
 compare <- TRUE
 posit_server <- TRUE
+#####
 
 library(magrittr)
+# posit publishing requires a reproducible library and since datapackcommons
+# is not in the renv.lock file it is installed fresh from master since
+# master always represents the valid branch to use
 if (isTRUE(posit_server)) {
   devtools::install_github("https://github.com/pepfar-datim/data-pack-commons",
                            ref = "prep-automation",
                            upgrade = FALSE)
-  print("Installed Latest Datapackcommons")
+
+  # extract installed commit
+  commit <-
+    devtools::package_info("datapackcommons") %>%
+    dplyr::filter(package == "datapackcommons") %>%
+    dplyr::pull(source) %>%
+    stringr::str_extract(., "(?<=@)\\w{7}")
+
+  print(paste0("Installed Latest datapackcommons, using commit: ", commit))
 } else {
   require(datapackcommons)
 }
@@ -23,6 +37,7 @@ require(assertthat)
 require(foreach)
 
 # login to datim
+# if using posit server we pull env vars
 if (isTRUE(posit_server)) {
   datimutils::loginToDATIM(
     username = Sys.getenv("UN"),
@@ -319,7 +334,7 @@ diff <- dplyr::mutate(diff,
 dim_item_sets <- datapackcommons::dim_item_sets
 
 # for each ou
-for (ou_index in seq_len(NROW(operating_units[1:4, ]))) {
+for (ou_index in seq_len(NROW(operating_units))) {
   # start with fresh local copy of data_required.csv
   data_required <-  datapackcommons::data_required
   operating_unit <-  dplyr::slice(operating_units, ou_index)
@@ -378,15 +393,21 @@ for (ou_index in seq_len(NROW(operating_units[1:4, ]))) {
 
 print(lubridate::now())
 
-# compare with another model version
+#### COMPARISON - AUTOMATED ----
+# when compare is set to TRUE we compare this run against the
+# latest production datapack model in test S3
+# FOR DEVELOPMENT PURPOSES RUN CODE MANUALLY
+
 if (compare == FALSE) {
 
   print("done")
 
 } else {
 
+  # file name in S3
   file_name <- "datapack_model_data.rds"
 
+  # explicitly set to make sure we are in test
   Sys.setenv(
     AWS_PROFILE = "datapack-testing",
     AWS_S3_BUCKET = "testing.pepfar.data.datapack"
@@ -394,6 +415,8 @@ if (compare == FALSE) {
 
   s3 <- paws::s3()
 
+  # retrieve the production datapack model
+  # and decode, error out if there is an issue
   r <- tryCatch({
     s3_download <- s3$get_object(Bucket = Sys.getenv("AWS_S3_BUCKET"),
                                Key = paste0(
@@ -417,15 +440,21 @@ if (compare == FALSE) {
   })
 
 
-
-  diff <- diffDataPackModels(model_old = model_old#file.choose() %>% readr::read_rds()
-                             , model_new = datapackcommons::flattenDataPackModel_21(cop_data)
+  # flatten the new datapack model run data and produce diff
+  model_new <- datapackcommons::flattenDataPackModel_21(cop_data)
+  diff <- diffDataPackModels(model_old = model_old
+                             #file.choose() %>% readr::read_rds(),
+                             , model_new = model_new
                              # , model_new = file.choose() %>% readr::read_rds()
-                             , full_diff = FALSE)
+                             , full_diff = TRUE)
 
   deltas <- diff$deltas
   print(paste0("The difference between the production datapack model in TEST S3 and the new model is: ", nrow(deltas)))
-  delta_summary <-  dplyr::group_by(deltas, indicator_code, ou) %>% dplyr::summarise(count_delta = dplyr::n())
+
+
+  # creates a summary of matches for later use
+  delta_summary <-  dplyr::group_by(deltas, indicator_code, ou) %>%
+    dplyr::summarise(count_delta = dplyr::n())
   indicators_w_delta <- deltas$indicator_code %>% unique()
 
   matched_summary <- dplyr::group_by(diff$matched, indicator_code, ou) %>%
@@ -436,20 +465,65 @@ if (compare == FALSE) {
     dplyr::filter(indicator_code %in% indicators_w_delta) %>%
     dplyr::arrange(indicator_code)
 
+  # create a more comprehensive summary for later use
+  deltas_summary <- dplyr::group_by(deltas, indicator_code, ou) %>%
+    dplyr::summarise(
+      count_total = dplyr::n(),
+      count_old_nas = sum(is.na(value.old)),
+      count_new_nas = sum(is.na(value.new)),
+      count_missing_psnu = sum(is.na(psnu)),
+      count_missing_ou = sum(is.na(ou))
+    ) %>%
+    mutate(indicator_type = case_when(grepl("\\T_1$", indicator_code) ~ "TARGET",
+                                      grepl("\\.R$", indicator_code)  ~ "RESULTS",
+                                      grepl("\\.Yield$", indicator_code)  ~ "RESULTS_Y",
+                                      grepl("\\.Share$", indicator_code)  ~ "TARGETS_S",
+
+    )) %>%
+    #mutate(indicator_type = ifelse(is.na(indicator_type), "YIELD", indicator_type)) %>%
+    arrange(ou, indicator_code)
+
+  # create a dataframe from the new model
+  new_model_binded <- bind_rows(model_new)
+
+  # label model data as present based on value
+  new_model_binded_e <-
+    new_model_binded %>%
+    mutate(
+      has_data = ifelse(!is.na(value), TRUE, FALSE)
+    ) %>%
+    mutate(has_data = replace(has_data, value == 0, FALSE))
+
+  # pivot schema disaggs
+  valid_schema_combos <- datapackcommons::pivotSchemaCombos(cop_year = 2024)
+
+  # create a summary of combos present in datapack schema but not in data
+  missing_schema_combos <- anti_join(
+    valid_schema_combos,
+    new_model_binded_e %>%
+      filter(has_data == TRUE) %>%
+      select(-value, -psnu_uid, -period) %>%
+      distinct()
+  )
+
+  #### CLEANUP ----
+  # using paws s3 we get and dump latest datapack model into our file system
+  # here we make sure to get rid of it locally
+
   # Check if the file exists
   if (file.exists(file_name)) {
     # Delete the file
     file.remove(file_name)
-    print(paste0(file_name, " LOCALLY deleted successfully."))
+    print(paste0(file_name, " deleted successfully LOCALLY."))
   } else {
     print(paste0(file_name, "File does not exist."))
   }
-
-
-
 }
 
 
+#### LEGACY AND PROD TRANSFER ----
+# this is legacy code as well as code for
+# production transfer purposes
 
 # # output_location <- "~/COP data/COP24 Update/"
 # # save flattened version manually update date and version
