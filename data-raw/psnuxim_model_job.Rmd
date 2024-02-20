@@ -9,11 +9,8 @@ resource_files:
 knitr::opts_chunk$set(echo = FALSE)
 ```
 
-## Run Script
 
-The following chunk runs the PSNUXM model on the posit server, this model is run and built with the `data-raw/SnuxImDistMain.R` file. This is just a wrapper, all changes are made to the `SnuxImDistMain.R` file. This RMD can be knit locally or run published on posit server.
-
-### TODO: new psnuxim model should be dumped into a staging folder in test S3, from there after it is deemed valid, it is moved to sharepoint and testing/prod S3 support_files directory for use in the apps.
+The following chunk runs the PSNUXM model on the posit server, this model is run and built with the `data-raw/SnuxImDistMain.R` file. This is just a wrapper, all changes are made to the `SnuxImDistMain.R` file. This RMD can be knit locally or run published on posit server. Note that when this report runs, it produces the capacity to download the psnuxim model run below.
 
 ```{r run_model, include=TRUE, echo=FALSE, message=FALSE}
 
@@ -76,8 +73,33 @@ Below we check if all the indicators in our MAPPING file are present in the new 
 # are all indicators present?
 setdiff(
    datapackcommons::Map24Tto25T$indicator_code,
-   bind_rows(data) %>%
+   bind_rows(data_new) %>%
      pull(indicator_code) %>%
      unique()
  )
+```
+
+
+## Download latest model
+
+If there exist deltas between this model run and the latest production model then you can download the latest run below to validate and update in test s3 and prod:
+
+```{r echo = FALSE, include = TRUE, message = TRUE, eval = TRUE}
+
+if (NROW(deltas) > 0) {
+  print("current server directory files: ")
+  print(list.files())
+  data_new %>%
+  downloadthis::download_this(
+    output_name = new_psx_file_name,
+    output_extension = ".rds",
+    button_label = "Download latest model run",
+    button_type = "default",
+    has_icon = TRUE,
+    icon = "fa fa-save",
+    class = "button_large"
+  )
+} else {
+  print("No Differences in Model so no Model to Download")
+}
 ```

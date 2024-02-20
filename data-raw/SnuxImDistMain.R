@@ -19,7 +19,7 @@ library(dplyr)
 # master always represents the valid branch to use
 if (isTRUE(posit_server)) {
   devtools::install_github("https://github.com/pepfar-datim/data-pack-commons",
-                           ref = "prep-automation",
+                           ref = "master",
                            upgrade = FALSE)
 
   # extract installed commit
@@ -387,11 +387,11 @@ fy_map <-  switch(as.character(cop_year),
 # pull list of countries to iterate through
 country_details <-  datimutils::getOrgUnitGroups("Country", name, fields = "organisationUnits[name,id]") %>%
   dplyr::arrange(name) %>%
-  select(country_name = name, id)
-#  dplyr::filter(country_name == "South Africa")
+  select(country_name = name, id) #%>%
+  #dplyr::filter(country_name == "South Africa")
 
 # start process of collecting api data for every country
-data <-  country_details[["id"]] %>%
+data_new <-  country_details[["id"]] %>%
   purrr::map(process_country, mechs, fy_map, .progress = list(
     type = "iterator",
     format = "Calculating {cli::pb_bar} {cli::pb_percent}",
@@ -451,11 +451,27 @@ if (compare == FALSE) {
 
   deltas <- datapackcommons::diffSnuximModels(
     data_old,
-    data,
+    data_new,
     full_diff = TRUE
   )
 
   print(paste0("The difference between the production PSNXUIM model in TEST S3 and the new model is: ", nrow(deltas)))
+
+  #### DOWNLOADABLE NEW MODEL ----
+  # if the new model has a diff we will create a filename
+  # and prepare the file for download availability in rmarkdown
+  # file can then be downloaded and reviewed along with report
+  # and moved manually to s3 test/prod
+  if (NROW(deltas) > 0) {
+
+    # save flattened version with data to disk
+    cop_year_end <- substr(cop_year, 3, 4)
+    new_psx_file_name <- paste0("psnuxim_model_data_", cop_year_end, "_", lubridate::today(), "_", commit)
+
+    # uncomment and run manually if you want to download manually
+    # saveRDS(flattenDataPackModel_21(cop_data),
+    #         file = paste0(new_psx_file_name, ".rds"))
+  }
 
   #### CLEANUP ----
   # using paws s3 we get and dump latest datapack model into our file system
@@ -473,26 +489,14 @@ if (compare == FALSE) {
 
 }
 
+#### LEGACY AND TEST/PROD TRANSFER ----
+# got rid of 22 and below
+# this is legacy code as well as code for
+# production transfer purposes
+# if you download the model from the report, to update simply manually update
+# the name of the model as needed and place it in OUTPUT_LOCATION VARIABLE
 
-
-
-# if (cop_year == 2021){
-#   readr::write_rds(data,
-#                    paste0("/Users/sam/COP data/PSNUxIM_COP21_", lubridate::today(), ".rds"),
-#                    compress = c("gz"))
-#   readr::write_rds(data,
-#                    "/Users/sam/COP data/psnuxim_model_data_21.rds",
-#                    compress = c("gz"))
-#   file_name <- "psnuxim_model_data_21.rds"
-# } else if (cop_year == 2022){
-#   readr::write_rds(data,
-#                    paste0("/Users/sam/COP data/PSNUxIM_COP22_", lubridate::today(), ".rds"),
-#                    compress = c("gz"))
-#   readr::write_rds(data,
-#                    "/Users/sam/COP data/psnuxim_model_data_22.rds",
-#                    compress = c("gz"))
-#   file_name <- "psnuxim_model_data_22.rds"
-# } else if (cop_year == 2023){
+# if (cop_year == 2023){
 #   readr::write_rds(data,
 #                    paste0("/Users/sam/COP data/PSNUxIM_COP23_", lubridate::today(), ".rds"),
 #                    compress = c("gz"))
@@ -510,6 +514,8 @@ if (compare == FALSE) {
 #   file_name <- "psnuxim_model_data_24.rds"
 # }
 
+# edit this output location to where ever your file is
+# output_location <- "~/COP data/COP24 Update/"
 #
 # Sys.setenv(
 #   AWS_PROFILE = "datapack-testing",
@@ -520,7 +526,7 @@ if (compare == FALSE) {
 #
 # r<-tryCatch({
 #   foo<-s3$put_object(Bucket = Sys.getenv("AWS_S3_BUCKET"),
-#                      Body = paste0("/Users/sam/COP data/", file_name),
+#                      Body = paste0(output_location, file_name),
 #                      Key = paste0("support_files/", file_name))
 #   print("DATIM Export sent to S3", name = "datapack")
 #   TRUE
@@ -540,7 +546,7 @@ if (compare == FALSE) {
 #
 # r<-tryCatch({
 #   foo<-s3$put_object(Bucket = Sys.getenv("AWS_S3_BUCKET"),
-#                      Body = paste0("/Users/sam/COP data/", file_name),
+#                      Body = paste0(output_location, file_name),
 #                      Key = paste0("support_files/", file_name))
 #   print("DATIM Export sent to S3", name = "datapack")
 #   TRUE

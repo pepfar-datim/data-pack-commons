@@ -10,13 +10,9 @@ knitr::opts_chunk$set(echo = FALSE)
 ```
 
 
-## Run Script
+The following chunk runs the datapack model on the posit server, this model is run and built with the `data-raw/model_calculations.R` file. This is just a wrapper, all changes are made to the `model_calculations.R` file. This RMD can be knit locally or run published on posit server. Note that when this report runs, it produces the capacity to download the datapack model run below.
 
-The following chunk runs the datapack model on the posit server, this model is run and built with the `data-raw/model_calculations.R` file. This is just a wrapper, all changes are made to the `model_calculations.R` file. This RMD can be knit locally or run published on posit server.
-
-### TODO: new datapack model should be dumped into a staging folder in test S3, from there after it is deemed valid, it is moved to sharepoint and testing/prod S3 support_files directory for use in the apps.
-
-```{r run_model, include=TRUE, echo=FALSE, message=FALSE}
+```{r run_model, include=TRUE, echo=FALSE, message=FALSE, eval = T}
 
 start_time <- as.POSIXlt(Sys.time())
 paste0("Datapack model started ", start_time, " America/NY time")
@@ -38,7 +34,7 @@ print(
 
 if there are deltas below we see which ous and indicators there are deltas for:
 
-``` {r ou_indicators, include = TRUE, echo = TRUE, message = TRUE}
+``` {r ou_indicators, include = TRUE, echo = TRUE, message = TRUE, eval = T}
 
 print(unique(deltas$ou))
 print(unique(deltas$indicator_code))
@@ -51,7 +47,7 @@ print(table(deltas_summary$indicator_type))
 
 New NA values are summarized below (these are usually a sign something is wrong):
 
-```{r nas, echo = T, include=T, message=T}
+```{r nas, echo = T, include=T, message=T, eval = T}
 
 # what about new na values?
 new_nas <-
@@ -68,7 +64,7 @@ print(new_nas)
 
 if there are deltas below is a summary grouped by ou and indicator code with the indicator codes labeled as targets or results - DOWNLOAD FOR ANALYSIS WITH THE CSV BUTTON:
 
-```{r analysis, include=TRUE, echo=TRUE, message=FALSE}
+```{r analysis, include=TRUE, echo=FALSE, message=FALSE, eval = TRUE}
 
 DT::datatable(
   deltas_summary,
@@ -88,7 +84,7 @@ DT::datatable(
 
 Below we mark which combos are IN the datapack schema BUT NOT IN the datapack model (missing combos are not necessarily an issue if they can be explained) - DOWNLOAD FOR ANALYSIS WITH THE CSV BUTTON:
 
-``` {r missing_combos, include = TRUE, echo = TRUE, message = FALSE}
+``` {r missing_combos, include = TRUE, echo = FALSE, message = FALSE, eval = T}
 
 DT::datatable(
   missing_schema_combos,
@@ -106,7 +102,32 @@ DT::datatable(
 
 Below we display the unique missing combo indicators from the above dataframe:
 
-```{r echo = T, include=T, message=T}
+```{r echo = TRUE, include=TRUE, message=TRUE, eval = TRUE}
 
 unique(missing_schema_combos$indicator_code)
+```
+
+
+## Download latest model
+
+If there exist deltas between this model run and the latest production model then you can download the latest run below to validate and update in test s3 and prod:
+
+```{r echo = FALSE, include=TRUE, message=TRUE, eval = TRUE}
+
+if (NROW(deltas) > 0) {
+  print("current server directory files: ")
+  print(list.files())
+  datapackcommons::flattenDataPackModel_21(cop_data) %>%
+  downloadthis::download_this(
+    output_name = new_dpm_file_name,
+    output_extension = ".rds",
+    button_label = "Download latest model run",
+    button_type = "default",
+    has_icon = TRUE,
+    icon = "fa fa-save",
+    class = "button_large"
+  )
+} else {
+  print("No Differences in Model so no Model to Download")
+}
 ```

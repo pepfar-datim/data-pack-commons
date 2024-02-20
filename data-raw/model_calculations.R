@@ -12,7 +12,7 @@ library(magrittr)
 # master always represents the valid branch to use
 if (isTRUE(posit_server)) {
   devtools::install_github("https://github.com/pepfar-datim/data-pack-commons",
-                           ref = "prep-automation",
+                           ref = "master",
                            upgrade = FALSE)
 
   # extract installed commit
@@ -506,6 +506,22 @@ if (compare == FALSE) {
       distinct()
   )
 
+  #### DOWNLOADABLE NEW MODEL ----
+  # if the new model has a diff we will create a filename
+  # and prepare the file for download availability in rmarkdown
+  # file can then be downloaded and reviewed along with report
+  # and moved manually to s3 test/prod
+  if (NROW(deltas) > 0) {
+
+    # save flattened version with data to disk
+    cop_year_end <- substr(cop_year, 3, 4)
+    new_dpm_file_name <- paste0("model_data_pack_input_", cop_year_end, "_", lubridate::today(), "_", commit, "_flat")
+
+    # uncomment and run manually if you want to download manually
+    # saveRDS(flattenDataPackModel_21(cop_data),
+    #         file = paste0(new_dpm_file_name, ".rds"))
+  }
+
   #### CLEANUP ----
   # using paws s3 we get and dump latest datapack model into our file system
   # here we make sure to get rid of it locally
@@ -514,16 +530,18 @@ if (compare == FALSE) {
   if (file.exists(file_name)) {
     # Delete the file
     file.remove(file_name)
-    print(paste0(file_name, " deleted successfully LOCALLY."))
+    print(paste0(file_name, " deleted successfully from connect server."))
   } else {
     print(paste0(file_name, "File does not exist."))
   }
 }
 
 
-#### LEGACY AND PROD TRANSFER ----
+#### LEGACY AND TEST/PROD TRANSFER ----
 # this is legacy code as well as code for
 # production transfer purposes
+# if you download the model from the report, to update simply manually update
+# the name of the model as needed and place it in OUTPUT_LOCATION VARIABLE
 
 # # output_location <- "~/COP data/COP24 Update/"
 # # save flattened version manually update date and version

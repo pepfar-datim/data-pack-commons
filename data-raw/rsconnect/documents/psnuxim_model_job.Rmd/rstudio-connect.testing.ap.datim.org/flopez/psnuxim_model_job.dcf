@@ -5,8 +5,8 @@ account: flopez
 server: rstudio-connect.testing.ap.datim.org
 hostUrl: https://rstudio-connect.testing.ap.datim.org/__api__
 appId: 234
-bundleId: 1975
-url: https://rstudio-connect.testing.ap.datim.org:443/content/fd37449a-00b1-496a-9310-69db81fe83a6/
+bundleId: 1990
+url: https://rstudio-connect.testing.ap.datim.org:443/psnuxim_model_report/
 version: 1
 asMultiple: FALSE
 asStatic: FALSE
