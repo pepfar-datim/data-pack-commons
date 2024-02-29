@@ -1,6 +1,6 @@
 {
   "R": {
-    "Version": "4.1.1",
+    "Version": "4.2.2",
     "Repositories": [
       {
         "Name": "CRAN",
@@ -41,7 +41,7 @@
       "Package": "ISOweek",
       "Version": "0.6-2",
       "Source": "Repository",
-      "Repository": "RSPM",
+      "Repository": "CRAN",
       "Requirements": [
         "stringr"
       ],
@@ -439,16 +439,15 @@
     },
     "datapackr": {
       "Package": "datapackr",
-      "Version": "7.3.2",
+      "Version": "7.4.0",
       "Source": "GitHub",
-      "RemoteType": "github",
       "Remotes": "pepfar-datim/datim-validation, pepfar-datim/datimutils",
+      "RemoteType": "github",
       "RemoteHost": "api.github.com",
       "RemoteRepo": "datapackr",
       "RemoteUsername": "pepfar-datim",
       "RemoteRef": "master",
-      "RemoteSha": "0bea89bb5a6e33d6763a8f3d2cecbfc928e11ab4",
-      "Remotes": "pepfar-datim/datim-validation, pepfar-datim/datimutils",
+      "RemoteSha": "e0dedf8b812129279921d0661d45c38597dc054a",
       "Requirements": [
         "R",
         "assertthat",
@@ -471,7 +470,7 @@
         "tidyselect",
         "tidyxl"
       ],
-      "Hash": "17bc548c0b68d1e48b3a806622aec70c"
+      "Hash": "c9075ae5e40f193988c08eda13ea3f95"
     },
     "datimutils": {
       "Package": "datimutils",
@@ -1658,7 +1657,7 @@
       "Package": "piton",
       "Version": "1.0.0",
       "Source": "Repository",
-      "Repository": "RSPM",
+      "Repository": "CRAN",
       "Requirements": [
         "Rcpp"
       ],
@@ -1995,7 +1994,7 @@
       "Package": "reshape2",
       "Version": "1.4.4",
       "Source": "Repository",
-      "Repository": "RSPM",
+      "Repository": "CRAN",
       "Requirements": [
         "R",
         "Rcpp",
