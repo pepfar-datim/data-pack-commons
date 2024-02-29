@@ -1,9 +1,11 @@
 ### Script Parameters ####################
-# WHEN RUNNING LOCALLY ALWAYS INITIATE CMD+SHIFT+B TO SEE CHANGES
+# this script can be run manually by setting the params below
+# and then running through line ~ END SCRIPT
+# WHEN RUNNING LOCALLY ALWAYS RENV.RESTORE AND THEN INITIATE CMD+SHIFT+B TO SEE CHANGES
 # these are set whether to run locally or on posit server
 cop_year <- 2024
-compare <- TRUE
-posit_server <- TRUE
+compare <- TRUE # default to true for full run
+posit_server <- TRUE # default to true as it runs on server
 #####
 
 library(magrittr)
@@ -15,7 +17,7 @@ if (isTRUE(posit_server)) {
                            ref = "master",
                            upgrade = FALSE)
 
-  # extract installed commit
+  # extract installed commit when running on server
   commit <-
     devtools::package_info("datapackcommons") %>%
     dplyr::filter(package == "datapackcommons") %>%
@@ -24,6 +26,13 @@ if (isTRUE(posit_server)) {
 
   print(paste0("Installed Latest datapackcommons, using commit: ", commit))
 } else {
+
+  # extract commit of the local version you are using
+  commit <-
+    devtools::package_info("datapackcommons") %>%
+    dplyr::filter(package == "datapackcommons") %>%
+    dplyr::pull(source) %>%
+    stringr::str_extract(., "(?<=@)\\w{7}")
   require(datapackcommons)
 }
 require(datapackr)
@@ -517,9 +526,12 @@ if (compare == FALSE) {
     cop_year_end <- substr(cop_year, 3, 4)
     new_dpm_file_name <- paste0("model_data_pack_input_", cop_year_end, "_", lubridate::today(), "_", commit, "_flat")
 
-    # uncomment and run manually if you want to download manually
-    # saveRDS(flattenDataPackModel_21(cop_data),
-    #         file = paste0(new_dpm_file_name, ".rds"))
+    # if run locally with local params set file is automatically saved
+    if (isFALSE(posit_server)) {
+      saveRDS(flattenDataPackModel_21(cop_data),
+               file = paste0(new_dpm_file_name, ".rds"))
+
+    }
   }
 
   #### CLEANUP ----
@@ -536,6 +548,7 @@ if (compare == FALSE) {
   }
 }
 
+#### END SCRIPT ----------------------------------------------------------------
 
 #### LEGACY AND TEST/PROD TRANSFER ----
 # this is legacy code as well as code for

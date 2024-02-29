@@ -6,7 +6,8 @@
 # the following script generates the model for the SNIXUIM distribution
 
 ### Script Parameters ####################
-# WHEN RUNNING LOCALLY ALWAYS INITIATE CMD+SHIFT+B TO SEE CHANGES
+# and then running through line ~ END SCRIPT
+# WHEN RUNNING LOCALLY ALWAYS RENV.RESTORE AND THEN INITIATE CMD+SHIFT+B TO SEE CHANGES
 # these are set whether to run locally or on posit server
 cop_year <- 2024
 compare <- TRUE
@@ -31,6 +32,13 @@ if (isTRUE(posit_server)) {
 
   print(paste0("Installed Latest datapackcommons, using commit: ", commit))
 } else {
+
+  # extract commit of the local version you are using
+  commit <-
+    devtools::package_info("datapackcommons") %>%
+    dplyr::filter(package == "datapackcommons") %>%
+    dplyr::pull(source) %>%
+    stringr::str_extract(., "(?<=@)\\w{7}")
   require(datapackcommons)
 }
 
@@ -468,9 +476,13 @@ if (compare == FALSE) {
     cop_year_end <- substr(cop_year, 3, 4)
     new_psx_file_name <- paste0("psnuxim_model_data_", cop_year_end, "_", lubridate::today(), "_", commit)
 
-    # uncomment and run manually if you want to download manually
-    # saveRDS(flattenDataPackModel_21(cop_data),
-    #         file = paste0(new_psx_file_name, ".rds"))
+    # if run locally with local params set file is automatically saved
+    if (isFALSE(posit_server)) {
+      readr::write_rds(data,
+                       paste0(new_psx_file_name, ".rds")
+                       , compress = c("gz"))
+
+    }
   }
 
   #### CLEANUP ----
@@ -488,6 +500,8 @@ if (compare == FALSE) {
 
 
 }
+
+#### END SCRIPT --------------------------------------------------------------------
 
 #### LEGACY AND TEST/PROD TRANSFER ----
 # got rid of 22 and below
@@ -516,6 +530,7 @@ if (compare == FALSE) {
 
 # edit this output location to where ever your file is
 # output_location <- "~/COP data/COP24 Update/"
+# file_name <- new_psx_file_name
 #
 # Sys.setenv(
 #   AWS_PROFILE = "datapack-testing",
