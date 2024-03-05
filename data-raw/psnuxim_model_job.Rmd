@@ -1,0 +1,105 @@
+---
+title: "Run PSNUXIM Model"
+output: html_document
+resource_files:
+- "rsconnect/documents/psnuxim_model_job.Rmd/rstudio-connect.testing.ap.datim.org/flopez/psnuxim_model_job.dcf"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+```
+
+
+The following chunk runs the PSNUXM model on the posit server, this model is run and built with the `data-raw/SnuxImDistMain.R` file. This is just a wrapper, all changes are made to the `SnuxImDistMain.R` file. This RMD can be knit locally or run published on posit server. Note that when this report runs, it produces the capacity to download the psnuxim model run below.
+
+```{r run_model, include=TRUE, echo=FALSE, message=FALSE}
+
+start_time <- as.POSIXlt(Sys.time())
+paste0("PSNUXIM model started ", start_time, " America/NY time")
+source("SnuxImDistMain.R")
+end_time <- as.POSIXlt(Sys.time())
+paste0("PSNUXIM model ended ", end_time, " America/NY time")
+print(
+  paste0(
+    "Job run time: ",
+    round(difftime(end_time, start_time, units = "mins"), 2),
+    " mins"
+  )
+)
+
+```
+
+## Deltas, NA values, Which OUS and which indicators
+
+If there are deltas below we see which ous and indicators there are deltas for:
+
+```{r echo = TRUE, include=TRUE, message=FALSE}
+
+print(unique(deltas$ou))
+print(unique(deltas$indicator_code))
+
+```
+
+New NA values are summarized below (these are usually a sign something is wrong):
+
+``` {r analysis, echo = TRUE, include = TRUE, message = FALSE}
+
+# what indicators values are newly na?
+deltas_na <- deltas %>%
+  filter(is.na(value.new))
+
+# which rows and which unique indicators
+print(nrow(deltas))
+unique(deltas_na$indicator_code)
+
+DT::datatable(
+  deltas_na,
+  rownames = FALSE,
+  filter = "top",
+  extensions = "Buttons",
+  options = list(
+    dom = "Bftrip",
+    buttons = c("csv")
+  )
+)
+```
+
+## Missing data
+
+Below we check if all the indicators in our MAPPING file are present in the new `PSNUXIM model`, if they aren't we should be able to explain why:
+
+```{r echo=TRUE, include=TRUE, message=FALSE}
+
+# are all indicators present?
+setdiff(
+   datapackcommons::Map24Tto25T$indicator_code,
+   bind_rows(data_new) %>%
+     pull(indicator_code) %>%
+     unique()
+ )
+```
+
+
+## Download latest model
+
+If there exist deltas between this model run and the latest production model then you can download the latest run below to validate and update in test s3 and prod:
+
+```{r echo = FALSE, include = TRUE, message = TRUE, eval = TRUE}
+
+if (NROW(deltas) > 0) {
+  print("current server directory files: ")
+  print(list.files())
+  data_new %>%
+  downloadthis::download_this(
+    output_name = new_psx_file_name,
+    output_extension = ".rds",
+    button_label = "Download latest model run",
+    button_type = "default",
+    has_icon = TRUE,
+    icon = "fa fa-save",
+    class = "button_large"
+  )
+} else {
+  print("No Differences in Model so no Model to Download")
+}
+```
