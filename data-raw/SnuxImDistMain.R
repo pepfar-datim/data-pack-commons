@@ -5,13 +5,57 @@
 # NOTES ------------------------------------------------------------------------
 # the following script generates the model for the SNIXUIM distribution
 
-### Setup and parameters ###
-
-library(datapackcommons)
-library(datimutils)
-library(dplyr)
-datimutils::loginToDATIM(paste0(Sys.getenv("SECRETS_FOLDER"), "datim.json")) # added for a different config access
+### Script Parameters ####################
+# and then running through line ~ END SCRIPT
+# WHEN RUNNING LOCALLY ALWAYS RENV.RESTORE AND THEN INITIATE CMD+SHIFT+B TO SEE CHANGES
+# these are set whether to run locally or on posit server
 cop_year <- 2024
+compare <- TRUE
+posit_server <- TRUE
+#####
+
+library(dplyr)
+# posit publishing requires a reproducible library and since datapackcommons
+# is not in the renv.lock file it is installed fresh from master since
+# master always represents the valid branch to use
+if (isTRUE(posit_server)) {
+  devtools::install_github("https://github.com/pepfar-datim/data-pack-commons",
+                           ref = "master",
+                           upgrade = FALSE)
+
+  # extract installed commit
+  commit <-
+    devtools::package_info("datapackcommons") %>%
+    dplyr::filter(package == "datapackcommons") %>%
+    dplyr::pull(source) %>%
+    stringr::str_extract(., "(?<=@)\\w{7}")
+
+  print(paste0("Installed Latest datapackcommons, using commit: ", commit))
+} else {
+
+  # extract commit of the local version you are using
+  commit <-
+    devtools::package_info("datapackcommons") %>%
+    dplyr::filter(package == "datapackcommons") %>%
+    dplyr::pull(source) %>%
+    stringr::str_extract(., "(?<=@)\\w{7}")
+  require(datapackcommons)
+}
+
+library(datimutils)
+
+# login to datim
+# if using posit server we pull env vars
+if (isTRUE(posit_server)) {
+  datimutils::loginToDATIM(
+    username = Sys.getenv("UN"),
+    password = Sys.getenv("PW"),
+    base_url = Sys.getenv("BASE_URL")
+  )
+} else {
+  datimutils::loginToDATIM(paste0(Sys.getenv("SECRETS_FOLDER"),
+                                  "datim.json"))
+}
 
 # FUNCTIONS -------------------------------------------------------------------
 
@@ -57,7 +101,7 @@ BuildDimensionList_DataPack <- function(data_element_map_item, dim_item_sets,
     dplyr::select(type, dim_item_uid, dim_uid) %>%
     unique()  %>%
     stats::na.omit() %>%
-    translateDims(.)
+    datapackcommons::translateDims(.)
 
   # if mechanisms are null return appended list of dimensions_common and dimensions_disaggs
   if (is.null(mechanisms)) {
@@ -72,7 +116,7 @@ BuildDimensionList_DataPack <- function(data_element_map_item, dim_item_sets,
     dplyr::transmute(type = "dimension",
                      dim_item_uid = mechanism_uid,
                      dim_uid = "SH885jaRe0o") %>%
-    translateDims(.)
+    datapackcommons::translateDims(.)
 
   # remaining dimensions
   if (mil == FALSE) {
@@ -352,10 +396,10 @@ fy_map <-  switch(as.character(cop_year),
 country_details <-  datimutils::getOrgUnitGroups("Country", name, fields = "organisationUnits[name,id]") %>%
   dplyr::arrange(name) %>%
   select(country_name = name, id) #%>%
-#  dplyr::filter(country_name == "South Africa")
+  #dplyr::filter(country_name == "South Africa")
 
 # start process of collecting api data for every country
-data <-  country_details[["id"]] %>%
+data_new <-  country_details[["id"]] %>%
   purrr::map(process_country, mechs, fy_map, .progress = list(
     type = "iterator",
     format = "Calculating {cli::pb_bar} {cli::pb_percent}",
@@ -364,36 +408,109 @@ data <-  country_details[["id"]] %>%
 
 #data$ODOymOOWyl0 <- process_country("ODOymOOWyl0", mechs)
 
-# COMPARE MODELS ---------------------------------------------------------------
+#### COMPARISON - AUTOMATED ----
+# when compare is set to TRUE we compare this run against the
+# latest production psnuxim model in test S3
+# FOR DEVELOPMENT PURPOSES RUN CODE MANUALLY
 
-data_old <- readr::read_rds(file.choose())
+if (compare == FALSE) {
 
-deltas <- diffSnuximModels(
-  data_old,
-  data,
-  full_diff = TRUE
-)
+  print("done")
 
-print(paste0("The difference between the older model and the new model is: ", nrow(deltas)))
+} else {
+
+  # file name in S3
+  cop_year_end <- substr(cop_year, 3, 4)
+  file_name <- paste0("psnuxim_model_data_", cop_year_end, ".rds")
+
+  # explicitly set to make sure we are in test
+  Sys.setenv(
+    AWS_PROFILE = "datapack-testing",
+    AWS_S3_BUCKET = "testing.pepfar.data.datapack"
+  )
+
+  s3 <- paws::s3()
+
+  # retrieve the production psnuxim model
+  # and decode, error out if there is an issue
+  r <- tryCatch({
+    s3_download <- s3$get_object(Bucket = Sys.getenv("AWS_S3_BUCKET"),
+                                 Key = paste0(
+                                   "support_files/",
+                                   file_name
+                                   )
+                                 )
+
+    # write output to file
+    writeBin(s3_download$Body, con = file_name)
+
+    # extract data
+    data_old <- s3_download$Body %>% rawConnection() %>% gzcon %>% readRDS
+    print("psnuxim model read from S3", name = "datapack")
+    TRUE
+  },
+  error = function(err) {
+    print("psnuxim model could not be read from S3", name = "datapack")
+    print(err, name = "datapack")
+    FALSE
+  })
+
+  #data_old <- readr::read_rds(file.choose())
+
+  deltas <- datapackcommons::diffSnuximModels(
+    data_old,
+    data_new,
+    full_diff = TRUE
+  )
+
+  print(paste0("The difference between the production PSNXUIM model in TEST S3 and the new model is: ", nrow(deltas)))
+
+  #### DOWNLOADABLE NEW MODEL ----
+  # if the new model has a diff we will create a filename
+  # and prepare the file for download availability in rmarkdown
+  # file can then be downloaded and reviewed along with report
+  # and moved manually to s3 test/prod
+  if (NROW(deltas) > 0) {
+
+    # save flattened version with data to disk
+    cop_year_end <- substr(cop_year, 3, 4)
+    new_psx_file_name <- paste0("psnuxim_model_data_", cop_year_end, "_", lubridate::today(), "_", commit)
+
+    # if run locally with local params set file is automatically saved
+    if (isFALSE(posit_server)) {
+      readr::write_rds(data,
+                       paste0(new_psx_file_name, ".rds")
+                       , compress = c("gz"))
+
+    }
+  }
+
+  #### CLEANUP ----
+  # using paws s3 we get and dump latest datapack model into our file system
+  # here we make sure to get rid of it locally
+  # Check if the file exists
+  if (file.exists(file_name)) {
+    # Delete the file
+    file.remove(file_name)
+    print(paste0(file_name, " LOCALLY deleted successfully."))
+  } else {
+    print(paste0(file_name, "File does not exist."))
+  }
 
 
-# if (cop_year == 2021){
-#   readr::write_rds(data,
-#                    paste0("/Users/sam/COP data/PSNUxIM_COP21_", lubridate::today(), ".rds"),
-#                    compress = c("gz"))
-#   readr::write_rds(data,
-#                    "/Users/sam/COP data/psnuxim_model_data_21.rds",
-#                    compress = c("gz"))
-#   file_name <- "psnuxim_model_data_21.rds"
-# } else if (cop_year == 2022){
-#   readr::write_rds(data,
-#                    paste0("/Users/sam/COP data/PSNUxIM_COP22_", lubridate::today(), ".rds"),
-#                    compress = c("gz"))
-#   readr::write_rds(data,
-#                    "/Users/sam/COP data/psnuxim_model_data_22.rds",
-#                    compress = c("gz"))
-#   file_name <- "psnuxim_model_data_22.rds"
-# } else if (cop_year == 2023){
+
+}
+
+#### END SCRIPT --------------------------------------------------------------------
+
+#### LEGACY AND TEST/PROD TRANSFER ----
+# got rid of 22 and below
+# this is legacy code as well as code for
+# production transfer purposes
+# if you download the model from the report, to update simply manually update
+# the name of the model as needed and place it in OUTPUT_LOCATION VARIABLE
+
+# if (cop_year == 2023){
 #   readr::write_rds(data,
 #                    paste0("/Users/sam/COP data/PSNUxIM_COP23_", lubridate::today(), ".rds"),
 #                    compress = c("gz"))
@@ -411,6 +528,9 @@ print(paste0("The difference between the older model and the new model is: ", nr
 #   file_name <- "psnuxim_model_data_24.rds"
 # }
 
+# edit this output location to where ever your file is
+# output_location <- "~/COP data/COP24 Update/"
+# file_name <- new_psx_file_name
 #
 # Sys.setenv(
 #   AWS_PROFILE = "datapack-testing",
@@ -421,7 +541,7 @@ print(paste0("The difference between the older model and the new model is: ", nr
 #
 # r<-tryCatch({
 #   foo<-s3$put_object(Bucket = Sys.getenv("AWS_S3_BUCKET"),
-#                      Body = paste0("/Users/sam/COP data/", file_name),
+#                      Body = paste0(output_location, file_name),
 #                      Key = paste0("support_files/", file_name))
 #   print("DATIM Export sent to S3", name = "datapack")
 #   TRUE
@@ -441,7 +561,7 @@ print(paste0("The difference between the older model and the new model is: ", nr
 #
 # r<-tryCatch({
 #   foo<-s3$put_object(Bucket = Sys.getenv("AWS_S3_BUCKET"),
-#                      Body = paste0("/Users/sam/COP data/", file_name),
+#                      Body = paste0(output_location, file_name),
 #                      Key = paste0("support_files/", file_name))
 #   print("DATIM Export sent to S3", name = "datapack")
 #   TRUE
