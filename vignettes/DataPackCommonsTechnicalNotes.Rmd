@@ -266,6 +266,14 @@ catalog <- tibble::tribble(~name, ~short_description,
 knitr::kable(catalog)
 ```
 
+## Automated Reporting
+
+Automated datapack and psnuxim model jobs were created on rstudio connect with the intention of having models produced regularly during COP season as imports become regular. Automated reports source the model production scripts respectively and produce a report on differences comparing to the latest production model in testing S3 bucket e.g. `support_files/datapack_model_data.rds`. These reports are available here:
+
+1. https://rstudio-connect.testing.ap.datim.org/psnuxim_model_report/
+2. https://rstudio-connect.testing.ap.datim.org/datapack_model_report/
+
+To make minor changes or edits to the reports and automation, changes are made to `datapack_model_job.Rmd` or `psnuxim_model_job.Rmd`. More in depth changes must be made to the original scripts they source: `model_calculations.R` or `SnuxImDistMain.R`. Once all your changes are made, approved and in master, you can then go on rstudio workbench and as an authorized collaborator republish the report via the blue publish button. Rsconnect DCF files in the `rsconnect` folder ensure publishing occurs with the same target report on rstudio connect.  
 
 ### TODO
 
