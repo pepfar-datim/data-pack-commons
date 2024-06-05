@@ -506,6 +506,8 @@ if (compare == FALSE) {
 # models can be downloaded from reports but for development purposes
 # and s3 below is some code to help
 
+if(!posit_server) {
+
 #### Send model to s3 and sharepoint ----
 cop_year_end <- substr(cop_year, 3, 4)
 file_name <- paste0("psnuxim_model_data_", cop_year_end, ".rds")
@@ -539,6 +541,7 @@ readr::write_rds(
   compress = c("gz")
 )
 
+}
 # uncomment below to send to respective s3
 
 # Sys.setenv(
