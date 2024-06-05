@@ -506,12 +506,12 @@ if (compare == FALSE) {
 # models can be downloaded from reports but for development purposes
 # and s3 below is some code to help
 
-if(!posit_server) {
+if (!posit_server) {
 
 #### Send model to s3 and sharepoint ----
 cop_year_end <- substr(cop_year, 3, 4)
 file_name <- paste0("psnuxim_model_data_", cop_year_end, ".rds")
-output_location <- '../' # change to whatever output location you want
+output_location <- "../" # change to whatever output location you want
 
 # extract commit information if you want to use for write DEV PURPOSES
 # during dev this can be tacked onto file name for tracking
@@ -536,7 +536,7 @@ readr::write_rds(
   data_new,
   paste0(
     output_location,
-    "PSNUxIM_COP", cop_year_end ,"_", commit, "_", lubridate::today(), ".rds"
+    "PSNUxIM_COP", cop_year_end, "_", commit, "_", lubridate::today(), ".rds"
   ),
   compress = c("gz")
 )

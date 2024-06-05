@@ -553,13 +553,13 @@ if (compare == FALSE) {
 # models can be downloaded from reports but for development purposes
 # and s3 below is some code to help
 
-if(!posit_server) {
+if (!posit_server) {
 
 #### Send model to s3 and sharepoint ----
 
 cop_year_end <- substr(cop_year, 3, 4)
 file_name <- "datapack_model_data.rds"
-output_location <- '../' # change to whatever output location you want
+output_location <- "../" # change to whatever output location you want
 
 # extract commit information if you want to use for write DEV PURPOSES
 # during dev this can be tacked onto file name for tracking
