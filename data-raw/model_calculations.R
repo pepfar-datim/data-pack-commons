@@ -550,27 +550,48 @@ if (compare == FALSE) {
 
 #### END SCRIPT ----------------------------------------------------------------
 
-#### LEGACY AND TEST/PROD TRANSFER ----
-# this is legacy code as well as code for
-# production transfer purposes
-# if you download the model from the report, to update simply manually update
-# the name of the model as needed and place it in OUTPUT_LOCATION VARIABLE
+# models can be downloaded from reports but for development purposes
+# and s3 below is some code to help
 
-# # output_location <- "~/COP data/COP24 Update/"
-# # save flattened version manually update date and version
-# file_name_base = paste0("model_data_pack_input_24_", lubridate::today(), "_de3d50e")
-# saveRDS(flattenDataPackModel_21(cop_data),
-#         file = paste0(output_location,file_name_base, "_flat.rds"))
-# # save flattened version to send to S3
-#  saveRDS(flattenDataPackModel_21(cop_data), file = paste0(output_location,"datapack_model_data.rds"))
-# # save flattened version manually update date and version
-#  saveRDS(cop_data, file = paste0(output_location,file_name_base, ".rds"))
+#### Send model to s3 and sharepoint ----
+cop_year_end <- substr(cop_year, 3, 4)
+file_name <- "datapack_model_data.rds"
+output_location <- '../' # change to whatever output location you want
 
+# extract commit information if you want to use for write DEV PURPOSES
+# during dev this can be tacked onto file name for tracking
+commit <-
+  devtools::package_info("datapackcommons") %>%
+  dplyr::filter(package == "datapackcommons") %>%
+  dplyr::pull(source) %>%
+  stringr::str_extract(., "(?<=@)\\w{7}")
 
- # Sys.setenv(
- #   AWS_PROFILE = "datapack-testing",
- #   AWS_S3_BUCKET = "testing.pepfar.data.datapack"
- # )
+# write out dpm for s3
+readr::write_rds(
+  data_new,
+  paste0(
+    output_location,
+    file_name
+  ),
+  compress = c("gz")
+)
+
+# write out dpm for sharepoint - this requires manual upload
+readr::write_rds(
+  data_new,
+  paste0(
+    output_location,
+    paste0("model_data_pack_input_", cop_year_end, "_", lubridate::today(), "_", commit, "_flat.rds")
+  ),
+  compress = c("gz")
+)
+
+# uncomment below to send to s3
+
+# Sys.setenv(
+#   AWS_PROFILE = "datapack-testing",
+#   AWS_S3_BUCKET = "testing.pepfar.data.datapack"
+# )
 #
 # s3<-paws::s3()
 #

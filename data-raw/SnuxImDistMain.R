@@ -503,17 +503,28 @@ if (compare == FALSE) {
 
 #### END SCRIPT --------------------------------------------------------------------
 
+# models can be downloaded from reports but for development purposes
+# and s3 below is some code to help
+
 #### Send model to s3 and sharepoint ----
 cop_year_end <- substr(cop_year, 3, 4)
 file_name <- paste0("psnuxim_model_data_", cop_year_end, ".rds")
 output_location <- '../' # change to whatever output location you want
+
+# extract commit information if you want to use for write DEV PURPOSES
+# during dev this can be tacked onto file name for tracking
+commit <-
+  devtools::package_info("datapackcommons") %>%
+  dplyr::filter(package == "datapackcommons") %>%
+  dplyr::pull(source) %>%
+  stringr::str_extract(., "(?<=@)\\w{7}")
 
 # write out psnuxim for s3
 readr::write_rds(
   data_new,
   paste0(
     output_location,
-    "psnuxim_model_data_", cop_year_end, ".rds"
+    file_name
   ),
   compress = c("gz")
 )
@@ -523,7 +534,7 @@ readr::write_rds(
   data_new,
   paste0(
     output_location,
-    "PSNUxIM_COP", cop_year_end ,"_", Sys.Date(), ".rds"
+    "PSNUxIM_COP", cop_year_end ,"_", commit, "_", lubridate::today(), ".rds"
   ),
   compress = c("gz")
 )
