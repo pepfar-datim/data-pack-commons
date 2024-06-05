@@ -503,35 +503,47 @@ if (compare == FALSE) {
 
 #### END SCRIPT --------------------------------------------------------------------
 
-#### LEGACY AND TEST/PROD TRANSFER ----
-# got rid of 22 and below
-# this is legacy code as well as code for
-# production transfer purposes
-# if you download the model from the report, to update simply manually update
-# the name of the model as needed and place it in OUTPUT_LOCATION VARIABLE
+# models can be downloaded from reports but for development purposes
+# and s3 below is some code to help
 
-# if (cop_year == 2023){
-#   readr::write_rds(data,
-#                    paste0("/Users/sam/COP data/PSNUxIM_COP23_", lubridate::today(), ".rds"),
-#                    compress = c("gz"))
-#   readr::write_rds(data,
-#                    "/Users/sam/COP data/psnuxim_model_data_23.rds",
-#                    compress = c("gz"))
-#   file_name <- "psnuxim_model_data_23.rds"
-# } else if (cop_year == 2024){
-#   readr::write_rds(data,
-#                    paste0("/Users/sam/COP data/PSNUxIM_COP24_", lubridate::today(), ".rds"),
-#                    compress = c("gz"))
-#   readr::write_rds(data,
-#                    "/Users/sam/COP data/psnuxim_model_data_24.rds",
-#                    compress = c("gz"))
-#   file_name <- "psnuxim_model_data_24.rds"
-# }
+if (!posit_server) {
 
-# edit this output location to where ever your file is
-# output_location <- "~/COP data/COP24 Update/"
-# file_name <- new_psx_file_name
-#
+#### Send model to s3 and sharepoint ----
+cop_year_end <- substr(cop_year, 3, 4)
+file_name <- paste0("psnuxim_model_data_", cop_year_end, ".rds")
+output_location <- "../" # change to whatever output location you want
+
+# extract commit information if you want to use for write DEV PURPOSES
+# during dev this can be tacked onto file name for tracking
+commit <-
+  devtools::package_info("datapackcommons") %>%
+  dplyr::filter(package == "datapackcommons") %>%
+  dplyr::pull(source) %>%
+  stringr::str_extract(., "(?<=@)\\w{7}")
+
+# write out psnuxim for s3
+readr::write_rds(
+  data_new,
+  paste0(
+    output_location,
+    file_name
+  ),
+  compress = c("gz")
+)
+
+# write out psnuxim for sharepoint - this requires manual upload
+readr::write_rds(
+  data_new,
+  paste0(
+    output_location,
+    "PSNUxIM_COP", cop_year_end, "_", commit, "_", lubridate::today(), ".rds"
+  ),
+  compress = c("gz")
+)
+
+}
+# uncomment below to send to respective s3
+
 # Sys.setenv(
 #   AWS_PROFILE = "datapack-testing",
 #   AWS_S3_BUCKET = "testing.pepfar.data.datapack"
