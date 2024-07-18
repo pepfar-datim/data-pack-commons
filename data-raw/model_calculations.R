@@ -525,7 +525,7 @@ if (compare == FALSE) {
     # save flattened version with data to disk
     # we create the varioble name for the rmd to pick up
     cop_year_end <- substr(cop_year, 3, 4)
-    new_dpm_file_name <- paste0("model_data_pack_input_", cop_year_end, "_", lubridate::today(),"_flat")
+    new_dpm_file_name <- paste0("model_data_pack_input_", cop_year_end, "_", lubridate::today(), "_flat")
 
   }
 
