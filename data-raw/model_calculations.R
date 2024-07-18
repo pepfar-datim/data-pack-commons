@@ -12,7 +12,7 @@ library(magrittr)
 # posit publishing requires a reproducible library and since datapackcommons
 # is not in the renv.lock file it is installed fresh from master since
 # master always represents the valid branch to use
-if (isTRUE(posit_server)) {
+if (posit_server) {
   devtools::install_github("https://github.com/pepfar-datim/data-pack-commons",
                            ref = "master",
                            upgrade = FALSE)
@@ -47,7 +47,7 @@ require(foreach)
 
 # login to datim
 # if using posit server we pull env vars
-if (isTRUE(posit_server)) {
+if (posit_server) {
   datimutils::loginToDATIM(
     username = Sys.getenv("UN"),
     password = Sys.getenv("PW"),
@@ -523,15 +523,10 @@ if (compare == FALSE) {
   if (NROW(deltas) > 0) {
 
     # save flattened version with data to disk
+    # we create the varioble name for the rmd to pick up
     cop_year_end <- substr(cop_year, 3, 4)
-    new_dpm_file_name <- paste0("model_data_pack_input_", cop_year_end, "_", lubridate::today(), "_", commit, "_flat")
+    new_dpm_file_name <- paste0("model_data_pack_input_", cop_year_end, "_", lubridate::today(),"_flat")
 
-    # if run locally with local params set file is automatically saved
-    if (isFALSE(posit_server)) {
-      saveRDS(flattenDataPackModel_21(cop_data),
-               file = paste0(new_dpm_file_name, ".rds"))
-
-    }
   }
 
   #### CLEANUP ----
@@ -559,19 +554,11 @@ if (!posit_server) {
 
 cop_year_end <- substr(cop_year, 3, 4)
 file_name <- "datapack_model_data.rds"
-output_location <- "../" # change to whatever output location you want
-
-# extract commit information if you want to use for write DEV PURPOSES
-# during dev this can be tacked onto file name for tracking
-commit <-
-  devtools::package_info("datapackcommons") %>%
-  dplyr::filter(package == "datapackcommons") %>%
-  dplyr::pull(source) %>%
-  stringr::str_extract(., "(?<=@)\\w{7}")
+output_location <- "../../" # change to whatever output location you want
 
 # write out dpm for s3
 readr::write_rds(
-  data_new,
+  model_new,
   paste0(
     output_location,
     file_name
@@ -581,10 +568,11 @@ readr::write_rds(
 
 # write out dpm for sharepoint - this requires manual upload
 readr::write_rds(
-  data_new,
+  model_new,
   paste0(
     output_location,
-    paste0("model_data_pack_input_", cop_year_end, "_", lubridate::today(), "_", commit, "_flat.rds")
+    new_dpm_file_name,
+    ".rds"
   ),
   compress = c("gz")
 )
