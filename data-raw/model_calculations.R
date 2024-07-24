@@ -524,7 +524,7 @@ if (compare == FALSE) {
 
     # save flattened version with data to disk
     cop_year_end <- substr(cop_year, 3, 4)
-    new_dpm_file_name <- paste0("model_data_pack_input_", cop_year_end, "_", lubridate::today(), "_", commit, "_flat")
+    new_dpm_file_name <- paste0("model_data_pack_input_", cop_year_end, "_", lubridate::today(), "_flat")
 
     # if run locally with local params set file is automatically saved
     if (isFALSE(posit_server)) {
