@@ -111,7 +111,7 @@
     },
     "XML": {
       "Package": "XML",
-      "Version": "3.99-0.10",
+      "Version": "3.99-0.17",
       "Source": "Repository",
       "Repository": "CRAN",
       "Requirements": [
@@ -119,7 +119,7 @@
         "methods",
         "utils"
       ],
-      "Hash": "f140675d766cf765bf06a5f14afb149d"
+      "Hash": "bc2a8a1139d8d4bd9c46086708945124"
     },
     "askpass": {
       "Package": "askpass",
