@@ -155,6 +155,16 @@ So the configuration requires a reference to a target data element from the prev
 
 OVC_SERV.DREAMS.T broke the pattern of mapping a data apck target to a single pair of DSD and TA data elements from the previous year.
 
+## Release Zero and Business as Usual
+
+Release zero is a process by which we work on preparing datapack models for the next year. This process is covered in the following tickets,
+[DP-1282](https://jira.pepfar.net/browse/DP-1282), [DP-1028](https://jira.pepfar.net/browse/DP-1028). These are followed by business as usual updates where we transition to updated indicators by updating the configuration files aka data_required and dim_item_sets. Aside from the documentation on the ticket below are some common gotchas:
+
+1. make sure to update `GetData_DataPack` in `dhis2api.R` to account for updated results and targets related to `FYxy Results AGYW_PREV Total D`
+and `COPxy Targets AGYW_PREV BEGUN`.
+2. always update the indicators first before updating periods to validate changes.
+3. use pivot tables to understand what data is expected for a period and make sure it aligns with the model.
+
 
 ## Configuring a `DataPack Model`
 

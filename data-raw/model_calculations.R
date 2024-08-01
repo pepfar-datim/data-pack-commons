@@ -5,7 +5,7 @@
 # these are set whether to run locally or on posit server
 cop_year <- 2024
 compare <- TRUE # default to true for full run
-posit_server <- TRUE # default to true as it runs on server
+posit_server <- FALSE # default to true as it runs on server
 #####
 
 library(magrittr)
@@ -364,7 +364,7 @@ for (ou_index in seq_len(NROW(operating_units))) {
 
 # Make the analytics calls for the data required
 # each row of indicator parameters contains the parameters for an analytics call
-  analytics_output <- plyr::adply(indicator_parameters,
+  analytics_output <<- plyr::adply(indicator_parameters,
                                   1,
                                   GetData,
                                   operating_unit$id,
@@ -504,7 +504,7 @@ if (compare == FALSE) {
     mutate(has_data = replace(has_data, value == 0, FALSE))
 
   # pivot schema disaggs
-  valid_schema_combos <- datapackcommons::pivotSchemaCombos(cop_year = 2024)
+  valid_schema_combos <- datapackcommons::pivotSchemaCombos(cop_year = cop_year)
 
   # create a summary of combos present in datapack schema but not in data
   missing_schema_combos <- anti_join(

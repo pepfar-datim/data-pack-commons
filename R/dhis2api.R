@@ -141,13 +141,15 @@ GetData_DataPack <- function(parameters,
   analytics_input$pe <- parameters$pe_iso[[1]]
 
   # add analytics filters for support type in DSD or TA
-  # expect for indicators/data elements with no support type (AGYW, Priortization)
+  # expect for indicators/data elements with no support type (AGYW, Prioritization)
   if (!(parameters$dx_id %in% c("zPTqc4v5GAK", # FY21 Results AGYW_PREV Total D
                                 "uWfP6tHu3ao", # FY22 Results AGYW_PREV Total D
                                 "BVhkc1rPgFW", # FY23 Results AGYW_PREV Total D
+                                "qp7Q0kDeHsF", # FY24 Results AGYW_PREV Total D
                                 "r4zbW3owX9n", #IMPATT.PRIORITY_SNU (N, SUBNAT) TARGET:
                                 "NbVyANRjRTS", # COP22 Targets AGYW_PREV BEGUN
-                                "OyUtGBQjY6K" # COP23 Targets AGYW_PREV BEGUN
+                                "OyUtGBQjY6K", # COP23 Targets AGYW_PREV BEGUN
+                                "dEPJxrV0VNU" # COP24 Targets AGYW_PREV BEGUN
                                 ))) {
 
     fils_list <- TWXpUVE2MqL %.f% c("cRAGKdWIDn4", "iM13vdNLWKb")
