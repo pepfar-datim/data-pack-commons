@@ -374,7 +374,7 @@ pivotSchemaCombos <- function(schema = NULL, cop_year = NULL) {
 
     valid_schema_indicators <- schema
 
-  } else if (cop_year == 2024) {
+  } else if (cop_year == 2025) {
 
     valid_schema_indicators <-
       filter(datapackr::cop24_data_pack_schema,
@@ -384,10 +384,10 @@ pivotSchemaCombos <- function(schema = NULL, cop_year = NULL) {
       distinct()
 
 
-  } else if (cop_year == 2023) {
+  } else if (cop_year == 2024) {
 
     valid_schema_indicators <-
-      filter(datapackr::cop23_data_pack_schema,
+      filter(datapackr::cop24_data_pack_schema,
              (dataset == "mer" & col_type == "past") |
                (dataset == "datapack" & col_type == "calculation")) %>%
       select(indicator_code, valid_ages, valid_sexes, valid_kps) %>%
