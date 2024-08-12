@@ -246,7 +246,8 @@ ProcessDataRequiredRow <- function(data_spec, dim_item_sets) {
 
 diffDataPackModels <- function(model_old,
                                model_new,
-                               full_diff = TRUE) {
+                               full_diff = TRUE,
+                               show_config = FALSE) {
 # only include countries present in both files
   if (full_diff) {
     countries <- dplyr::union(names(model_old),
@@ -306,6 +307,17 @@ diff <- dplyr::mutate(diff,
     deltas_split$`FALSE` <- dplyr::mutate(deltas_split$`FALSE`,
                                           kp_option = datimutils::getCatOptions(kp_option_uid))
     deltas <- dplyr::bind_rows(deltas_split)
+  }
+
+  # add dx_names to deltas in order to help us with differences
+  if (show_config) {
+    deltas <-
+      merge(
+        deltas,
+        datapackcommons::data_required,
+        by.x = "indicator_code",
+        by.y = "data_pack_code"
+      )
   }
 
   return(list(deltas = deltas, matched = matched))
@@ -455,7 +467,8 @@ if (compare == FALSE) {
                              #file.choose() %>% readr::read_rds(),
                              , model_new = model_new
                              # , model_new = file.choose() %>% readr::read_rds()
-                             , full_diff = TRUE)
+                             , full_diff = TRUE,
+                             show_config = TRUE)
 
   deltas <- diff$deltas
   print(paste0("The difference between the production datapack model in TEST S3 and the new model is: ", nrow(deltas)))
