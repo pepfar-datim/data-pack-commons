@@ -12,7 +12,7 @@ library(magrittr)
 # posit publishing requires a reproducible library and since datapackcommons
 # is not in the renv.lock file it is installed fresh from master since
 # master always represents the valid branch to use
-if (isTRUE(posit_server)) {
+if (posit_server) {
   devtools::install_github("https://github.com/pepfar-datim/data-pack-commons",
                            ref = "master",
                            upgrade = FALSE)
@@ -47,7 +47,7 @@ require(foreach)
 
 # login to datim
 # if using posit server we pull env vars
-if (isTRUE(posit_server)) {
+if (posit_server) {
   datimutils::loginToDATIM(
     username = Sys.getenv("UN"),
     password = Sys.getenv("PW"),
@@ -523,15 +523,10 @@ if (compare == FALSE) {
   if (NROW(deltas) > 0) {
 
     # save flattened version with data to disk
+    # we create the varioble name for the rmd to pick up
     cop_year_end <- substr(cop_year, 3, 4)
-    new_dpm_file_name <- paste0("model_data_pack_input_", cop_year_end, "_", lubridate::today(), "_", commit, "_flat")
+    new_dpm_file_name <- paste0("model_data_pack_input_", cop_year_end, "_", lubridate::today(), "_flat")
 
-    # if run locally with local params set file is automatically saved
-    if (isFALSE(posit_server)) {
-      saveRDS(flattenDataPackModel_21(cop_data),
-               file = paste0(new_dpm_file_name, ".rds"))
-
-    }
   }
 
   #### CLEANUP ----
@@ -550,27 +545,46 @@ if (compare == FALSE) {
 
 #### END SCRIPT ----------------------------------------------------------------
 
-#### LEGACY AND TEST/PROD TRANSFER ----
-# this is legacy code as well as code for
-# production transfer purposes
-# if you download the model from the report, to update simply manually update
-# the name of the model as needed and place it in OUTPUT_LOCATION VARIABLE
+# models can be downloaded from reports but for development purposes
+# and s3 below is some code to help
 
-# # output_location <- "~/COP data/COP24 Update/"
-# # save flattened version manually update date and version
-# file_name_base = paste0("model_data_pack_input_24_", lubridate::today(), "_de3d50e")
-# saveRDS(flattenDataPackModel_21(cop_data),
-#         file = paste0(output_location,file_name_base, "_flat.rds"))
-# # save flattened version to send to S3
-#  saveRDS(flattenDataPackModel_21(cop_data), file = paste0(output_location,"datapack_model_data.rds"))
-# # save flattened version manually update date and version
-#  saveRDS(cop_data, file = paste0(output_location,file_name_base, ".rds"))
+if (!posit_server) {
 
+#### Send model to s3 and sharepoint ----
 
- # Sys.setenv(
- #   AWS_PROFILE = "datapack-testing",
- #   AWS_S3_BUCKET = "testing.pepfar.data.datapack"
- # )
+cop_year_end <- substr(cop_year, 3, 4)
+file_name <- "datapack_model_data.rds"
+output_location <- "../../" # change to whatever output location you want
+
+# write out dpm for s3
+readr::write_rds(
+  model_new,
+  paste0(
+    output_location,
+    file_name
+  ),
+  compress = c("gz")
+)
+
+# write out dpm for sharepoint - this requires manual upload
+readr::write_rds(
+  model_new,
+  paste0(
+    output_location,
+    new_dpm_file_name,
+    ".rds"
+  ),
+  compress = c("gz")
+)
+
+}
+
+# uncomment below to send to s3
+
+# Sys.setenv(
+#   AWS_PROFILE = "datapack-testing",
+#   AWS_S3_BUCKET = "testing.pepfar.data.datapack"
+# )
 #
 # s3<-paws::s3()
 #
