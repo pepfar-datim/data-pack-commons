@@ -74,8 +74,9 @@ ValidateDimItemSets <- function(dim_item_sets) {
     dplyr::filter(dim_uid == "co") %>%
     .$dim_name %>%
     unique() %>%
-    assertthat::are_equal("Category option combo") %>%
-    assertthat::assert_that()
+    {
+      stopifnot(all(. == "Category option combo"))
+    }
   # category option combination names and ids
   dim_item_sets %>%
     dplyr::filter(dim_uid == "co") %>%
@@ -144,7 +145,7 @@ ValidateMapT_1toT <- function(t_1_to_t, dim_item_sets) {
                     stringr::str_split(disagg_type, pattern = ";"),
                   disagg_type_uid =
                     stringr::str_split(disagg_type_uid, pattern = ";")) %>%
-    tidyr::unnest(disagg_type, disagg_type_uid) %>%
+    tidyr::unnest(c(disagg_type, disagg_type_uid)) %>%
     ValidateDimItems("dim_uid_colname", "disagg_type", "disagg_type_uid")
 
 # check for matching model sets in Dimension item sets
