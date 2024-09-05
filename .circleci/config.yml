@@ -13,6 +13,7 @@ jobs:
          command: |
              sudo apt-get update
              sudo apt-get -qq -y install libcurl4-openssl-dev libxml2-dev libsodium-dev libgit2-dev
+             sudo apt-get install xz-utils
              sudo curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
       - run:
           name: Install package dependencies
