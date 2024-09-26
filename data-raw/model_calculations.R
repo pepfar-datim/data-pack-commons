@@ -5,7 +5,7 @@
 # these are set whether to run locally or on posit server
 cop_year <- 2024
 compare <- TRUE # default to true for full run
-posit_server <- TRUE # default to true as it runs on server
+posit_server <- FALSE # default to true as it runs on server
 #####
 
 library(magrittr)
@@ -246,7 +246,8 @@ ProcessDataRequiredRow <- function(data_spec, dim_item_sets) {
 
 diffDataPackModels <- function(model_old,
                                model_new,
-                               full_diff = TRUE) {
+                               full_diff = TRUE,
+                               show_config = FALSE) {
 # only include countries present in both files
   if (full_diff) {
     countries <- dplyr::union(names(model_old),
@@ -308,6 +309,17 @@ diff <- dplyr::mutate(diff,
     deltas <- dplyr::bind_rows(deltas_split)
   }
 
+  # add dx_names to deltas in order to help us with differences
+  if (show_config) {
+    deltas <-
+      merge(
+        deltas,
+        datapackcommons::data_required,
+        by.x = "indicator_code",
+        by.y = "data_pack_code"
+      )
+  }
+
   return(list(deltas = deltas, matched = matched))
 }
 
@@ -364,7 +376,7 @@ for (ou_index in seq_len(NROW(operating_units))) {
 
 # Make the analytics calls for the data required
 # each row of indicator parameters contains the parameters for an analytics call
-  analytics_output <- plyr::adply(indicator_parameters,
+  analytics_output <<- plyr::adply(indicator_parameters,
                                   1,
                                   GetData,
                                   operating_unit$id,
@@ -455,7 +467,8 @@ if (compare == FALSE) {
                              #file.choose() %>% readr::read_rds(),
                              , model_new = model_new
                              # , model_new = file.choose() %>% readr::read_rds()
-                             , full_diff = TRUE)
+                             , full_diff = TRUE,
+                             show_config = TRUE)
 
   deltas <- diff$deltas
   print(paste0("The difference between the production datapack model in TEST S3 and the new model is: ", nrow(deltas)))
@@ -504,7 +517,7 @@ if (compare == FALSE) {
     mutate(has_data = replace(has_data, value == 0, FALSE))
 
   # pivot schema disaggs
-  valid_schema_combos <- datapackcommons::pivotSchemaCombos(cop_year = 2024)
+  valid_schema_combos <- datapackcommons::pivotSchemaCombos(cop_year = cop_year)
 
   # create a summary of combos present in datapack schema but not in data
   missing_schema_combos <- anti_join(
