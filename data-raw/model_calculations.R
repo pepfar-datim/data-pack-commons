@@ -3,7 +3,7 @@
 # and then running through line ~ END SCRIPT
 # WHEN RUNNING LOCALLY ALWAYS RENV.RESTORE AND THEN INITIATE CMD+SHIFT+B TO SEE CHANGES
 # these are set whether to run locally or on posit server
-cop_year <- 2024
+cop_year <- 2025
 compare <- TRUE # default to true for full run
 posit_server <- FALSE # default to true as it runs on server
 #####
