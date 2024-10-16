@@ -377,7 +377,7 @@ pivotSchemaCombos <- function(schema = NULL, cop_year = NULL) {
   } else if (cop_year == 2025) {
 
     valid_schema_indicators <-
-      filter(datapackr::cop24_data_pack_schema,
+      filter(datapackr::cop25_data_pack_schema,
              (dataset == "mer" & col_type == "past") |
                (dataset == "datapack" & col_type == "calculation")) %>%
       select(indicator_code, valid_ages, valid_sexes, valid_kps) %>%

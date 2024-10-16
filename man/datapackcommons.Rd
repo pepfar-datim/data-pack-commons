@@ -2,9 +2,27 @@
 % Please edit documentation in R/DataPackCommons.R
 \docType{package}
 \name{datapackcommons}
+\alias{datapackcommons-package}
 \alias{datapackcommons}
 \title{\code{datapackcommons} package}
 \description{
 Parsing and import functions for the ICPI Data Pack
 https://github.com/jennybc/googlesheets/blob/master/R/googlesheets.R
+}
+\seealso{
+Useful links:
+\itemize{
+  \item \url{https://github.com/pepfar-datim/data-pack-commons}
+}
+
+}
+\author{
+\strong{Maintainer}: Sam Garman \email{sgarman@baosystems.com}
+
+Other contributors:
+\itemize{
+  \item Fausto Lopez \email{flopez@baosystems.com} [contributor]
+  \item Jordan Bales \email{jbales@baosystems.com} [contributor]
+}
+
 }
