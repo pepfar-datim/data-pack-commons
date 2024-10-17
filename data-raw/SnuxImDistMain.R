@@ -11,7 +11,7 @@
 # these are set whether to run locally or on posit server
 cop_year <- 2024
 compare <- TRUE
-posit_server <- TRUE
+posit_server <- F
 #####
 
 library(dplyr)
@@ -176,7 +176,8 @@ getMechsList <- function(cop_year,
   assertthat::assert_that(cop_year %in% c(2021,
                                           2022,
                                           2023,
-                                          2024))
+                                          2024,
+                                          2025))
   #if (cop_year == 2023) #{cop_year = 2022} # temporary code to get mechs for last year for initial cop23 dev
     # Wed Feb 22 13:29:39 2023 We should probably remove line 136 now.
   de_group <- dplyr::case_when(
@@ -184,6 +185,7 @@ getMechsList <- function(cop_year,
     cop_year == 2022 ~ "QjkuCJf6lCs",  #"2022 MER Targets",
     cop_year == 2023 ~ "OuKFZzVk6gr",  #"2023 MER Targets",
     cop_year == 2024 ~ "TXAVaM4oYMd",  #"2024 MER Targets",
+    cop_year == 2024 ~ "u75ZKXAxyVu"  #"2025 MER Targets",
   )
 
   mechs <- datimutils::getAnalytics(
@@ -389,7 +391,8 @@ fy_map <-  switch(as.character(cop_year),
                   "2021" = datapackcommons::Map21Tto22T,
                   "2022" = datapackcommons::Map22Tto23T,
                   "2023" = datapackcommons::Map23Tto24T,
-                  "2024" = datapackcommons::Map24Tto25T
+                  "2024" = datapackcommons::Map24Tto25T,
+                  "2025" = datapackcommons::Map25Tto26T
                   )
 
 # pull list of countries to iterate through
