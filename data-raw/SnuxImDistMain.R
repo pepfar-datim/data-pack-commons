@@ -11,7 +11,7 @@
 # these are set whether to run locally or on posit server
 cop_year <- 2024
 compare <- TRUE
-posit_server <- F
+posit_server <- FALSE
 #####
 
 library(dplyr)
