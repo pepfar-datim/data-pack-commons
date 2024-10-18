@@ -42,8 +42,6 @@ TX_TB.D.Already.Neg.T,DE_GROUP-TXAVaM4oYMd,TX_TB,tOiM2uxcnkj,Denominator,QpNj0nS
 TX_TB.D.New.Neg.T,DE_GROUP-TXAVaM4oYMd,TX_TB,tOiM2uxcnkj,Denominator,QpNj0nSuEhD,Age/Sex/TBScreen/NewExistingART/HIVStatus,xzHStH1s4R1,2023Oct,<15/>15,F/M,NA,tb_n_art_n,distribute
 TX_TB.D.Already.Pos.T,DE_GROUP-TXAVaM4oYMd,TX_TB,tOiM2uxcnkj,Denominator,QpNj0nSuEhD,Age/Sex/TBScreen/NewExistingART/HIVStatus,xzHStH1s4R1,2023Oct,<15/>15,F/M,NA,tb_p_art_a,distribute
 TX_TB.D.New.Pos.T,DE_GROUP-TXAVaM4oYMd,TX_TB,tOiM2uxcnkj,Denominator,QpNj0nSuEhD,Age/Sex/TBScreen/NewExistingART/HIVStatus,xzHStH1s4R1,2023Oct,<15/>15,F/M,NA,tb_p_art_n,distribute
-VMMC_CIRC.Neg.T,DE_GROUP-TXAVaM4oYMd,VMMC_CIRC,wdoUps1qb3V,Numerator,Som9NRMQqV7,Age/Sex/HIVStatus,pxz2gGSIQhG,2023Oct,fy24_age_bands,M,NA,tss_Neg,distribute
-VMMC_CIRC.Pos.T,DE_GROUP-TXAVaM4oYMd,VMMC_CIRC,wdoUps1qb3V,Numerator,Som9NRMQqV7,Age/Sex/HIVStatus,pxz2gGSIQhG,2023Oct,fy24_age_bands,M,NA,tss_Pos,distribute
 VMMC_CIRC.Unk.T,DE_GROUP-TXAVaM4oYMd,VMMC_CIRC,wdoUps1qb3V,Numerator,Som9NRMQqV7,Age/Sex/HIVStatus,pxz2gGSIQhG,2023Oct,fy24_age_bands,M,NA,tss_Unknown,distribute
 CXCA_SCRN.T,DE_GROUP-TXAVaM4oYMd,CXCA_SCRN,qOgXk080fJH,Numerator,Som9NRMQqV7,Age/Sex/HIVStatus,pxz2gGSIQhG,2023Oct,fy24_age_bands,F,NA,NA,distribute
 OVC_SERV.DREAMS.T,DE_GROUP-TXAVaM4oYMd,OVC_SERV,RxyNwEV3oQf,Numerator,Som9NRMQqV7,Age/Sex/DREAMS,cCTvqWoHxSk,2023Oct,<01-18+ (OVC & Caregivers),F,NA,NA,distribute
