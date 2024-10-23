@@ -55,7 +55,7 @@ if (isTRUE(posit_server)) {
   )
 } else {
   datimutils::loginToDATIM(paste0(Sys.getenv("SECRETS_FOLDER"),
-                                  "datim.json"))
+                                  "testmer.json"))
 }
 
 
@@ -355,10 +355,10 @@ diff <- dplyr::mutate(diff,
 dim_item_sets <- datapackcommons::dim_item_sets
 
 # for each ou
-for (ou_index in seq_len(NROW(operating_units))) {
+for (ou_index in seq_len(NROW(operating_units[1,]))) {
   # start with fresh local copy of data_required.csv
   data_required <-  datapackcommons::data_required
-  operating_unit <-  dplyr::slice(operating_units, ou_index)
+  operating_unit <-  dplyr::slice(operating_units %>% filter(country_name=="Ethiopia"), ou_index)
   cop_data[[operating_unit$id]] <- list("ou_name" = operating_unit$country_name,
                                        "ou_psnu_level" = operating_unit$prioritization_level)
 

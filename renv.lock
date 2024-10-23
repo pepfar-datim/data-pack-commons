@@ -446,8 +446,8 @@
       "RemoteHost": "api.github.com",
       "RemoteRepo": "datapackr",
       "RemoteUsername": "pepfar-datim",
-      "RemoteRef": "DP-1250",
-      "RemoteSha": "795d3ce2d6794703580fb9ca8f5dd9420bd490fc",
+      "RemoteRef": "DP-1250-update-schema",
+      "RemoteSha": "cf4a454e0c70ec3355d1dff9fd943d01a443a66a",
       "Requirements": [
         "R",
         "assertthat",
@@ -468,18 +468,18 @@
         "tidyselect",
         "tidyxl"
       ],
-      "Hash": "a97822ec2cf1fa6925e2a26ecc4d7c07"
+      "Hash": "b8bb6fed735bab0834077e13000b64d1"
     },
     "datimutils": {
       "Package": "datimutils",
-      "Version": "0.6.0",
+      "Version": "0.7.0",
       "Source": "GitHub",
       "RemoteType": "github",
       "RemoteHost": "api.github.com",
       "RemoteRepo": "datimutils",
       "RemoteUsername": "pepfar-datim",
-      "RemoteRef": "HEAD",
-      "RemoteSha": "3346faec3d1c0a6d180a1b60cab4176c2b27fa95",
+      "RemoteRef": "add-api-call-getAnalytics",
+      "RemoteSha": "ba14afbffd6b45922a6edd49436dad79099dabae",
       "Requirements": [
         "R",
         "R6",
@@ -490,7 +490,7 @@
         "stringi",
         "tidyr"
       ],
-      "Hash": "80f3a1d81d28e1bd0861211b7dc7dd1b"
+      "Hash": "28c714c7fb817650457fc1160e1025f1"
     },
     "datimvalidation": {
       "Package": "datimvalidation",
