@@ -150,7 +150,7 @@ GetData_DataPack <- function(parameters,
                                 "NbVyANRjRTS", # COP22 Targets AGYW_PREV BEGUN
                                 "OyUtGBQjY6K", # COP23 Targets AGYW_PREV BEGUN
                                 "dEPJxrV0VNU" # COP24 Targets AGYW_PREV BEGUN
-                                ))) {
+  ))) {
 
     fils_list <- TWXpUVE2MqL %.f% c("cRAGKdWIDn4", "iM13vdNLWKb")
     analytics_input <-  append(analytics_input, fils_list)
@@ -220,26 +220,41 @@ GetData_DataPack <- function(parameters,
     # add custom ou dimension
     analytics_input_cus$ou <- c(analytics_input_cus$ou, parameters$custom_ou)
 
-    results_custom <-
-      try({
-        do.call(datimutils::getAnalytics
-                   , analytics_input_cus) %>%
-          tibble()
-        },
-          silent = TRUE)
+    # add verbose
+    analytics_input_cus$verbose <- TRUE
 
+    # results_custom <-
+    #   try({
+    #     do.call(datimutils::getAnalytics
+    #                , analytics_input_cus) %>%
+    #       tibble()
+    #     },
+    #       silent = TRUE)
+
+    results_custom <- try({
+      do.call(datimutils::getAnalytics, analytics_input_cus)
+    }, silent = TRUE)
+
+    # handle list returned
+    if(is.list(results_custom)) {
+      results_custom$data <- tibble::as_tibble(results_custom$data)
+    }
+
+    # evaluate results
     if (is.error(results_custom) ||
-       is.null(results_custom) ||
-       NROW(results_custom) < 1) { # nothing to return
+        is.null(results_custom$data) ||
+        NROW(results_custom$data) < 1) { # nothing to return
 
       api_call <- NULL
       results <- NULL
     } else {
 
-      results <- results_custom
+      api_call <- results_custom$api_call
+      results <- results_custom$data
     }
 
-    return(list("api_call" = "Not Avaialble...",
+    return(list("custom_inputs" = analytics_input_cus,
+                "api_call_custom" = api_call,
                 "time" = lubridate::now("UTC"),
                 "results" = results))
   }
@@ -266,13 +281,26 @@ GetData_DataPack <- function(parameters,
   analytics_input_non_mil <- analytics_input_base # create a copy for non mil call
   analytics_input_non_mil$ou <- c(analytics_input_non_mil$ou, "OU_GROUP-AVy8gJXym2D")
   analytics_input_non_mil <- append(analytics_input_non_mil, fils_list_extra)
+  analytics_input_non_mil$verbose <- TRUE
+
 
   # get non-military (PSNU) data
-      results_psnu <-
-        do.call(datimutils::getAnalytics,
-                analytics_input_non_mil
-        ) %>%
-        tibble()
+  # results_psnu <-
+  #   do.call(datimutils::getAnalytics,
+  #           analytics_input_non_mil
+  #   ) %>%
+  #   tibble()
+  results_psnu <- try({
+    do.call(datimutils::getAnalytics, analytics_input_non_mil)
+  }, silent = TRUE)
+
+  if (is.list(results_psnu)) {
+    results_psnu$data <- tibble::as_tibble(results_psnu$data)
+    api_call_psnu <- results_psnu$api_call
+  } else {
+    results_psnu$data <- NULL
+    api_call_psnu <- NULL
+  }
 
   # military data added if needed ----
   # all OUs have military below the country level as standard
@@ -284,12 +312,24 @@ GetData_DataPack <- function(parameters,
 
   # add military ou dimension
   analytics_input_mil$ou <- c(analytics_input_mil$ou, "OU_GROUP-nwQbMeALRjL")
+  analytics_input_mil$verbose <- TRUE
 
   # call military data
-  results_mil <-
-    do.call(datimutils::getAnalytics,
-            analytics_input_mil) %>%
-    tibble()
+  # results_mil <-
+  #   do.call(datimutils::getAnalytics,
+  #           analytics_input_mil) %>%
+  #   tibble()
+  results_mil <- try({
+    do.call(datimutils::getAnalytics, analytics_input_mil)
+  }, silent = TRUE)
+
+  if (is.list(results_mil)) {
+    results_mil$data <- tibble::as_tibble(results_mil$data)
+    api_call_mil <- results_mil$api_call
+  } else {
+    results_mil$data <- NULL
+    api_call_mil <- NULL
+  }
 
   # finalize results ----
   if (NROW(results_psnu) == 0 && NROW(results_mil) == 0) {
@@ -297,13 +337,21 @@ GetData_DataPack <- function(parameters,
     results <- NULL
   } else if (NROW(results_mil) == 0) {
     # psnu but no mil data
-    results <- results_psnu
+    #results <- results_psnu
+    results <- results_psnu$data
   } else {
     # return everything
-    results <- dplyr::bind_rows(results_psnu, results_mil)
+    #results <- dplyr::bind_rows(results_psnu, results_mil)
+    results <- dplyr::bind_rows(results_psnu$data, results_mil$data)
   }
 
-  return(list("api_call" = "Not Avaialble...",
+  # return(list("api_call" = "Not Avaialble...",
+  #             "time" = lubridate::now("UTC"),
+  #             "results" = results))
+  return(list("non_mil_inputs" = analytics_input_non_mil,
+              "mil_inputs" = analytics_input_mil,
+              "api_call_psnu" = api_call_psnu,
+              "api_call_mil" = api_call_mil,
               "time" = lubridate::now("UTC"),
               "results" = results))
 
